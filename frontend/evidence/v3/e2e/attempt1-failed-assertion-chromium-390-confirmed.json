@@ -1,0 +1,31 @@
+{
+ "url": "https://pocketdrop-app.vercel.app",
+ "browser": "chromium",
+ "mode": "Confirmed",
+ "viewport": "390x844",
+ "startedAt": "2026-11-19T18:44:44.247Z",
+ "txs": {
+  "fund": "0xa82e11c4767cbb4f4cddd3717cdf3436fc0f416967a7ed9b99a5d25da450d767",
+  "senderActivate0": "3D019A562AC649AC6E9B4FE059FB216EBA407F26D81FC332D275B15D34DA9777",
+  "senderActivate1": "E0E8814C06556D672BD99DB3D034464D53FC88D7E0C8C1652E20785AA101FAC3",
+  "create": "0x38a6f8ed88fba13b0c310cbc9dc04b1537621a4f0650f3dcf9335a07a89ba5fd",
+  "bind": "0x94397d401cb7b14062e1016d879ff23badbab0141cae4925afd0245e2fcaa716",
+  "register": "A1F1458CFAE9CDD62BB5DAD2847808C255B4731ED7FFD11BC8F5962D37C1F340",
+  "window": "6BE1FDEBE0CDC313DA3B86EFA4BC92C736960832FD0C2A0ED71A5967966FDC30"
+ },
+ "sender": "0xc2cBDc5de33b3A21f68A3d1797209D0ab25c7146",
+ "totalSpentQorSoFar": 0.55,
+ "claimUrl": "https://pocketdrop-app.vercel.app/c/26#k=<seed-not-recorded>",
+ "linkId": "26",
+ "windowStatus": "done",
+ "fingerprint": [
+  "olive",
+  "argue",
+  "crack",
+  "region"
+ ],
+ "result": "FAIL",
+ "error": "\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByTestId('tx-confirm-26')\nExpected: visible\nTimeout: 120000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" getByTestId('tx-confirm-26') with timeout 120000ms\u001b[22m\n\u001b[2m  - waiting for getByTestId('tx-confirm-26')\u001b[22m\n",
+ "consoleErrors": [],
+ "finishedAt": "2026-11-19T18:48:15.439Z"
+}

@@ -1,0 +1,42 @@
+{
+ "url": "https://pocketdrop-app.vercel.app",
+ "browser": "chromium",
+ "mode": "Confirmed",
+ "viewport": "390x844",
+ "startedAt": "2026-11-19T18:58:51.972Z",
+ "txs": {
+  "fund": "0x52378e848ef6a1ced00d7493e9dd2cb450a3db720864ee6e6cdfd945b7ace128",
+  "senderActivate0": "36CEB5408DF65D6F9B9930121BEABA81B3E2A87ED9F783F12464F681D585F347",
+  "senderActivate1": "862F39D387BC8FCD98BE95AB9F8F270D45B34B9D75369F4060457BDEA1F08A65",
+  "create": "0xbf2c2201817279bc8d4269c8893d6a15e4449b929fdb58ea20796ee46001932d",
+  "bind": "0x9306a9bc0476e5b898d8472ca544e613eeae6820d692824fedf828a1a85976d9",
+  "register": "EB113F56E5C0D74283E1A6C576E67E254B03D642E56F34DF6FF73128D63FEB5F",
+  "window": "2DDA0B759D551DC1C30289FCFCC47A6A94E2C311758417AB89288C8615248197",
+  "confirm": "0xd21e0f936906b783edfd9e210db9e3c3d16a263e35f2ad206cf509664f02103d",
+  "claim": "0x21d7e0889cb1730f3a4cee59b7c892cf98841b5891cc4d760b19c103559f35c8"
+ },
+ "sender": "0x5959B4737A24FbD3168BD178DA7F08Fa7847a016",
+ "totalSpentQorSoFar": 3.12,
+ "claimUrl": "https://pocketdrop-app.vercel.app/c/27#k=<seed-not-recorded>",
+ "linkId": "27",
+ "windowStatus": "done",
+ "fingerprint": [
+  "brisk",
+  "pupil",
+  "foil",
+  "excite"
+ ],
+ "stepMs": {
+  "key": 39,
+  "bind": 4060,
+  "register": 4253,
+  "window": 4567,
+  "claim": 3480
+ },
+ "recipientFinalBalanceWei": "140000000000000000",
+ "senderBalanceWeiAtEnd": "72914792500000000",
+ "inboxRestoredOnFreshDevice": true,
+ "result": "PASS",
+ "consoleErrors": [],
+ "finishedAt": "2026-11-19T18:59:50.771Z"
+}

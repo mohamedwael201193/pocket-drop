@@ -1,0 +1,47 @@
+{
+ "totalQor": 3.69,
+ "entries": [
+  {
+   "qor": 0.55,
+   "note": "e2e chromium-390-confirmed",
+   "hash": "0xa82e11c4767cbb4f4cddd3717cdf3436fc0f416967a7ed9b99a5d25da450d767",
+   "at": "2026-11-19T18:45:40.124Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "e2e chromium-390-confirmed",
+   "hash": "0x710960557ed449d1fdbdc19d755116cff382d92c5e38a7de537fcfc91444ebf1",
+   "at": "2026-11-19T18:50:19.463Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "e2e chromium-390-open",
+   "hash": "0x8337a93a115ec67748806d2a66feb7123f13982a71a4eaa71b22a81c3f18cda1",
+   "at": "2026-11-19T18:52:52.866Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "e2e chromium-390-confirmed",
+   "hash": "0x59fdfeee2075f05889d80f83a2845f96fd58ee38454359b0ca211a3eb804516d",
+   "at": "2026-11-19T18:55:06.709Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "e2e chromium-1440-open",
+   "hash": "0x14e5cc28ff114f42ce68f92008ee2e39b8c3366607ec675260a12286c37ccc87",
+   "at": "2026-11-19T18:57:26.773Z"
+  },
+  {
+   "qor": 0.57,
+   "note": "e2e chromium-390-confirmed",
+   "hash": "0x52378e848ef6a1ced00d7493e9dd2cb450a3db720864ee6e6cdfd945b7ace128",
+   "at": "2026-11-19T18:58:58.894Z"
+  },
+  {
+   "qor": 0.57,
+   "note": "e2e webkit-1440-open",
+   "hash": "0x97afad5dc781f10a936e72a6e683ce3cdd278d9aee7923854ac4b9fe36091218",
+   "at": "2026-11-19T19:00:12.850Z"
+  }
+ ]
+}
