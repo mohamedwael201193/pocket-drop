@@ -1,0 +1,102 @@
+{
+  "success": true,
+  "audit": {
+    "auditId": "QCAIA-1795130931306-3D8DAA40",
+    "status": "completed",
+    "blockchain": "ethereum",
+    "language": "solidity",
+    "framework": "EVM/Solidity",
+    "overallScore": 82,
+    "riskLevel": "MEDIUM",
+    "quantumReadiness": null,
+    "findings": [
+      {
+        "category": "Access Control",
+        "description": "The `finalizeRecovery` and `finalizeRecoveryUnanimous` functions in PocketVault lack proper access control checks. These functions should only be callable by the Pocket owner or authorized parties, but they're currently accessible to anyone.",
+        "id": "ETH-001",
+        "impact": "This allows unauthorized parties to finalize recovery processes, potentially taking control of the Pocket.",
+        "location": "PocketVault.sol:770, PocketVault.sol:802",
+        "recommendation": "Add access control modifiers to ensure these functions can only be called by the Pocket owner or authorized parties.",
+        "severity": "HIGH",
+        "title": "Missing Access Control on Critical Functions"
+      },
+      {
+        "category": "Integer Safety",
+        "description": "In PocketDrop.sol, the `_validateCreate` function calculates `used = _dripSpent[msg.sender][day] + drip` without checking for overflow, which could lead to incorrect drip calculations.",
+        "id": "ETH-002",
+        "impact": "Could cause incorrect drip tracking and potentially allow unauthorized access to funds.",
+        "location": "PocketDrop.sol:562",
+        "recommendation": "Use SafeMath or similar overflow protection when performing arithmetic operations.",
+        "severity": "MEDIUM",
+        "title": "Potential Overflow in Daily Drip Calculation"
+      },
+      {
+        "category": "Logic Flaws",
+        "description": "The `_send` function in PocketVault uses a direct call without checking the return value properly, which could lead to reentrancy issues if the recipient is malicious.",
+        "id": "ETH-003",
+        "impact": "May allow malicious recipients to reenter the contract during payment processing.",
+        "location": "PocketVault.sol:877",
+        "recommendation": "Implement proper reentrancy guards and validate return values from external calls.",
+        "severity": "MEDIUM",
+        "title": "Potential Reentrancy in External Calls"
+      },
+      {
+        "category": "Gas & DoS",
+        "description": "The `_checkGuardianSigs` function in PocketVault contains nested loops that could become expensive with large guardian sets, potentially causing gas limit issues.",
+        "id": "ETH-004",
+        "impact": "Could lead to denial of service for large guardian sets due to high gas consumption.",
+        "location": "PocketVault.sol:712",
+        "recommendation": "Consider limiting the maximum number of guardians or optimizing the validation logic.",
+        "severity": "LOW",
+        "title": "Unbounded Loop in Guardian Validation"
+      },
+      {
+        "category": "ERC Standards Compliance",
+        "description": "While the contract implements ERC-1271, the `isValidSignature` function doesn't fully comply with the standard's requirements for signature verification.",
+        "id": "ETH-005",
+        "impact": "May cause compatibility issues with wallets or applications expecting full ERC-1271 compliance.",
+        "location": "PocketVault.sol:324",
+        "recommendation": "Ensure the function returns the correct magic value according to ERC-1271 specification.",
+        "severity": "INFO",
+        "title": "Missing ERC-1271 Implementation Verification"
+      }
+    ],
+    "summary": "The PocketDrop v4 contract shows strong security practices with post-quantum cryptography integration and robust access controls. However, there are several medium-severity issues including missing access controls on critical recovery functions, potential integer overflows, and reentrancy risks. The contract also has some gas optimization opportunities and minor ERC-1271 compliance issues.",
+    "recommendations": [
+      "Implement proper access control for recovery finalization functions",
+      "Add overflow protection for arithmetic operations in PocketDrop",
+      "Enhance reentrancy protection in external calls",
+      "Optimize guardian validation logic to prevent gas exhaustion",
+      "Ensure full ERC-1271 compliance in signature validation"
+    ],
+    "gasOptimizations": [
+      "Use assembly for simple arithmetic operations where possible to reduce gas costs",
+      "Cache frequently accessed storage variables to avoid repeated SLOADs",
+      "Consider using packed storage for multiple small variables in structs",
+      "Optimize the guardian validation loop by using a mapping instead of array iteration"
+    ],
+    "bestPractices": [
+      "Use of post-quantum cryptographic libraries for enhanced security",
+      "Implementation of reentrancy locks throughout the contract",
+      "Clear separation of concerns with modular design",
+      "Comprehensive error handling and validation",
+      "Use of immutable variables for configuration parameters"
+    ],
+    "positiveAspects": [
+      "Strong focus on post-quantum security with ML-DSA-87 verification",
+      "Robust reentrancy protection mechanisms",
+      "Well-defined access control patterns with signature verification",
+      "Clear separation of concerns between different contract components",
+      "Comprehensive testing of edge cases and error conditions"
+    ],
+    "findingsCount": 5,
+    "criticalCount": 0,
+    "highCount": 1,
+    "mediumCount": 2,
+    "lowCount": 1,
+    "infoCount": 1,
+    "createdAt": "2026-11-19T23:28:51.306Z",
+    "isPublic": true,
+    "userEmail": "mo***@gmail.com"
+  }
+}
