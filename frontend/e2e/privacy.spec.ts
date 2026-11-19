@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const URL = process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app';
-const EVID = path.resolve('evidence');
+const EVID = path.resolve('evidence/v2');
 
 test('og: tags are served without any fragment, and the fragment is never requested', async ({ page, request, browserName }) => {
   // 1. What WhatsApp's preview crawler gets: the HTML of /c/1 with no fragment.

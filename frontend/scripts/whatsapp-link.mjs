@@ -1,6 +1,6 @@
 // Creates ONE real, unclaimed Confirmed-mode link (0.3 QOR) through the deployed UI, for the manual WhatsApp test.
 //   E2E_URL=https://pocketdrop-app.vercel.app node scripts/whatsapp-link.mjs
-// Writes evidence/e2e-secrets-whatsapp.json (git-ignored: sender backup key + link). Testnet only; funded from the deployer under the 15 QOR cap.
+// Writes evidence/e2e-secrets-whatsapp.json (git-ignored: sender backup key + link). Testnet only; funded from the deployer under the 6 QOR v2 cap.
 import { chromium } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';

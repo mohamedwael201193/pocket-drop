@@ -8,20 +8,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const URL = process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app';
-const EVID = path.resolve('evidence');
-const AMOUNT = process.env.E2E_AMOUNT ?? '0.2';
-const FUND = process.env.E2E_FUND ?? '0.8';
+const EVID = path.resolve('evidence/v2');
+const AMOUNT = process.env.E2E_AMOUNT ?? '0.1';
+const DRIP = process.env.E2E_DRIP ?? '0.2';
+const VP = process.env.E2E_VP === 'd' ? 'd' : 'm'; // m = 390x844 phone, d = 1440x900 desktop
+const FUND = process.env.E2E_FUND ?? '0.55';
 fs.mkdirSync(EVID, { recursive: true });
 
-const ctxOpts = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
+const ctxOpts = VP === 'm'
+  ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
+  : { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 };
 const hashOf = async (p: Page, testId: string) => (await p.getByTestId(testId).first().getAttribute('data-hash'))!;
-const wordsOf = async (p: Page, testId: string) => (await p.getByTestId(testId).innerText()).replace(/\d/g, '').split(/\s+/).filter((w) => /^[a-z]+$/.test(w));
+const wordsOf = async (p: Page, testId: string) => ((await p.getByTestId(testId).textContent()) ?? '').toLowerCase().replace(/\d/g, ' ').split(/\s+/).filter((w) => /^[a-z]+$/.test(w));
 
 async function run(browser: Browser, browserName: string, mode: 'Confirmed' | 'Open') {
-  const label = `${browserName}-${mode.toLowerCase()}`;
+  const label = `${browserName}-${VP === 'm' ? '390' : '1440'}-${mode.toLowerCase()}`;
   const shot = async (p: Page, name: string) => { await p.screenshot({ path: path.join(EVID, `${label}-${name}.png`), fullPage: true }); };
   const txs: Record<string, string> = {};
-  const out: Record<string, unknown> = { url: URL, browser: browserName, mode, viewport: '390x844', startedAt: new Date().toISOString(), txs };
+  const out: Record<string, unknown> = { url: URL, browser: browserName, mode, viewport: VP === 'm' ? '390x844' : '1440x900', startedAt: new Date().toISOString(), txs };
   const errors: string[] = [];
   let sctx: BrowserContext | undefined;
   let rctx: BrowserContext | undefined;
@@ -36,8 +40,8 @@ async function run(browser: Browser, browserName: string, mode: 'Confirmed' | 'O
     }
 
     // ---- sender: create account, fund, create link
-    await S.goto(URL, { waitUntil: 'load' });
-    await expect(S.getByTestId('testnet-badge')).toContainText('Testnet');
+    await S.goto(URL + '/dashboard', { waitUntil: 'load' });
+    await expect(S.getByTestId('testnet-badge')).toContainText('Diana');
     await S.getByTestId('create-sender').click();
     const senderEvm = (await S.getByTestId('sender-evm').textContent())!.trim();
     out.sender = senderEvm;
@@ -55,6 +59,7 @@ async function run(browser: Browser, browserName: string, mode: 'Confirmed' | 'O
     for (let i = 0; i < nAct; i++) txs[`senderActivate${i}`] = (await S.getByTestId(`tx-activate-${i}`).getAttribute('data-hash'))!;
     await S.getByTestId(`mode-${mode}`).click();
     await S.getByTestId('amount').fill(AMOUNT);
+    await S.getByTestId('drip').fill(DRIP);
     await expect(S.getByTestId('create-link')).toBeEnabled();
     await shot(S, '2-sender-funded-form');
     await S.getByTestId('create-link').click();
@@ -105,6 +110,9 @@ async function run(browser: Browser, browserName: string, mode: 'Confirmed' | 'O
     await expect(R.getByTestId('claim-page')).toHaveAttribute('data-done', '1', { timeout: 180_000 });
     txs.claim = await hashOf(R, 'tx-claim');
     await expect(R.getByTestId('step-verify')).toHaveAttribute('data-status', mode === 'Open' ? 'skipped' : 'done');
+    const stepMs: Record<string, number> = {};
+    for (const k of ['key', 'bind', 'register', 'window', 'claim']) { const v = await R.getByTestId(`step-${k}`).getAttribute('data-ms'); if (v) stepMs[k] = Number(v); }
+    out.stepMs = stepMs;
     const want = BigInt(Math.round(Number(AMOUNT) * 1e6)) * 10n ** 12n;
     await expect.poll(async () => BigInt((await R.getByTestId('final-balance').getAttribute('data-wei')) || '0') >= want, { timeout: 60_000 }).toBe(true);
     out.recipientFinalBalanceWei = await R.getByTestId('final-balance').getAttribute('data-wei');
@@ -112,6 +120,7 @@ async function run(browser: Browser, browserName: string, mode: 'Confirmed' | 'O
     await expect(S.getByTestId(`state-${id}`)).toHaveText('Claimed', { timeout: 60_000 });
     await shot(S, '8-sender-sees-claimed');
     expect(errors.filter((e) => !/favicon|fonts\.g/.test(e)), 'console errors').toEqual([]);
+    expect(await R.getByTestId('claim-error').count()).toBe(0);
     out.result = 'PASS';
   } catch (e) {
     out.result = 'FAIL';

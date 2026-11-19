@@ -10,9 +10,11 @@ A sender creates a link, a friend with **no wallet** opens it, and a quantum-saf
 
 | Route | What it does |
 |---|---|
-| `/` | Send. Browser-created sender account, funding instructions, create link (Confirmed or Giveaway), share by Web Share / WhatsApp / copy, your links with confirm / cancel / refund. |
+| `/` | Overview: the original design (hero, onboarding, phone, architecture). Every figure is LIVE (latest claimed drop from the API, relayer window) or RECORDED with its source. |
+| `/dashboard` | Drops & Escrow Control: sender account and activation, Drop Builder (Confirmed or Giveaway, any chat app incl. WhatsApp), 4-word confirmation console, relayer window gauge, live ledger. |
+| `/claim` | Paste a link, plus a clearly labelled walkthrough illustration of the phone flow. |
 | `/c/:id#k=<seed>` | Claim. Keygen in the tab, `/api/bind`, PoP registration, scoped EVM window, 4-word fingerprint, `/api/claim`, live balance. |
-| `/stats` | Dashboard from `/api/stats` and `/api/health` (accounts, never "users"). |
+| `/radar` | Telemetry from `/api/stats`, `/api/health` and the chain; recorded step latency (Playwright, deployed app) and real-phone timings. `/stats` redirects here. |
 | `/lab` | The six attacks with recorded tx hashes, plus a button that really re-runs each one against the chain state it faced (receipt + `eth_call` at the previous block). |
 | `/judges` | 60-second checklist with live contract reads, relayer health and recorded test results. |
 
