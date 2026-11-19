@@ -52,18 +52,21 @@ Default store is in-memory: on serverless each warm instance has its own counter
 
 ## Trust model
 
-- The relayer holds only a secp256k1 key. Its ML-DSA-87 key never leaves the operator machine (`.secrets/`).
+- The serving relayer (Vercel) holds only the secp256k1 key `RELAYER_SECP_KEY`. The ML-DSA key is NOT in Vercel. It lives in the operator's local `.secrets/` and as an encrypted GitHub Actions secret (`RELAYER_PQC_SEED`, next to `RELAYER_SECP_KEY`), used only by the scheduled `renew-window` workflow.
 - The relayer can only pay gas. Every payout needs a link-key ML-DSA signature (bind) and the recipient's registered ML-DSA key signature (claim), both verified by the contract through the `pqcVerify` precompile. A relayer cannot redirect funds: changing the recipient in `bind` gives `BadLinkSignature`; claiming with a wrong key gives `BadRecipientSignature`.
-- Chain-enforced scope: the relayer account has a registered PQ key, so EVM transactions need an open EVM authorisation window, and widening the window or sending via the Cosmos lane needs the hybrid (secp + ML-DSA) signature. Live proof (`feasibility/live_r3.md`, section 4b): a holder of only the secp key is refused a wider window and `MsgSend` (code 20) and cannot send EVM txs to non-listed targets. The window is scoped to `[PocketDrop]` with a value cap, so a leaked `RELAYER_SECP_KEY` can at most burn gas on PocketDrop calls until the window ends. Whoever holds both keys can widen it; that is why the ML-DSA key stays local.
+- Chain-enforced scope: the relayer account has a registered PQ key, so EVM transactions need an open EVM authorisation window, and widening the window or sending via the Cosmos lane needs the hybrid (secp + ML-DSA) signature. Live proof (`feasibility/live_r3.md`, section 4b): a holder of only the secp key is refused a wider window and `MsgSend` (code 20) and cannot send EVM txs to non-listed targets. The window is scoped to `[PocketDrop]` with a value cap, so a leaked `RELAYER_SECP_KEY` can at most burn gas on PocketDrop calls until the window ends. Whoever holds both keys can widen it; that is why the ML-DSA key is kept out of the serving function.
+- Renewer trust (GitHub Actions holds the ML-DSA key). Anyone who compromises the repo secrets, the workflow, or a maintainer with write access holds both relayer keys. They can widen the relayer window (more blocks, more txs, a higher value cap, other targets) and spend the relayer's gas float (about 3.8 QOR on testnet at the last check; see `relayer.balance` in `/api/health`). They can NOT move escrow: every payout needs the link-key ML-DSA signature (bind) and the recipient's registered ML-DSA signature (claim), and the relayer has neither. The worst case is a drained gas float, a paused relayer, or spam against PocketDrop. Senders can still cancel/refund from their own account, and a recipient can submit their own claim with their own gas.
 
 ## Renewing the relayer window
 
-The window expires after a number of blocks or txs. When `/api/health` shows `window.live: false` (or bind/claim return `503 RelayerWindowUnavailable`), run locally (needs `.secrets/pocketdrop-relayer.json`):
+Automatic: `.github/workflows/renew-window.yml` runs every 2 hours (and on manual dispatch). It renews to the maximum 17,280 blocks (about 6.9 h at ~1.43 s/block) with 500 txs when fewer than 8,000 blocks remain or the window is not live, then fails the run if `/api/health` is still not live. Every 2 h rather than 4 h: 8,000 blocks is only about 3.2 h, so a 4 h cadence could let the window lapse between runs. `/api/health` adds a `warning` when fewer than 2,000 blocks remain.
+
+Manual: the window expires after a number of blocks or txs. When `/api/health` shows `window.live: false` (or bind/claim return `503 RelayerWindowUnavailable`), run locally (needs `.secrets/pocketdrop-relayer.json`):
 
 ```
 cd backend
 npm install
-node scripts/renew-window.mjs --blocks 6000 --txs 200
+node scripts/renew-window.mjs --blocks 17280 --txs 500   # add --if-below 8000 to renew only when needed
 ```
 
 It hybrid-signs `MsgOpenEVMWindow` with `allowed_targets=[POCKETDROP_ADDRESS]` and `max_value` = `evmWindowCost * txs` plus headroom, then prints the status. Keep the relayer funded (check `relayer.balance` in `/api/health`).
