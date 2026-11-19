@@ -28,7 +28,7 @@ export const TESTS = {
   verifiedOn: '2026-11-19',
   foundry: { passed: 117, failed: 0, total: 117, command: 'FOUNDRY_PROFILE=ci forge test', fuzzRuns: 10_000 },
   coverage: { lines: '194/194', statements: '282/282', branches: '54/54', functions: '26/26', command: 'forge coverage --report summary --no-match-coverage "(test|script|lib)/"' },
-  backend: { passed: 76, skipped: 9, command: 'cd backend && npx vitest run', note: 'the 9 skipped tests are live-integration tests that need the relayer secret' },
+  backend: { passed: 77, skipped: 9, command: 'cd backend && npx vitest run', note: 'the 9 skipped tests are live-integration tests that need the relayer secret' },
 } as const;
 
 export const KNOWN_LIMITS = [
@@ -38,3 +38,18 @@ export const KNOWN_LIMITS = [
   'An Open-mode link that is bound cannot be cancelled by the sender; money returns only after expiry.',
   'The two native precompiles (0x0A01, 0x0A02) are trusted. PqcLib fails closed but cannot detect a lying precompile.',
 ] as const;
+
+/** RECORDED: real-phone measurements of the on-chain steps (register PQ key, open window, claim), from the spike runs.
+ *  Source: spike/VERDICT.md, 2026-11-19 (kept outside this repo; summarised in evidence/v2/phone-measurements.md).
+ *  Browser keygen was 47 to 67 ms on every device. These are NOT measurements of this app's full flow. */
+export const PHONE = {
+  source: 'spike/VERDICT.md, 2026-11-19',
+  androidMs: [12_635, 10_965],
+  iphoneMs: 6_854,
+  androidLabel: 'about 11 to 13 s',
+  iphoneLabel: '6.9 s',
+  note: 'Android Chrome 157 (real device, 2 runs) and iPhone Safari on iOS 18.0 (BrowserStack, device type unconfirmed). Steps: register key, open window, claim.',
+} as const;
+
+/** The relayer window is renewed to this many blocks (the chain maximum); the gauge on the dashboard divides by it. RECORDED. */
+export const WINDOW_MAX_BLOCKS = 17_280;

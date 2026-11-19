@@ -44,8 +44,12 @@ export const healthSchema = z.object({
   network: z.string(),
   headBlock: z.string().nullable(),
   relayer: z.object({ address: z.string(), cosmosAddress: z.string(), balance: z.string().nullable() }).nullable(),
-  window: z.object({ queryable: z.boolean(), live: z.boolean().optional(), remainingTxs: z.string().optional(), remainingBlocks: z.string().optional() }).passthrough(),
-}).passthrough();
+  window: z.object({
+    queryable: z.boolean(), live: z.boolean().optional(), remainingTxs: z.string().optional(), remainingBlocks: z.string().optional(),
+    expiryHeight: z.string().optional(), allowedTargets: z.array(z.string()).optional(),
+  }).passthrough(),
+  warning: z.object({ level: z.string(), message: z.string() }).optional(),
+});
 export type Health = z.infer<typeof healthSchema>;
 
 const counts = z.object({ created: z.number(), bound: z.number(), confirmed: z.number(), claimed: z.number(), cancelled: z.number(), refunded: z.number(), other: z.number() });
@@ -61,11 +65,18 @@ export const statsSchema = z.object({
     own: z.number(), external: z.number(),
     byRole: z.record(z.object({ own: z.number(), external: z.number() })).optional(),
   }),
-  recent: z.array(z.object({ name: z.string(), kind: z.string(), linkId: z.string().nullable(), txHash: z.string(), blockNumber: z.string().optional() })),
+  recent: z.array(z.object({ name: z.string(), kind: z.string(), linkId: z.string().nullable(), txHash: z.string(), blockNumber: z.string().optional(), amount: z.string().optional() })),
 });
 export type Stats = z.infer<typeof statsSchema>;
 
-export const fetchHealth = () => getJson('/api/health', healthSchema);
+/** /api/health answers 503 with a full body when the relayer window is closed; that body is exactly what we want to show. */
+export async function fetchHealth() {
+  const r = await fetch(`${API_BASE}/api/health`);
+  const j = await r.json().catch(() => null);
+  const p = healthSchema.safeParse(j);
+  if (!p.success) throw new ApiError('HttpError', `HTTP ${r.status}`, r.status);
+  return p.data;
+}
 export const fetchStats = () => getJson('/api/stats', statsSchema);
 export const fetchLink = (id: string | bigint) => getJson(`/api/link/${id}`, z.object({ ok: z.literal(true), link: linkSchema })).then((r) => r.link);
 
@@ -83,12 +94,14 @@ async function post<T>(path: string, body: unknown, schema: z.ZodType<T>): Promi
 export const postBind = (p: { linkId: string; recipient: string; recipientKeyHash: string; linkPk: string; linkSig: string }) => post('/api/bind', p, txOk);
 export const postClaim = (p: { linkId: string; recipientSig: string }) => post('/api/claim', p, txOk);
 
+export const RELAYER_PAUSED = "The relayer's EVM window has expired, so it cannot submit transactions for you right now. Your funds are safe and still in escrow: nothing was sent and nothing was lost. Retry in a few minutes, after the relayer window is renewed.";
+
 /** Plain-language text for the contract/relayer errors a person can actually hit. */
 export function explainError(e: unknown): string {
   if (e instanceof ApiError) {
     const map: Record<string, string> = {
       RateLimited: 'Too many tries in a short time. Wait a minute and try again.',
-      RelayerWindowUnavailable: 'The relayer is paused for maintenance. Nothing was sent; try again in a few minutes.',
+      RelayerWindowUnavailable: RELAYER_PAUSED,
       InvalidState: 'This link is not in a state that allows that step (already used, cancelled or expired).',
       Expired: 'This link has expired.',
       BadLinkSignature: 'The link key does not match this link. Ask the sender for a fresh link.',
@@ -97,6 +110,7 @@ export function explainError(e: unknown): string {
       NotRegistered: 'The account key is not registered yet.',
       LinkNotFound: 'No such link.',
     };
+    if (e.status === 503 && !map[e.name]) return RELAYER_PAUSED;
     return map[e.name] ?? `${e.name}: ${e.message}`;
   }
   return e instanceof Error ? e.message : String(e);
