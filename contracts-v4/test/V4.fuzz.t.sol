@@ -92,6 +92,108 @@ contract V4FuzzTest is V4Base {
         assertEq(SINK.balance, 0);
     }
 
+    /*---------------- guardian freeze / unanimous recovery ----------------*/
+
+    function _g(uint256 k) internal pure returns (address[] memory a) {
+        a = new address[](k);
+        for (uint256 i; i < k; i++) {
+            a[i] = address(uint160(0x6700 + i));
+        }
+    }
+
+    function _fsig(string memory p, uint256 i, uint256 n) internal returns (bytes memory) {
+        return _sg("fuzz", string.concat(p, "_G", vm.toString(i), "_", vm.toString(n)));
+    }
+
+    /// Nothing but real guardian signatures freezes the Pocket or proposes a unanimous recovery.
+    function testFuzz_forged_freeze_and_unanimous_never_succeed(bytes memory s0, bytes memory s1, bytes memory s2, address no, bytes32 kh)
+        public
+    {
+        bytes[] memory two = new bytes[](2);
+        two[0] = s0;
+        two[1] = s1;
+        (bool ok,) = address(v).call(abi.encodeCall(v.guardianFreeze, (_g(2), two, 0, DL)));
+        assertFalse(ok);
+        assertEq(v.frozenUntil(), 0);
+        bytes[] memory three = new bytes[](3);
+        three[0] = s0;
+        three[1] = s1;
+        three[2] = s2;
+        (ok,) = address(v).call(abi.encodeCall(v.proposeRecoveryUnanimous, (no, kh, DL, _g(3), three)));
+        assertFalse(ok);
+        assertEq(v.uRecoveryAt(), 0);
+        assertFalse(v.frozen());
+    }
+
+    /// For any moment inside the freeze every value-moving path reverts `Frozen`; from the end on, it is open again.
+    function testFuzz_freeze_window_is_exactly_FREEZE_PERIOD(uint256 dt, uint8 path) public {
+        assertEq(v.spend(SINK, 5 ether, DL, V("spendB_0")), 1); // queued before the freeze
+        bytes[] memory s = new bytes[](2);
+        s[0] = _fsig("frz", 0, 0);
+        s[1] = _fsig("frz", 1, 0);
+        v.guardianFreeze(_g(2), s, 0, DL);
+        uint256 t0 = block.timestamp;
+        dt = bound(dt, 0, 2 * FREEZE_PERIOD);
+        vm.warp(t0 + dt);
+        bool isFrozen = dt < FREEZE_PERIOD;
+        assertEq(v.frozen(), isFrozen);
+        bytes memory sig = V("spendS_1");
+        bytes memory big = V("spendB_1");
+        if (path % 3 == 0) {
+            if (isFrozen) vm.expectRevert(PocketVault.Frozen.selector);
+            v.spend(SINK, 0.8 ether, DL, sig);
+        } else if (path % 3 == 1) {
+            if (isFrozen) vm.expectRevert(PocketVault.Frozen.selector);
+            v.spend(SINK, 5 ether, DL, big);
+        } else {
+            if (isFrozen) vm.expectRevert(PocketVault.Frozen.selector);
+            v.executeQueued(1);
+            if (!isFrozen) assertEq(SINK.balance, 5 ether);
+        }
+    }
+
+    /// Random gaps between freeze attempts by the same guardian set: never more than 2 freezes back to back, and a
+    /// freeze never starts while one is running.
+    function testFuzz_freeze_streak_never_exceeds_cap(uint256 seed) public {
+        uint256 consecutive;
+        uint256 lastEnd;
+        for (uint256 i; i < 8; i++) {
+            seed = uint256(keccak256(abi.encode(seed, i)));
+            vm.warp(block.timestamp + (seed % (6 * FREEZE_PERIOD)));
+            uint256 n = v.freezeNonce();
+            bytes[] memory s = new bytes[](2);
+            s[0] = _fsig("frz", 0, n);
+            s[1] = _fsig("frz", 1, n);
+            bool wasFrozen = v.frozen();
+            uint256 start = block.timestamp;
+            try v.guardianFreeze(_g(2), s, n, DL) {
+                assertFalse(wasFrozen);
+                bool quiet = lastEnd != 0 && start >= lastEnd + 4 * FREEZE_PERIOD;
+                consecutive = (lastEnd == 0 || quiet) ? 1 : consecutive + 1;
+                assertLe(consecutive, 2, "3 freezes in a row");
+                assertEq(v.freezeStreak(), consecutive);
+                lastEnd = v.frozenUntil();
+            } catch {}
+        }
+    }
+
+    /// While a unanimous recovery is pending the Pocket is frozen and the old key's veto does nothing, whatever the time.
+    function testFuzz_unanimous_recovery_is_not_vetoable(uint256 dt) public {
+        bytes[] memory s = new bytes[](3);
+        s[0] = _fsig("unan", 0, 0);
+        s[1] = _fsig("unan", 1, 0);
+        s[2] = _fsig("unan", 2, 0);
+        v.proposeRecoveryUnanimous(OB, keccak256(_pk("OB")), DL, _g(3), s);
+        dt = bound(dt, 0, UNANIMOUS_DELAY - 1);
+        vm.warp(block.timestamp + dt);
+        bytes memory veto = _sg("fuzz", "vetoRec_0");
+        vm.expectRevert(PocketVault.NoRecoveryPending.selector);
+        v.vetoRecovery(DL, veto);
+        assertTrue(v.frozen());
+        vm.expectRevert(PocketVault.TooEarly.selector);
+        v.finalizeRecoveryUnanimous();
+    }
+
     /*---------------- drop ----------------*/
 
     function testFuzz_drop_create_accounting(uint256 val, uint96 drip, uint96 fee, uint64 ttl, uint8 mode) public {

@@ -98,6 +98,189 @@ contract VaultInvariantTest is StdInvariant, V4Base {
 }
 
 /*====================================================================================================================
+                                          VAULT FREEZE / UNANIMOUS RECOVERY
+====================================================================================================================*/
+
+contract FreezeHandler is Fx {
+    PocketVault public v;
+    uint256 public immediatePaid;
+    uint256 public executedPaid;
+    uint256 public okIntents;
+    bool public movedWhileFrozen; // a spend or execute succeeded although frozen() was true
+    bool public freezeStartedWhileFrozen;
+    bool public unanimousVetoed; // a veto changed or cleared a pending unanimous recovery
+    bool public frozenUntilDecreased;
+    uint256 public lastFrozenUntil;
+    uint256 public okFreezes;
+    uint256 public okUnanimous;
+
+    constructor(PocketVault v_) {
+        v = v_;
+    }
+
+    function _sigs3(string memory prefix, uint256 n) internal returns (bytes[] memory s) {
+        s = new bytes[](3);
+        for (uint256 i; i < 3; i++) {
+            s[i] = _sg("fuzz", string.concat(prefix, "_G", vm.toString(i), "_", vm.toString(n)));
+        }
+    }
+
+    function _signers(uint256 k) internal pure returns (address[] memory a) {
+        a = new address[](k);
+        for (uint256 i; i < k; i++) {
+            a[i] = address(uint160(0x6700 + i));
+        }
+    }
+
+    function _track() internal {
+        uint256 f = v.frozenUntil();
+        if (f < lastFrozenUntil) frozenUntilDecreased = true;
+        lastFrozenUntil = f;
+    }
+
+    function spend(uint256 seed) external {
+        uint256 n = v.nonce();
+        if (n >= 60) return;
+        bool big = seed % 2 == 1;
+        bytes memory sig = _sg("fuzz", string.concat(big ? "spendB_" : "spendS_", vm.toString(n)));
+        uint256 amt = big ? 5 ether : 0.8 ether;
+        bool wasFrozen = v.frozen();
+        try v.spend(SINK_, amt, DL_, sig) returns (uint256 id) {
+            okIntents++;
+            if (wasFrozen) movedWhileFrozen = true;
+            if (id == 0) immediatePaid += amt;
+        } catch {}
+    }
+
+    function execute(uint256 seed) external {
+        uint256 c = v.queueCount();
+        if (c == 0) return;
+        uint256 id = 1 + seed % c;
+        PocketVault.Queued memory q = v.getQueued(id);
+        bool wasFrozen = v.frozen();
+        try v.executeQueued(id) {
+            executedPaid += q.amount;
+            if (wasFrozen) movedWhileFrozen = true;
+        } catch {}
+    }
+
+    function freeze(uint256 seed) external {
+        uint256 n = v.freezeNonce();
+        if (n >= 8) return;
+        bool wasFrozen = v.frozen();
+        // two or three of the guardians (any >= threshold works)
+        uint256 k = 2 + seed % 2;
+        bytes[] memory all = _sigs3("frz", n);
+        bytes[] memory s = new bytes[](k);
+        for (uint256 i; i < k; i++) {
+            s[i] = all[i];
+        }
+        try v.guardianFreeze(_signers(k), s, n, DL_) {
+            okFreezes++;
+            if (wasFrozen) freezeStartedWhileFrozen = true;
+        } catch {}
+        _track();
+    }
+
+    function proposeUnanimous() external {
+        uint256 rn = v.recoveryNonce();
+        if (rn >= 8) return;
+        try v.proposeRecoveryUnanimous(
+            address(uint160(0xa0a02)), keccak256(_pk("OB")), DL_, _signers(3), _sigs3("unan", rn)
+        ) {
+            okUnanimous++;
+        } catch {}
+    }
+
+    function proposeThreshold() external {
+        uint256 rn = v.recoveryNonce();
+        if (rn >= 8) return;
+        bytes[] memory all = _sigs3("rec", rn);
+        bytes[] memory s = new bytes[](2);
+        s[0] = all[0];
+        s[1] = all[1];
+        try v.proposeRecovery(address(uint160(0xa0a02)), keccak256(_pk("OB")), DL_, _signers(2), s) {} catch {}
+    }
+
+    function finalizeUnanimous() external {
+        try v.finalizeRecoveryUnanimous() {} catch {}
+    }
+
+    function finalizeThreshold() external {
+        try v.finalizeRecovery() {} catch {}
+    }
+
+    /// The (old) owner key tries to veto: it may clear a threshold proposal, never a unanimous one.
+    function veto() external {
+        uint256 n = v.nonce();
+        if (n >= 60) return;
+        bytes memory sig = _sg("fuzz", string.concat("vetoRec_", vm.toString(n)));
+        uint256 u = v.uRecoveryAt();
+        try v.vetoRecovery(DL_, sig) {
+            okIntents++;
+        } catch {}
+        if (u != 0 && v.uRecoveryAt() != u) unanimousVetoed = true;
+    }
+
+    function warp(uint256 s) external {
+        vm.warp(block.timestamp + (s % 40 hours));
+        _track();
+    }
+}
+
+contract FreezeInvariantTest is StdInvariant, V4Base {
+    FreezeHandler internal h;
+    PocketVault internal v;
+
+    function setUp() public override {
+        super.setUp();
+        v = pocketA();
+        h = new FreezeHandler(v);
+        targetContract(address(h));
+        bytes4[] memory sels = new bytes4[](9);
+        sels[0] = FreezeHandler.spend.selector;
+        sels[1] = FreezeHandler.execute.selector;
+        sels[2] = FreezeHandler.freeze.selector;
+        sels[3] = FreezeHandler.proposeUnanimous.selector;
+        sels[4] = FreezeHandler.proposeThreshold.selector;
+        sels[5] = FreezeHandler.finalizeUnanimous.selector;
+        sels[6] = FreezeHandler.finalizeThreshold.selector;
+        sels[7] = FreezeHandler.veto.selector;
+        sels[8] = FreezeHandler.warp.selector;
+        targetSelector(FuzzSelector({addr: address(h), selectors: sels}));
+    }
+
+    /// No spend or execute ever succeeds while the Pocket is frozen (guardian freeze or pending unanimous recovery).
+    function invariant_no_spend_or_execute_succeeds_while_frozen() public view {
+        assertFalse(h.movedWhileFrozen());
+    }
+
+    /// QOR conservation holds across freezes and recoveries (every wei out was an immediate or executed spend).
+    function invariant_freeze_vault_balance_conservation() public view {
+        assertEq(SINK_.balance, h.immediatePaid() + h.executedPaid());
+        assertEq(address(v).balance, 100 ether - SINK_.balance);
+    }
+
+    function invariant_freeze_cannot_be_started_or_extended_while_frozen() public view {
+        assertFalse(h.freezeStartedWhileFrozen());
+        assertFalse(h.frozenUntilDecreased());
+    }
+
+    /// A freeze lasts at most FREEZE_PERIOD from its start and the streak never exceeds the cap.
+    function invariant_freeze_bounded_and_streak_capped() public view {
+        assertLe(uint256(v.freezeStreak()), v.MAX_FREEZE_STREAK());
+        assertLe(v.frozenUntil(), block.timestamp + v.FREEZE_PERIOD());
+        assertEq(v.freezeNonce(), h.okFreezes());
+    }
+
+    /// The old owner key can never veto (or otherwise clear) a unanimous recovery.
+    function invariant_old_key_cannot_veto_unanimous_recovery() public view {
+        assertFalse(h.unanimousVetoed());
+        assertEq(v.nonce(), h.okIntents());
+    }
+}
+
+/*====================================================================================================================
                                                     DROP
 ====================================================================================================================*/
 

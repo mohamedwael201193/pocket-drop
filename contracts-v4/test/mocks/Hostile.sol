@@ -71,8 +71,8 @@ import {DropPool} from "../../src/DropPool.sol";
 
 /// @notice Wraps `new` in external calls so `vm.expectRevert` can observe constructor reverts without ending the test.
 contract Maker {
-    function vault(uint256 a, uint256 b) external returns (PocketVault) {
-        return new PocketVault(a, b);
+    function vault(uint256 a, uint256 b, uint256 c, uint256 d) external returns (PocketVault) {
+        return new PocketVault(a, b, c, d);
     }
 
     function factory(address i) external returns (PocketFactory) {

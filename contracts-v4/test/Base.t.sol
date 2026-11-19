@@ -51,6 +51,8 @@ abstract contract V4Base is Fx {
 
     uint256 internal constant TIMELOCK = 1 days;
     uint256 internal constant RECOVERY_DELAY = 2 days;
+    uint256 internal constant FREEZE_PERIOD = 3 days;
+    uint256 internal constant UNANIMOUS_DELAY = 3 days;
     uint256 internal constant BIND_TIMEOUT = 3600;
 
     address internal constant OA = address(uint160(0xa0a01));
@@ -85,7 +87,7 @@ abstract contract V4Base is Fx {
         vm.chainId(9800);
         vm.etch(VERIFY_ADDR, address(new MockPqcVerify()).code);
         vm.etch(KEYS_ADDR, address(new MockPqcKeys()).code);
-        deployCodeTo("PocketVault.sol:PocketVault", abi.encode(TIMELOCK, RECOVERY_DELAY), IMPL);
+        deployCodeTo("PocketVault.sol:PocketVault", abi.encode(TIMELOCK, RECOVERY_DELAY, FREEZE_PERIOD, UNANIMOUS_DELAY), IMPL);
         deployCodeTo("PocketFactory.sol:PocketFactory", abi.encode(IMPL), FACTORY);
         deployCodeTo(
             "PocketDrop.sol:PocketDrop",

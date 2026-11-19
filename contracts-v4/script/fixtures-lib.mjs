@@ -25,7 +25,7 @@ export const ETH = 10n ** 18n;
 export const tag = (s) => keccak256(toBytes(s));
 export const ACT = Object.fromEntries(
   ['SPEND', 'VETO_QUEUED', 'SET_LIMIT', 'SET_GUARDIANS', 'CANCEL_PENDING', 'VETO_RECOVERY', 'CREATE_DROP', 'CONFIRM_DROP',
-    'CANCEL_DROP', 'CREATE_POOL', 'CLOSE_POOL', 'RECOVER'].map((k) => [k, tag(`POCKET_${k}_V1`)]),
+    'CANCEL_DROP', 'CREATE_POOL', 'CLOSE_POOL', 'RECOVER', 'GUARDIAN_FREEZE', 'RECOVER_UNANIMOUS'].map((k) => [k, tag(`POCKET_${k}_V1`)]),
 );
 
 const enc = (types, values) => encodeAbiParameters(types.map((type) => ({ type })), values);
@@ -60,8 +60,15 @@ export const rawMessage = (digest) => toHex(toBytes(digest));
 export const intentDigest = ({ action, vault, nonce, deadline = DL, params, chainId = CHAIN_ID }) =>
   keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256', 'bytes'], [action, chainId, vault, BigInt(nonce), BigInt(deadline), params]));
 
-export const recoveryDigest = ({ vault, recNonce, newOwner, newKeyHash, deadline = DL }) =>
-  keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256', 'address', 'bytes32'], [ACT.RECOVER, CHAIN_ID, vault, BigInt(recNonce), BigInt(deadline), newOwner, newKeyHash]));
+export const recoveryDigest = ({ vault, recNonce, newOwner, newKeyHash, deadline = DL, action = ACT.RECOVER }) =>
+  keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256', 'address', 'bytes32'], [action, CHAIN_ID, vault, BigInt(recNonce), BigInt(deadline), newOwner, newKeyHash]));
+
+/** Unanimous recovery: same shape as recoveryDigest under its own action tag (shares the recovery nonce). */
+export const unanimousDigest = (a) => recoveryDigest({ ...a, action: ACT.RECOVER_UNANIMOUS });
+
+/** Guardian freeze digest: keccak(abi.encode(ACT_FREEZE, chainid, vault, freezeNonce, deadline)). */
+export const freezeDigest = ({ vault, nonce, deadline = DL }) =>
+  keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256'], [ACT.GUARDIAN_FREEZE, CHAIN_ID, vault, BigInt(nonce), BigInt(deadline)]));
 
 export const dropBindDigest = ({ domain = 'POCKETDROP_BIND_V2', chainId = CHAIN_ID, drop = ADDR.DROP, id, recipient, keyHash, payTo }) =>
   keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address'], [domain, chainId, drop, BigInt(id), recipient, keyHash, payTo]));

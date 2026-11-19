@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import { mldsa } from '@qorechain/pqc';
 import {
   ACCOUNTS, ADDR, POCKETS, POCKET_CFG, ACT, ETH, T0, DL, EXP, NUM_LINKS, params, intentDigest, recoveryDigest, dropBindDigest,
-  dropClaimDigest, poolDigest, counterDigest, pqMessage, rawMessage, tripleHash, hex, unhex, keccak256, toBytes,
+  dropClaimDigest, poolDigest, unanimousDigest, freezeDigest, counterDigest, pqMessage, rawMessage, tripleHash, hex, unhex, keccak256, toBytes,
 } from './fixtures-lib.mjs';
 
 const keyNames = ['OA', 'OB', 'G0', 'G1', 'G2', 'G3', 'R0', 'R1', 'R2', 'C0', 'C1', 'C2', 'C3', 'LK0', 'LK1', 'LK2', 'PK', 'X'];
@@ -95,6 +95,18 @@ const vault = makeGroup();
   for (const g of ['G0', 'G1']) vault.add(`recBadHash_${g}_0`, g, pqMessage(recoveryDigest({ vault: PA, recNonce: 0, newOwner: ACCOUNTS.OB, newKeyHash: badHash })));
   // recovery signed for the PA2 vault must not work on PA
   for (const g of ['G0', 'G1']) vault.add(`recPA2_${g}_0`, g, pqMessage(recoveryDigest({ vault: POCKETS.PA2, recNonce: 0, newOwner: ACCOUNTS.OB, newKeyHash: keyHash('OB') })));
+  // guardian freeze (nonces 0..5; G3 is NOT a guardian of PA) and unanimous recovery (new owner OB, recovery nonces 0..3)
+  for (let n = 0; n < 6; n++) {
+    for (const g of ['G0', 'G1', 'G2', 'G3']) vault.add(`frz_${g}_${n}`, g, pqMessage(freezeDigest({ vault: PA, nonce: n })));
+  }
+  for (const g of ['G0', 'G1']) vault.add(`frzPA2_${g}_0`, g, pqMessage(freezeDigest({ vault: POCKETS.PA2, nonce: 0 })));
+  for (let rn = 0; rn < 4; rn++) {
+    for (const g of ['G0', 'G1', 'G2', 'G3']) {
+      vault.add(`unan_${g}_${rn}`, g, pqMessage(unanimousDigest({ vault: PA, recNonce: rn, newOwner: ACCOUNTS.OB, newKeyHash: keyHash('OB') })));
+    }
+  }
+  for (const g of ['G0', 'G1', 'G2']) vault.add(`unanBadHash_${g}_0`, g, pqMessage(unanimousDigest({ vault: PA, recNonce: 0, newOwner: ACCOUNTS.OB, newKeyHash: badHash })));
+  for (const g of ['G0', 'G1', 'G2']) vault.add(`unanPA2_${g}_0`, g, pqMessage(unanimousDigest({ vault: POCKETS.PA2, recNonce: 0, newOwner: ACCOUNTS.OB, newKeyHash: keyHash('OB') })));
   // owner "guardian replay" pieces: the same OB key signing a veto after recovery
   for (let n = 0; n < 3; n++) intent(`vetoRec_OB_${n}`, 'OB', ACT.VETO_RECOVERY, n, params.none());
 }
@@ -170,7 +182,20 @@ const fuzz = makeGroup();
   const PA = POCKETS.PA;
   for (let n = 0; n < 60; n++) {
     fuzz.add(`spendS_${n}`, 'OA', pqMessage(intentDigest({ action: ACT.SPEND, vault: PA, nonce: n, params: params.spend(SINK, 8n * ETH / 10n) })));
+    fuzz.add(`vetoRec_${n}`, 'OA', pqMessage(intentDigest({ action: ACT.VETO_RECOVERY, vault: PA, nonce: n, params: params.none() })));
     fuzz.add(`spendB_${n}`, 'OA', pqMessage(intentDigest({ action: ACT.SPEND, vault: PA, nonce: n, params: params.spend(SINK, 5n * ETH) })));
+  }
+}
+
+// frozen-state grid for the invariant / fuzz suites: freeze nonces 0..7, unanimous and threshold recovery nonces 0..7 (new owner OB)
+{
+  const PA = POCKETS.PA;
+  for (let n = 0; n < 8; n++) {
+    for (const g of ['G0', 'G1', 'G2']) {
+      fuzz.add(`frz_${g}_${n}`, g, pqMessage(freezeDigest({ vault: PA, nonce: n })));
+      fuzz.add(`unan_${g}_${n}`, g, pqMessage(unanimousDigest({ vault: PA, recNonce: n, newOwner: ACCOUNTS.OB, newKeyHash: keyHash('OB') })));
+      fuzz.add(`rec_${g}_${n}`, g, pqMessage(recoveryDigest({ vault: PA, recNonce: n, newOwner: ACCOUNTS.OB, newKeyHash: keyHash('OB') })));
+    }
   }
 }
 

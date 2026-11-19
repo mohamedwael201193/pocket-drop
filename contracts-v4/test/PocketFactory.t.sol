@@ -99,14 +99,24 @@ contract PocketFactoryTest is V4Base {
         vm.expectRevert(PocketFactory.NoImplementation.selector);
         maker.factory(address(0xdeadbeef));
         vm.expectRevert(PocketVault.InvalidConfig.selector);
-        maker.vault(0, 1);
+        maker.vault(0, 1, 1, 1);
         vm.expectRevert(PocketVault.InvalidConfig.selector);
-        maker.vault(1, 0);
+        maker.vault(1, 0, 1, 1);
         vm.expectRevert(PocketVault.InvalidConfig.selector);
-        maker.vault(31 days, 1);
+        maker.vault(31 days, 1, 1, 1);
         vm.expectRevert(PocketVault.InvalidConfig.selector);
-        maker.vault(1, 31 days);
-        PocketVault lab = maker.vault(60, 60);
+        maker.vault(1, 31 days, 1, 1);
+        vm.expectRevert(PocketVault.InvalidConfig.selector);
+        maker.vault(1, 1, 0, 1);
+        vm.expectRevert(PocketVault.InvalidConfig.selector);
+        maker.vault(1, 1, 31 days, 1);
+        vm.expectRevert(PocketVault.InvalidConfig.selector);
+        maker.vault(1, 1, 1, 0);
+        vm.expectRevert(PocketVault.InvalidConfig.selector);
+        maker.vault(1, 1, 1, 31 days);
+        PocketVault lab = maker.vault(60, 60, 120, 180);
+        assertEq(lab.FREEZE_PERIOD(), 120);
+        assertEq(lab.UNANIMOUS_RECOVERY_DELAY(), 180);
         assertEq(lab.TIMELOCK(), 60);
     }
 

@@ -1,8 +1,8 @@
 # Coverage (src/ only)
 
 `FOUNDRY_PROFILE=coverage forge coverage --report summary --no-match-coverage "test/"` (solc 0.8.28, optimizer off so source maps are exact).
-100% line, statement, branch and function coverage on every file in `src/`. Tests: 126 unit, 14 fuzz, 11 invariant functions (143 Foundry tests; the 11 invariants run as 3 stateful suites).
-CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 runs x depth 50): 143 passed, 0 failed.
+100% line, statement, branch and function coverage on every file in `src/`. Tests: 145 unit, 18 fuzz, 16 invariant functions (167 Foundry tests; the 16 invariants run as 4 stateful suites). New: guardian freeze + unanimous recovery (19 unit, 4 fuzz, 5 invariants incl. "no spend or execute succeeds while frozen").
+CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 runs x depth 50): 167 passed, 0 failed.
 
 | File                              | % Lines           | % Statements      | % Branches        | % Funcs         |
 | src/DropPool.sol                  | 100.00% (56/56)   | 100.00% (91/91)   | 100.00% (20/20)   | 100.00% (8/8)   |
@@ -15,7 +15,7 @@ CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 ru
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
 | src/PocketRouter.sol              | 100.00% (29/29)   | 100.00% (34/34)   | 100.00% (6/6)     | 100.00% (7/7)   |
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
-| src/PocketVault.sol               | 100.00% (194/194) | 100.00% (241/241) | 100.00% (46/46)   | 100.00% (33/33) |
+| src/PocketVault.sol               | 100.00% (258/258) | 100.00% (324/324) | 100.00% (60/60)   | 100.00% (42/42) |
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
 | src/PqGuard.sol                   | 100.00% (8/8)     | 100.00% (14/14)   | 100.00% (3/3)     | 100.00% (2/2)   |
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
@@ -23,4 +23,4 @@ CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 ru
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
 | src/examples/PqGuardedCounter.sol | 100.00% (6/6)     | 100.00% (6/6)     | N/A (0/0)         | 100.00% (2/2)   |
 |-----------------------------------+-------------------+-------------------+-------------------+-----------------|
-| Total                             | 100.00% (530/530) | 100.00% (727/727) | 100.00% (137/137) | 100.00% (84/84) |
+| Total                             | 100.00% (594/594) | 100.00% (810/810) | 100.00% (151/151) | 100.00% (93/93) |
