@@ -20,6 +20,17 @@ export async function getWindow(cfg: Pick<Config, 'rest'>, qorAddr: string, f: t
   } catch (e) { return { queryable: false, error: e instanceof Error ? e.message : String(e) }; }
 }
 
+export const WINDOW_WARN_BLOCKS = 2000;
+
+/** Operator-facing warning when the relayer window is closed or about to close. null when healthy. */
+export function windowWarning(w: WindowStatus): { level: 'expired' | 'low' | 'unknown'; message: string } | null {
+  if (!w.queryable) return { level: 'unknown', message: 'The relayer window could not be queried.' };
+  if (!w.live) return { level: 'expired', message: 'The relayer window is not live: bind and claim will be refused until it is renewed. Escrowed funds are unaffected.' };
+  const left = Number(w.remainingBlocks ?? 0);
+  if (left < WINDOW_WARN_BLOCKS) return { level: 'low', message: `Only ${left} blocks remain in the relayer window (warning below ${WINDOW_WARN_BLOCKS}). The scheduled renewal job should have run; check it.` };
+  return null;
+}
+
 export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance' | 'getBlockNumber'>, f: typeof fetch = fetch) {
   const base = { network: NETWORK, evmChainId: EVM_CHAIN_ID, cosmosChainId: COSMOS_CHAIN_ID, contract: cfg.contract, time: new Date().toISOString() };
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };

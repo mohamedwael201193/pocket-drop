@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getConfig } from '../src/config.js';
-import { getHealth, getWindow } from '../src/health.js';
+import { getHealth, getWindow, windowWarning } from '../src/health.js';
 import { CORS, clientIp, gate, send, buildDeps } from '../src/http.js';
 import { log, redact, setSink } from '../src/log.js';
 import { cfg, hexBytes } from './helpers.js';
@@ -112,5 +112,14 @@ describe('http helpers', () => {
     expect(d.cfg).toBeTruthy();
     expect(d.limiter).toBeTruthy();
     expect(() => d.getRelayer()).toThrow(); // no key/contract in test env
+  });
+});
+
+describe('windowWarning', () => {
+  it('warns below 2000 blocks, on expiry, and stays quiet when healthy', () => {
+    expect(windowWarning({ queryable: true, live: true, remainingBlocks: '1999' })).toMatchObject({ level: 'low' });
+    expect(windowWarning({ queryable: true, live: true, remainingBlocks: '2000' })).toBeNull();
+    expect(windowWarning({ queryable: true, live: false, remainingBlocks: '0' })).toMatchObject({ level: 'expired' });
+    expect(windowWarning({ queryable: false })).toMatchObject({ level: 'unknown' });
   });
 });
