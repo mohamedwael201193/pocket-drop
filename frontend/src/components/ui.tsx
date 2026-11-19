@@ -109,3 +109,27 @@ export function PageTitle({ eyebrow, title, children }: { eyebrow: ReactNode; ti
     </header>
   );
 }
+
+/** Page container: one width, one gutter, one vertical rhythm for every route. */
+export function Page({ children, narrow, testId }: { children: ReactNode; narrow?: boolean; testId?: string }) {
+  return <div data-testid={testId} className={cx('mx-auto px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8', narrow ? 'max-w-2xl' : 'max-w-5xl')}>{children}</div>;
+}
+
+/** Small state pill. */
+export function Pill({ tone = 'neutral', children, testId }: { tone?: 'neutral' | 'ok' | 'warn' | 'dark'; children: ReactNode; testId?: string }) {
+  const t = { neutral: 'border-zinc-300 bg-stoneCard text-zinc-700', ok: 'border-emerald-300 bg-emerald-50 text-emerald-900', warn: 'border-amber-300 bg-amber-50 text-amber-900', dark: 'border-zinc-800 bg-zinc-900 text-stone-100' }[tone];
+  return <span data-testid={testId} className={cx('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium', t)}>{children}</span>;
+}
+
+/** Numbered step card: the one card style used by every linear flow. */
+export function StepCard({ n, title, done, locked, children, testId }: { n: number; title: string; done?: boolean; locked?: boolean; children: ReactNode; testId?: string }) {
+  return (
+    <section data-testid={testId} data-done={done ? '1' : '0'} className={cx('rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6', locked && 'opacity-60')}>
+      <div className="mb-4 flex items-center gap-3">
+        <span className={cx('flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold', done ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-stone-100')}>{done ? <Check className="h-4 w-4" aria-hidden /> : n}</span>
+        <h2 className="font-serif text-2xl text-zinc-900">{title}</h2>
+      </div>
+      {children}
+    </section>
+  );
+}
