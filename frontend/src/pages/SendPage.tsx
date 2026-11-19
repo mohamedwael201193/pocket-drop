@@ -49,7 +49,7 @@ export default function SendPage() {
     if (pocket.balance === undefined) return 'Reading your balance…';
     if (!pocket.active) return 'Finish step 1: fund and activate your account.';
     if (pocket.remainingUqor !== undefined && pocket.remainingUqor * 10n ** 12n < a + d + fee + 10_000_000_000_000_000n) return 'Your authorisation window is too small for this amount. Activate the account again to refresh it.';
-    if (pocket.balance < a + d + fee + 20_000_000_000_000_000n) return 'Balance too low for this amount plus fees. Add QOR in step 1.';
+    if (pocket.balance < a + d + fee + 70_000_000_000_000_000n) return 'Balance too low for this amount plus network fees (about 0.07 QOR). Add QOR in step 1.';
     return null;
   }, [a, d, fee, sender, pocket.balance, pocket.active, pocket.remainingUqor]);
 
