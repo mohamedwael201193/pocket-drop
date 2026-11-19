@@ -139,13 +139,13 @@ contract PocketFlowsTest is V4Base {
         router.relay(DROP, bindData);
         assertEq(relayer.balance, rb + 0.05 ether, "relayerFee reaches the relayer, not the router");
         assertEq(address(router).balance, 0);
-        assertEq(predict(cfgPR(0)).balance, 0.2 ether, "drip landed in the recipient's counterfactual Pocket");
+        assertEq(r(0).balance, 0.2 ether, "drip landed in the recipient account (pays its PQ registration)");
         // 3. the sender confirms in one tap (intent), no second device
         router.relay(address(v), abi.encodeCall(v.confirmDrop, (DROP, 1, keccak256(_pk("R0")), DL, D("cf_1_1"))));
         // 4. the recipient claims into their Pocket (still undeployed)
         router.relay(DROP, abi.encodeCall(drop.claim, (1, D("claim_1_0"))));
         address pr0 = predict(cfgPR(0));
-        assertEq(pr0.balance, 1.2 ether);
+        assertEq(pr0.balance, 1 ether);
         assertEq(pr0.code.length, 0);
         // 5. the recipient's first action lazily deploys the Pocket and spends from it
         Cfg memory k = cfgPR(0);
@@ -153,7 +153,7 @@ contract PocketFlowsTest is V4Base {
             k.owner, k.guardians, k.threshold, k.limit, k.salt,
             abi.encodeCall(PocketVault.spend, (SINK, 0.1 ether, DL, V("spendPR0_0")))
         );
-        assertEq(pr0.balance, 1.1 ether);
+        assertEq(pr0.balance, 0.9 ether);
         assertEq(SINK.balance, 0.1 ether);
         assertEq(address(drop).balance, 0);
     }

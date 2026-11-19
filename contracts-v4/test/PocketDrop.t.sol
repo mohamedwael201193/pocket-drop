@@ -167,7 +167,8 @@ contract PocketDropTest is V4Base {
         assertEq(l.payTo, payTo(0));
         assertEq(l.recipientKeyHash, rHash(0));
         assertEq(l.bindDeadline, block.timestamp + BIND_TIMEOUT);
-        assertEq(payTo(0).balance, 0.2 ether, "drip lands in the (undeployed) Pocket");
+        assertEq(r(0).balance, 0.2 ether, "drip lands in the recipient ACCOUNT (gas money for its PQ registration)");
+        assertEq(payTo(0).balance, 0);
         assertEq(relayer.balance, r0 + 0.05 ether);
         assertEq(drop.unpaidOf(id), 1 ether);
     }
@@ -232,7 +233,7 @@ contract PocketDropTest is V4Base {
         drop.bind(id, r(1), rh1, pt1, lpk, s);
         assertEq(drop.getLink(id).recipient, r(1));
         assertEq(relayer.balance, rb, "no second drip or fee");
-        assertEq(payTo(1).balance, 0);
+        assertEq(r(1).balance, 0);
         // expiry
         vm.warp(EXP);
         bytes memory s0 = D("bind_1_0");
@@ -290,7 +291,8 @@ contract PocketDropTest is V4Base {
         confirm(id, 0);
         claim(id, 0);
         assertEq(uint8(drop.getLink(id).state), uint8(PocketDrop.State.Claimed));
-        assertEq(payTo(0).balance, 0.2 ether + 1 ether);
+        assertEq(payTo(0).balance, 1 ether);
+        assertEq(r(0).balance, 0.2 ether);
         assertEq(address(drop).balance, 0);
         vm.expectRevert(abi.encodeWithSelector(PocketDrop.InvalidState.selector, PocketDrop.State.Claimed));
         drop.claim(id, hex"00");
@@ -315,7 +317,7 @@ contract PocketDropTest is V4Base {
         drop.claim(id, s);
         vm.warp(block.timestamp - BIND_TIMEOUT - 1);
         claim(id, 0);
-        assertEq(payTo(0).balance, 1.2 ether);
+        assertEq(payTo(0).balance, 1 ether);
     }
 
     function test_claim_expired() public {
@@ -516,9 +518,9 @@ contract PocketDropTest is V4Base {
 
     function test_zero_drip_and_fee_pay_nothing_at_bind_and_cancel() public {
         uint256 id = create(1, 0, 0);
-        uint256 b = payTo(0).balance;
+        uint256 b = r(0).balance;
         bind(id, 0);
-        assertEq(payTo(0).balance, b);
+        assertEq(r(0).balance, b);
         vm.warp(EXP);
         vm.prank(mallory);
         drop.refund(id);

@@ -88,7 +88,7 @@ contract PocketDrop is Payout, IPocketDropSender {
     event LinkClaimed(uint256 indexed linkId, address indexed recipient, address payTo, uint256 amount, address relayer);
     event LinkCancelled(uint256 indexed linkId, address indexed sender, uint256 refunded);
     event LinkRefunded(uint256 indexed linkId, address indexed sender, uint256 refunded, address caller);
-    event DripPaid(uint256 indexed linkId, address indexed payTo, uint256 drip, address indexed relayer, uint256 relayerFee);
+    event DripPaid(uint256 indexed linkId, address indexed recipient, uint256 drip, address indexed relayer, uint256 relayerFee);
 
     error InvalidConfig();
     error InvalidMode();
@@ -199,8 +199,8 @@ contract PocketDrop is Payout, IPocketDropSender {
         emit LinkBound(linkId, recipient, payTo, recipientKeyHash, deadline, !first, msg.sender);
 
         if (first) {
-            emit DripPaid(linkId, payTo, drip, msg.sender, fee);
-            _pay(payTo, drip);
+            emit DripPaid(linkId, recipient, drip, msg.sender, fee);
+            _pay(recipient, drip);
             _pay(msg.sender, fee);
         }
     }
