@@ -6,15 +6,15 @@ Detector: arbitrary-send-eth
 PocketRouter._sweep() (src/PocketRouter.sol#66-75) sends eth to arbitrary user
 	Dangerous calls:
 	- (ok,None) = msg.sender.call{value: bal}() (src/PocketRouter.sol#73-74)
-PocketVault.createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes) (src/PocketVault.sol#366-381) sends eth to arbitrary user
+PocketVault.createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes) (src/PocketVault.sol#487-503) sends eth to arbitrary user
 	Dangerous calls:
-	- linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash,mode,expiry,drip,relayerFee) (src/PocketVault.sol#379)
-PocketVault.createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes) (src/PocketVault.sol#404-418) sends eth to arbitrary user
+	- linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash,mode,expiry,drip,relayerFee) (src/PocketVault.sol#497-500)
+PocketVault.createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes) (src/PocketVault.sol#525-539) sends eth to arbitrary user
 	Dangerous calls:
-	- poolId = IDropPoolHost(pool).create{value: value}(linkKeyHash,slots,perSlot,expiry) (src/PocketVault.sol#416)
-PocketVault._send(address,uint256) (src/PocketVault.sol#486-489) sends eth to arbitrary user
+	- poolId = IDropPoolHost(pool).create{value: value}(linkKeyHash,slots,perSlot,expiry) (src/PocketVault.sol#536-537)
+PocketVault._send(address,uint256) (src/PocketVault.sol#623-626) sends eth to arbitrary user
 	Dangerous calls:
-	- (ok,None) = to.call{value: amount}() (src/PocketVault.sol#487)
+	- (ok,None) = to.call{value: amount}() (src/PocketVault.sol#624-625)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
 INFO:Detectors:
 Detector: incorrect-equality
@@ -22,19 +22,19 @@ Payout._pay(address,uint256) (src/Payout.sol#44-50) uses a dangerous strict equa
 	- value == 0 (src/Payout.sol#45)
 PocketRouter._sweep() (src/PocketRouter.sol#66-75) uses a dangerous strict equality:
 	- bal == 0 (src/PocketRouter.sol#72)
-PocketVault.allowanceLeft() (src/PocketVault.sol#441-444) uses a dangerous strict equality:
-	- spentDay == block.timestamp / 86400 (src/PocketVault.sol#442)
-PocketVault.applyGuardians() (src/PocketVault.sol#274-284) uses a dangerous strict equality:
-	- at == 0 (src/PocketVault.sol#277)
-PocketVault.applyLimit() (src/PocketVault.sol#251-259) uses a dangerous strict equality:
-	- at == 0 (src/PocketVault.sol#254)
-PocketVault.finalizeRecovery() (src/PocketVault.sol#339-351) uses a dangerous strict equality:
-	- at == 0 (src/PocketVault.sol#341)
+PocketVault.allowanceLeft() (src/PocketVault.sol#561-565) uses a dangerous strict equality:
+	- spentDay == block.timestamp / 86400 (src/PocketVault.sol#563-565)
+PocketVault.finalizeRecovery() (src/PocketVault.sol#375-386) uses a dangerous strict equality:
+	- at == 0 (src/PocketVault.sol#376)
+PocketVault.finalizeRecoveryUnanimous() (src/PocketVault.sol#417-426) uses a dangerous strict equality:
+	- at == 0 (src/PocketVault.sol#418)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
 INFO:Detectors:
 Detector: unused-return
-PocketVault.proposeRecovery(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#299-328) ignores return value by PqcLib.requireKey(newOwner,newKeyHash) (src/PocketVault.sol#322)
-PocketVault.finalizeRecovery() (src/PocketVault.sol#339-351) ignores return value by PqcLib.requireKey(recoveryOwner,recoveryKeyHash) (src/PocketVault.sol#343)
+PocketVault.proposeRecovery(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#347-366) ignores return value by PqcLib.requireKey(newOwner,newKeyHash) (src/PocketVault.sol#363)
+PocketVault.finalizeRecovery() (src/PocketVault.sol#375-386) ignores return value by PqcLib.requireKey(recoveryOwner,recoveryKeyHash) (src/PocketVault.sol#377-378)
+PocketVault.proposeRecoveryUnanimous(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#398-414) ignores return value by PqcLib.requireKey(newOwner,newKeyHash) (src/PocketVault.sol#408-409)
+PocketVault.finalizeRecoveryUnanimous() (src/PocketVault.sol#417-426) ignores return value by PqcLib.requireKey(uRecoveryOwner,uRecoveryKeyHash) (src/PocketVault.sol#420-421)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
 INFO:Detectors:
 Detector: missing-zero-check
@@ -42,36 +42,40 @@ PocketRouter.constructor(IPocketFactory,address,address).drop_ (src/PocketRouter
 		- drop = drop_ (src/PocketRouter.sol#24)
 PocketRouter.constructor(IPocketFactory,address,address).pool_ (src/PocketRouter.sol#23) lacks a zero-check on :
 		- pool = pool_ (src/PocketRouter.sol#25)
-PocketVault.initialize(address,address[],uint8,uint256).owner_ (src/PocketVault.sol#163) lacks a zero-check on :
-		- owner = owner_ (src/PocketVault.sol#168)
+PocketVault.initialize(address,address[],uint8,uint256).owner_ (src/PocketVault.sol#205) lacks a zero-check on :
+		- owner = owner_ (src/PocketVault.sol#211)
+PocketVault.proposeRecovery(address,bytes32,uint256,address[],bytes[]).newOwner (src/PocketVault.sol#348) lacks a zero-check on :
+		- recoveryOwner = newOwner (src/PocketVault.sol#364)
+PocketVault.proposeRecoveryUnanimous(address,bytes32,uint256,address[],bytes[]).newOwner (src/PocketVault.sol#398) lacks a zero-check on :
+		- uRecoveryOwner = newOwner (src/PocketVault.sol#412)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
 INFO:Detectors:
 Detector: reentrancy-events
-Reentrancy in PocketVault.cancelDrop(address,uint256,uint256,bytes) (src/PocketVault.sol#397-401):
+Reentrancy in PocketVault.cancelDrop(address,uint256,uint256,bytes) (src/PocketVault.sol#516-524):
 	External calls:
-	- IPocketDropSender(drop).cancel(linkId) (src/PocketVault.sol#399)
+	- IPocketDropSender(drop).cancel(linkId) (src/PocketVault.sol#522-524)
 	Event emitted after the call(s):
-	- DropCancelled(drop,linkId) (src/PocketVault.sol#400)
-Reentrancy in PocketVault.closePool(address,uint256,uint256,bytes) (src/PocketVault.sol#421-425):
+	- DropCancelled(drop,linkId) (src/PocketVault.sol#524)
+Reentrancy in PocketVault.closePool(address,uint256,uint256,bytes) (src/PocketVault.sol#543-548):
 	External calls:
-	- IDropPoolHost(pool).close(poolId) (src/PocketVault.sol#423)
+	- IDropPoolHost(pool).close(poolId) (src/PocketVault.sol#547)
 	Event emitted after the call(s):
-	- PoolClosed(pool,poolId) (src/PocketVault.sol#424)
-Reentrancy in PocketVault.confirmDrop(address,uint256,bytes32,uint256,bytes) (src/PocketVault.sol#384-394):
+	- PoolClosed(pool,poolId) (src/PocketVault.sol#547-548)
+Reentrancy in PocketVault.confirmDrop(address,uint256,bytes32,uint256,bytes) (src/PocketVault.sol#507-516):
 	External calls:
-	- IPocketDropSender(drop).confirmRecipient(linkId,expectedRecipientKeyHash) (src/PocketVault.sol#392)
+	- IPocketDropSender(drop).confirmRecipient(linkId,expectedRecipientKeyHash) (src/PocketVault.sol#512-513)
 	Event emitted after the call(s):
-	- DropConfirmed(drop,linkId) (src/PocketVault.sol#393)
-Reentrancy in PocketVault.createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes) (src/PocketVault.sol#366-381):
+	- DropConfirmed(drop,linkId) (src/PocketVault.sol#513-516)
+Reentrancy in PocketVault.createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes) (src/PocketVault.sol#487-503):
 	External calls:
-	- linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash,mode,expiry,drip,relayerFee) (src/PocketVault.sol#379)
+	- linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash,mode,expiry,drip,relayerFee) (src/PocketVault.sol#497-500)
 	Event emitted after the call(s):
-	- DropCreated(drop,linkId,value) (src/PocketVault.sol#380)
-Reentrancy in PocketVault.createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes) (src/PocketVault.sol#404-418):
+	- DropCreated(drop,linkId,value) (src/PocketVault.sol#501-502)
+Reentrancy in PocketVault.createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes) (src/PocketVault.sol#525-539):
 	External calls:
-	- poolId = IDropPoolHost(pool).create{value: value}(linkKeyHash,slots,perSlot,expiry) (src/PocketVault.sol#416)
+	- poolId = IDropPoolHost(pool).create{value: value}(linkKeyHash,slots,perSlot,expiry) (src/PocketVault.sol#536-537)
 	Event emitted after the call(s):
-	- PoolCreated(pool,poolId,value) (src/PocketVault.sol#417)
+	- PoolCreated(pool,poolId,value) (src/PocketVault.sol#537-539)
 Reentrancy in PocketFactory.deploy(address,address[],uint8,uint256,bytes32) (src/PocketFactory.sol#52-67):
 	External calls:
 	- PocketVault(address(pocket)).initialize(owner,guardians,threshold,dailyLimit) (src/PocketFactory.sol#65)
@@ -120,40 +124,52 @@ PocketDrop.refund(uint256) (src/PocketDrop.sol#255-266) uses timestamp for compa
 PocketDrop._validateCreate(uint64,uint96,uint96) (src/PocketDrop.sol#303-317) uses timestamp for comparisons
 	Dangerous comparisons:
 	- expiry <= block.timestamp || expiry > block.timestamp + MAX_EXPIRY (src/PocketDrop.sol#312-313)
-PocketVault.executeQueued(uint256) (src/PocketVault.sol#212-221) uses timestamp for comparisons
+PocketVault.executeQueued(uint256) (src/PocketVault.sol#255-264) uses timestamp for comparisons
 	Dangerous comparisons:
-	- recoveryAt != 0 (src/PocketVault.sol#213)
-	- block.timestamp < q.unlockAt (src/PocketVault.sol#217)
-PocketVault.applyLimit() (src/PocketVault.sol#251-259) uses timestamp for comparisons
+	- recoveryAt != 0 (src/PocketVault.sol#256)
+	- block.timestamp < q.unlockAt (src/PocketVault.sol#260-261)
+PocketVault.applyLimit() (src/PocketVault.sol#292-302) uses timestamp for comparisons
 	Dangerous comparisons:
-	- recoveryAt != 0 (src/PocketVault.sol#252)
-	- at == 0 (src/PocketVault.sol#254)
-	- block.timestamp < at (src/PocketVault.sol#255)
-PocketVault.applyGuardians() (src/PocketVault.sol#274-284) uses timestamp for comparisons
+	- recoveryAt != 0 (src/PocketVault.sol#294-295)
+	- block.timestamp < at (src/PocketVault.sol#296-299)
+PocketVault.applyGuardians() (src/PocketVault.sol#318-331) uses timestamp for comparisons
 	Dangerous comparisons:
-	- recoveryAt != 0 (src/PocketVault.sol#275)
-	- at == 0 (src/PocketVault.sol#277)
-	- block.timestamp < at (src/PocketVault.sol#278)
-PocketVault.proposeRecovery(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#299-328) uses timestamp for comparisons
+	- recoveryAt != 0 (src/PocketVault.sol#320)
+	- block.timestamp < at (src/PocketVault.sol#322)
+PocketVault.proposeRecovery(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#347-366) uses timestamp for comparisons
 	Dangerous comparisons:
-	- recoveryAt != 0 (src/PocketVault.sol#306)
-	- block.timestamp > deadline (src/PocketVault.sol#307)
-PocketVault.vetoRecovery(uint256,bytes) (src/PocketVault.sol#331-336) uses timestamp for comparisons
+	- recoveryAt != 0 || uRecoveryAt != 0 (src/PocketVault.sol#351)
+	- block.timestamp > deadline (src/PocketVault.sol#352)
+PocketVault.vetoRecovery(uint256,bytes) (src/PocketVault.sol#367-372) uses timestamp for comparisons
 	Dangerous comparisons:
-	- recoveryAt == 0 (src/PocketVault.sol#333)
-PocketVault.finalizeRecovery() (src/PocketVault.sol#339-351) uses timestamp for comparisons
+	- recoveryAt == 0 (src/PocketVault.sol#370-371)
+PocketVault.finalizeRecovery() (src/PocketVault.sol#375-386) uses timestamp for comparisons
 	Dangerous comparisons:
-	- at == 0 (src/PocketVault.sol#341)
-	- block.timestamp < at (src/PocketVault.sol#342)
-PocketVault.allowanceLeft() (src/PocketVault.sol#441-444) uses timestamp for comparisons
+	- at == 0 (src/PocketVault.sol#376)
+	- block.timestamp < at (src/PocketVault.sol#377)
+PocketVault.proposeRecoveryUnanimous(address,bytes32,uint256,address[],bytes[]) (src/PocketVault.sol#398-414) uses timestamp for comparisons
 	Dangerous comparisons:
-	- spentDay == block.timestamp / 86400 (src/PocketVault.sol#442)
-PocketVault._auth(bytes32,bytes,uint256,bytes) (src/PocketVault.sol#464-469) uses timestamp for comparisons
+	- block.timestamp > deadline (src/PocketVault.sol#400)
+PocketVault.finalizeRecoveryUnanimous() (src/PocketVault.sol#417-426) uses timestamp for comparisons
 	Dangerous comparisons:
-	- block.timestamp > deadline (src/PocketVault.sol#465)
-PocketVault._debit(uint256) (src/PocketVault.sol#471-479) uses timestamp for comparisons
+	- at == 0 (src/PocketVault.sol#418)
+	- block.timestamp < at (src/PocketVault.sol#419-420)
+PocketVault.guardianFreeze(address[],bytes[],uint256,uint256) (src/PocketVault.sol#452-464) uses timestamp for comparisons
 	Dangerous comparisons:
-	- spentDay != day (src/PocketVault.sol#473)
+	- block.timestamp > deadline (src/PocketVault.sol#453)
+	- block.timestamp >= uint256(frozenUntil) + FREEZE_COOLDOWN_PERIODS * FREEZE_PERIOD (src/PocketVault.sol#456-460)
+PocketVault.frozen() (src/PocketVault.sol#471-475) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < frozenUntil || uRecoveryAt != 0 (src/PocketVault.sol#472-475)
+PocketVault.allowanceLeft() (src/PocketVault.sol#561-565) uses timestamp for comparisons
+	Dangerous comparisons:
+	- spentDay == block.timestamp / 86400 (src/PocketVault.sol#563-565)
+PocketVault._auth(bytes32,bytes,uint256,bytes) (src/PocketVault.sol#584-594) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > deadline (src/PocketVault.sol#588)
+PocketVault._debit(uint256) (src/PocketVault.sol#613-619) uses timestamp for comparisons
+	Dangerous comparisons:
+	- spentDay != day (src/PocketVault.sol#616)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
 INFO:Detectors:
 Detector: assembly
@@ -176,8 +192,8 @@ Low level call in PocketRouter._call(address,bytes) (src/PocketRouter.sol#58-66)
 	- (ok,ret) = target.call(data) (src/PocketRouter.sol#62)
 Low level call in PocketRouter._sweep() (src/PocketRouter.sol#66-75):
 	- (ok,None) = msg.sender.call{value: bal}() (src/PocketRouter.sol#73-74)
-Low level call in PocketVault._send(address,uint256) (src/PocketVault.sol#486-489):
-	- (ok,None) = to.call{value: amount}() (src/PocketVault.sol#487)
+Low level call in PocketVault._send(address,uint256) (src/PocketVault.sol#623-626):
+	- (ok,None) = to.call{value: amount}() (src/PocketVault.sol#624-625)
 Low level call in PqGuard.isPqApproved(address,bytes32,bytes) (src/PqGuard.sol#19-26):
 	- (ok,ret) = account.staticcall(abi.encodeCall(IERC1271.isValidSignature,(digest,sig))) (src/PqGuard.sol#21)
 Low level call in PqcLib.verify(bytes,bytes,bytes) (src/PqcLib.sol#36-43):
@@ -197,12 +213,14 @@ Variable PocketDrop.MAX_DRIP (src/PocketDrop.sol#56-57) is not in mixedCase
 Variable PocketDrop.DAILY_DRIP_CAP (src/PocketDrop.sol#57-58) is not in mixedCase
 Variable PocketDrop.BIND_TIMEOUT (src/PocketDrop.sol#58-59) is not in mixedCase
 Variable PocketDrop.MAX_EXPIRY (src/PocketDrop.sol#59-60) is not in mixedCase
-Variable PocketVault.TIMELOCK (src/PocketVault.sol#46) is not in mixedCase
-Variable PocketVault.RECOVERY_DELAY (src/PocketVault.sol#48) is not in mixedCase
+Variable PocketVault.TIMELOCK (src/PocketVault.sol#60) is not in mixedCase
+Variable PocketVault.RECOVERY_DELAY (src/PocketVault.sol#62) is not in mixedCase
+Variable PocketVault.FREEZE_PERIOD (src/PocketVault.sol#64) is not in mixedCase
+Variable PocketVault.UNANIMOUS_RECOVERY_DELAY (src/PocketVault.sol#66) is not in mixedCase
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
 INFO:Detectors:
 Detector: too-many-digits
 PocketFactory.deploy(address,address[],uint8,uint256,bytes32) (src/PocketFactory.sol#52-67) uses literals with too many digits:
 	- mstore(uint256,uint256)(0x00,impl << 0x60 >> 0xe8 | 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000) (src/PocketFactory.sol#59)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#too-many-digits
-INFO:Slither:. analyzed (13 contracts with 102 detectors), 64 result(s) found
+INFO:Slither:. analyzed (13 contracts with 102 detectors), 73 result(s) found

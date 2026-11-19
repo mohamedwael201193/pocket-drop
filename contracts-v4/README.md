@@ -6,7 +6,7 @@ Post-quantum smart accounts ("Pockets") on QoreChain Diana testnet (EVM 9800). E
 |---|---|
 | `PqcLib` | Fail-closed wrappers for the `0x...0a01` / `0x...0a02` precompiles; the one place the QoreX message format lives (`pqMessage`). |
 | `PocketFactory` | EIP-1167 clones at CREATE2 addresses; the salt commits to the whole config; `isPocket`. |
-| `PocketVault` | The Pocket: ERC-1271, daily limit, timelocked queue + veto, timelocked limit raise and guardian change, 2-of-3 guardian recovery with delay + veto, drop/pool calls. |
+| `PocketVault` | The Pocket: ERC-1271, daily limit, timelocked queue + veto, timelocked limit raise and guardian change, 2-of-3 guardian recovery with delay + owner veto, guardian freeze (72 h) and unanimous guardian recovery (72 h, no veto; the stolen-key path), drop/pool calls. |
 | `PocketRouter` | The relayer's single entry; allowlist (factory Pockets, PocketDrop, DropPool); lazy deployment. |
 | `PocketDrop` | v4 escrow: sender is a Pocket, claim pays into the recipient's Pocket. |
 | `DropPool` | One link, N slots, one slot per PoP account. |
@@ -40,7 +40,7 @@ Fixtures are signature-real; the mock verifier accepts only exact triples a test
 ## Deploy and live suite (testnet only; needs the local `.secrets`, never committed)
 ```
 npm ci
-node script/deploy.mjs [--check]            # prod (24 h / 48 h) and lab (60 s) instances
+node script/deploy.mjs [--check]            # prod (24 h / 48 h / freeze 72 h / unanimous 72 h) and lab instances
 node test/live/run.mjs                      # every success path and lab attack as mined txs
 ```
 The relayer window is renewed with `node ../backend/scripts/renew-window.mjs` (targets: both routers and PocketDrop v3); the scheduled workflow does the same.

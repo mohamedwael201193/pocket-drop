@@ -20,6 +20,8 @@ Anyone may submit an intent (the relayer); authority is only the signature. The 
   - `setLimit`: lowering is immediate and cancels a pending raise; raising is queued for `TIMELOCK` (`applyLimit`).
   - `setGuardians` is also queued for `TIMELOCK` (see deviations); `cancelPending` clears both queues.
   - recovery: `threshold` (>= 2) distinct guardians sign `recoveryDigest(newOwner, newKeyHash, deadline)` with their own PoP-proven ML-DSA keys; `RECOVERY_DELAY`; the CURRENT owner key can veto; `finalizeRecovery` re-checks that the new key is registered, proven and equals `newKeyHash`. Guardian signatures are bound to a separate `recoveryNonce` that increments on every proposal, so a vetoed proposal's signatures cannot be replayed.
+  - **guardian freeze** (`guardianFreeze`): `threshold` distinct guardians sign `freezeDigest(freezeNonce, deadline)` = keccak(abi.encode(ACT_FREEZE, chainid, vault, freezeNonce, deadline)); the Pocket is frozen for `FREEZE_PERIOD` (prod 72 h, lab 120 s). The owner cannot lift it. Frozen: `spend`, `executeQueued`, `createDrop`, `createPool`, `applyLimit`, `applyGuardians`, limit raises and guardian changes revert `Frozen`. Allowed: veto a queued spend, lowering the limit, `cancelPending`, `vetoRecovery`, confirm/cancel a drop, close a pool, both recovery paths. No renewal while running; after 2 freezes in a row by the same guardian set a third needs 4 periods of quiet or a guardian-set change (`FreezeCapped`).
+  - **unanimous recovery** (`proposeRecoveryUnanimous` / `finalizeRecoveryUnanimous`): ALL guardians (set >= 2) sign `unanimousDigest` (own action tag, shared `recoveryNonce`); delay `UNANIMOUS_RECOVERY_DELAY` (prod 72 h, lab 180 s); the old key CANNOT veto it; it overrides a pending threshold recovery; while pending the Pocket is frozen; finalize bumps `epoch` (kills the old key's queue). The vetoable threshold recovery is unchanged and still covers colluding guardians.
   - while a recovery is pending, queued spends, limit raises and guardian changes cannot execute; a finalized recovery bumps `epoch`, killing everything the old key queued, and clears pending limit/guardian changes.
   - `createDrop` / `createPool` debit the daily allowance (otherwise a stolen key could move value around the limit through a link-key claim).
   - ERC-1271 `isValidSignature(hash, sig)` is valid only for the owner's ML-DSA signature over the prefixed message of `hash`.
@@ -28,10 +30,18 @@ Anyone may submit an intent (the relayer); authority is only the signature. The 
 - **DropPool**: one slot per PoP-proven recipient ACCOUNT (not per human), link-key signature + recipient signature per claim, small configurable caps, host close/refund.
 - **PqGuard**: `requirePqApproval(account, digest, sig)`: Pocket (ERC-1271 via `staticcall`, malformed/short return is `false`) or PoP-proven account.
 
+## Trust table (who can do what, for how long)
+See `KNOWN_ISSUES.md` section 3 for the full table. Summary (`L` = daily limit):
+- **Lost phone**: no attacker; recovery by guardians in 48 h (threshold) or 72 h (unanimous).
+- **Stolen key**: thief drains up to `L` per UTC day until `threshold` guardians freeze (worst case `L x (floor(hours/24) + 2)`), then nothing moves; the unanimous recovery (all guardians, 72 h) cannot be vetoed by the thief. If any guardian is unreachable, recovery fails.
+- **Colluding threshold**: they can freeze (<= 2 x 72 h per 6-period cycle) and propose a recovery the owner must veto within 48 h; they cannot take funds if the owner vetoes.
+- **All guardians colluding**: total loss 72 h after the proposal; not preventable by the contracts.
+
 ## Invariants (invariant tests: 256 runs x depth 50 in the CI profile)
 1. Pocket QOR conservation: every wei that left was an immediate spend or an executed queued spend; queued spends never execute early, never twice; the daily-allowance rule holds.
 2. PocketDrop: `balance == sum(unpaid escrow of live links) + sum(pull balances)` exactly; a link pays at most once; claims/binds follow the state machine; terminal links hold nothing.
 3. DropPool: `balance == sum(unclaimed of open pools) + pull balances`; one claim per account per pool; `taken <= slots`.
+4. Freeze (handler mixes spends, executes, freezes, both recovery kinds, owner vetoes and time): no `spend` or `executeQueued` ever succeeds while `frozen()`; a freeze never starts while one runs and `frozenUntil` never decreases; the streak never exceeds 2 and `frozenUntil <= now + FREEZE_PERIOD`; the old key's veto never clears a pending unanimous recovery; QOR conservation holds throughout.
 
 ## Test evidence
 - Fixtures are REAL ML-DSA-87 keys and signatures (`script/gen-fixtures.mjs`, deterministic seeds, library `@qorechain/pqc`), over the exact prefixed message. `script/verify-fixtures.mjs` re-verifies all of them with the real verifier and checks that wrong-key, bit-flipped and mutated-message inputs are rejected.
@@ -60,3 +70,5 @@ Fixed: `missing-inheritance` (PocketDrop / DropPool now implement the sender/hos
 8. `PocketDrop` does not enforce that the sender is a Pocket (it is a generic escrow; the sender is whatever calls `create`). Enforcing it would need a factory dependency cycle (factory <-> drop). The product only creates links through Pockets.
 9. The vault trusts the owner-signed `drop` / `pool` address in `createDrop` / `createPool`. A signing UI must show it.
 10. A failed `create2` (address already deployed) consumes the forwarded gas; the router avoids it by checking `isPocket` first.
+11. Guardian freeze and unanimous recovery were added to the Pocket (stolen-key defence, see above). `frozen()` is also true while a unanimous recovery is pending, so the freeze cannot lapse before the recovery lands; a new unanimous proposal replaces a pending one. The constructor takes four delays `(timelock, recoveryDelay, freezePeriod, unanimousDelay)`.
+12. `guardianFreeze` / `proposeRecoveryUnanimous` take explicit `signers` next to `sigs` (ML-DSA keys are looked up per account), like `proposeRecovery`.
