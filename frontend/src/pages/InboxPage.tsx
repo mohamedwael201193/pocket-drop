@@ -21,6 +21,8 @@ export default function InboxPage() {
   const { sender, links } = useAccount();
   const [params] = useSearchParams();
   const focus = params.get('link');
+  const [txs, setTxs] = useState<Record<string, { what: string; hash: string }>>({});
+  const onTx = (id: string, t: { what: string; hash: string }) => setTxs((x) => ({ ...x, [id]: t }));
   const scan = useQuery({ queryKey: ['inbox', sender?.address], enabled: !!sender, queryFn: () => scanSenderLinks(sender!.address), refetchInterval: 20_000 });
 
   const rows = useMemo(() => {
@@ -59,20 +61,20 @@ export default function InboxPage() {
           {needs.length > 0 && (
             <section className="space-y-4" data-testid="needs-you">
               <div className="flex items-center gap-2"><h2 className="font-serif text-2xl text-zinc-900">Needs your confirmation</h2><Pill tone="warn">{needs.length}</Pill></div>
-              {needs.map((r) => <ConfirmCard key={r.id} id={r.id} link={r.link!} highlight={r.id === focus} />)}
+              {needs.map((r) => <ConfirmCard key={r.id} id={r.id} link={r.link!} highlight={r.id === focus} onTx={onTx} />)}
             </section>
           )}
 
           <section className="space-y-3">
             <div className="flex items-center justify-between"><h2 className="font-serif text-2xl text-zinc-900">Waiting</h2><SourceBadge kind="LIVE" /></div>
             {waiting.length === 0 && <Empty text="Nothing in flight. Links you create show up here until they are claimed." />}
-            {waiting.map((r) => <Row key={r.id} r={r} />)}
+            {waiting.map((r) => <Row key={r.id} r={r} tx={txs[r.id]} onTx={onTx} />)}
           </section>
 
           <section className="space-y-3">
             <h2 className="font-serif text-2xl text-zinc-900">Finished</h2>
             {done.length === 0 && <Empty text="Claimed, cancelled and refunded links collect here." />}
-            {done.map((r) => <Row key={r.id} r={r} />)}
+            {done.map((r) => <Row key={r.id} r={r} tx={txs[r.id]} onTx={onTx} />)}
           </section>
           <p className="text-center text-xs text-zinc-500">Account <Mono>{sender.address}</Mono></p>
         </div>
@@ -85,19 +87,19 @@ function Empty({ text }: { text: string }) {
   return <div className="flex items-center gap-3 rounded-2xl border border-dashed border-zinc-300 p-4 text-sm text-zinc-500"><InboxIcon className="h-5 w-5 shrink-0" aria-hidden />{text}</div>;
 }
 
-function ConfirmCard({ id, link, highlight }: { id: string; link: ApiLink; highlight: boolean }) {
+function ConfirmCard({ id, link, highlight, onTx }: { id: string; link: ApiLink; highlight: boolean; onTx: (id: string, t: { what: string; hash: string }) => void }) {
   const { sender } = useAccount();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [tx, setTx] = useState<{ what: string; hash: string } | null>(null);
+  const [sent, setSent] = useState(false);
   const words = fingerprint(link.recipientKeyHash!);
   async function run(what: 'confirm' | 'cancel') {
     if (!sender) return;
     setBusy(what); setErr(null);
     try {
       const r = what === 'confirm' ? await confirmRecipient(sender, id, link.recipientKeyHash as Hex) : await cancelLink(sender, id);
-      setTx({ what, hash: r.hash });
+      setSent(true); onTx(id, { what, hash: r.hash });
       await qc.invalidateQueries({ queryKey: ['link', id] }); await qc.invalidateQueries({ queryKey: ['balance'] });
     } catch (e) { setErr((e as Error).message); } finally { setBusy(null); }
   }
@@ -109,23 +111,22 @@ function ConfirmCard({ id, link, highlight }: { id: string; link: ApiLink; highl
       <Button block variant="ghost" onClick={() => void run('cancel')} busy={busy === 'cancel'} disabled={!!busy} data-testid={`cancel-bound-${id}`}>They differ: cancel and refund me</Button>
       <p className="text-xs text-zinc-600">Confirming sends one transaction naming exactly this recipient key. After that you cannot cancel.</p>
       {err && <Notice tone="error">{err}</Notice>}
-      {tx && <p className="font-mono text-xs text-emerald-700" data-testid="confirm-status-msg">{tx.what} mined: <TxLink hash={tx.hash} testId={`tx-${tx.what}-${id}`} /></p>}
+      {sent && <p className="text-xs text-emerald-700">Sent. Updating from the chain…</p>}
     </div>
   );
 }
 
-function Row({ r }: { r: { id: string; mode: 'Confirmed' | 'Open'; amountWei: string; stored?: StoredLink; link?: ApiLink } }) {
+function Row({ r, tx, onTx }: { r: { id: string; mode: 'Confirmed' | 'Open'; amountWei: string; stored?: StoredLink; link?: ApiLink }; tx?: { what: string; hash: string }; onTx: (id: string, t: { what: string; hash: string }) => void }) {
   const { sender } = useAccount();
   const qc = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [tx, setTx] = useState<{ what: string; hash: string } | null>(null);
   const [show, setShow] = useState(false);
   const l = r.link;
   const expired = l ? Number(l.expiry) * 1000 < Date.now() : false;
   async function run(what: string, fn: () => Promise<{ hash: string }>) {
     setBusy(what); setErr(null);
-    try { const x = await fn(); setTx({ what, hash: x.hash }); await qc.invalidateQueries({ queryKey: ['link', r.id] }); await qc.invalidateQueries({ queryKey: ['balance'] }); }
+    try { const x = await fn(); onTx(r.id, { what, hash: x.hash }); await qc.invalidateQueries({ queryKey: ['link', r.id] }); await qc.invalidateQueries({ queryKey: ['balance'] }); }
     catch (e) { setErr((e as Error).message); } finally { setBusy(null); }
   }
   const amount = l ? l.amount : r.amountWei;
@@ -152,7 +153,7 @@ function Row({ r }: { r: { id: string; mode: 'Confirmed' | 'Open'; amountWei: st
         </div>
       )}
       {l && expired && !TERMINAL.includes(l.state) && sender && <div className="mt-3"><Button variant="secondary" busy={busy === 'refund'} onClick={() => void run('refund', () => refundLink(sender, r.id))}>This link expired: refund to my account</Button></div>}
-      {tx && <p className="mt-2 font-mono text-xs text-zinc-600">{tx.what}: <TxLink hash={tx.hash} testId={`tx-${tx.what}-${r.id}-row`} /></p>}
+      {tx && <p className="mt-2 font-mono text-xs text-zinc-600">{tx.what} mined: <TxLink hash={tx.hash} testId={`tx-${tx.what}-${r.id}`} /></p>}
       {err && <div className="mt-2"><Notice tone="error">{err}</Notice></div>}
     </div>
   );
