@@ -1,0 +1,46 @@
+name: renew-window
+# Keeps the relayer EVM authorisation window alive (QoreChain Diana testnet).
+# Runs every 2 hours: a full window (17,280 blocks) lasts about 6.9 h at ~1.43 s/block, so a 4 h cadence with an
+# 8,000-block threshold could miss the window (8,001 blocks left now, 10,000 blocks pass before the next run).
+# Every 2 h, the worst case is 8,000 - ~5,000 = ~3,000 blocks of margin.
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Renew even if the window is healthy'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: renew-window
+  cancel-in-progress: false
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - name: Renew window if below 8,000 blocks or not live
+        working-directory: backend
+        env:
+          RELAYER_SECP_KEY: ${{ secrets.RELAYER_SECP_KEY }}
+          RELAYER_PQC_SEED: ${{ secrets.RELAYER_PQC_SEED }}
+          POCKETDROP_ADDRESS: '0x29F53b4B8031E7bA1785dC8C7a1C0Be413a4bd97'
+          FORCE: ${{ inputs.force }}
+        run: |
+          THRESHOLD=8000
+          if [ "$FORCE" = "true" ]; then THRESHOLD=1000000000; fi
+          node scripts/renew-window.mjs --blocks 17280 --txs 500 --if-below "$THRESHOLD"
+      - name: Check public health
+        run: |
+          curl -fsS https://pocketdrop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('live',h.window?.live,'remainingBlocks',h.window?.remainingBlocks);if(!h.window?.live)process.exit(1)})"
