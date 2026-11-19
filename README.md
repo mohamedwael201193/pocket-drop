@@ -25,6 +25,15 @@ The three post-quantum checks at claim, stated precisely:
 
 Both digests include the chain id and the contract address, so signatures cannot be replayed across chains, instances or links. If the sender never gets a claim, `cancel` (while allowed) or `refund` (after expiry) returns the funds to the sender.
 
+## Frontend
+
+Live app: **https://pocketdrop-app.vercel.app** (testnet only, source in [frontend/](frontend/)).
+
+- `/` Send: a browser-created sender account, a link in Confirmed or Giveaway mode, share by WhatsApp, Web Share or copy, and the sender's confirm / cancel / refund actions.
+- `/c/:id#k=...` Claim: the recipient needs no wallet. The key pair is generated in the tab, the relayer binds, the recipient registers the key with proof of possession, then claims. The link seed lives only in the URL fragment.
+- `/stats` Dashboard from the API, `/lab` the six attacks with a live re-run, `/judges` a 60-second checklist. Every number is badged LIVE (read from chain or API) or RECORDED (from files in this repo).
+- Verified end to end on the deployed URL at 390x844 in Chromium and WebKit, with real senders and recipients in separate browser contexts. Screenshots, tx hashes and receipt checks are in [frontend/evidence/](frontend/evidence/). The WhatsApp check is in [frontend/WHATSAPP_TEST.md](frontend/WHATSAPP_TEST.md).
+
 ## Tests
 
 - Contracts: 117 Foundry tests pass (figure from the CI profile: fuzz 10,000 runs, invariant 256 runs x depth 50). Coverage of `src`: 100% lines (194/194) and 100% branches (54/54). See [contracts/COVERAGE.md](contracts/COVERAGE.md).
@@ -102,6 +111,7 @@ Every row is a mined EVM transaction on Diana. Rows marked "reverted" are lab at
 - [SPEC.md](SPEC.md): frozen build spec
 - [contracts/README.md](contracts/README.md): contract build, test and deploy
 - [backend/README.md](backend/README.md): relayer API
+- [frontend/README.md](frontend/README.md): web app, tests and E2E evidence
 - [contracts/SECURITY.md](contracts/SECURITY.md): threat model, invariants, Slither review
 
 ## License
