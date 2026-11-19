@@ -1,0 +1,14 @@
+# secrets and build output - never commit
+.env
+.env.*
+*.env
+.secrets/
+node_modules/
+out/
+cache/
+broadcast/
+*.key
+.vercel/
+.DS_Store
+coverage/
+lcov.info

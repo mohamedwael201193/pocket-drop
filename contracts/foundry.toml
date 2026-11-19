@@ -1,0 +1,48 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+solc = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+bytecode_hash = "none"
+cbor_metadata = false
+ffi = false
+fs_permissions = [{ access = "read", path = "./test/fixtures" }]
+gas_limit = 100000000
+block_timestamp = 1800000000
+verbosity = 2
+
+[fuzz]
+runs = 1000
+seed = "0x706f636b6574"
+
+[invariant]
+runs = 64
+depth = 30
+fail_on_revert = false
+show_metrics = false
+
+# CI profile: fuzz >= 10,000 runs, invariant runs >= 256 with depth >= 50.
+# Run with: FOUNDRY_PROFILE=ci forge test
+[profile.ci]
+verbosity = 1
+
+[profile.ci.fuzz]
+runs = 10000
+seed = "0x706f636b6574"
+
+[profile.ci.invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
+
+# Coverage profile: no optimizer so source maps stay precise.
+[profile.coverage]
+optimizer = false
+
+[lint]
+severity = ["high", "med"]
+exclude_lints = ["unsafe-typecast", "block-timestamp", "arbitrary-send-eth"]

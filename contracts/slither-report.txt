@@ -1,0 +1,67 @@
+INFO:Detectors:
+Detector: incorrect-equality
+PocketDrop._pay(address,uint256) (src/PocketDrop.sol#339-343) uses a dangerous strict equality:
+	- value == 0 (src/PocketDrop.sol#340)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Detector: timestamp
+PocketDrop.bind(uint256,address,bytes32,bytes,bytes) (src/PocketDrop.sol#134-168) uses timestamp for comparisons
+	Dangerous comparisons:
+	- s != State.Open && ! (s == State.Bound && block.timestamp > l.bindDeadline) (src/PocketDrop.sol#143-145)
+	- block.timestamp >= l.expiry (src/PocketDrop.sol#146-147)
+PocketDrop.claim(uint256,bytes) (src/PocketDrop.sol#181-205) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > l.bindDeadline (src/PocketDrop.sol#190)
+	- block.timestamp >= l.expiry (src/PocketDrop.sol#191-192)
+PocketDrop.refund(uint256) (src/PocketDrop.sol#220-232) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < l.expiry (src/PocketDrop.sol#227-228)
+PocketDrop._validateCreate(uint64,uint96,uint96) (src/PocketDrop.sol#286-297) uses timestamp for comparisons
+	Dangerous comparisons:
+	- expiry <= block.timestamp || expiry > block.timestamp + MAX_EXPIRY (src/PocketDrop.sol#292-293)
+PocketDrop._confirm(uint256) (src/PocketDrop.sol#300-314) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= l.expiry (src/PocketDrop.sol#308-310)
+	- block.timestamp > l.bindDeadline (src/PocketDrop.sol#311)
+PocketDrop._pay(address,uint256) (src/PocketDrop.sol#339-343) uses timestamp for comparisons
+	Dangerous comparisons:
+	- value == 0 (src/PocketDrop.sol#340)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: assembly
+PocketDrop._rawSend(address,uint256,uint256) (src/PocketDrop.sol#345-350) uses assembly
+	- INLINE ASM (src/PocketDrop.sol#347-349)
+PqcLib.verify(bytes,bytes,bytes) (src/PqcLib.sol#37-46) uses assembly
+	- INLINE ASM (src/PqcLib.sol#42-44)
+PqcLib.keyStatus(address) (src/PqcLib.sol#51-90) uses assembly
+	- INLINE ASM (src/PqcLib.sol#63-68)
+	- INLINE ASM (src/PqcLib.sol#74-76)
+	- INLINE ASM (src/PqcLib.sol#80-84)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Detectors:
+Detector: cyclomatic-complexity
+PocketDrop.claim(uint256,bytes) (src/PocketDrop.sol#181-205) has a high cyclomatic complexity (12).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in PqcLib.verify(bytes,bytes,bytes) (src/PqcLib.sol#37-46):
+	- (success,ret) = VERIFY_PRECOMPILE.staticcall(abi.encodeWithSignature(pqcVerify(bytes,bytes,bytes),pk,sig,message)) (src/PqcLib.sol#38-39)
+Low level call in PqcLib.keyStatus(address) (src/PqcLib.sol#51-90):
+	- (success,ret) = KEYS_PRECOMPILE.staticcall(abi.encodeWithSignature(pqcKeyStatus(address),account)) (src/PqcLib.sol#52-53)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Detector: naming-convention
+Variable PocketDrop.MIN_ESCROW (src/PocketDrop.sol#33-34) is not in mixedCase
+Variable PocketDrop.MAX_AMOUNT (src/PocketDrop.sol#35-36) is not in mixedCase
+Variable PocketDrop.MAX_DRIP (src/PocketDrop.sol#37-38) is not in mixedCase
+Variable PocketDrop.DAILY_DRIP_CAP (src/PocketDrop.sol#38-40) is not in mixedCase
+Variable PocketDrop.BIND_TIMEOUT (src/PocketDrop.sol#40-42) is not in mixedCase
+Variable PocketDrop.MAX_EXPIRY (src/PocketDrop.sol#42-44) is not in mixedCase
+Function IPocketDrop.MIN_ESCROW() (src/interfaces/IPocketDrop.sol#268) is not in mixedCase
+Function IPocketDrop.MAX_AMOUNT() (src/interfaces/IPocketDrop.sol#272) is not in mixedCase
+Function IPocketDrop.MAX_DRIP() (src/interfaces/IPocketDrop.sol#276) is not in mixedCase
+Function IPocketDrop.DAILY_DRIP_CAP() (src/interfaces/IPocketDrop.sol#280) is not in mixedCase
+Function IPocketDrop.BIND_TIMEOUT() (src/interfaces/IPocketDrop.sol#284) is not in mixedCase
+Function IPocketDrop.MAX_EXPIRY() (src/interfaces/IPocketDrop.sol#288) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Slither:src/PocketDrop.sol analyzed (3 contracts with 102 detectors), 25 result(s) found

@@ -1,0 +1,11 @@
+{
+  "note": "Addresses that belong to the Pocket Drop team/test setup. Everything else is reported as external. Public addresses only.",
+  "accounts": {
+    "relayer": "0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
+    "burner": "0x664a2B7d5541B31C5C8A17849B5e85618309359E",
+    "testRecipient0": "0xd3165676dE819698b5a2c01667f4DCE006dC0EfF",
+    "testRecipient1": "0x186722ee0E6C6a022D9F5aFcF281bcE554563d74",
+    "mainTestWallet": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+    "deployer": "0x392f50b1955a827458A320205e19acf7C664f116"
+  }
+}

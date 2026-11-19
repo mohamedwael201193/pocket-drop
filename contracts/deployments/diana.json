@@ -1,0 +1,473 @@
+{
+  "network": {
+    "name": "qorechain-diana",
+    "evmChainId": 9800,
+    "cosmosChainId": "qorechain-diana",
+    "explorer": "https://explore.qore.network"
+  },
+  "deployer": {
+    "address": "0x392f50b1955a827458A320205e19acf7C664f116",
+    "cosmos": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+    "registerPqcTx": "E10FA01C6E7B70D4890FECE72C4AE9E6B7FF5C0CC92CBE7C02218A91B2E82B8D",
+    "possessionProven": true,
+    "openWindowTx": "CFE77325938FD3F1C3B2BE6628D1F7CC55DD3656E64F3F781F4A5798DB8A381F",
+    "evmBalanceQorAfterDeploy": "14.2711152875"
+  },
+  "fundingFromMain": [
+    {
+      "qor": 15,
+      "to": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "cosmosTx": "65CF67796E050C85E3FFDABC33C2322BD702CE84744CD7B9D323C349B1F5CEA2",
+      "url": "https://explore.qore.network/tx/65CF67796E050C85E3FFDABC33C2322BD702CE84744CD7B9D323C349B1F5CEA2",
+      "at": "2026-11-19T01:29:12.783Z"
+    }
+  ],
+  "contracts": {
+    "main": {
+      "address": "0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97",
+      "deployTx": "0x316fc8d51b2d1ca3273620984058153ac58886468e89f6f17f9ed86e9b18b26a",
+      "deployTxUrl": "https://explore.qore.network/tx/0x316fc8d51b2d1ca3273620984058153ac58886468e89f6f17f9ed86e9b18b26a",
+      "blockNumber": "10348478",
+      "deployer": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "gasUsedReceipt": "1944911",
+      "constructorArgs": {
+        "MIN_ESCROW": "100000000000000000",
+        "MAX_AMOUNT": "50000000000000000000",
+        "MAX_DRIP": "600000000000000000",
+        "DAILY_DRIP_CAP": "10000000000000000000",
+        "BIND_TIMEOUT": "3600",
+        "MAX_EXPIRY": "2592000"
+      },
+      "constructorArgsHuman": {
+        "MIN_ESCROW": "0.1 QOR",
+        "MAX_AMOUNT": "50 QOR",
+        "MAX_DRIP": "0.6 QOR",
+        "DAILY_DRIP_CAP": "10 QOR",
+        "BIND_TIMEOUT": "3600 s",
+        "MAX_EXPIRY": "2592000 s"
+      },
+      "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000000000000000000000000002b5e3af16b18800000000000000000000000000000000000000000000000000000853a0d2313c00000000000000000000000000000000000000000000000000008ac7230489e800000000000000000000000000000000000000000000000000000000000000000e100000000000000000000000000000000000000000000000000000000000278d00",
+      "readBackConstants": {
+        "MIN_ESCROW": "100000000000000000",
+        "MAX_AMOUNT": "50000000000000000000",
+        "MAX_DRIP": "600000000000000000",
+        "DAILY_DRIP_CAP": "10000000000000000000",
+        "BIND_TIMEOUT": "3600",
+        "MAX_EXPIRY": "2592000"
+      },
+      "runtimeCodeKeccak": "0x46a0f36c3ca4aaa970a750bc2ac7c55f1f1e883b02e8b5f1b66d93dc59f6d606",
+      "runtimeMatchesBuildArtifactModuloImmutables": true
+    },
+    "lab": {
+      "address": "0xce1912ed9d310f1973a88e7ff6aa56f6d76c9a67",
+      "deployTx": "0x54cd1dc4efc2ba3b7d7559cf7bc763f8a958d01deae514c84cc7a2d58a8f6c4b",
+      "deployTxUrl": "https://explore.qore.network/tx/0x54cd1dc4efc2ba3b7d7559cf7bc763f8a958d01deae514c84cc7a2d58a8f6c4b",
+      "blockNumber": "10348482",
+      "deployer": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "gasUsedReceipt": "1944899",
+      "constructorArgs": {
+        "MIN_ESCROW": "100000000000000000",
+        "MAX_AMOUNT": "50000000000000000000",
+        "MAX_DRIP": "600000000000000000",
+        "DAILY_DRIP_CAP": "10000000000000000000",
+        "BIND_TIMEOUT": "60",
+        "MAX_EXPIRY": "2592000"
+      },
+      "constructorArgsHuman": {
+        "MIN_ESCROW": "0.1 QOR",
+        "MAX_AMOUNT": "50 QOR",
+        "MAX_DRIP": "0.6 QOR",
+        "DAILY_DRIP_CAP": "10 QOR",
+        "BIND_TIMEOUT": "60 s",
+        "MAX_EXPIRY": "2592000 s"
+      },
+      "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000000000000000000000000002b5e3af16b18800000000000000000000000000000000000000000000000000000853a0d2313c00000000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000003c0000000000000000000000000000000000000000000000000000000000278d00",
+      "readBackConstants": {
+        "MIN_ESCROW": "100000000000000000",
+        "MAX_AMOUNT": "50000000000000000000",
+        "MAX_DRIP": "600000000000000000",
+        "DAILY_DRIP_CAP": "10000000000000000000",
+        "BIND_TIMEOUT": "60",
+        "MAX_EXPIRY": "2592000"
+      },
+      "runtimeCodeKeccak": "0x619b7f0af7c1ab42af762f29addc230c3a98bac5e5aadd99959e40b567e8d011",
+      "runtimeMatchesBuildArtifactModuloImmutables": true
+    }
+  },
+  "build": {
+    "solc": "0.8.28",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "cancun",
+    "viaIR": false,
+    "bytecodeHash": "none",
+    "cborMetadata": false,
+    "sources": [
+      "src/PocketDrop.sol",
+      "src/PqcLib.sol",
+      "src/interfaces/IPocketDrop.sol"
+    ],
+    "initCodeBytes": 9031,
+    "runtimeCodeBytes": 8630,
+    "initCodeKeccak": "0xe0230c05b6d1a867babad502a31b8ac9c6b1121a9e384bb67f10a46bd5f80a17",
+    "reproduce": "cd contracts && forge build && node script/deploy.mjs --check"
+  },
+  "liveTxs": [
+    {
+      "step": "fund attacker B 0.6 QOR",
+      "hash": "0x6beca7ca925c980debfce154e3995b217785a2148097366cbc1c6942c4b3f20c",
+      "url": "https://explore.qore.network/tx/0x6beca7ca925c980debfce154e3995b217785a2148097366cbc1c6942c4b3f20c",
+      "status": "success",
+      "outcome": "funded"
+    },
+    {
+      "step": "attacker B registers PQ key (PoP)",
+      "hash": "527E572EBEE9DA30FDDA3417E32325603AF69BCC962EB003813EDFED6E3EB1C7",
+      "url": "https://explore.qore.network/tx/527E572EBEE9DA30FDDA3417E32325603AF69BCC962EB003813EDFED6E3EB1C7",
+      "status": "success",
+      "outcome": "possessionProven=true"
+    },
+    {
+      "step": "attacker B opens EVM window",
+      "hash": "DD0F7D991672976A762657EF437626849EC94E086D2C3F10F5219D6EB39F64B1",
+      "url": "https://explore.qore.network/tx/DD0F7D991672976A762657EF437626849EC94E086D2C3F10F5219D6EB39F64B1",
+      "status": "success",
+      "outcome": "window opened"
+    },
+    {
+      "step": "A1 create (Confirmed, 1 QOR, drip 0.2)",
+      "hash": "0x07d368c3b8c493326dd60bc2b557c57fc4dd18edcc1b8820474e781e41e4046c",
+      "url": "https://explore.qore.network/tx/0x07d368c3b8c493326dd60bc2b557c57fc4dd18edcc1b8820474e781e41e4046c",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "ATTACK 1 thief swaps recipient in bind",
+      "hash": "0xdbea1fe56bc41b07900138570d975b3acee3e862fe398b06496dc3f52fbeed10",
+      "url": "https://explore.qore.network/tx/0xdbea1fe56bc41b07900138570d975b3acee3e862fe398b06496dc3f52fbeed10",
+      "status": "reverted",
+      "outcome": "BadLinkSignature",
+      "expected": true
+    },
+    {
+      "step": "A2: relayer binds recipient (drip lands)",
+      "hash": "0x1109eb4c68aa1efe0b06e442837560be867f3d7aa65b735a6afe45e18f32acfa",
+      "url": "https://explore.qore.network/tx/0x1109eb4c68aa1efe0b06e442837560be867f3d7aa65b735a6afe45e18f32acfa",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "A2: recipient registers ML-DSA-87 key with PoP (fee paid from drip)",
+      "hash": "AAF516A51BBBB50F058C4931904AE2025AB884D7F6A244D727EE2B4B41DB3EEE",
+      "url": "https://explore.qore.network/tx/AAF516A51BBBB50F058C4931904AE2025AB884D7F6A244D727EE2B4B41DB3EEE",
+      "status": "success",
+      "outcome": "possessionProven=true"
+    },
+    {
+      "step": "A3 sender confirms (checked fingerprint of recipientKeyHash)",
+      "hash": "0x253f623659d747381e22871b67b84d30009eb29bb124bdfe6c866507c0917cca",
+      "url": "https://explore.qore.network/tx/0x253f623659d747381e22871b67b84d30009eb29bb124bdfe6c866507c0917cca",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "ATTACK 6 sender cancels after confirm",
+      "hash": "0x1c9a9691920ba98f1cd52ecb7a38d1b114c64106a7c814149945c4f286b6f582",
+      "url": "https://explore.qore.network/tx/0x1c9a9691920ba98f1cd52ecb7a38d1b114c64106a7c814149945c4f286b6f582",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "ATTACK 5 second person (B, own proven key) claims the Confirmed link",
+      "hash": "0x42bb1ca0f7c527de11b64e13dc7f516a4e8277eb9c557520a5f02cbc1e0c58aa",
+      "url": "https://explore.qore.network/tx/0x42bb1ca0f7c527de11b64e13dc7f516a4e8277eb9c557520a5f02cbc1e0c58aa",
+      "status": "reverted",
+      "outcome": "BadRecipientSignature",
+      "expected": true
+    },
+    {
+      "step": "A4 relayer claims with the recipient signature",
+      "hash": "0x3e52c32c1cfd7548dd70ea117e1fd363a1d5f7d5bae99ad4f73eb64e5a58142a",
+      "url": "https://explore.qore.network/tx/0x3e52c32c1cfd7548dd70ea117e1fd363a1d5f7d5bae99ad4f73eb64e5a58142a",
+      "status": "success",
+      "outcome": "amount paid"
+    },
+    {
+      "step": "A5 second claim of a claimed link",
+      "hash": "0x5af1e2fae19f9537d88785af321ae00614ec1d47340c9c8959e6471a474f4d75",
+      "url": "https://explore.qore.network/tx/0x5af1e2fae19f9537d88785af321ae00614ec1d47340c9c8959e6471a474f4d75",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "B1 create (Open, 0.5 QOR, drip 0.2)",
+      "hash": "0x156e7efa32a546ff00f36a92d884074da8db41a6b8737a07d94d51fe87b8ec42",
+      "url": "https://explore.qore.network/tx/0x156e7efa32a546ff00f36a92d884074da8db41a6b8737a07d94d51fe87b8ec42",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "B2: relayer binds recipient (drip lands)",
+      "hash": "0x533ff1ece49b38b3a8a0155e7a805554f9dc39b2e955bc81744b30a9ea3aa964",
+      "url": "https://explore.qore.network/tx/0x533ff1ece49b38b3a8a0155e7a805554f9dc39b2e955bc81744b30a9ea3aa964",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "B2: recipient registers ML-DSA-87 key with PoP (fee paid from drip)",
+      "hash": "05F78E03D933AD1FACE5162D2F03B9E21A91C7274CF818CC996F499C669F7EDF",
+      "url": "https://explore.qore.network/tx/05F78E03D933AD1FACE5162D2F03B9E21A91C7274CF818CC996F499C669F7EDF",
+      "status": "success",
+      "outcome": "possessionProven=true"
+    },
+    {
+      "step": "B3 relayer claims",
+      "hash": "0x730067b90eb45556ce36280bd4b02b0f33b0de2d7f0c180fb5069afa99e6796f",
+      "url": "https://explore.qore.network/tx/0x730067b90eb45556ce36280bd4b02b0f33b0de2d7f0c180fb5069afa99e6796f",
+      "status": "success",
+      "outcome": "amount paid"
+    },
+    {
+      "step": "C1 create (Open, 0.3 QOR, drip 0.2)",
+      "hash": "0x356d86a4fc2ace3a77a94a5ea7ca30e412f8bbaad02a943d7eca04ed1a5e3fe1",
+      "url": "https://explore.qore.network/tx/0x356d86a4fc2ace3a77a94a5ea7ca30e412f8bbaad02a943d7eca04ed1a5e3fe1",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "C2: relayer binds recipient (drip lands)",
+      "hash": "0xc921cb27d8aae78917a179c04c48956f12a5844990fb8b0a268e6a23da56022e",
+      "url": "https://explore.qore.network/tx/0xc921cb27d8aae78917a179c04c48956f12a5844990fb8b0a268e6a23da56022e",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "C2: recipient registers ML-DSA-87 key with PoP (fee paid from drip)",
+      "hash": "C06D7D3F5D5A4108EDD7A2A291D8361CD0426001701FF677B8EA81F854A79F96",
+      "url": "https://explore.qore.network/tx/C06D7D3F5D5A4108EDD7A2A291D8361CD0426001701FF677B8EA81F854A79F96",
+      "status": "success",
+      "outcome": "possessionProven=true"
+    },
+    {
+      "step": "ATTACK 2 claim signed by a key other than the registered one",
+      "hash": "0x7fcc837d595e479bd2dae229f57eff9d44858230d7b2dedd9f61d9add3d64cf2",
+      "url": "https://explore.qore.network/tx/0x7fcc837d595e479bd2dae229f57eff9d44858230d7b2dedd9f61d9add3d64cf2",
+      "status": "reverted",
+      "outcome": "BadRecipientSignature",
+      "expected": true
+    },
+    {
+      "step": "C3 honest claim still works afterwards",
+      "hash": "0x69c9b80149230a805d6988b43c326a6775d72dbf5730b3a73147370e3cdb79b2",
+      "url": "https://explore.qore.network/tx/0x69c9b80149230a805d6988b43c326a6775d72dbf5730b3a73147370e3cdb79b2",
+      "status": "success",
+      "outcome": "amount paid"
+    },
+    {
+      "step": "D1 create (Open, 0.2 QOR, expiry +100s)",
+      "hash": "0x6ab4f00f38e1c93f9a5b6f923a68866dd3577be1486b809031888a0df11ff934",
+      "url": "https://explore.qore.network/tx/0x6ab4f00f38e1c93f9a5b6f923a68866dd3577be1486b809031888a0df11ff934",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "D2 bind to main test wallet (legacy key, possessionProven=false)",
+      "hash": "0x5956253a493daf0415f8240ea835d943167b7b9458e35eb45955a9ebfdbbd743",
+      "url": "https://explore.qore.network/tx/0x5956253a493daf0415f8240ea835d943167b7b9458e35eb45955a9ebfdbbd743",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "ATTACK 3 claim into an account whose key has possessionProven=false",
+      "hash": "0x168d02b9fa213fef2bcd2bcb179306de90476421ebe6223035daf086d9887ecc",
+      "url": "https://explore.qore.network/tx/0x168d02b9fa213fef2bcd2bcb179306de90476421ebe6223035daf086d9887ecc",
+      "status": "reverted",
+      "outcome": "PossessionNotProven",
+      "expected": true
+    },
+    {
+      "step": "E1 create (Open, 0.2 QOR, expiry +100s)",
+      "hash": "0x3e01de18e99ff6c408b51a40528f95f0dd9ef6068de07c9eecdcb882b36d1dd3",
+      "url": "https://explore.qore.network/tx/0x3e01de18e99ff6c408b51a40528f95f0dd9ef6068de07c9eecdcb882b36d1dd3",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "E2 bind to an account with no PQ key",
+      "hash": "0xd3bb48c7edda3bc69b124dbac6324c70a019d6d70331ad84eb04c6addaa04a9c",
+      "url": "https://explore.qore.network/tx/0xd3bb48c7edda3bc69b124dbac6324c70a019d6d70331ad84eb04c6addaa04a9c",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "ATTACK 4 claim into an account with no PQ key",
+      "hash": "0x7e3c9c2e4fc56d6104b38526af3e62a64cbd38e8ec7a5de0ddf239b024f42d44",
+      "url": "https://explore.qore.network/tx/0x7e3c9c2e4fc56d6104b38526af3e62a64cbd38e8ec7a5de0ddf239b024f42d44",
+      "status": "reverted",
+      "outcome": "NotRegistered",
+      "expected": true
+    },
+    {
+      "step": "F1 create (Open, 0.2 QOR, drip 0.1)",
+      "hash": "0x06b6e125f7f484a4412c848b3956eda74edf2e667365aab5fbc146389cd4f516",
+      "url": "https://explore.qore.network/tx/0x06b6e125f7f484a4412c848b3956eda74edf2e667365aab5fbc146389cd4f516",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "F2 sender cancels (refund amount + unpaid drip)",
+      "hash": "0x86a0868b60322184e73569096066dbfa6a2c3862a509d7a6b18d0c400ef4308f",
+      "url": "https://explore.qore.network/tx/0x86a0868b60322184e73569096066dbfa6a2c3862a509d7a6b18d0c400ef4308f",
+      "status": "success",
+      "outcome": "refunded"
+    },
+    {
+      "step": "F3 cancel again",
+      "hash": "0xd967f734219f0bb0d85bdb89a29f8b8636bbfe6690aaaf3e6e8cb67edb14ca22",
+      "url": "https://explore.qore.network/tx/0xd967f734219f0bb0d85bdb89a29f8b8636bbfe6690aaaf3e6e8cb67edb14ca22",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "G1 create (Open, 0.15 QOR, expiry +40s)",
+      "hash": "0x51b93493b5dd9e8bc3d69283c96c580cb49ca746c30b647286121b4491c69eaf",
+      "url": "https://explore.qore.network/tx/0x51b93493b5dd9e8bc3d69283c96c580cb49ca746c30b647286121b4491c69eaf",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "G2 refund before expiry",
+      "hash": "0xeb2c68d51a25ef5a94fd2d096c7d98d0e3358e7cef6f3377ee8ca41e7e9ce77f",
+      "url": "https://explore.qore.network/tx/0xeb2c68d51a25ef5a94fd2d096c7d98d0e3358e7cef6f3377ee8ca41e7e9ce77f",
+      "status": "reverted",
+      "outcome": "NotExpired",
+      "expected": true
+    },
+    {
+      "step": "G3 refund link 4 after expiry, by the relayer",
+      "hash": "0x250563c8289214c3ffeda69269e923d17542f56e4ca9c51c189aad7f1483dadf",
+      "url": "https://explore.qore.network/tx/0x250563c8289214c3ffeda69269e923d17542f56e4ca9c51c189aad7f1483dadf",
+      "status": "success",
+      "outcome": "refunded to sender"
+    },
+    {
+      "step": "G3 refund link 5 after expiry, by the relayer",
+      "hash": "0xf38cf0fc90c089f4122434a90655674ab5b1e741e1ea10ef62b1ab49787dde20",
+      "url": "https://explore.qore.network/tx/0xf38cf0fc90c089f4122434a90655674ab5b1e741e1ea10ef62b1ab49787dde20",
+      "status": "success",
+      "outcome": "refunded to sender"
+    },
+    {
+      "step": "G3 refund link 7 after expiry, by the relayer",
+      "hash": "0xc70edceb4d4e47d38f620fe347f31c51a1987e2ec7588b1e65b85b14830da409",
+      "url": "https://explore.qore.network/tx/0xc70edceb4d4e47d38f620fe347f31c51a1987e2ec7588b1e65b85b14830da409",
+      "status": "success",
+      "outcome": "refunded to sender"
+    },
+    {
+      "step": "G4 claim after expiry/refund",
+      "hash": "0x20ddfdca8d0e6e58a50f51085b9573307cc52c16a0afc3a3df39437ef8bf1cef",
+      "url": "https://explore.qore.network/tx/0x20ddfdca8d0e6e58a50f51085b9573307cc52c16a0afc3a3df39437ef8bf1cef",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "H1 create on lab (Open, 0.2 QOR, drip 0.2)",
+      "hash": "0xf59fdb6707c131b471a9428d15ddb90001b9b659101e8f69c9a32333b88ee3ad",
+      "url": "https://explore.qore.network/tx/0xf59fdb6707c131b471a9428d15ddb90001b9b659101e8f69c9a32333b88ee3ad",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "H2 bind R1",
+      "hash": "0x9e8b97b3d4893dc3f474cfe56e2e112e88976960dd2900e45162aa29bf956cc4",
+      "url": "https://explore.qore.network/tx/0x9e8b97b3d4893dc3f474cfe56e2e112e88976960dd2900e45162aa29bf956cc4",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "H3 rebind before timeout is refused",
+      "hash": "0xf854495d59fc0f92ae2eee594b39cbbc025da13da0b8f22b7f95e993a242b132",
+      "url": "https://explore.qore.network/tx/0xf854495d59fc0f92ae2eee594b39cbbc025da13da0b8f22b7f95e993a242b132",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "H1 create on lab (Open, 0.2 QOR, drip 0.2)",
+      "hash": "0x8d8323f1bc575fc9c28453013aec1c33e33046e1222808aff59be1971182bdc9",
+      "url": "https://explore.qore.network/tx/0x8d8323f1bc575fc9c28453013aec1c33e33046e1222808aff59be1971182bdc9",
+      "status": "success",
+      "outcome": "link created"
+    },
+    {
+      "step": "H2 bind R1",
+      "hash": "0x713d315a7c75b93391e1a23e3724b677608cf529abfb2e4a8d459a548e94beaf",
+      "url": "https://explore.qore.network/tx/0x713d315a7c75b93391e1a23e3724b677608cf529abfb2e4a8d459a548e94beaf",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "H3 rebind before timeout is refused",
+      "hash": "0x2875a7d4a6ee7b9dd6e5ea7bf3221a1783496977890bf150f88027c0d6aeda44",
+      "url": "https://explore.qore.network/tx/0x2875a7d4a6ee7b9dd6e5ea7bf3221a1783496977890bf150f88027c0d6aeda44",
+      "status": "reverted",
+      "outcome": "InvalidState",
+      "expected": true
+    },
+    {
+      "step": "H4 rebind to R2 after timeout (no second drip)",
+      "hash": "0xb0e5c11912d99cb124604a0a92aa6168854da02472eb31ed9ed08df03c96123d",
+      "url": "https://explore.qore.network/tx/0xb0e5c11912d99cb124604a0a92aa6168854da02472eb31ed9ed08df03c96123d",
+      "status": "success",
+      "outcome": "rebound"
+    },
+    {
+      "step": "H5 deployer tops up R2 for its registration fee",
+      "hash": "0x9e4dbc91798f8a5df555158aded6c9351c251e81b9f7c82ea91444abb2c2db4b",
+      "url": "https://explore.qore.network/tx/0x9e4dbc91798f8a5df555158aded6c9351c251e81b9f7c82ea91444abb2c2db4b",
+      "status": "success",
+      "outcome": "funded"
+    },
+    {
+      "step": "H6 R2 registers PQ key (PoP)",
+      "hash": "9D3E454D8323BAE7ABD84850AA6C63577FCD6B4444EEE54DC9202EC7C67FD1B3",
+      "url": "https://explore.qore.network/tx/9D3E454D8323BAE7ABD84850AA6C63577FCD6B4444EEE54DC9202EC7C67FD1B3",
+      "status": "success",
+      "outcome": "ok"
+    },
+    {
+      "step": "H7 old recipient R1 signature no longer claims",
+      "hash": "0xc9c1a22fa230f615da1ab7a0b794cad2ed6c5897bcd6f98035cec8c719b3dce3",
+      "url": "https://explore.qore.network/tx/0xc9c1a22fa230f615da1ab7a0b794cad2ed6c5897bcd6f98035cec8c719b3dce3",
+      "status": "reverted",
+      "outcome": "BadRecipientSignature",
+      "expected": true
+    },
+    {
+      "step": "H8 R2 claims",
+      "hash": "0xad0329ba289c6aa682e16140197a68cf9c854ec35b84d956d859f20e574a44b8",
+      "url": "https://explore.qore.network/tx/0xad0329ba289c6aa682e16140197a68cf9c854ec35b84d956d859f20e574a44b8",
+      "status": "success",
+      "outcome": "amount paid"
+    }
+  ],
+  "liveSummary": {
+    "ranAt": "2026-11-19T01:48:02.778Z",
+    "contractsChecked": {
+      "main": "0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97",
+      "lab": "0xce1912ed9d310f1973a88e7ff6aa56f6d76c9a67"
+    },
+    "deployerSpentQorIncludingEscrowRoundTrips": "0.74281946",
+    "mainLinkCount": "7",
+    "labLinkCount": "2",
+    "mainContractBalanceQor": "0",
+    "labContractBalanceQor": "0.2"
+  }
+}

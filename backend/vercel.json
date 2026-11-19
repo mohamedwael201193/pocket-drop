@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/rpc", "destination": "/api/proxy?t=rpc" },
+    { "source": "/rest/:path*", "destination": "/api/proxy?t=rest&p=:path*" }
+  ],
+  "functions": {
+    "api/*.ts": { "maxDuration": 60, "includeFiles": "config/**" },
+    "api/link/*.ts": { "maxDuration": 20, "includeFiles": "config/**" }
+  }
+}
