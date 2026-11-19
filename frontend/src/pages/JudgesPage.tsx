@@ -96,8 +96,8 @@ export default function JudgesPage() {
         </Item>
 
         <Item n={6} title="Try the whole thing yourself" >
-          <p>The dashboard creates a real link from a browser account. Open the link in another browser to receive without any wallet. /radar shows the effect, indexed from chain events.</p>
-          <div className="flex flex-wrap gap-2"><Link className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/dashboard">Send a Drop</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/radar">/radar</Link></div>
+          <p>The Send tab creates a real link from a browser account. Open the link in another browser to receive without any wallet. /radar shows the effect, indexed from chain events.</p>
+          <div className="flex flex-wrap gap-2"><Link className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/send">Send a Drop</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/radar">/radar</Link></div>
         </Item>
 
         <Item n={7} title="What it does not do">

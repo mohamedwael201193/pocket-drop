@@ -59,11 +59,11 @@ export default function LandingPage() {
             No wallet, no app, no seed phrase. Your friend taps a link in any chat app (WhatsApp, Telegram, SMS, email), reads 4 words, and gets a PoP-verified QoreChain account.
           </motion.p>
           <motion.div {...stagger(3)} className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/dashboard" data-testid="hero-create" className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-stone-100 shadow-md transition-all hover:-translate-y-0.5 hover:bg-zinc-800">
-              <span>Create a Drop</span><ChevronRight className="h-4 w-4" />
+            <Link to="/send" data-testid="hero-create" className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-stone-100 shadow-md transition-all hover:-translate-y-0.5 hover:bg-zinc-800">
+              <span>Send QOR</span><ChevronRight className="h-4 w-4" />
             </Link>
-            <Link to="/claim" data-testid="hero-claim" className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-stoneCard px-6 py-3 text-sm font-medium text-zinc-900 transition-all hover:-translate-y-0.5 hover:bg-white">
-              <MessageCircle className="h-4 w-4 text-emerald-600" /><span>Open a Claim Link</span>
+            <Link to="/receive" data-testid="hero-claim" className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-stoneCard px-6 py-3 text-sm font-medium text-zinc-900 transition-all hover:-translate-y-0.5 hover:bg-white">
+              <MessageCircle className="h-4 w-4 text-emerald-600" /><span>Receive a link</span>
             </Link>
           </motion.div>
         </div>
@@ -84,7 +84,7 @@ export default function LandingPage() {
           <div ref={stageRef} className="tilt-stage relative z-20 w-full max-w-[295px] animate-float-slow sm:max-w-[315px]"
             onMouseMove={(e) => { const r = stageRef.current!.getBoundingClientRect(); setTilt({ x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 }); }}
             onMouseLeave={() => setTilt({ x: 0, y: 0 })}>
-            <div role="button" tabIndex={0} aria-label="Open the claim flow" data-testid="hero-capsule" onClick={() => navigate('/claim')} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/claim'); }}
+            <div role="button" tabIndex={0} aria-label="Open the claim flow" data-testid="hero-capsule" onClick={() => navigate("/receive")} onKeyDown={(e) => { if (e.key === 'Enter') navigate("/receive"); }}
               className="tilt-card capsule-bezel cursor-pointer" style={{ transform: `rotateY(${tilt.x * 14}deg) rotateX(${-tilt.y * 12}deg)` }}>
               <div className="rounded-[19px] capsule-obsidian p-5 text-stone-100">
                 <div className="mb-3.5 flex items-center justify-between">
@@ -165,65 +165,8 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* SECTION 3: PHONE + LEGACY COLLAPSE */}
-      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
-        <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">— ZERO-FRICTION FLOW</p>
-        <p className="mb-3 text-xs text-zinc-500">From a single link to a quantum-safe account</p>
-        <h2 className="mb-12 max-w-xl font-serif text-4xl leading-[1.03] text-zinc-900 sm:text-5xl">One link, no wallet.<br />The friction vanishes.</h2>
-
-        <div className="grid items-center gap-8 md:grid-cols-12">
-          <Reveal className="relative flex items-center justify-center md:col-span-5">
-            <div className="relative w-full max-w-[360px]">
-              <img src="/phone-titanium.webp" width={800} height={800} loading="lazy" alt="3D brushed-titanium smartphone floating over alabaster ripples" className="h-auto w-full select-none object-contain" style={{ mixBlendMode: 'multiply', filter: 'brightness(1.04) contrast(1.03)' }} />
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="w-[155px] -translate-y-[14px] -rotate-[13deg] space-y-2 text-center">
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50/95 px-2 py-1 shadow-sm">
-                    <div className="font-mono text-[8.5px] font-semibold text-emerald-800">…/c/{d.id ?? 'N'}#k=…</div>
-                    <div className="text-[7.5px] text-zinc-500">Tap 1: open the link</div>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-white/95 px-2 py-1.5 shadow-sm">
-                    <div className="font-serif text-lg leading-none text-zinc-900">{d.amount ?? '…'} QOR</div>
-                    <div className="mt-0.5 font-mono text-[8px] text-zinc-500">+ {d.drip ?? '…'} drip</div>
-                  </div>
-                  <div className="titanium-plaque rounded-lg px-1.5 py-1 shadow-sm">
-                    <div className="font-mono text-[7px] font-bold uppercase tracking-wider text-zinc-900">{d.words ? d.words.join(' · ') : '· · · ·'}</div>
-                    <div className="text-[7px] text-zinc-600">Tap 2: read the 4 words</div>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-white/95 px-2 py-1 shadow-sm">
-                    <div className="text-[8.5px] font-semibold text-zinc-900">PoP Verified ✓</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p className="absolute -bottom-2 left-0 right-0 text-center text-[10px] text-zinc-400">Walkthrough illustration built from the latest real drop <SourceBadge kind="LIVE" /></p>
-          </Reveal>
-
-          <Reveal className="border-zinc-200/80 md:col-span-7 md:border-l md:pl-8">
-            <div className="mb-5 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">Typical wallet onboarding</div>
-            <div className="relative space-y-2 pl-2 text-xs font-medium text-zinc-600">
-              {['Install Wallet', 'Save Seed Phrase', 'Add Network RPC', 'Bridge Gas Token', 'Register PoP Key', 'Open EVM Window'].map((t, i) => (
-                <div key={t} className="flex items-center gap-2.5" style={{ paddingLeft: `${i * 1.5}rem` }}><span className="h-1.5 w-1.5 rounded-full bg-zinc-400" /> {t}</div>
-              ))}
-            </div>
-            <svg className="my-1 h-14 w-full text-zinc-300" viewBox="0 0 400 56" fill="none" aria-hidden>
-              <path d="M20 0 C 20 32, 200 22, 200 52" stroke="currentColor" strokeWidth="1" />
-              <path d="M80 0 C 80 30, 200 22, 200 52" stroke="currentColor" strokeWidth="1" />
-              <path d="M140 0 C 140 28, 200 22, 200 52" stroke="currentColor" strokeWidth="1" />
-              <path d="M260 0 C 260 30, 200 22, 200 52" stroke="currentColor" strokeWidth="1" />
-              <polygon points="196,48 204,48 200,55" fill="#71717A" />
-            </svg>
-            <div className="titanium-plaque relative mx-auto max-w-xs rounded-2xl p-5 text-center md:ml-24">
-              {['left-2.5 top-2.5', 'right-2.5 top-2.5', 'bottom-2.5 left-2.5', 'bottom-2.5 right-2.5'].map((p) => <span key={p} className={`absolute h-1.5 w-1.5 rounded-full bg-zinc-500/60 ${p}`} />)}
-              <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-600">Pocket Drop</div>
-              <div className="mt-1 font-sans text-xl font-semibold text-zinc-900">0 installs · 0 seed phrases</div>
-              <div className="mt-1 font-mono text-[11px] text-zinc-600">+ PoP-gated claim, enforced on-chain</div>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-
       {/* SECTION 4: POST-QUANTUM ARCHITECTURE */}
-      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 pb-24 pt-16 sm:px-6 lg:px-8">
         <SectionHead eyebrow="— POST-QUANTUM ARCHITECTURE" sub="Enforced by native precompiles" title="Hardened at the protocol layer." className="mb-12" />
         <div className="grid gap-5 md:grid-cols-12">
           <Reveal className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/90 bg-white/90 p-6 shadow-sm md:col-span-6">
