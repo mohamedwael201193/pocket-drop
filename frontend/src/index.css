@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: #F6F5F3; overflow-x: hidden; }
+.dot-bg {
+  background-color: #F6F5F3;
+  background-image: radial-gradient(rgba(24, 24, 27, 0.075) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.capsule {
+  background: linear-gradient(135deg, #F2F0EC 0%, #DFDDD7 50%, #EBE9E4 100%);
+  box-shadow: 0 18px 40px -14px rgba(24, 24, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.obsidian {
+  background: linear-gradient(135deg, #2C2C31 0%, #141417 55%, #232328 100%);
+  box-shadow: 0 24px 50px -12px rgba(20, 20, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.skeleton { position: relative; overflow: hidden; background: #E7E4DE; border-radius: 8px; }
+.skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); animation: shimmer 1.4s infinite; }
+input, select, textarea { font-size: 16px; } /* no iOS zoom on focus */
+:focus-visible { outline: 2px solid #18181B; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

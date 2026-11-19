@@ -1,0 +1,14 @@
+node_modules
+dist
+.vercel
+.env
+.env.*
+!.env.example
+test-results
+playwright-report
+evidence/**/*.webm
+evidence/**/*.mp4
+evidence/e2e-secrets*
+
+.vercel
+.env*
