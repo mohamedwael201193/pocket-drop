@@ -34,7 +34,7 @@ const relayer = new Evm(relayerAcc); // window scoped to [router prod, router la
 // an earlier incomplete run is kept (honestly labelled) and the table below shows only this run
 if (dep.liveTxs?.length) {
   dep.priorRuns ??= [];
-  dep.priorRuns.push({ aborted: true, reason: process.env.PRIOR_NOTE ?? 'incomplete run', txs: dep.liveTxs });
+  dep.priorRuns.push({ aborted: process.env.PRIOR_ABORTED === '1', reason: process.env.PRIOR_NOTE ?? 'incomplete run', txs: dep.liveTxs });
 }
 dep.liveTxs = [];
 const log = (...a) => console.log(...a);
@@ -468,7 +468,7 @@ writeDeployments(dep);
 const rows = dep.liveTxs.filter((t) => t.step).map((t) => `| ${t.step.replace(/\|/g, '/')} | ${t.status} | ${String(t.outcome).replace(/\|/g, '/')} | ${t.hash ? `[${t.hash.slice(0, 12)}...](${t.url})` : 'none (not mined)'} |`).join('\n');
 fs.writeFileSync(path.join(ROOT, 'LIVE_RESULTS.md'), `# Live results (QoreChain Diana testnet, EVM chain id 9800)
 
-Instances: PROD (24 h timelock / 48 h recovery) router \`${P.router.address}\`; LAB (60 s delays) router \`${L.router.address}\`.
+Instances (vault with guardian freeze + unanimous recovery): PROD (24 h timelock / 48 h recovery / 72 h freeze / 72 h unanimous recovery) router \`${P.router.address}\`; LAB (60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery) router \`${L.router.address}\`. The freeze / stolen-key scenarios are appended below the table (see test/live/run-freeze.mjs).
 Every row with a hash is a mined transaction ("reverted" rows are the lab attacks: each was decoded with eth_call first, then mined with an explicit gas limit so the revert is on chain). Rows marked "refused" are transactions the chain refuses to BROADCAST (the relayer's EVM window does not list the target), so they have no hash by design.
 
 | step | status | outcome / custom error | tx |

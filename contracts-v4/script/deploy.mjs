@@ -1,7 +1,8 @@
 // Deploys Pocket Drop v4 to QoreChain Diana TESTNET from the deployer account and records everything in
 // deployments/diana.json. Two full instances of the SAME bytecode are deployed:
-//   prod - TIMELOCK 24 h, RECOVERY_DELAY 48 h, BIND_TIMEOUT 3600 s
-//   lab  - 60 s delays everywhere, so the live suite can show timelock / recovery / veto / rebind in minutes
+//   prod - TIMELOCK 24 h, RECOVERY_DELAY 48 h, FREEZE_PERIOD 72 h, UNANIMOUS_RECOVERY_DELAY 72 h, BIND_TIMEOUT 3600 s
+//   lab  - 60 s delays, FREEZE_PERIOD 120 s, UNANIMOUS_RECOVERY_DELAY 180 s, so the live suite can show timelock /
+//          recovery / veto / freeze / unanimous recovery / rebind in minutes
 // Each instance = PocketVault (implementation) + PocketFactory + PocketDrop + DropPool + PocketRouter.
 // One PqGuardedCounter (example consumer of PqGuard) is deployed once.
 //   node script/deploy.mjs            deploy what is missing
@@ -14,8 +15,8 @@ import {
 const log = (...a) => console.log(...a);
 const DAY = 86400n;
 const INSTANCES = {
-  prod: { timelock: DAY, recovery: 2n * DAY, bindTimeout: 3600n },
-  lab: { timelock: 60n, recovery: 60n, bindTimeout: 60n },
+  prod: { timelock: DAY, recovery: 2n * DAY, freeze: 3n * DAY, unanimous: 3n * DAY, bindTimeout: 3600n },
+  lab: { timelock: 60n, recovery: 60n, freeze: 120n, unanimous: 180n, bindTimeout: 60n },
 };
 const DROP = { minEscrow: parseEther('0.1'), maxAmount: parseEther('50'), maxDrip: parseEther('0.6'), dailyDripCap: parseEther('10'), maxExpiry: 30n * DAY };
 const POOL = { minPerSlot: parseEther('0.01'), maxPerSlot: parseEther('5'), maxSlots: 20n, maxExpiry: 30n * DAY };
@@ -74,9 +75,9 @@ async function deployOne(set, key, contract, types, values) {
 
 const startBal = await pub.getBalance({ address: evm.address });
 for (const [inst, p] of Object.entries(INSTANCES)) {
-  dep.v4[inst] ??= { params: { timelockSeconds: String(p.timelock), recoverySeconds: String(p.recovery), bindTimeoutSeconds: String(p.bindTimeout) } };
+  dep.v4[inst] ??= { params: { timelockSeconds: String(p.timelock), recoverySeconds: String(p.recovery), freezeSeconds: String(p.freeze), unanimousRecoverySeconds: String(p.unanimous), bindTimeoutSeconds: String(p.bindTimeout) } };
   const set = dep.v4[inst];
-  const impl = await deployOne(set, 'vaultImpl', 'PocketVault', ['uint256', 'uint256'], [p.timelock, p.recovery]);
+  const impl = await deployOne(set, 'vaultImpl', 'PocketVault', ['uint256', 'uint256', 'uint256', 'uint256'], [p.timelock, p.recovery, p.freeze, p.unanimous]);
   const factory = await deployOne(set, 'factory', 'PocketFactory', ['address'], [impl]);
   const drop = await deployOne(set, 'drop', 'PocketDrop', ['uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256'],
     [DROP.minEscrow, DROP.maxAmount, DROP.maxDrip, DROP.dailyDripCap, p.bindTimeout, DROP.maxExpiry]);
@@ -93,6 +94,8 @@ for (const inst of Object.keys(INSTANCES)) {
   dep.v4[inst].readBack = {
     TIMELOCK: String(await pub.readContract({ address: a, abi: vabi, functionName: 'TIMELOCK' })),
     RECOVERY_DELAY: String(await pub.readContract({ address: a, abi: vabi, functionName: 'RECOVERY_DELAY' })),
+    FREEZE_PERIOD: String(await pub.readContract({ address: a, abi: vabi, functionName: 'FREEZE_PERIOD' })),
+    UNANIMOUS_RECOVERY_DELAY: String(await pub.readContract({ address: a, abi: vabi, functionName: 'UNANIMOUS_RECOVERY_DELAY' })),
     BIND_TIMEOUT: String(await pub.readContract({ address: dep.v4[inst].drop.address, abi: artifact('PocketDrop').abi, functionName: 'BIND_TIMEOUT' })),
   };
 }

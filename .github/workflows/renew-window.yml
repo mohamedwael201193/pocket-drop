@@ -36,7 +36,7 @@ jobs:
           RELAYER_SECP_KEY: ${{ secrets.RELAYER_SECP_KEY }}
           RELAYER_PQC_SEED: ${{ secrets.RELAYER_PQC_SEED }}
           # v4: PocketRouter (prod), PocketRouter (lab), PocketDrop v3 (kept for the v3 flows)
-          WINDOW_TARGETS: '0x8abf85b7491f50ab4aeae16582723200bc3bd46a,0x72ba4753375d4724e7ccbfdc9a330276ae90606e,0x29F53b4B8031E7bA1785dC8C7a1C0Be413a4bd97'
+          WINDOW_TARGETS: '0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209,0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d,0x29F53b4B8031E7bA1785dC8C7a1C0Be413a4bd97'
           FORCE: ${{ inputs.force }}
         run: |
           THRESHOLD=8000
