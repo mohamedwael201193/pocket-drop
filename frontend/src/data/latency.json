@@ -1,0 +1,1 @@
+{ "note": "Per-step durations of the recipient flow measured by Playwright against the deployed app. Filled by scripts/sync-latency.mjs from evidence/v2 runs.", "runs": [] }
