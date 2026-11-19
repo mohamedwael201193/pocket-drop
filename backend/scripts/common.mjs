@@ -16,6 +16,10 @@ export const hex = (u) => Buffer.from(u).toString('hex');
 export const unhex = (s) => Uint8Array.from(Buffer.from(s.replace(/^0x/, ''), 'hex'));
 
 export async function loadRelayer() {
+  // CI path: RELAYER_SECP_KEY + RELAYER_PQC_SEED come from encrypted GitHub Actions secrets (never logged).
+  if (process.env.RELAYER_SECP_KEY && process.env.RELAYER_PQC_SEED) {
+    return unifiedAccountFromSeed(unhex(process.env.RELAYER_SECP_KEY.trim()), { pqcSecret: unhex(process.env.RELAYER_PQC_SEED.trim()) });
+  }
   const j = JSON.parse(fs.readFileSync(SECRET_FILE, 'utf8'));
   return unifiedAccountFromSeed(unhex(j.secp256k1PrivateKey), { pqcSecret: unhex(j.pqcSecret) });
 }
