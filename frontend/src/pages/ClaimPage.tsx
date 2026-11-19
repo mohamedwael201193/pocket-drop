@@ -185,17 +185,6 @@ export default function ClaimPage() {
           </div>
         )}
 
-        {(state === 'opening' || state === 'waiting' || state === 'yours') && (
-          <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
-            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount} of {ORDER.length}</span></div>
-            <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : steps[k].status === 'error' ? 'bg-red-600' : 'bg-zinc-200')} />)}</div>
-            {state === 'opening' && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
-            <details className="mt-3 text-sm"><summary className="cursor-pointer text-zinc-600">Show every step</summary>
-              <ol className="mt-3 space-y-2 text-xs" data-testid="steps">{ORDER.map((k, i) => <StepRow key={k} id={k} n={i + 1} step={steps[k]} started={started} />)}</ol>
-            </details>
-          </div>
-        )}
-
         {state === 'waiting' && words && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 rounded-3xl border-2 border-zinc-900 bg-white p-5 shadow-sm sm:p-6" data-testid="waiting-confirm">
             <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 animate-pulseDot rounded-full bg-emerald-500" /><h2 className="font-serif text-2xl text-zinc-900">Waiting for the sender to confirm</h2></div>
@@ -208,6 +197,17 @@ export default function ClaimPage() {
             {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && <Button block variant="secondary" onClick={() => navigator.share({ text: waText }).catch(() => undefined)}>Share in another app…</Button>}
             <p className="text-xs leading-relaxed text-zinc-500">This page checks the chain every few seconds and claims by itself the moment the sender confirms. You can close it: opening the same link again picks up where it stopped. {sender && <>Sender account <Mono>{sender.slice(0, 10)}…</Mono>.</>} <SourceBadge kind="LIVE" title="Link state read from the relayer API every 3 seconds" /></p>
           </motion.div>
+        )}
+
+        {(state === 'opening' || state === 'waiting' || state === 'yours') && (
+          <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
+            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount} of {ORDER.length}</span></div>
+            <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : steps[k].status === 'error' ? 'bg-red-600' : 'bg-zinc-200')} />)}</div>
+            {state === 'opening' && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
+            <details className="mt-3 text-sm"><summary className="cursor-pointer text-zinc-600">Show every step</summary>
+              <ol className="mt-3 space-y-2 text-xs" data-testid="steps">{ORDER.map((k, i) => <StepRow key={k} id={k} n={i + 1} step={steps[k]} started={started} />)}</ol>
+            </details>
+          </div>
         )}
 
         {fatal && (

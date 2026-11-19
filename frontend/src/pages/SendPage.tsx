@@ -59,7 +59,10 @@ export default function SendPage() {
     try {
       const l = await createLink(sender, { mode, amount: a, drip: d, relayerFee: fee, ttlSeconds: ttl });
       setTxHash(l.txHash); setFreshId(l.id); refreshLinks();
-    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+    } catch (e) {
+      const m = (e as { shortMessage?: string }).shortMessage ?? (e as Error).message;
+      setErr(/allowance/i.test(m) ? 'Your authorisation window is too small for this amount. Open the Pocket tab and activate the account again.' : m.slice(0, 280));
+    } finally { setBusy(false); }
   }
   const fresh = freshId ? links.find((l) => l.id === freshId) : undefined;
 

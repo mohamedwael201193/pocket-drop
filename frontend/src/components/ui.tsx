@@ -84,7 +84,7 @@ export function Skeleton({ className }: { className?: string }) { return <div cl
 
 export function Notice({ tone = 'info', children, testId }: { tone?: 'info' | 'warn' | 'error' | 'ok'; children: ReactNode; testId?: string }) {
   const t = { info: 'border-zinc-200 bg-stoneCard text-zinc-800', warn: 'border-amber-300 bg-amber-50 text-amber-950', error: 'border-red-300 bg-red-50 text-red-900', ok: 'border-emerald-300 bg-emerald-50 text-emerald-950' }[tone];
-  return <div data-testid={testId} role={tone === 'error' ? 'alert' : undefined} className={cx('rounded-xl border px-3.5 py-3 text-sm leading-relaxed', t)}>{children}</div>;
+  return <div data-testid={testId} role={tone === 'error' ? 'alert' : undefined} className={cx('break-words rounded-xl border px-3.5 py-3 text-sm leading-relaxed [overflow-wrap:anywhere]', t)}>{children}</div>;
 }
 
 export function Fingerprint({ words, testId }: { words: string[]; testId?: string }) {

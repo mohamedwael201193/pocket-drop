@@ -89,7 +89,9 @@ export async function activateSender(seed: Uint8Array, balanceWei: bigint, onSte
   const st = await keyStatus(acct.evm as Hex);
   if (!(st.registered && st.possessionProven)) { onStep('Registering your quantum-safe key'); out.register = await registerKey(acct); }
   onStep('Opening your authorisation window');
-  const spendable = balanceWei > 300_000_000_000_000_000n ? balanceWei - 250_000_000_000_000_000n : balanceWei;
+  // Activation itself costs about 0.16 QOR in fees; everything else in the account may be moved through the window.
+  const reserve = 170_000_000_000_000_000n;
+  const spendable = balanceWei > reserve ? balanceWei - reserve : 0n;
   out.window = await openScopedWindow(acct, { maxTxs: 30, blocks: 17000, valueUqor: spendable / 10n ** 12n });
   return out;
 }
