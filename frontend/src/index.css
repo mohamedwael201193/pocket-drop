@@ -3,23 +3,66 @@
 @tailwind utilities;
 
 :root { color-scheme: light; }
-html { -webkit-text-size-adjust: 100%; }
-body { background: #F6F5F3; overflow-x: hidden; }
-.dot-bg {
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { background-color: #F6F5F3; color: #18181B; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
+
+/* Editorial dot-matrix + architectural hairline grid (from the design file) */
+.editorial-bg {
   background-color: #F6F5F3;
-  background-image: radial-gradient(rgba(24, 24, 27, 0.075) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-image:
+    linear-gradient(to right, rgba(24, 24, 27, 0.032) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(24, 24, 27, 0.032) 1px, transparent 1px),
+    radial-gradient(rgba(24, 24, 27, 0.08) 1px, transparent 1px);
+  background-size: 96px 96px, 96px 96px, 16px 16px;
 }
-.capsule {
-  background: linear-gradient(135deg, #F2F0EC 0%, #DFDDD7 50%, #EBE9E4 100%);
-  box-shadow: 0 18px 40px -14px rgba(24, 24, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+.capsule-obsidian {
+  background: linear-gradient(135deg, #2D2D32 0%, #161619 52%, #25252A 100%);
+  box-shadow: 0 30px 65px -16px rgba(18, 18, 21, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
-.obsidian {
-  background: linear-gradient(135deg, #2C2C31 0%, #141417 55%, #232328 100%);
-  box-shadow: 0 24px 50px -12px rgba(20, 20, 23, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+.capsule-titanium {
+  background: linear-gradient(135deg, #F5F3EF 0%, #DFDDD7 48%, #ECEAE4 100%);
+  box-shadow: 0 22px 48px -14px rgba(24, 24, 27, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
+.glass-nav {
+  background: rgba(246, 245, 243, 0.84);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.nav-pill-active { background-color: #18181B; color: #F6F5F3; }
+/* Brightens stone paper to white so multiply leaves only the sculptures */
+.sculptures-blend {
+  mix-blend-mode: multiply;
+  filter: brightness(1.09) contrast(1.05);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 4%, black 26%, black 98%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 4%, black 26%, black 98%, transparent 100%);
+}
+.capsule-bezel {
+  background: linear-gradient(145deg, #D5CFC6 0%, #8E887E 48%, #ECE8E0 100%);
+  padding: 5px;
+  border-radius: 24px;
+  box-shadow: 0 28px 60px -16px rgba(18, 18, 21, 0.36);
+}
+.iso-slab {
+  transform: perspective(900px) rotateX(48deg) rotateZ(-28deg);
+  background: linear-gradient(135deg, #F3F1EC 0%, #CCC7BE 48%, #E7E4DC 100%);
+  box-shadow: -12px 18px 28px -8px rgba(24, 24, 27, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(161, 156, 147, 0.7);
+}
+.tilt-stage { perspective: 1200px; }
+.tilt-card { transform-style: preserve-3d; transition: transform 0.16s ease-out; }
+.titanium-plaque {
+  background: linear-gradient(145deg, #EAE7E0 0%, #CFCAC0 52%, #E5E1D9 100%);
+  box-shadow: 0 18px 36px -12px rgba(24, 24, 27, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(161, 156, 147, 0.8);
+}
+.word-tile {
+  background: linear-gradient(180deg, #ECEAE4 0%, #D7D3CA 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 2px 6px rgba(24,24,27,0.08);
+  border: 1px solid #C7C2B8;
+}
+input[type="range"] { accent-color: #18181B; }
 .skeleton { position: relative; overflow: hidden; background: #E7E4DE; border-radius: 8px; }
 .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); animation: shimmer 1.4s infinite; }
 input, select, textarea { font-size: 16px; } /* no iOS zoom on focus */
 :focus-visible { outline: 2px solid #18181B; outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }

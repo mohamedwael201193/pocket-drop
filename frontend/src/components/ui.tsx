@@ -6,8 +6,9 @@ import { shortHash } from '../lib/protocol';
 export const cx = (...a: Array<string | false | null | undefined>) => a.filter(Boolean).join(' ');
 
 /** LIVE = read from chain/API just now. RECORDED = taken from files in the repo (deployments/diana.json, test output). */
-export function SourceBadge({ kind, title }: { kind: 'LIVE' | 'RECORDED'; title?: string }) {
+export function SourceBadge({ kind, title }: { kind: 'LIVE' | 'RECORDED' | 'ILLUSTRATION'; title?: string }) {
   const live = kind === 'LIVE';
+  if (kind === 'ILLUSTRATION') return <span title={title ?? 'A walkthrough drawing, not a live transaction'} className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-zinc-700">ILLUSTRATION</span>;
   return (
     <span
       title={title ?? (live ? 'Read from the chain or the relayer API just now' : 'Taken from a recorded file in the repository')}
@@ -20,22 +21,22 @@ export function SourceBadge({ kind, title }: { kind: 'LIVE' | 'RECORDED'; title?
   );
 }
 
-export function Card({ children, className, dark }: { children: ReactNode; className?: string; dark?: boolean }) {
-  return <section className={cx('rounded-2xl border p-4 sm:p-5', dark ? 'obsidian border-zinc-800 text-stone-100' : 'border-zinc-200 bg-white shadow-sm', className)}>{children}</section>;
+export function Card({ children, className, dark, id, ...rest }: { children: ReactNode; className?: string; dark?: boolean; id?: string; 'data-testid'?: string }) {
+  return <section id={id} data-testid={rest['data-testid']} className={cx('rounded-3xl border p-5 sm:p-6', dark ? 'capsule-obsidian border-zinc-800 text-stone-100' : 'border-zinc-200 bg-white/90 shadow-sm', className)}>{children}</section>;
 }
 
 export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">{children}</p>;
+  return <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{children}</p>;
 }
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'whatsapp'; busy?: boolean; block?: boolean };
 export function Button({ variant = 'primary', busy, block, className, children, disabled, ...rest }: BtnProps) {
   const v = {
     primary: 'bg-zinc-900 text-stone-50 hover:bg-zinc-800 shadow-sm',
-    secondary: 'border border-zinc-300 bg-white text-zinc-900 hover:bg-stone2',
-    ghost: 'text-zinc-700 hover:bg-stone2',
+    secondary: 'border border-zinc-300 bg-white text-zinc-900 hover:bg-stoneCard',
+    ghost: 'text-zinc-700 hover:bg-stoneCard',
     danger: 'border border-red-300 bg-red-50 text-red-800 hover:bg-red-100',
-    whatsapp: 'bg-[#128C7E] text-white hover:bg-[#0f7a6e] shadow-sm',
+    whatsapp: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm',
   }[variant];
   return (
     <button
@@ -82,17 +83,17 @@ export function Mono({ children, className }: { children: ReactNode; className?:
 export function Skeleton({ className }: { className?: string }) { return <div className={cx('skeleton h-5 w-24', className)} />; }
 
 export function Notice({ tone = 'info', children, testId }: { tone?: 'info' | 'warn' | 'error' | 'ok'; children: ReactNode; testId?: string }) {
-  const t = { info: 'border-zinc-200 bg-stone2 text-zinc-800', warn: 'border-amber-300 bg-amber-50 text-amber-950', error: 'border-red-300 bg-red-50 text-red-900', ok: 'border-emerald-300 bg-emerald-50 text-emerald-950' }[tone];
+  const t = { info: 'border-zinc-200 bg-stoneCard text-zinc-800', warn: 'border-amber-300 bg-amber-50 text-amber-950', error: 'border-red-300 bg-red-50 text-red-900', ok: 'border-emerald-300 bg-emerald-50 text-emerald-950' }[tone];
   return <div data-testid={testId} role={tone === 'error' ? 'alert' : undefined} className={cx('rounded-xl border px-3.5 py-3 text-sm leading-relaxed', t)}>{children}</div>;
 }
 
 export function Fingerprint({ words, testId }: { words: string[]; testId?: string }) {
   return (
-    <div className="capsule rounded-2xl border border-zinc-300 p-4 text-center">
-      <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">4-word fingerprint</div>
+    <div className="capsule-titanium rounded-2xl border border-zinc-300 p-4 text-center">
+      <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">4-word verification seal</div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid={testId}>
         {words.map((w, i) => (
-          <div key={i} className="rounded-xl bg-white/80 px-2 py-3 font-serif text-2xl leading-none text-zinc-900"><span className="mr-1 font-mono text-[10px] text-zinc-400">{i + 1}</span>{w}</div>
+          <div key={i} className="word-tile rounded-xl py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900"><span className="mr-1 text-[9px] text-zinc-400">{i + 1}</span>{w}</div>
         ))}
       </div>
     </div>
@@ -101,9 +102,9 @@ export function Fingerprint({ words, testId }: { words: string[]; testId?: strin
 
 export function PageTitle({ eyebrow, title, children }: { eyebrow: ReactNode; title: string; children?: ReactNode }) {
   return (
-    <header className="mb-6">
+    <header className="mb-8">
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h1 className="mt-1.5 font-serif text-[2rem] leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">{title}</h1>
+      <h1 className="mt-1 font-serif text-3xl leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">{title}</h1>
       {children && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600 sm:text-base">{children}</p>}
     </header>
   );
