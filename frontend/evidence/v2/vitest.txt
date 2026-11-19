@@ -1,0 +1,18 @@
+
+ RUN  v2.1.9 D:/route/QORE/work/pd/frontend
+
+ ✓ test/whatsapp.test.ts (5 tests) 38ms
+ ✓ test/relayer-errors.test.ts (4 tests) 7ms
+ ✓ test/protocol.test.ts (8 tests) 75ms
+ ✓ test/digests.live.test.ts (5 tests) 64422ms
+   ✓ digests equal the main contract > bindDigest 26208ms
+   ✓ digests equal the main contract > claimDigest 2488ms
+   ✓ digests equal the lab contract > bindDigest 34198ms
+   ✓ digests equal the lab contract > claimDigest 926ms
+   ✓ browser signatures verify on the chain precompile > pqcVerify accepts a bind signature from this code and rejects a tampered recipient 600ms
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  07:02:40
+   Duration  66.29s (transform 232ms, setup 0ms, collect 4.16s, tests 64.54s, environment 1ms, prepare 713ms)
+

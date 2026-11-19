@@ -1,0 +1,8 @@
+ ✓ test/handlers.test.ts (15 tests) 25ms
+ ✓ test/misc.test.ts (12 tests) 42ms
+
+ Test Files  8 passed | 1 skipped (9)
+      Tests  77 passed | 9 skipped (86)
+   Start at  07:02:36
+   Duration  2.06s (transform 745ms, setup 0ms, collect 6.52s, tests 172ms, environment 2ms, prepare 5.43s)
+

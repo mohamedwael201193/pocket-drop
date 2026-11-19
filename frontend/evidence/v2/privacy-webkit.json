@@ -1,0 +1,13 @@
+{
+ "url": "https://pocketdrop-app.vercel.app",
+ "ogTags": {
+  "title": "Someone sent you QOR with Pocket Drop",
+  "description": "Open the link to receive testnet QOR. No wallet, no extension, no seed phrase. Testnet only, no monetary value.",
+  "image": "https://pocketdrop-app.vercel.app/og.png",
+  "type": "website",
+  "twitterCard": "summary_large_image"
+ },
+ "ogImageBytes": 522547,
+ "requestsObserved": 15,
+ "requestsContainingSeedOrFragment": 0
+}
