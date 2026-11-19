@@ -1,0 +1,9 @@
+{
+ "note": "unclaimed Confirmed-mode link for the manual WhatsApp test (0.3 QOR); seed and sender key are not recorded here",
+ "linkId": "17",
+ "sender": "0x8f9afD1d5419B4aC0A2f281B2c7E0bCA0c4bB32D",
+ "txs": {
+  "fund": "0x73b0a7f8a7da0f9138cec06aff32db0db0aa26c030373460566bed78252444dc",
+  "create": "0x03aa1632a2cebfa7fc0392494d42a8e26b2648fb3f7b56032570a104f0c0dc51"
+ }
+}

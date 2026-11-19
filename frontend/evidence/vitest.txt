@@ -1,0 +1,17 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/route/QORE/pocket-drop-frontend/frontend[39m
+
+ [32m✓[39m test/whatsapp.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32m✓[39m test/protocol.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 76[2mms[22m[39m
+ [32m✓[39m test/digests.live.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 3818[2mms[22m[39m
+   [33m[2m✓[22m[39m digests equal the main contract[2m > [22mbindDigest [33m1144[2mms[22m[39m
+   [33m[2m✓[22m[39m digests equal the main contract[2m > [22mclaimDigest [33m614[2mms[22m[39m
+   [33m[2m✓[22m[39m digests equal the lab contract[2m > [22mbindDigest [33m701[2mms[22m[39m
+   [33m[2m✓[22m[39m digests equal the lab contract[2m > [22mclaimDigest [33m740[2mms[22m[39m
+   [33m[2m✓[22m[39m browser signatures verify on the chain precompile[2m > [22mpqcVerify accepts a bind signature from this code and rejects a tampered recipient [33m617[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 05:51:12
+[2m   Duration [22m 5.30s[2m (transform 152ms, setup 0ms, collect 2.46s, tests 3.93s, environment 0ms, prepare 319ms)[22m
+

@@ -1,0 +1,11 @@
+
+Running 6 tests using 1 worker
+
+  ok 1 [chromium] › e2e\flow.spec.ts:131:3 › Confirmed flow end to end (52.1s)
+  ok 2 [chromium] › e2e\flow.spec.ts:131:3 › Open flow end to end (39.4s)
+  ok 3 [chromium] › e2e\privacy.spec.ts:10:1 › og: tags are served without any fragment, and the fragment is never requested (3.9s)
+  ok 4 [webkit] › e2e\flow.spec.ts:131:3 › Confirmed flow end to end (53.4s)
+  ok 5 [webkit] › e2e\flow.spec.ts:131:3 › Open flow end to end (40.8s)
+  ok 6 [webkit] › e2e\privacy.spec.ts:10:1 › og: tags are served without any fragment, and the fragment is never requested (4.5s)
+
+  6 passed (3.3m)

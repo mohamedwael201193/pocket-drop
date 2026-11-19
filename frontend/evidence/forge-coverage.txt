@@ -1,0 +1,163 @@
+Warning: optimizer settings and `viaIR` have been disabled for accurate coverage reports.
+If you encounter "stack too deep" errors, consider using `--ir-minimum` which enables `viaIR` with minimum optimization resolving most of the errors.
+See more: https://book.getfoundry.sh/guides/best-practices/stack-too-deep
+No files changed, compilation skipped
+Analysing contracts...
+Running tests...
+
+Ran 18 tests for test/PqcLib.t.sol:PqcLibTest
+[PASS] testFuzz_keyStatus_mutated_word(uint8,uint256) (runs: 1000, μ: 221381, ~: 221401)
+[PASS] testFuzz_keyStatus_never_reverts(bytes) (runs: 1000, μ: 105063, ~: 97579)
+[PASS] testFuzz_verify_never_reverts(bytes,bool) (runs: 1000, μ: 114114, ~: 115835)
+[PASS] test_keyStatus_accepts_gap_between_head_and_tail() (gas: 230798)
+[PASS] test_keyStatus_cap_boundary() (gas: 2687781)
+[PASS] test_keyStatus_fail_closed_on_bad_length() (gas: 492979)
+[PASS] test_keyStatus_fail_closed_on_bad_offsets() (gas: 540837)
+[PASS] test_keyStatus_fail_closed_on_call_failure() (gas: 240169)
+[PASS] test_keyStatus_fail_closed_on_no_code() (gas: 17859)
+[PASS] test_keyStatus_fail_closed_on_non_bool_flags() (gas: 463584)
+[PASS] test_keyStatus_fail_closed_on_short_data() (gas: 349696)
+[PASS] test_keyStatus_odd_length_key_and_flags() (gas: 205512)
+[PASS] test_keyStatus_unregistered_empty_key() (gas: 117414)
+[PASS] test_keyStatus_valid_decode() (gas: 3711032)
+[PASS] test_verify_false_variants() (gas: 610368)
+[PASS] test_verify_false_when_precompile_has_no_code() (gas: 16241)
+[PASS] test_verify_passes_exact_calldata() (gas: 411400)
+[PASS] test_verify_true_only_for_exactly_one_word_equal_one() (gas: 148288)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 2.66s (984.19ms CPU time)
+
+Ran 14 tests for test/PocketDrop.fuzz.t.sol:PocketDropFuzzTest
+[PASS] testFuzz_bind_mutated_message_reverts(address,bytes32,uint256) (runs: 1000, μ: 1104266, ~: 1004767)
+[PASS] testFuzz_bind_mutated_pubkey_reverts(uint256,uint8) (runs: 1000, μ: 363438, ~: 363438)
+[PASS] testFuzz_bind_mutated_signature_reverts(uint256,uint8) (runs: 1000, μ: 400025, ~: 400024)
+[PASS] testFuzz_bind_random_bytes_never_succeed(bytes) (runs: 1000, μ: 296877, ~: 296670)
+[PASS] testFuzz_bind_random_pubkey_never_matches(bytes) (runs: 1000, μ: 322030, ~: 321831)
+[PASS] testFuzz_claim_mutated_signature_reverts(uint256,uint8,uint8) (runs: 1000, μ: 2755324, ~: 2773687)
+[PASS] testFuzz_claim_random_bytes_never_succeed(bytes) (runs: 1000, μ: 2650981, ~: 2650777)
+[PASS] testFuzz_claim_requires_exact_key_state(bool,uint8,bool,uint8) (runs: 1000, μ: 2722557, ~: 2715084)
+[PASS] testFuzz_create_matches_oracle(uint256,uint96,uint96,uint64,uint8,bytes32) (runs: 1000, μ: 69845, ~: 62670)
+[PASS] testFuzz_daily_drip_cap(uint96[6],uint32) (runs: 1000, μ: 931673, ~: 990350)
+[PASS] testFuzz_open_mode_timing(uint32,uint32) (runs: 1000, μ: 2638925, ~: 2564226)
+[PASS] testFuzz_rebind_window(uint32,bool) (runs: 1000, μ: 673069, ~: 669677)
+[PASS] testFuzz_value_flows(uint256,uint96,uint96,uint8,uint8) (runs: 1000, μ: 2530713, ~: 2463532)
+[PASS] testFuzz_wrong_domain_signatures_rejected(uint8) (runs: 1000, μ: 2487040, ~: 2318808)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 2.66s (31.96s CPU time)
+
+Ran 83 tests for test/PocketDrop.t.sol:PocketDropTest
+[PASS] test_balance_covers_unpaid_through_lifecycle() (gas: 736949)
+[PASS] test_bind_first_pays_drip_and_fee_and_emits() (gas: 527649)
+[PASS] test_bind_not_allowed_after_terminal() (gas: 405276)
+[PASS] test_bind_not_allowed_once_confirmed() (gas: 667100)
+[PASS] test_bind_rebind_after_timeout_replaces_recipient_without_second_drip() (gas: 705605)
+[PASS] test_bind_revert_already_bound_before_deadline() (gas: 781263)
+[PASS] test_bind_revert_bad_recipient() (gas: 508786)
+[PASS] test_bind_revert_expired() (gas: 319769)
+[PASS] test_bind_revert_link_key_mismatch() (gas: 365146)
+[PASS] test_bind_revert_recipient_swapped() (gas: 728555)
+[PASS] test_bind_revert_signature_for_other_link_or_garbage() (gas: 564332)
+[PASS] test_bind_revert_unknown_link() (gas: 170953)
+[PASS] test_bind_revert_wrong_domain_chain_contract() (gas: 732172)
+[PASS] test_bind_revert_zero_link_id() (gas: 171031)
+[PASS] test_bind_revert_zero_recipient_key() (gas: 354264)
+[PASS] test_bind_with_zero_drip_and_fee() (gas: 418885)
+[PASS] test_cancel_after_confirm_reverts() (gas: 536438)
+[PASS] test_cancel_after_refund_reverts() (gas: 278065)
+[PASS] test_cancel_bound_confirmed_mode_refunds_only_amount_after_drip_paid() (gas: 508261)
+[PASS] test_cancel_open_mode_open_state() (gas: 261124)
+[PASS] test_cancel_open_refunds_amount_drip_and_fee() (gas: 274165)
+[PASS] test_cancel_reverts() (gas: 796470)
+[PASS] test_claim_after_rebind_pays_new_recipient_only() (gas: 5350912)
+[PASS] test_claim_by_anyone_not_only_relayer() (gas: 2766599)
+[PASS] test_claim_cannot_be_cancelled_afterwards_nor_refunded() (gas: 2810940)
+[PASS] test_claim_confirmed_mode_full_flow() (gas: 2818645)
+[PASS] test_claim_open_mode_at_exact_deadline_ok() (gas: 2765329)
+[PASS] test_claim_open_mode_full_flow() (gas: 2765563)
+[PASS] test_claim_open_mode_revert_after_bind_deadline() (gas: 2515701)
+[PASS] test_claim_revert_expired() (gas: 2490299)
+[PASS] test_claim_revert_key_status_unavailable() (gas: 3202606)
+[PASS] test_claim_revert_not_registered() (gas: 592664)
+[PASS] test_claim_revert_possession_not_proven() (gas: 2693168)
+[PASS] test_claim_revert_registered_key_differs_from_bound_hash() (gas: 2718446)
+[PASS] test_claim_revert_signature_for_other_link() (gas: 2733804)
+[PASS] test_claim_revert_signature_from_other_key() (gas: 3331420)
+[PASS] test_claim_revert_state_confirmed_mode() (gas: 2620628)
+[PASS] test_claim_revert_state_open_mode() (gas: 2249950)
+[PASS] test_claim_revert_unknown_link() (gas: 38324)
+[PASS] test_claim_revert_unsupported_algo() (gas: 2713120)
+[PASS] test_claim_revert_wrong_domain_chain_contract() (gas: 3396930)
+[PASS] test_claim_second_person_cannot_steal_confirmed_link() (gas: 4871850)
+[PASS] test_claim_twice_reverts_and_pays_once() (gas: 2855943)
+[PASS] test_confirmRecipient() (gas: 563193)
+[PASS] test_confirmRecipient_blocks_rebind_race() (gas: 700562)
+[PASS] test_confirmRecipient_unknown_link() (gas: 40800)
+[PASS] test_confirm_at_deadline_still_allowed() (gas: 505007)
+[PASS] test_confirm_revert_wrong_mode() (gas: 495429)
+[PASS] test_confirm_reverts() (gas: 628838)
+[PASS] test_confirm_success_and_event() (gas: 527502)
+[PASS] test_confirm_twice_reverts() (gas: 536497)
+[PASS] test_constructor_rejects_bad_config() (gas: 5399)
+[PASS] test_constructor_sets_constants() (gas: 41814)
+[PASS] test_contract_rejects_plain_eth() (gas: 33169)
+[PASS] test_create_amount_bounds_inclusive() (gas: 295727)
+[PASS] test_create_cap_is_not_credited_back_on_cancel() (gas: 226945)
+[PASS] test_create_daily_drip_cap_and_utc_reset() (gas: 825746)
+[PASS] test_create_ids_increment_from_one() (gas: 517037)
+[PASS] test_create_revert_amount_above_max() (gas: 53260)
+[PASS] test_create_revert_amount_below_min() (gas: 53251)
+[PASS] test_create_revert_drip_too_high() (gas: 52508)
+[PASS] test_create_revert_expiry_not_in_future() (gas: 91830)
+[PASS] test_create_revert_expiry_too_far() (gas: 189056)
+[PASS] test_create_revert_invalid_mode() (gas: 51930)
+[PASS] test_create_revert_value_below_drip_plus_fee() (gas: 53069)
+[PASS] test_create_revert_zero_link_key() (gas: 46858)
+[PASS] test_create_stores_link_and_emits() (gas: 248704)
+[PASS] test_create_zero_drip_zero_fee() (gas: 166287)
+[PASS] test_digests_match_spec_encoding() (gas: 38623)
+[PASS] test_getLink_unknown_is_none() (gas: 32167)
+[PASS] test_hostile_recipient_burning_gas_cannot_block_claim() (gas: 4441990)
+[PASS] test_hostile_recipient_revert_goes_to_pull_balance() (gas: 4384633)
+[PASS] test_hostile_relayer_fee_receiver_goes_to_pull() (gas: 1985457)
+[PASS] test_hostile_sender_cannot_block_cancel_or_refund() (gas: 2071443)
+[PASS] test_reentrancy_blocked_from_every_entry_point() (gas: 19888708)
+[PASS] test_reentrancy_during_cancel_and_refund_payouts_blocked() (gas: 2068048)
+[PASS] test_reentrancy_during_withdraw_blocked() (gas: 4009514)
+[PASS] test_refund_and_active_windows_do_not_overlap_at_expiry() (gas: 2496799)
+[PASS] test_refund_bound_and_confirmed() (gas: 1021582)
+[PASS] test_refund_open_after_expiry_by_anyone() (gas: 276163)
+[PASS] test_refund_reverts() (gas: 623361)
+[PASS] test_unpaidOf_tracks_drip_payment() (gas: 489129)
+[PASS] test_withdraw_nothing_reverts() (gas: 36816)
+Suite result: ok. 83 passed; 0 failed; 0 skipped; finished in 2.66s (424.93ms CPU time)
+
+Ran 2 tests for test/PocketDrop.invariant.t.sol:PocketDropInvariantTest
+[PASS]
+PocketDropInvariantTest invariants:
+[PASS] invariant_amount_only_to_bound_recipient
+[PASS] invariant_amount_paid_at_most_once
+[PASS] invariant_bad_signatures_never_accepted
+[PASS] invariant_confirmed_recipient_never_changes
+[PASS] invariant_no_payout_without_proven_matching_key
+[PASS] invariant_pull_balances_sum_to_total
+[PASS] invariant_refunds_only_to_sender
+[PASS] invariant_solvency
+[PASS] invariant_terminal_states_are_final
+ PocketDropInvariantTest invariants (runs: 64, calls: 1920, reverts: 0)
+Logs:
+  create/bind/rebind 3 1 0
+  confirm/claim/cancel 1 1 0
+  refund/withdraw 0 0
+
+[PASS] test_handler_script_reaches_every_action() (gas: 5774671)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 4.61s (4.35s CPU time)
+
+Ran 4 test suites in 4.62s (12.59s CPU time): 117 tests passed, 0 failed, 0 skipped (117 total tests)
+
+╭--------------------+-------------------+-------------------+-----------------+-----------------╮
+| File               | % Lines           | % Statements      | % Branches      | % Funcs         |
++================================================================================================+
+| src/PocketDrop.sol | 100.00% (159/159) | 100.00% (221/221) | 100.00% (48/48) | 100.00% (24/24) |
+|--------------------+-------------------+-------------------+-----------------+-----------------|
+| src/PqcLib.sol     | 100.00% (35/35)   | 100.00% (61/61)   | 100.00% (6/6)   | 100.00% (2/2)   |
+|--------------------+-------------------+-------------------+-----------------+-----------------|
+| Total              | 100.00% (194/194) | 100.00% (282/282) | 100.00% (54/54) | 100.00% (26/26) |
+╰--------------------+-------------------+-------------------+-----------------+-----------------╯
