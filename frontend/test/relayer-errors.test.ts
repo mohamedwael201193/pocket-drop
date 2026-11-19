@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError, RELAYER_PAUSED, explainError, fetchHealth } from '../src/lib/api';
-import { parseClaimInput } from '../src/pages/ClaimEntryPage';
+import { parseClaimInput } from '../src/pages/ReceivePage';
 
 describe('relayer window expiry message', () => {
   it('says the window expired and that funds are safe and still in escrow', () => {

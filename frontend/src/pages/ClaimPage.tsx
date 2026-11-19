@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, CircleDashed, Loader2, TriangleAlert, SkipForward, KeyRound, Droplets, CheckCircle2, MessageCircle, ShieldCheck, Fingerprint as FpIcon, Lock } from 'lucide-react';
-import { Button, CopyButton, Fingerprint, Mono, Notice, SourceBadge, TxLink, cx } from '../components/ui';
-import { PhoneFrame } from '../components/PhoneFrame';
+import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
+
 import { addrUrl } from '../lib/config';
-import { PHONE } from '../data/proofs';
+
 import { explainError, fetchLink, postBind, postClaim, type ApiLink } from '../lib/api';
 import { fmtQor } from '../lib/chain';
 import { useBalance, useLink } from '../lib/queries';
@@ -52,7 +52,7 @@ export default function ClaimPage() {
   const patch = useCallback((s: StepId, p: Partial<Step>) => setSteps((x) => ({ ...x, [s]: { ...x[s], ...p } })), []);
 
   const run = useCallback(async () => {
-    if (running.current || !seed) return;
+    if (running.current || (!seed && !loadSaved(id))) return;
     running.current = true; setStarted(true); setFatal(null);
     let current: StepId = 'key';
     const t0: Partial<Record<StepId, number>> = t0s.current;
@@ -79,6 +79,7 @@ export default function ClaimPage() {
       if (mine) {
         mark('bind', 'done', { hash: saved.tx.bind, note: 'Already bound to this browser.' });
       } else if (l.state === 'Open' || (l.state === 'Bound' && Number(l.bindDeadline) < Date.now() / 1000)) {
+        if (!seed) throw new Error('This link is missing its key. Open the full link the sender shared.');
         const s = rec.signBind(seed, BigInt(id), me, rec.recipientKeyHash(acct));
         if (s.linkKeyHash.toLowerCase() !== l.linkKeyHash.toLowerCase()) throw new Error('The key in this link does not belong to this drop. Ask the sender for a fresh link.');
         const r = await postBind({ linkId: id, recipient: me, recipientKeyHash: rec.recipientKeyHash(acct), linkPk: s.linkPk, linkSig: s.linkSig });
@@ -139,15 +140,15 @@ export default function ClaimPage() {
 
   // Resume automatically if this browser already holds the key for this link (e.g. after a reload).
   const auto = useRef(false);
-  useEffect(() => { if (!auto.current && !started && seed && /^\d+$/.test(id) && loadSaved(id) && !running.current) { auto.current = true; void run(); } }, [id, seed, run, started]);
+  useEffect(() => { if (!auto.current && !started && /^\d+$/.test(id) && loadSaved(id) && !running.current) { auto.current = true; void run(); } }, [id, seed, run, started]);
 
 
   /* ---------- guards */
   const guard = (testId: string, tone: 'error' | 'warn', msg: React.ReactNode) => (
-    <div className="mx-auto max-w-xl px-4 py-10"><Notice tone={tone} testId={testId}>{msg}</Notice></div>
+    <Page narrow><Notice tone={tone} testId={testId}>{msg}</Notice></Page>
   );
   if (!/^\d+$/.test(id)) return guard('bad-link', 'error', 'This is not a Pocket Drop link.');
-  if (!seed) return guard('no-key', 'error', 'This link is missing its key. The long part after the # is required, so open the full link the sender shared.');
+  if (!seed && !loadSaved(id)) return guard('no-key', 'error', 'This link is missing its key. The long part after the # is required, so open the full link the sender shared.');
   if (linkErr && !link) return guard('link-error', 'error', explainError(linkErr));
 
   const done = steps.claim.status === 'done';
@@ -155,84 +156,82 @@ export default function ClaimPage() {
   const expired = link && !started && Number(link.expiry) * 1000 < Date.now() && !['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
   const amount = link ? fmtQor(BigInt(link.amount)) : null;
   const drip = link ? fmtQor(BigInt(link.drip)) : null;
-  const sealWords = words ?? (link?.recipientKeyHash ? fingerprint(link.recipientKeyHash) : null);
+  const waiting = !done && !fatal && steps.verify.status === 'running' && !!words;
+  const doneCount = ORDER.filter((k) => ['done', 'skipped'].includes(steps[k].status)).length;
+  const currentId = ORDER.find((k) => steps[k].status === 'running') ?? ORDER.find((k) => steps[k].status === 'idle');
+  const state: 'ready' | 'opening' | 'waiting' | 'yours' = done ? 'yours' : waiting ? 'waiting' : started ? 'opening' : 'ready';
+  const sender = link?.sender;
+  const inboxUrl = `${window.location.origin}/send/inbox?link=${id}`;
+  const waText = words ? `Pocket Drop link #${id}: my 4 words are "${words.join(' ')}". Please open ${inboxUrl} and tap Confirm, then my ${amount ?? ''} QOR is released.` : '';
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8" data-testid="claim-page" data-done={done ? '1' : '0'}>
-      <div className="grid items-center gap-8 lg:grid-cols-12">
-        <div className="space-y-4 lg:col-span-5">
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">You received a Pocket Drop</span>
-          <h1 className="font-serif text-4xl text-zinc-900">{amount ? `${amount} QOR is waiting for you` : 'A drop is waiting for you'}</h1>
-          <p className="text-sm leading-relaxed text-zinc-600">This browser generates an ML-DSA-87 keypair, binds via <code className="font-mono text-xs">POST /api/bind</code> so the gas drip lands, registers its proof of possession, and settles the escrow. No wallet, no extension, no seed phrase.</p>
-          <p className="text-xs text-zinc-500">Link #{id}. On real phones the three on-chain steps took {PHONE.androidLabel} (Android) and {PHONE.iphoneLabel} (iPhone) <SourceBadge kind="RECORDED" title={`Source: ${PHONE.source}`} />. This page shows the time of each of your steps as it finishes.</p>
+    <Page narrow testId="claim-page">
+      <div data-done={done ? '1' : '0'} data-state={state} className="space-y-5" data-testid="claim-state">
+        <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
+          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · link #{id}</span><SourceBadge kind="LIVE" /></div>
+          <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : 'You received'}</div>
+          <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
+          <div className="mt-2 font-mono text-[11px] text-stone-400">{link ? `${link.mode === 'Open' ? 'Giveaway' : 'Confirmed by the sender'}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
 
-        <div className="flex justify-center lg:col-span-7">
-          <PhoneFrame testId="phone">
-            <div className="flex items-center justify-between">
-              <span className="font-serif text-lg text-zinc-900">Pocket Drop</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-medium text-emerald-800"><MessageCircle className="h-3 w-3" /> Link #{id}</span>
+        {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}
+        {expired && <Notice tone="warn" testId="link-expired">This link expired. The sender can take the money back.</Notice>}
+
+        {state === 'ready' && !dead && !expired && (
+          <div className="space-y-4 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
+            <h1 className="font-serif text-3xl text-zinc-900">Open your Pocket</h1>
+            <p className="text-sm leading-relaxed text-zinc-600">One tap creates a quantum-safe account inside this browser. A relayer pays the gas. No wallet, no extension, no seed phrase. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, you will read them four words.'}</p>
+            <Button block onClick={run} data-testid="start-claim" className="min-h-[52px] text-base">Receive {amount ?? ''} QOR</Button>
+          </div>
+        )}
+
+        {(state === 'opening' || state === 'waiting' || state === 'yours') && (
+          <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
+            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount} of {ORDER.length}</span></div>
+            <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : steps[k].status === 'error' ? 'bg-red-600' : 'bg-zinc-200')} />)}</div>
+            {state === 'opening' && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
+            <details className="mt-3 text-sm"><summary className="cursor-pointer text-zinc-600">Show every step</summary>
+              <ol className="mt-3 space-y-2 text-xs" data-testid="steps">{ORDER.map((k, i) => <StepRow key={k} id={k} n={i + 1} step={steps[k]} started={started} />)}</ol>
+            </details>
+          </div>
+        )}
+
+        {state === 'waiting' && words && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 rounded-3xl border-2 border-zinc-900 bg-white p-5 shadow-sm sm:p-6" data-testid="waiting-confirm">
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 animate-pulseDot rounded-full bg-emerald-500" /><h2 className="font-serif text-2xl text-zinc-900">Waiting for the sender to confirm</h2></div>
+            <Notice tone="ok">Nothing is broken. Your money is safe in escrow; it moves when the sender taps Confirm.</Notice>
+            <p className="text-sm text-zinc-700">Send these 4 words to the sender. They compare them in their inbox and tap Confirm.</p>
+            <Fingerprint words={words} testId="fingerprint" />
+            <CopyButton text={words.join(' ')} label="Copy the 4 words" testId="copy-words" className="!min-h-[52px] w-full !text-base" />
+            <a href={`https://wa.me/?text=${encodeURIComponent(waText)}`} target="_blank" rel="noopener noreferrer" data-testid="whatsapp-sender"
+              className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-emerald-600 px-5 text-base font-medium text-white hover:bg-emerald-700"><MessageCircle className="h-5 w-5" aria-hidden />Send the words to the sender</a>
+            {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && <Button block variant="secondary" onClick={() => navigator.share({ text: waText }).catch(() => undefined)}>Share in another app…</Button>}
+            <p className="text-xs leading-relaxed text-zinc-500">This page checks the chain every few seconds and claims by itself the moment the sender confirms. You can close it: opening the same link again picks up where it stopped. {sender && <>Sender account <Mono>{sender.slice(0, 10)}…</Mono>.</>} <SourceBadge kind="LIVE" title="Link state read from the relayer API every 3 seconds" /></p>
+          </motion.div>
+        )}
+
+        {fatal && (
+          <div className="space-y-3">
+            <Notice tone="error" testId="claim-error">{fatal}</Notice>
+            <Button variant="secondary" block onClick={run} data-testid="retry-claim">Try again</Button>
+          </div>
+        )}
+
+        {state === 'yours' && address && (
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours">
+            <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">It is yours.</h1><SourceBadge kind="LIVE" /></div>
+            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="final-balance" data-wei={balance?.toString() ?? ''}>{balance === undefined ? '…' : fmtQor(balance)} <span className="text-xl text-zinc-500">QOR</span></div>
+            <p className="mt-1 text-xs text-zinc-600">Balance of your new account, read from the chain.</p>
+            <div className="mt-3 space-y-1 text-xs text-zinc-700">
+              <div>Account: <a className="underline" href={addrUrl(address)} target="_blank" rel="noopener noreferrer"><Mono>{address}</Mono></a></div>
+              {steps.claim.hash && <div>Claim transaction: <TxLink hash={steps.claim.hash} testId="tx-claim" /></div>}
             </div>
-            <div className="py-2 text-center">
-              <div className="text-xs text-zinc-500">You received (Testnet)</div>
-              <div className="mt-1 font-serif text-4xl text-zinc-900" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-zinc-500">QOR</span></div>
-              <div className="mt-1 font-mono text-[11px] text-zinc-500">{drip ? `+ ${drip} QOR gas drip included` : ''} <SourceBadge kind="LIVE" /></div>
-            </div>
-
-            <div className="capsule-titanium rounded-2xl border border-zinc-300 p-4 text-center">
-              <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500">4-Word Verification Seal</div>
-              {sealWords && link?.mode === 'Confirmed' ? (
-                <div className="font-mono text-sm font-bold uppercase tracking-wider text-zinc-900" data-testid="seal">{sealWords.join(' · ')}</div>
-              ) : (
-                <div className="font-mono text-[11px] text-zinc-500" data-testid="seal-idle">{link?.mode === 'Open' ? 'Giveaway link: no word check' : 'Your 4 words appear after you tap Receive'}</div>
-              )}
-            </div>
-
-            {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}
-            {expired && <Notice tone="warn" testId="link-expired">This link expired. The sender can take the money back.</Notice>}
-
-            <ol className="space-y-2 text-xs" data-testid="steps">
-              {ORDER.map((s, i) => <StepRow key={s} id={s} n={i + 1} step={steps[s]} started={started} />)}
-            </ol>
-
-            {words && !done && steps.verify.status === 'running' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-                <Fingerprint words={words} testId="fingerprint" />
-                <Notice tone="info" testId="waiting-confirm">Read these four words to the sender (message, call or screenshot). Claiming starts by itself when they confirm.</Notice>
-                <CopyButton text={words.join(' ')} label="Copy the 4 words" />
-              </motion.div>
-            )}
-
-            {fatal && (
-              <div className="space-y-2">
-                <Notice tone="error" testId="claim-error">{fatal}</Notice>
-                <Button variant="secondary" block onClick={run} data-testid="retry-claim">Retry</Button>
-              </div>
-            )}
-
-            {!started && !dead && !expired && (
-              <>
-                <p className="text-xs text-zinc-600">Tap once. A quantum-safe QoreChain account is created in this tab, a relayer pays the gas, and the QOR lands in it. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, you will read them four words.'}</p>
-                <button type="button" onClick={run} data-testid="start-claim" className="w-full rounded-full bg-zinc-900 py-3 text-xs font-semibold text-stone-100 transition-all hover:bg-zinc-800">Receive {amount ?? ''} QOR →</button>
-              </>
-            )}
-
-            {done && address && (
-              <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} className="capsule-obsidian rounded-2xl p-5 text-stone-100">
-                <div className="flex items-center justify-between"><h2 className="font-serif text-2xl">It is yours.</h2><SourceBadge kind="LIVE" /></div>
-                <div className="mt-2 font-serif text-5xl" data-testid="final-balance" data-wei={balance?.toString() ?? ''}>{balance === undefined ? '…' : fmtQor(balance)} <span className="text-xl text-stone-400">QOR</span></div>
-                <p className="mt-1 text-xs text-stone-300">Balance of your new account, read from the chain.</p>
-                <div className="mt-3 space-y-1 text-xs text-stone-300">
-                  <div>Account: <a className="underline" href={addrUrl(address)} target="_blank" rel="noopener noreferrer"><Mono className="!text-stone-100">{address}</Mono></a></div>
-                  {steps.claim.hash && <div>Claim transaction: <span className="text-stone-100"><TxLink hash={steps.claim.hash} testId="tx-claim" /></span></div>}
-                </div>
-                <p className="mt-3 text-[11px] text-stone-400">Your key lives in this browser only. Clearing site data loses access to this testnet account.</p>
-              </motion.div>
-            )}
-          </PhoneFrame>
-        </div>
+            <p className="mt-3 text-xs text-zinc-600">Your key lives in this browser only. Clearing site data loses access to this testnet account.</p>
+            <Link to="/send" className="mt-3 inline-block text-sm font-medium text-zinc-900 underline">Send a drop of your own</Link>
+          </motion.div>
+        )}
       </div>
-    </div>
+    </Page>
   );
 }
 
