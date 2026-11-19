@@ -11,8 +11,8 @@ if (net.chainId !== 'qorechain-diana') throw new Error('testnet only');
 export const SECRET_FILE = process.env.DEPLOYER_SECRET_FILE || 'D:/route/QORE/.secrets/pocketdrop-deployer.json';
 export const chain = defineChain({ id: 9800, name: 'diana', nativeCurrency: { name: 'QOR', symbol: 'QOR', decimals: 18 }, rpcUrls: { default: { http: [net.endpoints.evmRpc] } } });
 export const pub = createPublicClient({ chain, transport: http() });
-export const SPEND_FILE = new URL('../evidence/v2/spend.json', import.meta.url);
-export const SPEND_CAP_QOR = 6;
+export const SPEND_FILE = new URL('../evidence/v3/spend.json', import.meta.url);
+export const SPEND_CAP_QOR = 4;
 
 export async function loadDeployer() {
   const j = JSON.parse(fs.readFileSync(SECRET_FILE, 'utf8')).deployer;
@@ -47,7 +47,7 @@ async function ensureWindow(acc) {
   } finally { c.disconnect(); }
 }
 
-/** Send `qor` from the deployer to `to` (EVM address). Enforces the 6 QOR total spend cap for the v2 run (evidence/v2/spend.json). Returns the tx hash. */
+/** Send `qor` from the deployer to `to` (EVM address). Enforces the 6 QOR total spend cap for the v2 run (evidence/v3/spend.json). Returns the tx hash. */
 export async function fundFromDeployer(to, qor, note = 'fund') {
   if (spent().totalQor + Number(qor) > SPEND_CAP_QOR) throw new Error(`spend cap ${SPEND_CAP_QOR} QOR would be exceeded`);
   const acc = await loadDeployer();
