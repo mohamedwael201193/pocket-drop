@@ -6,8 +6,13 @@ import { pocketDropAbi } from './abi';
 import { pub, chainNow, cosmosAddressOf } from './chain';
 import { bytesToHex } from './protocol';
 
-const KEY = 'pd.sender.v1';
-const LINKS = 'pd.links.v1';
+const KEY_BASE = 'pd.sender.v1';
+const LINKS_BASE = 'pd.links.v1';
+/** Per-person storage: when a QoreX identity is connected, the Pocket key and the link list live in that person's slot. */
+let owner: string | null = null;
+export const setOwner = (o: string | null) => { owner = o; };
+export const getOwner = () => owner;
+const slot = (base: string, o: string | null = owner) => (o ? `${base}:${o}` : base);
 
 export interface SenderAccount { address: Hex; cosmos: string; account: PrivateKeyAccount }
 export interface StoredLink { id: string; seed: string; mode: 'Confirmed' | 'Open'; amountWei: string; createdAt: number; txHash: string }
@@ -24,23 +29,33 @@ const toSender = (pk: Hex): SenderAccount => {
 };
 
 export function loadSender(): SenderAccount | null {
-  const pk = store.get(KEY);
+  const pk = store.get(slot(KEY_BASE));
   return pk && /^0x[0-9a-f]{64}$/i.test(pk) ? toSender(pk as Hex) : null;
 }
-export function createSender(): SenderAccount { const pk = generatePrivateKey(); store.set(KEY, pk); return toSender(pk); }
+export function createSender(): SenderAccount { const pk = generatePrivateKey(); store.set(slot(KEY_BASE), pk); return toSender(pk); }
 export function importSender(pk: string): SenderAccount {
   const k = (pk.trim().startsWith('0x') ? pk.trim() : `0x${pk.trim()}`);
   if (!/^0x[0-9a-f]{64}$/i.test(k)) throw new Error('A backup key is 64 hex characters.');
-  store.set(KEY, k);
+  store.set(slot(KEY_BASE), k);
   return toSender(k as Hex);
 }
-export const exportSenderKey = (): string | null => store.get(KEY);
-export function forgetSender() { store.del(KEY); }
+export const exportSenderKey = (): string | null => store.get(slot(KEY_BASE));
+export function forgetSender() { store.del(slot(KEY_BASE)); }
+/** The browser-only (not yet linked to a QoreX identity) key, if any. */
+export const anonymousKey = (): string | null => (owner ? store.get(KEY_BASE) : null);
+/** Copy the anonymous browser key into the connected person's slot. */
+export function linkAnonymousToOwner(): SenderAccount | null {
+  const k = store.get(KEY_BASE);
+  if (!owner || !k || !/^0x[0-9a-f]{64}$/i.test(k)) return null;
+  store.set(slot(KEY_BASE), k);
+  const l = store.get(LINKS_BASE); if (l) store.set(slot(LINKS_BASE), l);
+  return toSender(k as Hex);
+}
 
 export function loadLinks(): StoredLink[] {
-  try { return JSON.parse(store.get(LINKS) || '[]'); } catch { return []; }
+  try { return JSON.parse(store.get(slot(LINKS_BASE)) || '[]'); } catch { return []; }
 }
-export function saveLink(l: StoredLink) { store.set(LINKS, JSON.stringify([l, ...loadLinks().filter((x) => x.id !== l.id)])); }
+export function saveLink(l: StoredLink) { store.set(slot(LINKS_BASE), JSON.stringify([l, ...loadLinks().filter((x) => x.id !== l.id)])); }
 
 async function send(s: SenderAccount, data: Hex, value: bigint): Promise<{ hash: Hex; blockNumber: bigint; logs: readonly Log[] }> {
   const gasPrice = ((await pub.getGasPrice()) * 13n) / 10n;
