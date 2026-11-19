@@ -1,0 +1,521 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import {PqcLib} from "./PqcLib.sol";
+import {IERC1271, IPocketDropSender, IDropPoolHost} from "./interfaces/IPocket.sol";
+
+/// @title PocketVault
+/// @notice A QOR smart account (the "Pocket") whose every sensitive action is an ML-DSA-87 intent verified on chain
+///         with `pqcVerify` against the owner's proof-of-possession key. Anyone (in practice one relayer, through
+///         PocketRouter) may submit an intent; authority comes only from the signature.
+/// @dev Deployed as EIP-1167 clones by PocketFactory. No owner/admin of the contracts themselves, no upgradeability.
+///      Delays are immutables of the implementation, so a lab deployment can use short ones.
+///
+///      Every owner intent signs `keccak256(abi.encode(action, chainid, vault, nonce, deadline, params))` as the
+///      QoreX-prefixed message (`PqcLib.pqMessage`). The nonce is a single sequential counter consumed on success.
+///
+///      Safety rules beyond the spec text (all tightenings):
+///      - the owner key hash is pinned at init and after recovery (a later key rotation does not move the Pocket);
+///      - createDrop / createPool debit the daily allowance (they would otherwise bypass it via a link-key claim);
+///      - setGuardians is timelocked like a limit raise (a stolen key must not be able to swap guardians instantly);
+///      - while a recovery is pending, queued spends, limit raises and guardian changes cannot be executed, and a
+///        finalized recovery invalidates everything queued by the old key.
+contract PocketVault is IERC1271 {
+    /*//////////////////////////////////////////////////////////////
+                               CONSTANTS
+    //////////////////////////////////////////////////////////////*/
+
+    bytes32 public constant ACT_SPEND = keccak256("POCKET_SPEND_V1");
+    bytes32 public constant ACT_VETO_QUEUED = keccak256("POCKET_VETO_QUEUED_V1");
+    bytes32 public constant ACT_SET_LIMIT = keccak256("POCKET_SET_LIMIT_V1");
+    bytes32 public constant ACT_SET_GUARDIANS = keccak256("POCKET_SET_GUARDIANS_V1");
+    bytes32 public constant ACT_CANCEL_PENDING = keccak256("POCKET_CANCEL_PENDING_V1");
+    bytes32 public constant ACT_VETO_RECOVERY = keccak256("POCKET_VETO_RECOVERY_V1");
+    bytes32 public constant ACT_CREATE_DROP = keccak256("POCKET_CREATE_DROP_V1");
+    bytes32 public constant ACT_CONFIRM_DROP = keccak256("POCKET_CONFIRM_DROP_V1");
+    bytes32 public constant ACT_CANCEL_DROP = keccak256("POCKET_CANCEL_DROP_V1");
+    bytes32 public constant ACT_CREATE_POOL = keccak256("POCKET_CREATE_POOL_V1");
+    bytes32 public constant ACT_CLOSE_POOL = keccak256("POCKET_CLOSE_POOL_V1");
+    /// @dev Guardian recovery intents use their own action tag and the separate `recoveryNonce`.
+    bytes32 public constant ACT_RECOVER = keccak256("POCKET_RECOVER_V1");
+
+    uint256 public constant MAX_GUARDIANS = 5;
+    uint256 public constant MAX_DELAY = 30 days;
+
+    /// @notice Delay before a spend above the daily allowance, a limit raise or a guardian change can execute.
+    uint256 public immutable TIMELOCK;
+    /// @notice Delay between a guardian recovery proposal and its finalization (owner may veto meanwhile).
+    uint256 public immutable RECOVERY_DELAY;
+
+    /*//////////////////////////////////////////////////////////////
+                                 TYPES
+    //////////////////////////////////////////////////////////////*/
+
+    enum QState {
+        None,
+        Pending,
+        Executed,
+        Vetoed
+    }
+
+    struct Queued {
+        address to;
+        uint64 unlockAt;
+        uint32 epoch;
+        QState state;
+        uint256 amount;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                STORAGE
+    //////////////////////////////////////////////////////////////*/
+
+    address public factory;
+    address public owner;
+    bytes32 public ownerKeyHash;
+    /// @notice Next owner-intent nonce.
+    uint256 public nonce;
+    /// @notice Next guardian-recovery nonce.
+    uint256 public recoveryNonce;
+    /// @notice Bumped by every finalized recovery; queued spends from an older epoch are dead.
+    uint256 public epoch;
+
+    uint256 public dailyLimit;
+    uint256 public spentDay;
+    uint256 public spentToday;
+
+    address[] internal _guardians;
+    uint8 public threshold;
+
+    uint256 public queueCount;
+    mapping(uint256 => Queued) internal _queue;
+
+    uint256 public pendingLimit;
+    uint64 public pendingLimitAt;
+
+    address[] internal _pendingGuardians;
+    uint8 public pendingThreshold;
+    uint64 public pendingGuardiansAt;
+
+    address public recoveryOwner;
+    bytes32 public recoveryKeyHash;
+    uint64 public recoveryAt;
+
+    /*//////////////////////////////////////////////////////////////
+                              EVENTS / ERRORS
+    //////////////////////////////////////////////////////////////*/
+
+    event Received(address indexed from, uint256 amount);
+    event Initialized(address indexed factory, address indexed owner, bytes32 ownerKeyHash, uint256 dailyLimit);
+    event Spent(address indexed to, uint256 amount);
+    event SpendQueued(uint256 indexed id, address indexed to, uint256 amount, uint64 unlockAt);
+    event QueuedExecuted(uint256 indexed id, address indexed to, uint256 amount);
+    event QueuedVetoed(uint256 indexed id);
+    event LimitSet(uint256 dailyLimit);
+    event LimitRaiseQueued(uint256 newLimit, uint64 unlockAt);
+    event GuardiansQueued(address[] guardians, uint8 threshold, uint64 unlockAt);
+    event GuardiansApplied(address[] guardians, uint8 threshold);
+    event PendingCancelled();
+    event RecoveryProposed(address indexed newOwner, bytes32 newKeyHash, uint64 finalizeAfter, uint256 recoveryNonce);
+    event RecoveryVetoed();
+    event RecoveryFinalized(address indexed oldOwner, address indexed newOwner, bytes32 newKeyHash);
+    event DropCreated(address indexed drop, uint256 indexed linkId, uint256 value);
+    event DropConfirmed(address indexed drop, uint256 indexed linkId);
+    event DropCancelled(address indexed drop, uint256 indexed linkId);
+    event PoolCreated(address indexed pool, uint256 indexed poolId, uint256 value);
+    event PoolClosed(address indexed pool, uint256 indexed poolId);
+
+    error AlreadyInitialized();
+    error InvalidConfig();
+    error Expired();
+    error BadSignature();
+    error BadParams();
+    error SendFailed();
+    error OverDailyLimit();
+    error NotQueued();
+    error TooEarly();
+    error NothingPending();
+    error RecoveryPending();
+    error NoRecoveryPending();
+    error NoGuardians();
+    error NotGuardian();
+    error DuplicateSigner();
+    error NotEnoughSigners();
+    error StaleEpoch();
+
+    /*//////////////////////////////////////////////////////////////
+                           CONSTRUCTION / INIT
+    //////////////////////////////////////////////////////////////*/
+
+    /// @param timelock_ Spend/limit/guardian timelock in seconds (production 24 h).
+    /// @param recoveryDelay_ Recovery delay in seconds (production 48 h).
+    /// @dev Locks the implementation itself (clones have their own storage).
+    constructor(uint256 timelock_, uint256 recoveryDelay_) {
+        if (timelock_ == 0 || timelock_ > MAX_DELAY || recoveryDelay_ == 0 || recoveryDelay_ > MAX_DELAY) {
+            revert InvalidConfig();
+        }
+        TIMELOCK = timelock_;
+        RECOVERY_DELAY = recoveryDelay_;
+        factory = address(0xdead);
+    }
+
+    /// @notice One-shot initialization by the factory. Reads and pins the owner's proven ML-DSA-87 key.
+    function initialize(address owner_, address[] calldata guardians_, uint8 threshold_, uint256 dailyLimit_) external {
+        if (factory != address(0)) revert AlreadyInitialized();
+        factory = msg.sender;
+        _validateGuardians(owner_, guardians_, threshold_);
+        bytes memory pk = PqcLib.requireKey(owner_, bytes32(0));
+        owner = owner_;
+        ownerKeyHash = keccak256(pk);
+        dailyLimit = dailyLimit_;
+        _guardians = guardians_;
+        threshold = threshold_;
+        emit Initialized(msg.sender, owner_, ownerKeyHash, dailyLimit_);
+    }
+
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                ERC-1271
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Valid only for the owner's ML-DSA-87 signature over the QoreX-prefixed message of `hash`.
+    function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
+        if (PqcLib.verifyForKey(owner, ownerKeyHash, PqcLib.pqMessage(hash), signature)) return 0x1626ba7e;
+        return 0xffffffff;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              SPEND / QUEUE
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Pay `to`. Within today's allowance it pays now; above it, the spend is queued for TIMELOCK.
+    /// @return queuedId 0 if paid immediately, otherwise the queue id.
+    function spend(address to, uint256 amount, uint256 deadline, bytes calldata sig) external returns (uint256 queuedId) {
+        _auth(ACT_SPEND, abi.encode(to, amount), deadline, sig);
+        if (to == address(0) || amount == 0) revert BadParams();
+        if (amount <= allowanceLeft()) {
+            _debit(amount);
+            emit Spent(to, amount);
+            _send(to, amount);
+            return 0;
+        }
+        queuedId = ++queueCount;
+        uint64 unlockAt = uint64(block.timestamp + TIMELOCK);
+        _queue[queuedId] = Queued(to, unlockAt, uint32(epoch), QState.Pending, amount);
+        emit SpendQueued(queuedId, to, amount, unlockAt);
+    }
+
+    /// @notice Execute a queued spend after its timelock. Anyone may call; the owner already signed.
+    function executeQueued(uint256 id) external {
+        if (recoveryAt != 0) revert RecoveryPending();
+        Queued storage q = _queue[id];
+        if (q.state != QState.Pending) revert NotQueued();
+        if (q.epoch != epoch) revert StaleEpoch();
+        if (block.timestamp < q.unlockAt) revert TooEarly();
+        q.state = QState.Executed;
+        emit QueuedExecuted(id, q.to, q.amount);
+        _send(q.to, q.amount);
+    }
+
+    /// @notice Owner veto of a queued spend.
+    function vetoQueued(uint256 id, uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_VETO_QUEUED, abi.encode(id), deadline, sig);
+        Queued storage q = _queue[id];
+        if (q.state != QState.Pending) revert NotQueued();
+        q.state = QState.Vetoed;
+        emit QueuedVetoed(id);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                         LIMIT AND GUARDIAN CONFIG
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Lowering (or keeping) the daily limit is immediate; raising it is queued for TIMELOCK.
+    function setLimit(uint256 newLimit, uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_SET_LIMIT, abi.encode(newLimit), deadline, sig);
+        if (newLimit <= dailyLimit) {
+            dailyLimit = newLimit;
+            pendingLimitAt = 0;
+            emit LimitSet(newLimit);
+        } else {
+            pendingLimit = newLimit;
+            pendingLimitAt = uint64(block.timestamp + TIMELOCK);
+            emit LimitRaiseQueued(newLimit, pendingLimitAt);
+        }
+    }
+
+    /// @notice Apply a queued limit raise after its timelock.
+    function applyLimit() external {
+        if (recoveryAt != 0) revert RecoveryPending();
+        uint64 at = pendingLimitAt;
+        if (at == 0) revert NothingPending();
+        if (block.timestamp < at) revert TooEarly();
+        pendingLimitAt = 0;
+        dailyLimit = pendingLimit;
+        emit LimitSet(pendingLimit);
+    }
+
+    /// @notice Queue a new guardian set (0 guardians + threshold 0, or 2..5 guardians with 2 <= threshold <= n).
+    function setGuardians(address[] calldata guardians_, uint8 threshold_, uint256 deadline, bytes calldata sig)
+        external
+    {
+        _auth(ACT_SET_GUARDIANS, abi.encode(guardians_, threshold_), deadline, sig);
+        _validateGuardians(owner, guardians_, threshold_);
+        _pendingGuardians = guardians_;
+        pendingThreshold = threshold_;
+        pendingGuardiansAt = uint64(block.timestamp + TIMELOCK);
+        emit GuardiansQueued(guardians_, threshold_, pendingGuardiansAt);
+    }
+
+    /// @notice Apply a queued guardian change after its timelock.
+    function applyGuardians() external {
+        if (recoveryAt != 0) revert RecoveryPending();
+        uint64 at = pendingGuardiansAt;
+        if (at == 0) revert NothingPending();
+        if (block.timestamp < at) revert TooEarly();
+        pendingGuardiansAt = 0;
+        _guardians = _pendingGuardians;
+        threshold = pendingThreshold;
+        delete _pendingGuardians;
+        emit GuardiansApplied(_guardians, threshold);
+    }
+
+    /// @notice Owner cancels a queued limit raise and a queued guardian change.
+    function cancelPending(uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_CANCEL_PENDING, "", deadline, sig);
+        _clearPending();
+        emit PendingCancelled();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                            GUARDIAN RECOVERY
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Propose replacing the owner key. Needs `threshold` distinct guardians' ML-DSA signatures over the
+    ///         recovery digest. The old key may veto until `finalizeRecovery` is possible.
+    function proposeRecovery(
+        address newOwner,
+        bytes32 newKeyHash,
+        uint256 deadline,
+        address[] calldata signers,
+        bytes[] calldata sigs
+    ) external {
+        if (recoveryAt != 0) revert RecoveryPending();
+        if (block.timestamp > deadline) revert Expired();
+        if (threshold == 0) revert NoGuardians();
+        if (newOwner == address(0) || newOwner == address(this) || newKeyHash == bytes32(0) || _isGuardian(newOwner)) {
+            revert BadParams();
+        }
+        if (signers.length != sigs.length || signers.length < threshold) revert NotEnoughSigners();
+        bytes memory message = PqcLib.pqMessage(recoveryDigest(newOwner, newKeyHash, deadline));
+        for (uint256 i; i < signers.length; i++) {
+            if (!_isGuardian(signers[i])) revert NotGuardian();
+            for (uint256 j; j < i; j++) {
+                if (signers[j] == signers[i]) revert DuplicateSigner();
+            }
+            if (!PqcLib.verifyFor(signers[i], message, sigs[i])) revert BadSignature();
+        }
+        // Fail early (and fail closed at finalize too) if the new key could not actually act as owner.
+        PqcLib.requireKey(newOwner, newKeyHash);
+        recoveryNonce++;
+        recoveryOwner = newOwner;
+        recoveryKeyHash = newKeyHash;
+        recoveryAt = uint64(block.timestamp + RECOVERY_DELAY);
+        emit RecoveryProposed(newOwner, newKeyHash, recoveryAt, recoveryNonce - 1);
+    }
+
+    /// @notice The CURRENT owner key vetoes a pending recovery.
+    function vetoRecovery(uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_VETO_RECOVERY, "", deadline, sig);
+        if (recoveryAt == 0) revert NoRecoveryPending();
+        recoveryAt = 0;
+        emit RecoveryVetoed();
+    }
+
+    /// @notice Complete a recovery after its delay. Anyone may call.
+    function finalizeRecovery() external {
+        uint64 at = recoveryAt;
+        if (at == 0) revert NoRecoveryPending();
+        if (block.timestamp < at) revert TooEarly();
+        PqcLib.requireKey(recoveryOwner, recoveryKeyHash);
+        address old = owner;
+        owner = recoveryOwner;
+        ownerKeyHash = recoveryKeyHash;
+        recoveryAt = 0;
+        epoch++;
+        _clearPending();
+        emit RecoveryFinalized(old, owner, ownerKeyHash);
+    }
+
+    /// @notice The digest each guardian signs (as the QoreX-prefixed message) for the next recovery proposal.
+    function recoveryDigest(address newOwner, bytes32 newKeyHash, uint256 deadline) public view returns (bytes32) {
+        return keccak256(
+            abi.encode(ACT_RECOVER, block.chainid, address(this), recoveryNonce, deadline, newOwner, newKeyHash)
+        );
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                         DROPS AND POOLS (CALLS)
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice Create a PocketDrop link with this Pocket as sender. `value` (= escrow + drip + relayer fee) is debited
+    ///         from today's allowance.
+    function createDrop(
+        address drop,
+        bytes32 linkKeyHash,
+        uint8 mode,
+        uint64 expiry,
+        uint96 drip,
+        uint96 relayerFee,
+        uint256 value,
+        uint256 deadline,
+        bytes calldata sig
+    ) external returns (uint256 linkId) {
+        _auth(ACT_CREATE_DROP, abi.encode(drop, linkKeyHash, mode, expiry, drip, relayerFee, value), deadline, sig);
+        _debitOrRevert(value);
+        linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash, mode, expiry, drip, relayerFee);
+        emit DropCreated(drop, linkId, value);
+    }
+
+    /// @notice Sender intent: confirm the recipient key the drop is bound to (the "sender check", one tap).
+    function confirmDrop(
+        address drop,
+        uint256 linkId,
+        bytes32 expectedRecipientKeyHash,
+        uint256 deadline,
+        bytes calldata sig
+    ) external {
+        _auth(ACT_CONFIRM_DROP, abi.encode(drop, linkId, expectedRecipientKeyHash), deadline, sig);
+        IPocketDropSender(drop).confirmRecipient(linkId, expectedRecipientKeyHash);
+        emit DropConfirmed(drop, linkId);
+    }
+
+    /// @notice Sender intent: cancel a drop; the escrow returns to this Pocket.
+    function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_CANCEL_DROP, abi.encode(drop, linkId), deadline, sig);
+        IPocketDropSender(drop).cancel(linkId);
+        emit DropCancelled(drop, linkId);
+    }
+
+    /// @notice Host a DropPool from this Pocket; slots * perSlot is debited from today's allowance.
+    function createPool(
+        address pool,
+        bytes32 linkKeyHash,
+        uint32 slots,
+        uint96 perSlot,
+        uint64 expiry,
+        uint256 deadline,
+        bytes calldata sig
+    ) external returns (uint256 poolId) {
+        _auth(ACT_CREATE_POOL, abi.encode(pool, linkKeyHash, slots, perSlot, expiry), deadline, sig);
+        uint256 value = uint256(slots) * perSlot;
+        _debitOrRevert(value);
+        poolId = IDropPoolHost(pool).create{value: value}(linkKeyHash, slots, perSlot, expiry);
+        emit PoolCreated(pool, poolId, value);
+    }
+
+    /// @notice Close a hosted pool; the unclaimed remainder returns to this Pocket.
+    function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external {
+        _auth(ACT_CLOSE_POOL, abi.encode(pool, poolId), deadline, sig);
+        IDropPoolHost(pool).close(poolId);
+        emit PoolClosed(pool, poolId);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                  VIEWS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice The digest an owner intent signs for `action` at `nonce_` (sign it as `PqcLib.pqMessage(digest)`).
+    function intentDigest(bytes32 action, uint256 nonce_, uint256 deadline, bytes memory params)
+        public
+        view
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(action, block.chainid, address(this), nonce_, deadline, params));
+    }
+
+    /// @notice What can still be spent immediately today.
+    function allowanceLeft() public view returns (uint256) {
+        uint256 used = spentDay == block.timestamp / 1 days ? spentToday : 0;
+        return used >= dailyLimit ? 0 : dailyLimit - used;
+    }
+
+    function guardians() external view returns (address[] memory) {
+        return _guardians;
+    }
+
+    function pendingGuardians() external view returns (address[] memory) {
+        return _pendingGuardians;
+    }
+
+    function getQueued(uint256 id) external view returns (Queued memory) {
+        return _queue[id];
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                INTERNALS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Checks deadline and the owner's signature over the next-nonce digest, then consumes the nonce. Called
+    ///      before any effect or external call, so a replay (same nonce) or a late intent fails closed.
+    function _auth(bytes32 action, bytes memory params, uint256 deadline, bytes calldata sig) internal {
+        if (block.timestamp > deadline) revert Expired();
+        bytes32 d = intentDigest(action, nonce, deadline, params);
+        if (!PqcLib.verifyForKey(owner, ownerKeyHash, PqcLib.pqMessage(d), sig)) revert BadSignature();
+        nonce++;
+    }
+
+    function _debit(uint256 amount) internal {
+        uint256 day = block.timestamp / 1 days;
+        if (spentDay != day) {
+            spentDay = day;
+            spentToday = amount;
+        } else {
+            spentToday += amount;
+        }
+    }
+
+    function _debitOrRevert(uint256 amount) internal {
+        if (amount > allowanceLeft()) revert OverDailyLimit();
+        _debit(amount);
+    }
+
+    function _send(address to, uint256 amount) internal {
+        (bool ok,) = to.call{value: amount}("");
+        if (!ok) revert SendFailed();
+    }
+
+    function _clearPending() internal {
+        pendingLimitAt = 0;
+        pendingGuardiansAt = 0;
+        delete _pendingGuardians;
+    }
+
+    function _isGuardian(address who) internal view returns (bool) {
+        uint256 n = _guardians.length;
+        for (uint256 i; i < n; i++) {
+            if (_guardians[i] == who) return true;
+        }
+        return false;
+    }
+
+    /// @dev 0 guardians with threshold 0, or 2..MAX guardians with 2 <= threshold <= n; non-zero, distinct, != owner.
+    function _validateGuardians(address owner_, address[] memory g, uint8 t) internal pure {
+        uint256 n = g.length;
+        if (owner_ == address(0) || n > MAX_GUARDIANS || n == 1) revert InvalidConfig();
+        if (n == 0) {
+            if (t != 0) revert InvalidConfig();
+            return;
+        }
+        if (t < 2 || t > n) revert InvalidConfig();
+        for (uint256 i; i < n; i++) {
+            if (g[i] == address(0) || g[i] == owner_) revert InvalidConfig();
+            for (uint256 j; j < i; j++) {
+                if (g[j] == g[i]) revert InvalidConfig();
+            }
+        }
+    }
+}
