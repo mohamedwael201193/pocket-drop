@@ -20,7 +20,7 @@ function fakeChain(o: Partial<Record<string, unknown>> = {}) {
     ...o,
   } as Record<string, unknown>;
   const send = vi.fn(async (to: Hex, _amt: bigint, memo: string) => { sends.unshift({ to, memo, time: NOW }); return { hash: 'ABCDEF' }; });
-  const pqVerify = vi.fn(async (_pk: Hex, _sig: Hex, msg: Uint8Array) => (state.sigOk as boolean) && msg.length === 66);
+  const pqVerify = vi.fn(async (_pk: Hex, _sig: Hex, msg: Uint8Array) => (state.sigOk as boolean) && /^qorechain-msg-v1\|qorechain-diana\|0x[0-9a-f]{64}$/.test(new TextDecoder().decode(msg)));
   const c: SponsorChain = {
     sponsorAddress: '0x9999999999999999999999999999999999999999',
     balance: async (a) => (a.toLowerCase() === POCKET ? (state.pocketBal as bigint) : (state.balance as bigint)),
@@ -52,9 +52,10 @@ describe('sponsor rules', () => {
     expect(r.amountUqor).toBe(60_000n); expect(r.dailyCap).toBe(20); expect(r.ipPerDay).toBe(3); expect(r.enabled).toBe(false);
     expect(sponsorRules({ SPONSOR_ENABLED: 'true' }).enabled).toBe(false);
   });
-  it('pqMessage is the 66 ASCII bytes of the lowercase digest; the link digest is bound to the recipient', () => {
+  it('pqMessage is the PqcLib QoreX framing of the lowercase digest; the link digest is bound to the recipient', () => {
     const d = poolLinkDigest(V4_INSTANCES.prod.pool as Hex, 7n, ME, PAYTO);
-    expect(pqMessage(d).length).toBe(66);
+    expect(new TextDecoder().decode(pqMessage(d))).toBe(`qorechain-msg-v1|qorechain-diana|${d.toLowerCase()}`);
+    expect(pqMessage(d).length).toBe(33 + 66);
     expect(poolLinkDigest(V4_INSTANCES.prod.pool as Hex, 7n, PAYTO, PAYTO)).not.toBe(d);
   });
 });
@@ -74,7 +75,7 @@ describe('POST /api/sponsor', () => {
     expect(r.status).toBe(200); expect(r.body.sponsored).toBe(true); expect(r.body.amountWei).toBe('60000000000000000');
     expect(send).toHaveBeenCalledWith(ME.toLowerCase(), 60_000n, 'pd-sponsor pool:prod:7');
     const msg = pqVerify.mock.calls[0][2];
-    expect(new TextDecoder().decode(msg)).toBe(poolLinkDigest(V4_INSTANCES.prod.pool as Hex, 7n, ME.toLowerCase() as Hex, PAYTO).toLowerCase());
+    expect(new TextDecoder().decode(msg)).toBe('qorechain-msg-v1|qorechain-diana|' + poolLinkDigest(V4_INSTANCES.prod.pool as Hex, 7n, ME.toLowerCase() as Hex, PAYTO).toLowerCase());
     const again = await handleSponsor(poolReq(), '1.1.1.1', deps(c));
     expect(errName(again)).toBe('AlreadySponsored'); expect(send).toHaveBeenCalledTimes(1);
   });
