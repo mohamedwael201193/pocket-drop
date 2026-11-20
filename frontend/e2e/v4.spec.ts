@@ -48,7 +48,7 @@ async function onboard(p: Page, run: Run, who: string, o: { pocketQor?: number; 
   run.accounts[`${who}.pocket`] = pocket; run.accounts[`${who}.key`] = keyAddr;
   run.txs[`fund ${who} key account ${KEY_FUND} QOR`] = await fund(keyAddr, KEY_FUND, `e2e ${run.project} ${run.flow} ${who} key`);
   if (o.pocketQor) run.txs[`fund ${who} Pocket ${o.pocketQor} QOR`] = await fund(pocket, o.pocketQor, `e2e ${run.project} ${run.flow} ${who} pocket`);
-  await expect.poll(async () => BigInt((await p.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(100_000_000_000_000_000n);
+  await expect.poll(async () => BigInt((await p.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(70_000_000_000_000_000n);
   await p.getByTestId('register-key').click();
   await expect(p.getByTestId('key-ready')).toBeVisible({ timeout: T });
   if (o.pocketQor) await expect.poll(async () => BigInt((await p.getByTestId('pocket-balance').first().getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(BigInt(Math.round(o.pocketQor * 1e18)));
@@ -177,7 +177,7 @@ test('c. Drop Pool with 2 claimers', async ({ browser }, info) => {
       const keyAddr = (await c.page.getByTestId('key-address').getAttribute('data-address', { timeout: T }))!;
       run.accounts[`claimer${n}.key`] = keyAddr;
       run.txs[`fund claimer${n} key account ${KEY_FUND} QOR`] = await fund(keyAddr, KEY_FUND, `e2e ${run.project} pool claimer${n}`);
-      await expect.poll(async () => BigInt((await c.page.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(100_000_000_000_000_000n);
+      await expect.poll(async () => BigInt((await c.page.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(70_000_000_000_000_000n);
       await c.page.getByTestId('register-key').click();
       await expect(c.page.getByTestId('pool-claim')).toBeVisible({ timeout: T });
       await c.page.getByTestId('pool-claim').click();

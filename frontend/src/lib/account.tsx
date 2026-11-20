@@ -37,6 +37,9 @@ interface Ctx {
 const AccountCtx = createContext<Ctx | null>(null);
 
 const ADOPT_KEY = 'pd.adopted.v4';
+const ACTIVE_KEY = 'pd.active.v4';
+const loadActive = (): Hex | null => { try { const v = localStorage.getItem(ACTIVE_KEY); return v && /^0x[0-9a-fA-F]{40}$/.test(v) ? (v as Hex) : null; } catch { return null; } };
+const saveActive = (a: Hex | null) => { try { if (a) localStorage.setItem(ACTIVE_KEY, a); else localStorage.removeItem(ACTIVE_KEY); } catch { /* ignore */ } };
 const loadAdopted = (): Hex[] => { try { return JSON.parse(localStorage.getItem(ADOPT_KEY) || '[]'); } catch { return []; } };
 
 export function AccountProvider({ children }: { children: ReactNode }) {
@@ -45,7 +48,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const [acct, setAcct] = useState<KeyAccount | null>(null);
   const [pocket, setPocket] = useState<Hex | null>(null);
   const [adopted, setAdopted] = useState<Hex[]>(() => loadAdopted());
-  const [active, setActive] = useState<Hex | null>(null);
+  const [active, setActiveState] = useState<Hex | null>(() => loadActive());
+  const setActive = useCallback((a: Hex | null) => { saveActive(a); setActiveState(a); }, []);
   const [identity, setIdentity] = useState<QorexIdentity | null>(null);
   const [qorexState, setQ] = useState<QorexState>('checking');
   const [qorexError, setErr] = useState<string | null>(null);
@@ -99,7 +103,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       identity, qorexState, qorexError, connect,
       disconnect: () => { forgetQorex(); setIdentity(null); setQ('ready'); },
     };
-  }, [env, root, acct, cfg, pocket, adopted, active, identity, qorexState, qorexError, connect]);
+  }, [env, root, acct, cfg, pocket, adopted, active, identity, qorexState, qorexError, connect, setActive]);
   return <AccountCtx.Provider value={value}>{children}</AccountCtx.Provider>;
 }
 

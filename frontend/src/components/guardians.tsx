@@ -128,8 +128,12 @@ export function LostPhone() {
       if (!isAddress(adoptText)) throw new Error('Enter the Pocket address (0x…).');
       const pv = await readPocket(a.env, adoptText as Hex);
       if (!pv.deployed) throw new Error('That Pocket is not deployed on this instance.');
-      if (pv.owner?.toLowerCase() !== a.acct!.evm.toLowerCase()) throw new Error('This browser\'s key is not the owner of that Pocket (yet). Has the recovery been finished?');
-      a.adopt(adoptText as Hex); setMsg({ tone: 'ok', text: 'This Pocket is now yours here. Switch to it in the Pocket and key card.' });
+      const me = a.acct!.evm.toLowerCase();
+      const pending = pv.unanimous?.newOwner.toLowerCase() === me || pv.recovery?.newOwner.toLowerCase() === me;
+      const owner = pv.owner?.toLowerCase() === me;
+      if (!owner && !pending) throw new Error('This browser\'s key is not the owner of that Pocket, and no recovery to it is pending. Ask your guardians to start the recovery with your new-key code.');
+      a.adopt(adoptText as Hex);
+      setMsg({ tone: 'ok', text: owner ? 'This Pocket is now yours here. Switch to it in the Pocket and key card.' : 'A recovery to your key is pending. The Pocket is shown in the Pocket and key card; finish the recovery there once its delay is over.' });
     } catch (e) { setMsg({ tone: 'error', text: (e as Error).message }); }
   }
   const code = newOwnerCode(a.acct);
@@ -137,7 +141,7 @@ export function LostPhone() {
     <div className="space-y-4" data-testid="lost-phone">
       <p className="text-sm leading-relaxed text-zinc-700">Lost your phone? On a new device, create a new key, register it (above), then give your guardians this code. They start a recovery to it; after the delay you can take your Pocket over.</p>
       <div className="rounded-2xl border border-zinc-200 bg-white/70 p-3"><Mono className="block max-h-20 overflow-auto"><span data-testid="new-owner-code">{code}</span></Mono><div className="mt-2"><CopyButton text={code} label="Copy my new-key code" testId="copy-newcode" /></div></div>
-      <div className="space-y-2"><label className="text-sm font-semibold text-zinc-900" htmlFor="adopt">After the recovery is finished: take over the Pocket</label>
+      <div className="space-y-2"><label className="text-sm font-semibold text-zinc-900" htmlFor="adopt">Take over the Pocket (once guardians have started the recovery to your key)</label>
         <div className="flex gap-2"><input id="adopt" value={adoptText} onChange={(e) => setAdoptText(e.target.value.trim())} placeholder="Old Pocket address 0x…" data-testid="adopt-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-2 font-mono text-xs" /><Button variant="secondary" onClick={() => void adopt()} data-testid="adopt-button">Check and take over</Button></div>
         {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}</div>
     </div>
