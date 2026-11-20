@@ -1,5 +1,6 @@
 import { decodeErrorResult, type Hex } from 'viem';
 import { pocketDropAbi } from './abi.js';
+import { v4ErrorsAbi } from './abi4.js';
 
 export interface DecodedRevert {
   name: string;
@@ -41,6 +42,36 @@ const HUMAN: Record<string, string> = {
   WithdrawFailed: 'The withdrawal transfer failed.',
   Reentrancy: 'Reentrant call blocked.',
 };
+
+Object.assign(HUMAN, {
+  BadSignature: 'The signature does not verify for this Pocket owner (wrong key, replayed intent, or the nonce moved on).',
+  OverDailyLimit: 'This amount is above the Pocket daily limit.',
+  TooEarly: 'The timelock has not ended yet.',
+  Frozen: 'This Pocket is frozen by its guardians.',
+  AlreadyFrozen: 'This Pocket is already frozen.',
+  FreezeCapped: 'The same guardians have already frozen this Pocket twice in a row.',
+  NotEnoughSigners: 'Not enough guardian signatures for this action.',
+  NotGuardian: 'A signer is not a guardian of this Pocket.',
+  DuplicateSigner: 'The same guardian signed twice.',
+  BadNonce: 'The signed freeze nonce is stale. Sign again.',
+  NotQueued: 'That queued spend is not pending any more.',
+  NoRecoveryPending: 'There is no recovery pending.',
+  RecoveryPending: 'A recovery is already pending.',
+  NotAllowed: 'The router only forwards to Pockets, the drop contract and the pool contract.',
+  AlreadyClaimed: 'This account already took a slot in this pool.',
+  PoolFull: 'Every slot of this pool is taken.',
+  PoolExpired: 'This pool has expired.',
+  PoolClosedError: 'This pool is closed.',
+  AlreadyDeployed: 'This Pocket is already deployed.',
+  StaleEpoch: 'That queued spend belongs to a previous owner key.',
+  NothingPending: 'Nothing is pending.',
+  KeyMismatch: 'The registered key is not the key this action was bound to.',
+  KeyUnavailable: 'The chain key-status precompile could not be read.',
+  BadParams: 'Invalid parameters.',
+  SendFailed: 'The payout transfer failed.',
+});
+
+const ERR_ABI = [...pocketDropAbi.filter((x) => x.type === 'error'), ...v4ErrorsAbi];
 
 const STATE_NAMES = ['None', 'Open', 'Bound', 'Confirmed', 'Claimed', 'Cancelled', 'Refunded'];
 
@@ -86,7 +117,7 @@ export function decodeRevert(data: Hex | null | undefined, fallbackMessage = 'ex
     } catch { /* fall through */ }
   }
   try {
-    const r = decodeErrorResult({ abi: pocketDropAbi, data });
+    const r = decodeErrorResult({ abi: ERR_ABI as any, data });
     const st = r.errorName === 'InvalidState' && r.args?.length ? ` (current state: ${STATE_NAMES[Number(r.args[0])] ?? r.args[0]})` : '';
     return { name: r.errorName, message: (HUMAN[r.errorName] ?? `Contract error ${r.errorName}.`) + st, args: r.args as readonly unknown[] | undefined, selector, raw: data, known: true };
   } catch {

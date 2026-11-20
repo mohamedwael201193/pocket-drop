@@ -8,7 +8,7 @@ export const KEY = ('0x' + '11'.repeat(32)) as Hex; // throwaway test key, not a
 
 export const cfg = (over: Partial<Config> = {}): Config => ({
   evmRpc: 'http://rpc.invalid', rest: 'http://rest.invalid', contract: CONTRACT as Hex, relayerKey: KEY, deployBlock: null,
-  statsLookback: 1000n, gasBind: 900_000n, gasClaim: 800_000n, upstashUrl: null, upstashToken: null, ...over,
+  statsLookback: 1000n, gasBind: 900_000n, gasClaim: 800_000n, gasRouteMin: 350_000n, gasRouteMax: 1_800_000n, gasRoutePct: 140n, upstashUrl: null, upstashToken: null, ...over,
 });
 
 export const bindBody = (over: Record<string, unknown> = {}) => ({

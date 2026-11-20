@@ -1,3 +1,6 @@
+import type { Hex } from 'viem';
+import { V4_INSTANCES, type V4Env } from './v4.js';
+import type { RouteDeps } from './route.js';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getConfig } from './config.js';
 import { reply, type Deps, type HttpResult } from './handlers.js';
@@ -39,4 +42,19 @@ export function buildDeps(): Deps {
   const cfg = getConfig();
   const pub = makePublicClient(cfg);
   return { cfg, limiter: getLimiter(), pub, getRelayer: () => (relayerCache ??= createRelayer(cfg, { pub })) };
+}
+
+const routerRelayers = new Map<V4Env, Relayer>();
+/** v4: one relayer per PocketRouter (same secp key; its EVM window is scoped to the routers). */
+export function buildRouteDeps(): RouteDeps {
+  const cfg = getConfig();
+  const pub = makePublicClient(cfg);
+  return {
+    cfg, limiter: getLimiter(),
+    getRouterRelayer: (env) => {
+      let r = routerRelayers.get(env);
+      if (!r) { r = createRelayer({ ...cfg, contract: V4_INSTANCES[env].router as Hex }, { pub }); routerRelayers.set(env, r); }
+      return r;
+    },
+  };
 }

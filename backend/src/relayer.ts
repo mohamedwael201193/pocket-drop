@@ -17,6 +17,8 @@ export interface Relayer {
   contract: Address;
   /** eth_call against the contract as the relayer; returns decoded custom error on revert. */
   simulate(data: Hex): Promise<SimResult>;
+  /** eth_estimateGas as the relayer; null when the node cannot estimate. */
+  estimate?(data: Hex): Promise<bigint | null>;
   /** Send with an explicit gas limit and wait for the receipt. */
   send(data: Hex, gasLimit: bigint): Promise<SendResult>;
 }
@@ -53,6 +55,9 @@ export function createRelayer(cfg: Pick<Config, 'evmRpc' | 'relayerKey' | 'contr
         return { ok: false, revert: decodeRevert(raw, msg) };
       }
       return { ok: true };
+    },
+    async estimate(data) {
+      try { return await pub.estimateGas({ account: account.address, to: contract, data }); } catch { return null; }
     },
     async send(data, gasLimit) {
       try {

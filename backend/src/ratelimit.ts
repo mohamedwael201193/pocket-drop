@@ -15,6 +15,8 @@ export const RULES = {
   bindLink: { limit: 6, windowSec: 600 },
   claimIp: { limit: 10, windowSec: 60 },
   claimLink: { limit: 6, windowSec: 600 },
+  routeIp: { limit: 20, windowSec: 60 },
+  routeTarget: { limit: 40, windowSec: 600 },
   readIp: { limit: 120, windowSec: 60 },
   statsIp: { limit: 20, windowSec: 60 },
   proxyIp: { limit: 300, windowSec: 60 },

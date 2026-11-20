@@ -1,6 +1,13 @@
 // Key-less CORS pass-through for the two QoreChain testnet hosts that send no CORS headers.
 // Only allowlisted hosts, JSON-RPC methods and REST path prefixes are forwarded. No credentials are ever attached.
-export const PROXY_HOSTS = { rpc: 'https://rpc-testnet.qore.host', rest: 'https://api-testnet.qore.host' } as const;
+export const PROXY_HOSTS = { rpc: 'https://rpc-testnet.qore.host', rest: 'https://api-testnet.qore.host', evm: 'https://evm-testnet.qore.host' } as const;
+
+/** Read-only Ethereum JSON-RPC methods accepted on /rpc and /evm (never a send or a signing method). */
+export const EVM_READ_METHODS = new Set([
+  'eth_chainId', 'net_version', 'eth_blockNumber', 'eth_gasPrice', 'eth_getBalance', 'eth_getCode', 'eth_call', 'eth_estimateGas',
+  'eth_getLogs', 'eth_getTransactionByHash', 'eth_getTransactionReceipt', 'eth_getBlockByNumber', 'eth_getBlockByHash',
+  'eth_getTransactionCount', 'eth_getStorageAt',
+]);
 
 export const RPC_METHODS = new Set([
   'status', 'abci_info', 'abci_query', 'broadcast_tx_sync', 'broadcast_tx_async', 'tx', 'tx_search', 'block', 'health',
@@ -21,7 +28,7 @@ export const MAX_BATCH = 10;
 export interface ProxyRequest { method: string; target: string | null; path: string | null; query: string; body: unknown }
 export interface ProxyResult { status: number; contentType: string; body: string }
 
-export function checkRpcBody(body: unknown): { ok: true; payload: unknown } | { ok: false; status: number; message: string } {
+export function checkRpcBody(body: unknown): { ok: true; payload: unknown; evm?: boolean } | { ok: false; status: number; message: string } {
   let b = body;
   if (typeof b === 'string') {
     if (b.length > MAX_BODY_BYTES) return { ok: false, status: 413, message: 'body too large' };
@@ -29,11 +36,14 @@ export function checkRpcBody(body: unknown): { ok: true; payload: unknown } | { 
   }
   const calls = Array.isArray(b) ? b : [b];
   if (calls.length === 0 || calls.length > MAX_BATCH) return { ok: false, status: 400, message: `batch must contain 1..${MAX_BATCH} calls` };
+  let evm = 0;
   for (const c of calls) {
     const m = c && typeof c === 'object' ? (c as { method?: unknown }).method : undefined;
-    if (typeof m !== 'string' || !RPC_METHODS.has(m)) return { ok: false, status: 403, message: `rpc method not allowed: ${String(m)}` };
+    if (typeof m !== 'string' || !(RPC_METHODS.has(m) || EVM_READ_METHODS.has(m))) return { ok: false, status: 403, message: `rpc method not allowed: ${String(m)}` };
+    if (EVM_READ_METHODS.has(m)) evm++;
   }
-  return { ok: true, payload: b };
+  if (evm !== 0 && evm !== calls.length) return { ok: false, status: 400, message: 'do not mix eth_* and CometBFT methods in one batch' };
+  return { ok: true, payload: b, evm: evm > 0 };
 }
 
 export function checkRestPath(raw: string | null): { ok: true; path: string } | { ok: false; status: number; message: string } {
@@ -57,7 +67,7 @@ export async function proxyRequest(req: ProxyRequest, fetchImpl: typeof fetch = 
       if (req.method !== 'POST') return text(405, 'POST only');
       const chk = checkRpcBody(req.body);
       if (!chk.ok) return text(chk.status, chk.message);
-      const r = await fetchImpl(host + '/', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(chk.payload) });
+      const r = await fetchImpl((chk.evm ? PROXY_HOSTS.evm : host) + '/', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(chk.payload) });
       return { status: r.status, contentType: r.headers.get('content-type') || 'application/json', body: await r.text() };
     }
     if (req.method !== 'GET') return text(405, 'GET only');

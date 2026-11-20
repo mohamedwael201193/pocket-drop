@@ -43,3 +43,44 @@ export type ClaimInput = z.infer<typeof claimSchema>;
 export function formatIssues(err: z.ZodError): { path: string; message: string }[] {
   return err.issues.map((i) => ({ path: i.path.join('.'), message: i.message }));
 }
+
+/* ---------- v4: POST /api/route ---------- */
+
+const MAX_ROUTE_DATA_BYTES = 64 * 1024;
+const uint = (label: string, bits: number) =>
+  z.union([z.string().regex(/^\d{1,78}$/, `${label} must be a decimal integer`), z.number().int().nonnegative().safe()])
+    .transform((v) => BigInt(v))
+    .refine((v) => v < 2n ** BigInt(bits), `${label} must fit in ${bits} bits`);
+
+export const pocketConfigSchema = z
+  .object({
+    owner: addressSchema,
+    guardians: z.array(addressSchema).max(5),
+    threshold: z.number().int().min(0).max(5),
+    dailyLimit: uint('dailyLimit', 256),
+    userSalt: z.string().regex(/^0x[0-9a-fA-F]{64}$/, 'userSalt must be 32 bytes of hex').transform((v) => v as Hex),
+  })
+  .strict();
+
+export const routeSchema = z
+  .object({
+    env: z.enum(['prod', 'lab']).default('prod'),
+    /** Forward `data` to this Pocket, PocketDrop or DropPool (router.relay). Omit when `pocket` is given. */
+    target: addressSchema.optional(),
+    /** Lazy deployment: deploy this Pocket config first if it does not exist yet (router.deployAndRelay). */
+    pocket: pocketConfigSchema.optional(),
+    data: z
+      .string()
+      .regex(/^0x([0-9a-fA-F]{2})*$/, 'data must be 0x-prefixed hex of whole bytes')
+      .refine((v) => (v.length - 2) / 2 <= MAX_ROUTE_DATA_BYTES, `data is limited to ${MAX_ROUTE_DATA_BYTES} bytes`)
+      .transform((v) => v as Hex)
+      .default('0x'),
+  })
+  .strict()
+  .superRefine((v, ctx) => {
+    if (!v.pocket && !v.target) ctx.addIssue({ code: 'custom', path: ['target'], message: 'target is required unless pocket is given' });
+    if (v.pocket && v.target) ctx.addIssue({ code: 'custom', path: ['target'], message: 'give either target or pocket, not both' });
+    if (!v.pocket && v.data === '0x') ctx.addIssue({ code: 'custom', path: ['data'], message: 'data is required when relaying to a target' });
+  });
+
+export type RouteInput = z.infer<typeof routeSchema>;

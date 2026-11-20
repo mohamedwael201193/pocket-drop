@@ -21,6 +21,10 @@ export interface Config {
   statsLookback: bigint;
   gasBind: bigint;
   gasClaim: bigint;
+  /** /api/route gas: floor, cap, and the multiplier (percent) applied to eth_estimateGas. */
+  gasRouteMin: bigint;
+  gasRouteMax: bigint;
+  gasRoutePct: bigint;
   upstashUrl: string | null;
   upstashToken: string | null;
 }
@@ -50,6 +54,9 @@ export function getConfig(env: Env = process.env): Config {
     statsLookback: num(env.STATS_LOOKBACK_BLOCKS, 150_000n),
     gasBind: num(env.GAS_BIND, 900_000n),
     gasClaim: num(env.GAS_CLAIM, 800_000n),
+    gasRouteMin: num(env.GAS_ROUTE_MIN, 350_000n),
+    gasRouteMax: num(env.GAS_ROUTE_MAX, 1_800_000n),
+    gasRoutePct: num(env.GAS_ROUTE_PCT, 140n),
     upstashUrl: env.UPSTASH_REDIS_REST_URL?.trim() || null,
     upstashToken: env.UPSTASH_REDIS_REST_TOKEN?.trim() || null,
   };
