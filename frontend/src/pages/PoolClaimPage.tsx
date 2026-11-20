@@ -95,7 +95,7 @@ export default function PoolClaimPage() {
           </div>
         )}
         {(took || tx) && pocket && (
-          <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="pool-yours">
+          <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="pool-yours" role="status" aria-live="polite">
             <Celebrate once={`pool-${env}-${pid}`} />
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">Slot taken.</h1><Pill tone="ok">paid</Pill></div>
             <div className="mt-2 font-money text-5xl text-zinc-900" data-testid="pool-balance" data-wei={bal?.toString() ?? ''}>{bal === undefined ? <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(bal)} <span className="text-xl text-zinc-500">QOR</span></div>
@@ -104,7 +104,8 @@ export default function PoolClaimPage() {
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>
               {tx && <div>Claim transaction: <TxLink hash={tx} testId="tx-pool-claim" /></div>}
             </div>
-            <Link to="/pocket" className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50">Open my Pocket</Link>
+            <p className="mt-3 text-sm text-zinc-800" data-testid="pool-backup-cta"><b>Back up your key.</b> It lives in this browser only (in a private window it is gone when you close it). Save the backup key on the Pocket page.</p>
+            <Link to="/pocket" className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50">Open my Pocket and back up</Link>
           </div>
         )}
       </div>
