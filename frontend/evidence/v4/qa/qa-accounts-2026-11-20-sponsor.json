@@ -1,0 +1,74 @@
+{
+ "note": "Public addresses created by the sponsored-onboarding work of 20 Nov 2026: the sponsor wallet, its three probe sends and the keys and Pockets of the three live sponsor runs. All are own accounts; /api/stats and /radar must not count them as external.",
+ "run": "2026-11-20-sponsor",
+ "accounts": [
+  {
+   "label": "TEAM-RUN sponsor wallet (/api/sponsor)",
+   "address": "0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221"
+  },
+  {
+   "label": "qa-20nov-sponsor-probe-1",
+   "address": "0xd8D4Bf178b212909Af5d2E67E8AF382220Bd612b"
+  },
+  {
+   "label": "qa-20nov-sponsor-probe-2",
+   "address": "0xE94fbff755058F5A6A7F25f8Ff80121BAc2640C0"
+  },
+  {
+   "label": "qa-20nov-sponsor-probe-3",
+   "address": "0x2Eb286b0fB879A7b9a1A2FD469Ab820f36C9738A"
+  },
+  {
+   "label": "qa-20nov-sponsor-run1-sender-pocket",
+   "address": "0x1923F0300B053C46d7d8cBbdF4Ff6D818Aa6D1d7"
+  },
+  {
+   "label": "qa-20nov-sponsor-run1-sender-acct",
+   "address": "0x5caE6975914C655168aCc6DC900359fA28b43d53"
+  },
+  {
+   "label": "qa-20nov-sponsor-run2-sender-pocket",
+   "address": "0x886413f2231e86Ff3595265DC08cA95B8bcD441f"
+  },
+  {
+   "label": "qa-20nov-sponsor-run2-sender-acct",
+   "address": "0x3be6E1870c615F2E6e58758213e3AD7960A4Ac54"
+  },
+  {
+   "label": "qa-20nov-sponsor-run2-recipient-acct",
+   "address": "0xDE31B3865e15158Eb46B3C97ffA2f48ee8103b24"
+  },
+  {
+   "label": "qa-20nov-sponsor-run2-recipient-pocket",
+   "address": "0xcedf92e135e34f7CC41b3c6E2B265D1FF71D967b"
+  },
+  {
+   "label": "qa-20nov-sponsor-run2-claimer-acct",
+   "address": "0x4601270E60A3E56229Cc582F68A41562F1e2D3f7"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-sender-pocket",
+   "address": "0x6D2b6D812f56De937Ac7B8659778EEAf65705689"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-sender-acct",
+   "address": "0xff8C9bC75154305120Db4a8211BB52F0D92C6071"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-recipient-acct",
+   "address": "0xB9CAbcd30aB28f0971946c148A71a908251B4ed3"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-recipient-pocket",
+   "address": "0x77828A73cdC642b3f001a1F14d327B74a124CDDE"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-claimer-acct",
+   "address": "0xfb04091845f81a399C8a5145900e2Ca8948aF46A"
+  },
+  {
+   "label": "qa-20nov-sponsor-run3-claimer-pocket",
+   "address": "0x23d7A6ec9637b4CA34eB1D2fEfE04221e9B2d406"
+  }
+ ]
+}

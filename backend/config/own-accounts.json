@@ -217,6 +217,23 @@
     "TEAM-RUN qday sender S key account": "0xFA45699C3F1F4A3D0C9cD117F2faEB06e80f9db7",
     "TEAM-RUN qday sender Pocket S": "0x94974f4D977005B1D4F4623D4Fe9C647801c0151",
     "TEAM-RUN qday bait B2 guardian G1": "0x41c008d14EF532f976Be20fE9410134b2C4a75b9",
-    "TEAM-RUN qday bait B2 guardian G2": "0x8460ed916F357ECdf0B59F4e8D89Cea5Ae775254"
+    "TEAM-RUN qday bait B2 guardian G2": "0x8460ed916F357ECdf0B59F4e8D89Cea5Ae775254",
+    "TEAM-RUN sponsor wallet (/api/sponsor)": "0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221",
+    "qa-20nov-sponsor-probe-1": "0xd8D4Bf178b212909Af5d2E67E8AF382220Bd612b",
+    "qa-20nov-sponsor-probe-2": "0xE94fbff755058F5A6A7F25f8Ff80121BAc2640C0",
+    "qa-20nov-sponsor-probe-3": "0x2Eb286b0fB879A7b9a1A2FD469Ab820f36C9738A",
+    "qa-20nov-sponsor-run1-sender-pocket": "0x1923F0300B053C46d7d8cBbdF4Ff6D818Aa6D1d7",
+    "qa-20nov-sponsor-run1-sender-acct": "0x5caE6975914C655168aCc6DC900359fA28b43d53",
+    "qa-20nov-sponsor-run2-sender-pocket": "0x886413f2231e86Ff3595265DC08cA95B8bcD441f",
+    "qa-20nov-sponsor-run2-sender-acct": "0x3be6E1870c615F2E6e58758213e3AD7960A4Ac54",
+    "qa-20nov-sponsor-run2-recipient-acct": "0xDE31B3865e15158Eb46B3C97ffA2f48ee8103b24",
+    "qa-20nov-sponsor-run2-recipient-pocket": "0xcedf92e135e34f7CC41b3c6E2B265D1FF71D967b",
+    "qa-20nov-sponsor-run2-claimer-acct": "0x4601270E60A3E56229Cc582F68A41562F1e2D3f7",
+    "qa-20nov-sponsor-run3-sender-pocket": "0x6D2b6D812f56De937Ac7B8659778EEAf65705689",
+    "qa-20nov-sponsor-run3-sender-acct": "0xff8C9bC75154305120Db4a8211BB52F0D92C6071",
+    "qa-20nov-sponsor-run3-recipient-acct": "0xB9CAbcd30aB28f0971946c148A71a908251B4ed3",
+    "qa-20nov-sponsor-run3-recipient-pocket": "0x77828A73cdC642b3f001a1F14d327B74a124CDDE",
+    "qa-20nov-sponsor-run3-claimer-acct": "0xfb04091845f81a399C8a5145900e2Ca8948aF46A",
+    "qa-20nov-sponsor-run3-claimer-pocket": "0x23d7A6ec9637b4CA34eB1D2fEfE04221e9B2d406"
   }
 }
