@@ -10,7 +10,7 @@ export const previewHeaders: Record<string, string> = TOKEN ? { 'x-vercel-truste
 export const test = base.extend({
   context: async ({ context }, use) => {
     if (TOKEN && ORIGIN) await context.route(`${ORIGIN}/**`, (r) => r.continue({ headers: { ...r.request().headers(), ...previewHeaders } }));
-    await use(context);
+    await use(context); // eslint-disable-line react-hooks/rules-of-hooks -- Playwright fixture callback, not a React hook
   },
 });
 export { expect };
