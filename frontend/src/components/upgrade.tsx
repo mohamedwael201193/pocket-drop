@@ -37,6 +37,16 @@ export function LegacyKeyBanner() {
   const [done, setDone] = useState<string | null>(null);
   const prior = legacyRoots();
 
+  // after the move this browser already holds the new key, so the legacy checks below no longer match: keep the receipt
+  if (done) {
+    return (
+      <div className="space-y-2" data-testid="legacy-key-banner">
+        <Notice tone="ok" testId="legacy-done">Done. Your new Pocket is <span className="break-all font-mono">{done}</span>. Register the new key below, then back it up.</Notice>
+        {txs.map((t) => <p key={t.hash} className="font-mono text-xs text-zinc-600">{t.what}: <TxLink hash={t.hash} /></p>)}
+      </div>
+    );
+  }
+
   if (!a.root || !isLegacyRoot(a.root) || a.activePocket !== a.pocket) {
     return prior.length > 0 && a.root && !isLegacyRoot(a.root) ? (
       <p className="text-xs text-zinc-500" data-testid="legacy-note">This browser also keeps {prior.length} older key{prior.length > 1 ? 's' : ''} (not quantum-safe). Restore one from its backup only to empty its Pocket.</p>
@@ -80,7 +90,6 @@ export function LegacyKeyBanner() {
       <p className="text-xs text-zinc-500">Back up the old key first if you may need it again (Backup key, below). After the move, this browser uses the new key; back that one up too.</p>
       {txs.map((t) => <p key={t.hash} className="font-mono text-xs text-zinc-600">{t.what}: <TxLink hash={t.hash} /></p>)}
       {err && <Notice tone="error" testId="legacy-error">{err}</Notice>}
-      {done && <Notice tone="ok" testId="legacy-done">Done. Your new Pocket is <span className="font-mono">{done}</span>. Register the new key below, then back it up.</Notice>}
     </div>
   );
 }
