@@ -21,7 +21,7 @@ export function Dash({ className }: { className?: string }) {
 export function SectionHead({ eyebrow, sub, title, className }: { eyebrow: string; sub?: string; title: ReactNode; className?: string }) {
   return (
     <div className={className}>
-      <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{eyebrow}</p>
+      <p className="mb-2 text-sm font-medium text-zinc-600">{eyebrow}</p>
       {sub && <p className="mb-3 text-xs text-zinc-500">{sub}</p>}
       <h2 className="max-w-2xl font-serif text-4xl leading-[1.03] text-zinc-900 sm:text-5xl">{title}</h2>
     </div>
@@ -31,5 +31,5 @@ export function SectionHead({ eyebrow, sub, title, className }: { eyebrow: strin
 /** Tiny pill used for source labels inside dark / titanium surfaces. */
 export function SourcePill({ kind, className }: { kind: 'LIVE' | 'RECORDED' | 'ILLUSTRATION'; className?: string }) {
   const tone = kind === 'LIVE' ? 'border-emerald-400/60 bg-emerald-500/15 text-emerald-300' : kind === 'RECORDED' ? 'border-amber-400/60 bg-amber-500/15 text-amber-300' : 'border-zinc-400/60 bg-white/10 text-zinc-300';
-  return <span className={cx('inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider', tone, className)}>{kind}</span>;
+  return <span className={cx('inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-xs font-semibold tracking-wider', tone, className)}>{kind}</span>;
 }

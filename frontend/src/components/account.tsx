@@ -119,11 +119,11 @@ export function PocketCard({ compact }: { compact?: boolean }) {
         </Notice>
       )}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{lost ? 'Former Pocket' : 'Your Pocket'}</span>
+        <span className="text-sm font-medium text-zinc-600">{lost ? 'Former Pocket' : 'Your Pocket'}</span>
         <span className="flex items-center gap-1.5"><SourceBadge kind="LIVE" /><Pill tone={a.env === 'lab' ? 'warn' : 'neutral'}>{a.env === 'lab' ? 'Lab · 60 s delays' : 'Production instance'}</Pill></span>
       </div>
       <div className="flex flex-wrap items-baseline gap-x-3">
-        <span className="font-serif text-4xl text-zinc-900" data-testid="pocket-balance" data-wei={pv?.balance.toString() ?? ''}>{pv ? fmtQor(pv.balance) : <Skel w="5rem" h="2.25rem" label="Reading your balance" />}</span>
+        <span className="font-money text-5xl text-zinc-900" data-testid="pocket-balance" data-wei={pv?.balance.toString() ?? ''}>{pv ? fmtQor(pv.balance) : <Skel w="5rem" h="2.25rem" label="Reading your balance" />}</span>
         <span className="text-sm text-zinc-600">QOR</span>
         <Pill tone={pv?.deployed ? 'ok' : 'neutral'} testId="pocket-deployed">{pv ? (pv.deployed ? 'deployed' : 'opens on first use') : 'reading…'}</Pill>
       </div>

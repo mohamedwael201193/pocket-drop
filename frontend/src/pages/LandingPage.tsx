@@ -73,7 +73,7 @@ export default function LandingPage() {
             <img src="/hero-sculptures.webp" width={1344} height={756} alt="Sculptural dialogue bridging legacy to post-quantum Web3" className="sculptures-blend h-auto w-full max-w-[1060px] select-none object-contain" />
           </div>
 
-          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-widest text-zinc-500">
             <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> 0x0A01</span>
             <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> 0x0A02</span>
             <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> Diana 9800</span>
@@ -89,13 +89,13 @@ export default function LandingPage() {
               <span id="hero-capsule-hint" className="sr-only">Opens the claim flow</span>
               <div className="rounded-[19px] capsule-obsidian p-5 text-stone-100">
                 <div className="mb-3.5 flex items-center justify-between">
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-300">POCKET DROP</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-semibold text-zinc-950"><MessageCircle className="h-3 w-3" />WhatsApp</span>
+                  <span className="font-mono text-xs uppercase tracking-widest text-zinc-300">POCKET DROP</span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-0.5 text-xs font-semibold text-zinc-950"><MessageCircle className="h-3 w-3" />WhatsApp</span>
                 </div>
                 <div className="my-2 text-center">
-                  <div className="font-serif text-4xl tracking-tight text-white" data-testid="hero-amount">{d.amount ?? <Dash />} <span className="text-lg text-zinc-400">QOR</span></div>
+                  <div className="font-money text-4xl tracking-tight text-white" data-testid="hero-amount">{d.amount ?? <Dash />} <span className="text-lg text-zinc-400">QOR</span></div>
                 </div>
-                <div className="mb-3 rounded-lg border border-white/10 bg-white/10 px-2 py-1.5 text-center font-mono text-[10px] uppercase tracking-widest text-stone-100" data-testid="hero-words">
+                <div className="mb-3 rounded-lg border border-white/10 bg-white/10 px-2 py-1.5 text-center font-mono text-xs uppercase tracking-widest text-stone-100" data-testid="hero-words">
                   {d.words ? d.words.join(' · ') : '4 words · from · your · key'}
                 </div>
                 <div className="flex items-center justify-between border-t border-white/10 pt-2 font-mono text-[9.5px] text-zinc-400">
@@ -114,7 +114,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <Reveal className="mb-16 grid items-end gap-8 md:grid-cols-2">
             <div>
-              <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">— ZERO-WALLET ONBOARDING</p>
+              <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">— ZERO-WALLET ONBOARDING</p>
               <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">From a chat link to a quantum-safe account</h2>
             </div>
             <div>
@@ -132,7 +132,7 @@ export default function LandingPage() {
               {[[STEP_ICONS.whatsapp, 'Chat link', 0, 'text-emerald-600'], [STEP_ICONS.key, 'Keygen', 0, 'text-zinc-800'], [STEP_ICONS.drip, 'Drip', 1, 'text-sky-600']].map(([icon, label, step, tone]) => (
                 <button key={label as string} type="button" onClick={() => setStack(step as number)} className="group flex flex-col items-center gap-2">
                   <span className={cx('flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-stoneBg shadow-sm transition-all group-hover:scale-105 group-hover:border-zinc-900', tone as string)}>{icon}</span>
-                  <span className="text-[11px] font-medium text-zinc-600">{label as string}</span>
+                  <span className="text-xs font-medium text-zinc-600">{label as string}</span>
                 </button>
               ))}
             </div>
@@ -143,15 +143,15 @@ export default function LandingPage() {
                 <div className="iso-slab absolute top-[56px] h-[126px] w-[200px] rounded-2xl opacity-85" />
                 <div className="iso-slab absolute top-[30px] h-[126px] w-[200px] rounded-2xl opacity-95" />
                 <div className="iso-slab absolute top-[4px] flex h-[126px] w-[200px] flex-col justify-between rounded-2xl p-4 transition-transform hover:-translate-y-1">
-                  <div className="flex items-center justify-between"><span className="text-[11px] font-semibold text-zinc-800">Link Pass</span><Hexagon className="h-3.5 w-3.5 text-zinc-700" /></div>
-                  <div className="font-mono text-[10px] text-zinc-600">{d.amount ? `${d.amount} QOR` : '…'} · ML-DSA-87</div>
+                  <div className="flex items-center justify-between"><span className="text-xs font-semibold text-zinc-800">Link Pass</span><Hexagon className="h-3.5 w-3.5 text-zinc-700" /></div>
+                  <div className="font-mono text-xs text-zinc-600">{d.amount ? `${d.amount} QOR` : '…'} · ML-DSA-87</div>
                 </div>
               </div>
               <div className="mt-2 max-w-[260px] text-center">
-                <span className="mb-1.5 inline-block rounded-full bg-zinc-900 px-2.5 py-0.5 font-mono text-[10px] text-white" data-testid="stack-badge">{s.badge}</span>
+                <span className="mb-1.5 inline-block rounded-full bg-zinc-900 px-2.5 py-0.5 font-mono text-xs text-white" data-testid="stack-badge">{s.badge}</span>
                 <div className="font-serif text-2xl text-zinc-900" data-testid="stack-title">{s.title}</div>
                 <div className="mt-0.5 text-xs text-zinc-600">{s.desc}</div>
-                <div className="mt-1.5 text-[10px] text-zinc-400">Example taken from the latest claimed drop{d.id ? ` (#${d.id})` : ''} <SourceBadge kind="LIVE" /></div>
+                <div className="mt-1.5 text-xs text-zinc-400">Example taken from the latest claimed drop{d.id ? ` (#${d.id})` : ''} <SourceBadge kind="LIVE" /></div>
               </div>
             </div>
 
@@ -159,7 +159,7 @@ export default function LandingPage() {
               {[[STEP_ICONS.seal, '4-Word Seal', 1, 'text-zinc-800'], [STEP_ICONS.shield, 'PoP Shield', 2, 'text-zinc-900'], [STEP_ICONS.explorer, 'Explorer', 2, 'text-zinc-800']].map(([icon, label, step, tone]) => (
                 <button key={label as string} type="button" onClick={() => setStack(step as number)} className="group flex flex-col items-center gap-2">
                   <span className={cx('flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-stoneBg shadow-sm transition-all group-hover:scale-105 group-hover:border-zinc-900', tone as string)}>{icon}</span>
-                  <span className="text-[11px] font-medium text-zinc-600">{label as string}</span>
+                  <span className="text-xs font-medium text-zinc-600">{label as string}</span>
                 </button>
               ))}
             </div>
@@ -172,17 +172,17 @@ export default function LandingPage() {
         <SectionHead eyebrow="— POST-QUANTUM ARCHITECTURE" sub="Enforced by native precompiles" title="Hardened at the protocol layer." className="mb-12" />
         <div className="grid gap-5 md:grid-cols-12">
           <Reveal className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/90 bg-white/90 p-6 shadow-sm md:col-span-6">
-            <div className="mb-2 font-mono text-[11px] uppercase tracking-widest text-zinc-500">Crystalline Lattice Seal · 0x0A01 &amp; 0x0A02</div>
+            <div className="mb-2 font-mono text-xs uppercase tracking-widest text-zinc-500">Crystalline Lattice Seal · 0x0A01 &amp; 0x0A02</div>
             <div className="relative my-1 flex items-center justify-center">
               <span className="absolute bottom-4 left-3 z-10 font-mono text-xs text-zinc-600">0x0A01</span>
               <span className="absolute right-3 top-4 z-10 font-mono text-xs text-zinc-600">0x0A02</span>
               <img src="/lattice-seal.webp" width={480} height={480} loading="lazy" alt="3D interlocking titanium rings around crystalline lattice" className="h-48 w-48 select-none object-contain" style={{ mixBlendMode: 'multiply' }} />
             </div>
-            <div className="border-t border-zinc-100 pt-3 font-mono text-[11px] text-zinc-500">Precompile verification · ML-DSA-87 native execution</div>
+            <div className="border-t border-zinc-100 pt-3 font-mono text-xs text-zinc-500">Precompile verification · ML-DSA-87 native execution</div>
           </Reveal>
 
           <Reveal delay={0.08} className="flex flex-col justify-between rounded-3xl border border-zinc-200/90 bg-white/90 p-6 text-center shadow-sm md:col-span-3">
-            <div className="font-mono text-[11px] uppercase tracking-widest text-zinc-500">Relayer Scoped Window</div>
+            <div className="font-mono text-xs uppercase tracking-widest text-zinc-500">Relayer Scoped Window</div>
             <div className="my-4 flex items-center justify-center">
               <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-dashed border-zinc-300">
                 <div className="titanium-plaque relative flex h-20 w-20 items-center justify-center rounded-full">
@@ -193,7 +193,7 @@ export default function LandingPage() {
             <div>
               <div className="text-sm font-semibold text-zinc-900">[PocketDrop] Only</div>
               <div className="mt-0.5 text-xs text-zinc-500">ML-DSA key not on the server</div>
-              <div className="mt-3 border-t border-zinc-100 pt-2 font-mono text-[10px] text-zinc-400" data-testid="landing-window">
+              <div className="mt-3 border-t border-zinc-100 pt-2 font-mono text-xs text-zinc-400" data-testid="landing-window">
                 {h ? (h.window.live ? `Window live · ${left} blocks left` : 'Window expired · renewing') : 'Reading the relayer window…'} <SourceBadge kind="LIVE" />
               </div>
             </div>
@@ -207,14 +207,14 @@ export default function LandingPage() {
                   const t = attackTx(n as number); const a = ATTACKS[(n as number) - 1];
                   return (
                     <a key={n as number} href={txUrl(t.hash)} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-zinc-200/80 bg-stoneBg p-2.5">
-                      <span className={cx('inline-block rounded-full px-2 py-0.5 font-mono text-[10px]', tone as string)}>{a.error}</span>
-                      <div className="mt-1 font-mono text-[10px] text-zinc-500">Tx {shortHash(t.hash, 4)} · Reverted</div>
+                      <span className={cx('inline-block rounded-full px-2 py-0.5 font-mono text-xs', tone as string)}>{a.error}</span>
+                      <div className="mt-1 font-mono text-xs text-zinc-500">Tx {shortHash(t.hash, 4)} · Reverted</div>
                     </a>
                   );
                 })}
               </div>
             </div>
-            <Link to="/lab" className="mt-4 text-left font-mono text-[11px] text-zinc-800 underline">Inspect all {ATTACKS.length} explorer txs → <span className="no-underline"><SourceBadge kind="RECORDED" title={`deployments/diana.json, main contract ${REC.main.address}`} /></span></Link>
+            <Link to="/lab" className="mt-4 text-left font-mono text-xs text-zinc-800 underline">Inspect all {ATTACKS.length} explorer txs → <span className="no-underline"><SourceBadge kind="RECORDED" title={`deployments/diana.json, main contract ${REC.main.address}`} /></span></Link>
           </Reveal>
         </div>
       </div>

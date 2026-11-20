@@ -53,7 +53,7 @@ export default function JudgesPage() {
       <div className="space-y-3">
         <Item n={1} title="The v4 contracts are on Diana (two instances: production and a 60 s lab)" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
           <div className="overflow-x-auto rounded-xl bg-stoneBg p-3" data-testid="v4-addresses">
-            <table className="w-full min-w-[34rem] text-left font-mono text-[11px]">
+            <table className="w-full min-w-[34rem] text-left font-mono text-xs">
               <thead><tr className="text-zinc-500"><th className="pr-3">Contract</th><th className="pr-3">Production</th><th>Lab</th></tr></thead>
               <tbody>{CONTRACTS.map(([k, label]) => (
                 <tr key={k} className="align-top"><td className="pr-3 py-1 text-zinc-700">{label}</td>
@@ -97,7 +97,7 @@ export default function JudgesPage() {
         <Item n={5} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
           <ul className="grid gap-2 sm:grid-cols-3">
             {[[String(t.total), 'Foundry tests pass', `${t.unit} unit, ${t.fuzz} fuzz, ${t.invariantFns} invariant functions`], ['100%', 'line, statement, branch, function', 'coverage on every file in src/'], ['CI profile', 'fuzz 10,000 runs', 'invariants 256 runs x depth 50']].map(([big, a, b]) => (
-              <li key={a} className="rounded-xl bg-stoneBg p-3"><div className="font-serif text-3xl leading-none" data-testid={`test-${a.split(' ')[0]}`}>{big}</div><div className="mt-1 text-xs">{a}</div><div className="text-[11px] text-zinc-500">{b}</div></li>
+              <li key={a} className="rounded-xl bg-stoneBg p-3"><div className="font-money text-3xl leading-none" data-testid={`test-${a.split(' ')[0]}`}>{big}</div><div className="mt-1 text-xs">{a}</div><div className="text-xs text-zinc-500">{b}</div></li>
             ))}
           </ul>
           <p className="text-xs text-zinc-500">{t.verifiedBy}. Foundry cannot fork the native precompiles, so the live suite (<code>contracts-v4/test/live/*.mjs</code>) is the end-to-end proof. <a className="underline" href={blob('contracts-v4/COVERAGE.md')} target="_blank" rel="noopener noreferrer">COVERAGE.md</a></p>
