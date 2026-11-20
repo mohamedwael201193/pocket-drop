@@ -4,7 +4,7 @@
     { "source": "/rest/:path*", "destination": "/api/proxy?t=rest&p=:path*" }
   ],
   "functions": {
-    "api/*.ts": { "maxDuration": 60, "includeFiles": "config/**" },
-    "api/link/*.ts": { "maxDuration": 20, "includeFiles": "config/**" }
+    "api/*.ts": { "maxDuration": 60, "includeFiles": "{config,vendor}/**" },
+    "api/link/*.ts": { "maxDuration": 20, "includeFiles": "{config,vendor}/**" }
   }
 }
