@@ -47,8 +47,14 @@ export function PocketObject({ className }: { className?: string }) {
     const go = () => { to = window.setTimeout(() => setWant(true), 600); };
     const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
     const start = () => { if (ric) idle = ric(go, { timeout: 2500 }); else to = window.setTimeout(go, 1200); };
-    if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
-    return () => { window.removeEventListener('load', start); clearTimeout(to); const c = (window as Window & { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback; if (idle && c) c(idle); };
+    // Desktop: once the page is idle. Phones and tablets: only after the first touch or scroll, so the
+    // 3D chunk never competes with the first paint or the first input on a slow phone.
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const evs = ['pointerdown', 'scroll', 'keydown'] as const;
+    const onFirst = () => { evs.forEach((e) => window.removeEventListener(e, onFirst)); start(); };
+    if (!fine) evs.forEach((e) => window.addEventListener(e, onFirst, { once: true, passive: true }));
+    else if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
+    return () => { evs.forEach((e) => window.removeEventListener(e, onFirst)); window.removeEventListener('load', start); clearTimeout(to); const c = (window as Window & { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback; if (idle && c) c(idle); };
   }, []);
   return (
     <div className={className} aria-hidden data-testid="pocket-object" data-mode={ready && !slow ? '3d' : 'static'}>
@@ -73,7 +79,7 @@ export function Stage({ eyebrow, title, children, action, object = true, live, t
   return (
     <header data-testid={testId} className="stage relative left-1/2 mb-8 -mt-8 w-screen -translate-x-1/2 sm:mb-10 sm:-mt-12">
       <div className="relative z-[1] mx-auto flex items-center gap-6 px-4 py-9 sm:px-6 sm:py-12 lg:px-8" style={{ maxWidth: 'calc(var(--page-w, 64rem))' }}>
-        <motion.div className="min-w-0 flex-1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+        <motion.div className="min-w-0 flex-1" initial={{ y: 12 }} animate={{ y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
           {eyebrow && <div className={cx('flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-invMuted [overflow-wrap:anywhere]', object && 'pr-[84px] sm:pr-0')}>{live && <span className="live-dot animate-pulseDot" aria-hidden />}{eyebrow}</div>}
           <h1 className={cx(object && 'pr-[72px] sm:pr-0', 'mt-3 font-display text-[2.5rem] font-medium leading-[1.02] tracking-[-0.035em] text-stone-50 sm:text-[3.5rem]')}>{title}</h1>
           {children && <div className="mt-4 max-w-2xl text-[15px] leading-relaxed text-stone-300 sm:text-base">{children}</div>}

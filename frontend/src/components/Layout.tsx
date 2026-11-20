@@ -113,7 +113,7 @@ export function Layout() {
       <RelayerBanner />
       <LegacyKeyStrip path={pathname} />
       <main className="flex-1">
-        <motion.div key={pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}><Outlet /></motion.div>
+        <motion.div key={pathname} initial={{ y: 10 }} animate={{ y: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}><Outlet /></motion.div>
       </main>
       <footer className="border-t border-zinc-200/80 bg-white/70 py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 pb-20 text-center text-[13px] text-zinc-600 sm:flex-row sm:px-6 sm:pb-0 sm:text-left lg:px-8">
