@@ -4,7 +4,7 @@
 
 :root { color-scheme: light; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-body { background-color: #F6F5F3; color: #18181B; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
+body { background-color: #F6F5F3; color: #18181B; font-family: 'Funnel Sans', system-ui, sans-serif; font-size: 16px; overflow-x: hidden; }
 
 /* Editorial dot-matrix + architectural hairline grid (from the design file) */
 .editorial-bg {
@@ -64,5 +64,87 @@ input[type="range"] { accent-color: #18181B; }
 .skeleton { position: relative; overflow: hidden; background: #E7E4DE; border-radius: 8px; }
 .skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); animation: shimmer 1.4s infinite; }
 input, select, textarea { font-size: 16px; } /* no iOS zoom on focus */
-:focus-visible { outline: 2px solid #18181B; outline-offset: 2px; }
+:focus-visible { outline: 2px solid #0B6B4B; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+/* ───────────── Direction B "Obsidian console" ─────────────
+   Tokens from qa/design-sketch-v2/B/tokens.css. Stone paper + obsidian stage, one green accent,
+   Funnel Display/Sans + DM Mono, Instrument Serif on big amounts (the owner's voice). */
+:root {
+  --p-bg: #F6F5F3; --p-surface: #EFEDE9; --p-ink: #18181B; --p-muted: #5E5C57; --p-ink-2: #4A4843;
+  --p-accent: #0B6B4B; --p-accent-hover: #095A3F;
+  --p-inv-bg: #18181B; --p-inv-surface: #252427; --p-inv-ink: #F6F5F3; --p-inv-muted: #A9A7A3;
+  --live: #10B981; --live-soft: #6EE7B7;
+  --line: #E4E1DB; --line-2: #D2CDC4; --fill: #ECEBE7; --fill-hover: #E6E4DF;
+  --err: #B42318; --off-bg: #E4E2DD; --off-ink: #67645E;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+.font-serif, .font-display { letter-spacing: -0.025em; font-weight: 500; }
+.font-money { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; font-variant-numeric: tabular-nums lining-nums; }
+.font-mono { font-variant-numeric: tabular-nums; }
+::selection { background: #0B6B4B; color: #F6F5F3; }
+
+/* Obsidian nav and tab bar: one dark block from the top of the screen. */
+.nav-obsidian { background: #18181B; color: #F6F5F3; border-bottom: 1px solid rgba(255,255,255,.08); }
+.tabbar-obsidian { background: #18181B; border-top: 1px solid rgba(255,255,255,.08); }
+
+/* The stage: the dark band each page opens with. */
+.stage {
+  position: relative; isolation: isolate; overflow: hidden; color: #F6F5F3;
+  background:
+    radial-gradient(120% 140% at 85% 0%, rgba(16,185,129,.10) 0%, transparent 55%),
+    linear-gradient(180deg, #18181B 0%, #1C1C1F 100%);
+}
+.stage::after { /* hairline grid, like the paper, but on obsidian */
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 95%); mask-image: linear-gradient(to bottom, black, transparent 95%);
+}
+/* Cursor spotlight (desktop only; JS sets --sx/--sy on the hovered dark surface). */
+.stage::before, .capsule-obsidian::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; z-index: 0;
+  background: radial-gradient(380px circle at var(--sx, 50%) var(--sy, -40%), rgba(110,231,183,.13), transparent 60%);
+  opacity: var(--so, 0); transition: opacity .35s var(--ease);
+}
+.capsule-obsidian { position: relative; isolation: isolate; }
+.capsule-obsidian > * { position: relative; z-index: 1; }
+
+/* Fields: filled, 52 px, label above (the label is the page's own), green focus ring. Wins over inline utilities by specificity. */
+main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), main select, main textarea {
+  background-color: #ECEBE7; border: 1px solid transparent; border-radius: 12px; min-height: 52px;
+  padding-left: 14px; padding-right: 14px; font-size: 16px; color: #18181B;
+  box-shadow: inset 0 -1px 0 #D2CDC4; transition: background-color .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+main textarea { padding-top: 12px; padding-bottom: 12px; }
+main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):hover, main select:hover, main textarea:hover { background-color: #E6E4DF; }
+main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):focus, main select:focus, main textarea:focus {
+  outline: none; background-color: #FFFFFF; border-color: #0B6B4B; box-shadow: 0 0 0 3px rgba(11,107,75,.18);
+}
+main input[aria-invalid="true"], main textarea[aria-invalid="true"] { border-color: #B42318; background-color: #FCECEA; box-shadow: none; }
+main input::placeholder, main textarea::placeholder { color: #67645E; opacity: 1; }
+main input:disabled, main select:disabled, main textarea:disabled { background-color: #E4E2DD; color: #67645E; cursor: not-allowed; box-shadow: none; }
+main input[type="checkbox"], main input[type="radio"] { accent-color: #0B6B4B; width: 18px; height: 18px; }
+input[type="range"] { accent-color: #0B6B4B; }
+
+/* Disabled buttons are a flat stone block, not a faded primary. */
+.btn-b:disabled { background: #E4E2DD !important; color: #67645E !important; border-color: transparent !important; box-shadow: none !important; opacity: 1 !important; }
+
+/* Icons: Phosphor duotone, animated on hover and on state. */
+.ph-i { flex: none; transition: transform .35s var(--ease); }
+a:hover > .ph-arrow, button:hover > .ph-arrow, a:hover .ph-arrow { transform: translateX(3px); }
+a:hover > .ph-ext, a:hover .ph-ext { transform: translate(2px, -2px); }
+button:hover > .ph-copy { transform: rotate(-8deg) scale(1.06); }
+a:hover > .ph-i:not(.ph-arrow):not(.ph-ext), button:hover > .ph-i:not(.ph-arrow):not(.ph-copy):not(.ph-spin) { transform: translateY(-1px) scale(1.08); }
+.ph-pop { animation: phPop .45s var(--ease) both; }
+@keyframes phPop { 0% { transform: scale(.4); opacity: 0; } 60% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+.ph-spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Live dot with a soft ring. */
+.live-dot { width: 7px; height: 7px; border-radius: 9999px; background: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,.22); }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage::before, .capsule-obsidian::before { display: none; }
+  .ph-i { transition: none; }
+}

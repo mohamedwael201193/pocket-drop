@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@cosmjs/stargate": "^0.39.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@qorechain/evm": "^0.14.0",
     "@qorechain/pqc": "^0.2.3",
     "@qorechain/sdk": "^0.14.0",
@@ -27,6 +28,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
+    "three": "^0.170.0",
     "viem": "^2.58.0",
     "zod": "^3.23.8"
   },
@@ -37,6 +39,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.14.0",
