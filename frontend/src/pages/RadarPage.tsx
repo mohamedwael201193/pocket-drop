@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Notice, SourceBadge, TxLink, cx } from '../components/ui';
 import { Dash, Reveal } from '../components/bits';
+import { Stage } from '../components/stage';
+import { CountUp } from '../components/alive';
 import { envStats, pqSample, type EnvStats, type Split } from '../lib/radar';
 import { addrUrl } from '../lib/config';
 import { INST, type Env } from '../lib/v4';
@@ -35,10 +37,10 @@ function EnvCard({ s }: { s: EnvStats }) {
   return (
     <div className={card} data-testid={`radar-${s.env}`}>
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">{s.env === 'prod' ? 'Production instance' : 'Lab instance (60 s delays)'}</h2><SourceBadge kind="LIVE" title="Read from chain logs just now" /></div>
-      <p className="mt-1 font-mono text-[11px] text-zinc-500">router <a className="underline" href={addrUrl(i.router)} target="_blank" rel="noopener noreferrer">{i.router.slice(0, 10)}…</a> · factory <a className="underline" href={addrUrl(i.factory)} target="_blank" rel="noopener noreferrer">{i.factory.slice(0, 10)}…</a></p>
+      <p className="mt-1 font-mono text-xs text-zinc-500">router <a className="underline" href={addrUrl(i.router)} target="_blank" rel="noopener noreferrer">{i.router.slice(0, 10)}…</a> · factory <a className="underline" href={addrUrl(i.factory)} target="_blank" rel="noopener noreferrer">{i.factory.slice(0, 10)}…</a></p>
       <div className="mt-4 grid grid-cols-3 gap-3 text-center">
         {([['Pockets deployed', s.pockets, 'pockets-deployed'], ['Drops created', s.drops.created, 'drops-created'], ['Pools created', s.pools.created, 'pools-created']] as const).map(([l, v, t]) => (
-          <div key={l} className="rounded-2xl bg-stoneCard p-3"><div className="font-serif text-3xl text-zinc-900" data-testid={`${s.env}-${t}`}>{v}</div><div className="text-[11px] text-zinc-600">{l}</div></div>
+          <div key={l} className="rounded-2xl bg-stoneCard p-3"><div className="font-money text-4xl leading-none text-zinc-900" data-testid={`${s.env}-${t}`}><CountUp value={v} /></div><div className="text-xs text-zinc-600">{l}</div></div>
         ))}
       </div>
       <div className="mt-5 space-y-3">
@@ -94,12 +96,10 @@ export default function RadarPage() {
   const extTotal = ext(prod.data) + ext(lab.data);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8" data-testid="radar">
-      <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Radar · v4 <SourceBadge kind="LIVE" /></p>
-      <h1 className="mt-1 font-serif text-3xl text-zinc-900 sm:text-5xl">What is actually on-chain</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600">Every number is counted from contract events on Diana testnet when you opened this page. Accounts that belong to the Pocket Drop team and its test setup are counted as <b>own</b>; everyone else is <b>external</b>. Nothing is added by hand.</p>
+    <div className="mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8" data-testid="radar">
+      <Stage live eyebrow={<>Radar · v4 <SourceBadge kind="LIVE" /></>} title="What is actually on-chain">Every number is counted from contract events on Diana testnet when you opened this page. Accounts that belong to the Pocket Drop team and its test setup are counted as <b>own</b>; everyone else is <b>external</b>. Nothing is added by hand.</Stage>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2">
         <Reveal>{prod.data ? <EnvCard s={prod.data} /> : <div className={card}><Dash />{prod.error && <Notice tone="error">Could not read the logs: {(prod.error as Error).message}</Notice>}</div>}</Reveal>
         <Reveal delay={0.08}>{lab.data ? <EnvCard s={lab.data} /> : <div className={card}><Dash />{lab.error && <Notice tone="error">Could not read the logs: {(lab.error as Error).message}</Notice>}</div>}</Reveal>
       </div>
