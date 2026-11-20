@@ -1,15 +1,18 @@
-// /qday "Steal this Pocket": banner, five live baits, alarm, in-tab attack (eth_call only), log, before/after; screenshots.
+// /qday "Q-Day Drill": banner, five live baits, alarm, in-tab attack (eth_call only), log, before/after; screenshots.
 //   E2E_URL=https://<preview> QDAY_KEYS_EXPECTED=1 npx playwright test e2e/qday.spec.ts --project=chromium-390 --project=chromium-1440
 import { test, expect } from './fixtures';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 
-test('Steal this Pocket shows the testnet warning, five live baits, the alarm and the log', async ({ page }, info) => {
+test('The Q-Day Drill shows the testnet warning, five live baits, the alarm and the log', async ({ page }, info) => {
   await page.goto(`${BASE}/qday`);
   await expect(page.getByTestId('qday-testnet-banner')).toContainText('TESTNET');
   await expect(page.getByTestId('qday-never-real')).toContainText('never send real funds');
   await expect(page.getByTestId('qday-alarm')).toContainText(/No breach|Breach alarm/, { timeout: 60_000 });
+  // on a phone the five cards are collapsed under "Try it"; open them
+  const toggle = page.getByTestId('qday-baits-toggle');
+  if (await toggle.isVisible() && !(await page.getByTestId('qday-baits-wrap').evaluate((d) => (d as HTMLDetailsElement).open))) await toggle.click();
   for (const id of ['B1', 'B2', 'B3', 'B4', 'B5']) {
     await expect(page.getByTestId(`qday-bait-${id}`)).toBeVisible();
     await expect(page.getByTestId(`qday-balance-${id}`)).toContainText('QOR');
@@ -38,7 +41,7 @@ test('Try it: every in-tab path against B1 is refused (eth_call, nothing sent)',
   await expect(rows).not.toContainText('WOULD SUCCEED');
 });
 
-test('Steal this Pocket is under Proof, not a new tab', async ({ page }) => {
+test('The Q-Day Drill is under Proof, not a new tab', async ({ page }) => {
   await page.goto(`${BASE}/proof`);
   await expect(page.getByTestId('proof-card-qday')).toBeVisible();
   await page.goto(`${BASE}/lab`);

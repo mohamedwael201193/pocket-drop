@@ -19,8 +19,8 @@ const TABS = [
   { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges', '/qday'].some((x) => p.startsWith(x)) },
 ] as const;
 export const PROOF_ITEMS = [
+  { to: '/qday', label: 'Q-Day Drill', sub: 'Public classical keys, live: try to take the QOR', Icon: KeyRound },
   { to: '/lab', label: 'Lab', sub: 'Attacks the chain refused', Icon: FlaskConical },
-  { to: '/qday', label: 'Steal this Pocket', sub: 'Q-Day drill: public keys, live', Icon: KeyRound },
   { to: '/radar', label: 'Radar', sub: 'Live stats from the chain', Icon: Radio },
   { to: '/judges', label: 'Judges', sub: '60-second checklist', Icon: Scale },
 ];

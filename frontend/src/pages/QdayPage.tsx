@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Button, CopyButton, Mono, Notice, Page, PageTitle, Pill, SourceBadge, TxLink, cx } from '../components/ui';
 import { Dash } from '../components/bits';
-import { ShieldAlert, ShieldCheck, TriangleAlert, KeyRound } from '../components/icons';
+import { ChevronDown, ShieldAlert, ShieldCheck, TriangleAlert, KeyRound } from '../components/icons';
 import { addrUrl, SOURCE_URL } from '../lib/config';
 import { fmtQor } from '../lib/chain';
 import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, type AttemptRow, type LiveBait, type TryRow } from '../lib/qday';
@@ -89,7 +89,7 @@ function TryIt({ baits }: { baits: LiveBait[] }) {
     setMined((m) => ({ ...m, [r.id]: out.ok ? `mined, ${out.status} (${out.expectedRevert}) ${out.txHash}` : out.error?.message ?? 'refused' }));
   }
   return (
-    <section className={cx(card, 'mt-5')} data-testid="qday-try">
+    <section className={cx(card, 'md:mt-5')} data-testid="qday-try">
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Try it in this tab</h2><SourceBadge kind="LIVE" title="eth_call against Diana from your browser" /></div>
       <p className="mt-1 text-sm text-zinc-700">Pick a bait. We sign every attack with the classical key <b>inside this browser tab</b> and ask the chain what would happen (eth_call, nothing is sent). The key is never sent to our server. Your own ML-DSA key is generated fresh for each run, exactly what an attacker with a quantum computer would have.</p>
       <div className="mt-3 flex flex-wrap items-end gap-2">
@@ -116,10 +116,20 @@ export default function QdayPage() {
   const q = useQuery({ queryKey: ['qday'], queryFn: fetchQday, refetchInterval: 30_000, retry: 1 });
   const s = q.data;
   const [scriptBait, setScriptBait] = useState('B1');
+  const [baitsOpen, setBaitsOpen] = useState(() => typeof window === 'undefined' || typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 768px)').matches);
   return (
     <Page testId="qday-page">
-      <PageTitle eyebrow={<>Proof · Q-Day drill <SourceBadge kind="LIVE" /></>} title="Steal this Pocket">We published the classical keys of five Pockets. Assume a quantum computer already broke them. Take the money if you can.</PageTitle>
+      <PageTitle eyebrow={<>Proof · Q-Day Drill <SourceBadge kind="LIVE" /></>} title="Q-Day Drill">We published the classical keys of five Pockets. Assume a quantum computer already broke them. Take the money if you can.</PageTitle>
       <TestnetBanner />
+
+      <section className={cx(card, 'mb-5')} data-testid="qday-proves">
+        <h2 className="font-serif text-2xl text-zinc-900">What this proves</h2>
+        <ul className="mt-2 space-y-2 text-[15px] leading-relaxed text-zinc-700">
+          <li><b>A rehearsal of Q-Day, enforced by the chain.</b> On Q-Day, classical keys (secp256k1, the kind every wallet uses today) can be computed from public data. Here we skip ahead: the classical keys of five real Pockets are published, so anyone holds what a quantum attacker would hold.</li>
+          <li><b>On real post-quantum smart accounts.</b> Each Pocket is a live contract on Diana testnet that only moves with a signature from its registered ML-DSA-87 key. The chain checks that signature, not our server, so every attempt below either reverts on chain or is refused before it is sent.</li>
+          <li><b>It already found a bug, in our own code.</b> An earlier version derived the ML-DSA key from the same seed as the classical key, so a stolen classical key also gave the PQ key. We robbed a test Pocket on purpose to prove it, then fixed the derivation. The before and after are at the bottom of this page.</li>
+        </ul>
+      </section>
 
       <section className={cx('mb-5 rounded-3xl border-2 p-5 sm:p-6', s?.alarm.raised ? 'border-red-500 bg-red-50' : 'border-emerald-400 bg-emerald-50')} data-testid="qday-alarm">
         {!s ? <p className="text-sm text-zinc-600">{q.error ? `Could not read the drill: ${(q.error as Error).message}` : <>Reading the chain… <Dash /></>}</p>
@@ -127,13 +137,23 @@ export default function QdayPage() {
           : (<><div className="flex items-center gap-2 font-serif text-2xl text-emerald-900"><ShieldCheck className="h-6 w-6" aria-hidden /> No breach</div><p className="mt-1 text-sm text-emerald-950">Every bait still holds what we left in it, every registered PQ key is unchanged, no EVM window is open, and no outside transaction against a bait has succeeded. Checked {at(s.generatedAt)}, re-checked every 30 s.</p></>)}
       </section>
 
-      <h2 className="sr-only">The five baits</h2>
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="qday-baits">
-        {s ? s.baits.map((b) => <BaitCard key={b.id} b={b} />) : QDAY.baits.map((b) => <div key={b.id} className={card}><h3 className="font-serif text-xl">{b.id}</h3><p className="text-sm text-zinc-600">{b.description}</p><Dash /></div>)}
-      </section>
-      <p className="mt-2 text-xs text-zinc-500">The five baits, their guardians and the sender behind B4&apos;s drop are TEAM-RUN accounts: they are listed as own accounts and never counted as outside use. Each Pocket&apos;s ML-DSA key is independent random entropy, so the classical key says nothing about it.</p>
-
-      <TryIt baits={s?.baits ?? []} />
+      {/* Phone: the verdict above, then "Try it", then the five key cards collapsed. Desktop: cards open first. */}
+      <div className="flex flex-col">
+        <div className="order-2 md:order-1">
+          <details className="group" open={baitsOpen} onToggle={(e) => setBaitsOpen(e.currentTarget.open)} data-testid="qday-baits-wrap">
+            <summary className="flex min-h-[48px] cursor-pointer list-none items-center justify-between gap-2 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-[15px] font-medium text-zinc-900 md:hidden" data-testid="qday-baits-toggle">
+              <span>The five Pockets and their published keys{s ? ` · ${s.baits.filter((b) => b.alarm.length === 0).length} of ${s.baits.length} holding` : ''}</span>
+              <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <h2 className="sr-only">The five baits</h2>
+            <section className="mt-3 grid gap-4 md:mt-0 md:grid-cols-2 lg:grid-cols-3" data-testid="qday-baits">
+              {s ? s.baits.map((b) => <BaitCard key={b.id} b={b} />) : QDAY.baits.map((b) => <div key={b.id} className={card}><h3 className="font-serif text-xl">{b.id}</h3><p className="text-sm text-zinc-600">{b.description}</p><Dash /></div>)}
+            </section>
+            <p className="mt-2 text-xs text-zinc-500">The five baits, their guardians and the sender behind B4&apos;s drop are TEAM-RUN accounts: they are listed as own accounts and never counted as outside use. Each Pocket&apos;s ML-DSA key is independent random entropy, so the classical key says nothing about it.</p>
+          </details>
+        </div>
+        <div className="order-1 mb-5 md:order-2 md:mb-0"><TryIt baits={s?.baits ?? []} /></div>
+      </div>
 
       <section className={cx(card, 'mt-5')} data-testid="qday-script">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Or attack from your terminal</h2>
@@ -149,7 +169,7 @@ export default function QdayPage() {
           <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4" data-testid="qday-log-refused">
             <h3 className="text-sm font-semibold text-zinc-900">Refused by our relayer</h3>
             <p className="mt-0.5 text-xs text-zinc-500">{s ? withLocalTimes(s.log.relayerRefused.label) : 'Attempts the relayer simulated and refused before sending.'}</p>
-            {(s?.log.relayerRefused.rows.length ?? 0) === 0 ? <p className="mt-3 text-xs text-zinc-500">{s ? 'None since this server instance started.' : '…'}</p> : (
+            {(s?.log.relayerRefused.rows.length ?? 0) === 0 ? <p className="mt-3 text-xs text-zinc-500">{s ? 'None yet. This list lives in the API server\'s memory and starts empty after each deploy; mined attempts are in the first column.' : '…'}</p> : (
               <ul className="mt-3 space-y-1.5 text-xs">{s!.log.relayerRefused.rows.slice(0, 15).map((r) => <li key={r.at + r.call} className="border-b border-zinc-100 pb-1.5 last:border-0"><b>{r.bait}</b> {r.call} · <span className="text-emerald-800">{r.error}</span> <span className="text-zinc-500">{at(r.at)}</span></li>)}</ul>)}
           </div>
           <LogCol title="Our attacker bot (team-run)" label={s?.log.teamBot.label ?? 'Hourly GitHub Actions run by the team.'} rows={s?.log.teamBot.rows ?? []} testId="qday-log-bot" empty={s ? (s.log.teamBot.runs.length > 0 ? 'No bot transaction on chain yet; the runs above are its read-only checks.' : 'No bot attempt on chain yet.') : '…'}>

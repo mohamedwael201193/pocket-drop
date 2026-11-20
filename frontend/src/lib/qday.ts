@@ -1,4 +1,4 @@
-// "Steal this Pocket": the Q-Day drill, run from the browser. Everything here is read-only (eth_call) unless the visitor
+// The Q-Day Drill, run from the browser. Everything here is read-only (eth_call) unless the visitor
 // presses "Put it on chain", which asks our relayer to mine the same call (it only mines calls that revert).
 // The classical key never leaves this tab: it signs locally and is never sent to our API.
 import { decodeErrorResult, encodeFunctionData, keccak256, parseEther, toHex, zeroAddress, type Hex } from 'viem';
