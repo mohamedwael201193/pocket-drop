@@ -4,7 +4,9 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Hex } from 'viem';
+import { keccak256, toHex, type Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
+import { keyMaterial, parseRoot } from '../src/lib/keyderive';
 import { INST, balanceOf, deployerAddress, dropLink, fund, guardians, pub, poolOf, qor, recovered, spentQor, txOk, vaultRead } from './chain4';
 
 const URL = (process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app').replace(/\/$/, '');
@@ -139,6 +141,17 @@ async function sendFlow(browser: Browser, opts: Record<string, unknown>, project
     expect(await balanceOf(rPocket)).toBe(BigInt(AMOUNT.replace('0.', '')) * 10n ** 17n);
     run.accounts['recipient.pocket'] = rPocket;
     run.checks.chain = { dropId: id, state: 'Claimed', senderIsPocket: true, paidIntoRecipientPocket: true };
+    // the recipient's browser key is v2: its EVM address and its registered ML-DSA key both come from the pd2: master,
+    // so the classical key cannot be used to compute the quantum-safe key (the root itself is never written to evidence)
+    const rRoot = await rp.evaluate(() => localStorage.getItem('pd.root.v4'));
+    expect(rRoot?.startsWith('pd2:')).toBe(true);
+    const km = keyMaterial(parseRoot(rRoot!)!);
+    expect(privateKeyToAccount(toHex(km.secp)).address.toLowerCase()).toBe(link.recipient.toLowerCase());
+    const { unifiedAccountFromSeed } = await import('@qorechain/sdk');
+    const rAcct = await unifiedAccountFromSeed(km.secp, { pqcSecret: km.pqcSecret });
+    const full = (await pub.readContract({ address: INST.prod.drop.address as Hex, abi: (await import('../src/lib/abi4')).dropAbi, functionName: 'getLink', args: [BigInt(id.slice(1))] })) as { recipientKeyHash: Hex };
+    expect(keccak256(toHex(rAcct.pqc.publicKey)).toLowerCase()).toBe(full.recipientKeyHash.toLowerCase());
+    run.checks.recipientKeyDerivation = 'v2: pd2: master; EVM address = v2 secp key; bound recipientKeyHash = keccak(ML-DSA key from the independent v2 secret)';
     await sweep(sp, run, 'sender', await balanceOf(pocket));
   } catch (e) { await failShots(run); throw e; } finally { PAGES.length = 0; save(run); await S.ctx.close(); await R.ctx.close(); }
 }

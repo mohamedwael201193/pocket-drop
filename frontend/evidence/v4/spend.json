@@ -1,5 +1,5 @@
 {
- "totalQor": 14.1,
+ "totalQor": 14.81,
  "entries": [
   {
    "qor": 2,
@@ -540,6 +540,36 @@
    "note": "retest 20 Nov: relayer paid 1.7849 QOR gas for 35 relayed txs (5.3589 -> 3.5740 QOR); deployer net 0.9499 QOR (7.1799 -> 6.2299)",
    "at": "2026-11-20T03:35:00.000Z",
    "hash": "n/a (balance delta of 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD)"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 b-giveaway sender key",
+   "hash": "0xdc89a218453414ba0138076c0a891bc3f0dd870b1ec37d634cc8c19d462c7a56",
+   "at": "2026-11-20T04:20:49.089Z"
+  },
+  {
+   "qor": 0.3,
+   "note": "e2e chromium-390 b-giveaway sender pocket",
+   "hash": "0x3b091c9a19c183b622b5061369c6f05094a593f94f654287988de2fc484aa776",
+   "at": "2026-11-20T04:20:50.793Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 b-giveaway sender key",
+   "hash": "0xf239e1dc619a9ae5fd26803676f3c92fd1e9bacaf69fc765158f9066e107c9e4",
+   "at": "2026-11-20T04:22:11.522Z"
+  },
+  {
+   "qor": 0.3,
+   "note": "e2e chromium-390 b-giveaway sender pocket",
+   "hash": "0x54753043b039d95af7826df6e3368b7bf2c09f75ebb8f1a5ed9098c223ec67fc",
+   "at": "2026-11-20T04:22:13.247Z"
+  },
+  {
+   "qor": -0.04,
+   "note": "recovered: chromium-390 b-giveaway sweep",
+   "hash": "0x8350bc12def1379482e32af7773aeb944b0425e2dde87b63a821e29651898ffe",
+   "at": "2026-11-20T04:22:35.907Z"
   }
  ]
 }

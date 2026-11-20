@@ -1,0 +1,29 @@
+{
+ "project": "chromium-390",
+ "flow": "b-giveaway",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0xf239e1dc619a9ae5fd26803676f3c92fd1e9bacaf69fc765158f9066e107c9e4",
+  "fund sender Pocket 0.3 QOR": "0x54753043b039d95af7826df6e3368b7bf2c09f75ebb8f1a5ed9098c223ec67fc",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "0x0a2381a827130c892170926b852953ff467f9c602df8affb2eb10414ebea16e4",
+  "recipient claim (ML-DSA signature, relayed)": "0xa014e5afccb4cd6c1831a67461c56c1673b78f11bcc1aab55eb5ae96f993be5f",
+  "recipient bind (link-key signature, relayed)": "0x7fc540b628c1b1b4d5d16664ae95c62321d8f8dfd2be5384f47b056e898b3097",
+  "recipient PQ key registration (paid from the drip)": "C9D5DA3F629AAE77D3AD83A43D81887E4B442D76CA809D7D7FA4A8BF998548B9",
+  "sweep sender Pocket back to the deployer": "0x8350bc12def1379482e32af7773aeb944b0425e2dde87b63a821e29651898ffe"
+ },
+ "checks": {
+  "recipientPocketBalanceWei": "100000000000000000",
+  "chain": {
+   "dropId": "p21",
+   "state": "Claimed",
+   "senderIsPocket": true,
+   "paidIntoRecipientPocket": true
+  },
+  "recipientKeyDerivation": "v2: pd2: master; EVM address = v2 secp key; bound recipientKeyHash = keccak(ML-DSA key from the independent v2 secret)"
+ },
+ "accounts": {
+  "sender.pocket": "0xcef4d6A66769446FbAd6A2523a2b2aEF85B655dB",
+  "sender.key": "0x7fdFBd6777EFebDb962D0be742e59393AFB5763F",
+  "recipient.pocket": "0xA5627D7B6Fc54b9D07E1085bF2127B1D15797980"
+ },
+ "finishedAt": "2026-11-20T04:22:35.907Z"
+}
