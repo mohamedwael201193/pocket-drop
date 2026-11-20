@@ -1,7 +1,8 @@
 // B-01 regression (no funds needed): a key written to this browser outside the current page (a claim page, another tab)
 // must never be replaced by "Use this browser", and /pocket must show the Pocket that key owns.
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/overwrite.spec.ts --project=chromium-390
-import { test, expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { test, expect } from '../fixtures';
 import { readRoot } from '../vault';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';

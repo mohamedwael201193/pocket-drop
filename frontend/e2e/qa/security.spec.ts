@@ -1,14 +1,14 @@
 // Security headers on a deployed build: strict CSP, frame-ancestors 'none', Permissions-Policy, and no CSP violation on
 // any route; the browser key is sealed at rest and survives a reload. Spends nothing.
 //   E2E_URL=https://<preview> npx playwright test e2e/qa/security.spec.ts --project=chromium-1440
-import { test, expect } from '@playwright/test';
+import { test, expect, previewHeaders } from '../fixtures';
 import { isSealed, readRoot } from '../vault';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 const ROUTES = ['/', '/send', '/send/inbox', '/receive', '/c/p12', '/c/p12#k=' + '00'.repeat(32), '/pool/p5', '/pocket', '/pocket?env=lab', '/proof', '/lab', '/radar', '/judges', '/qday', '/nope-404'];
 
 test('headers: strict CSP with only the two backends, no framing, Permissions-Policy', async ({ request }) => {
-  const r = await request.get(`${BASE}/qday`);
+  const r = await request.get(`${BASE}/qday`, { headers: previewHeaders });
   const h = r.headers();
   const csp = h['content-security-policy'] ?? '';
   expect(csp).toContain("frame-ancestors 'none'");

@@ -1,6 +1,6 @@
 // /qday "Steal this Pocket": banner, five live baits, alarm, in-tab attack (eth_call only), log, before/after; screenshots.
 //   E2E_URL=https://<preview> QDAY_KEYS_EXPECTED=1 npx playwright test e2e/qday.spec.ts --project=chromium-390 --project=chromium-1440
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
