@@ -179,6 +179,23 @@
     "qa-20nov-a-confirmed-attempt1-sender-pocket-lost": "0x6c07A8Dc8D70483Aa6845338aC379e9Ef9f67cea",
     "qa-20nov-a-confirmed-attempt1-sender-acct-lost": "0x705B26B225f2F20A41220c05bFDD7B38d8213196",
     "qa-20nov-c-pool-claimer1-pocket": "0x5DdB75E409756311FC568cA33956393014662A19",
-    "qa-20nov-c-pool-claimer2-pocket": "0x03A4d4551611D325434c563e4A39a1090F323AEE"
+    "qa-20nov-c-pool-claimer2-pocket": "0x03A4d4551611D325434c563e4A39a1090F323AEE",
+    "qa-20nov-retest-a-confirmed-sender-pocket": "0x33e1DbCdEc09c8Ab24c704923C1F02685D93813b",
+    "qa-20nov-retest-a-confirmed-sender-acct": "0x24B29C10195316AF261fdcaC1b0B2181c4CA975B",
+    "qa-20nov-retest-a-confirmed-recipient-pocket": "0x564B31b57F452CB67326788D0305C324d74dC8fD",
+    "qa-20nov-retest-b-giveaway-sender-pocket": "0xBD859b2F924b70bE2DB75c93C8ecdD091D1ba9F2",
+    "qa-20nov-retest-b-giveaway-sender-acct": "0x30879a5BcF1C8be940f64b1C0C102E1B6D547477",
+    "qa-20nov-retest-b-giveaway-recipient-pocket": "0x4bf3cf8c0a194C224aC2F4B45916B533037dBee7",
+    "qa-20nov-retest-c-pool-host-pocket": "0xa236261516760486cD513e41121559E7860400E1",
+    "qa-20nov-retest-c-pool-host-acct": "0x953cb497eB98DFF5695bD296aE507419FF1fcc67",
+    "qa-20nov-retest-c-pool-claimer1-acct": "0xBA171bCEE7EBe2Ea940003697fb9ef0d3C2BE854",
+    "qa-20nov-retest-c-pool-claimer2-acct": "0xAE357A40b055fBBD05a633f41d15aa648e9da742",
+    "qa-20nov-retest-d-pocket-lab-owner-pocket": "0x3eC04d31c1769796CaD463fAD331BaF7473E6D7c",
+    "qa-20nov-retest-d-pocket-lab-owner-acct": "0x0386f15570b8F76136745cf4405DC4247639e9fB",
+    "qa-20nov-retest-d-pocket-lab-newowner-acct": "0x096804D9d584088208FE705754d291EcF7D9e705",
+    "qa-20nov-retest-e-cancel-sender-pocket": "0x5da4a726494b378C2Dd3C0Da000B8C779fdd2756",
+    "qa-20nov-retest-e-cancel-sender-acct": "0xD2C10B5d86a8B36d25bE218eb3AC8116DFCd3Da5",
+    "qa-20nov-retest-c-pool-claimer1-pocket": "0x99887327B8fC07Ffd5456d494c473505A886346A",
+    "qa-20nov-retest-c-pool-claimer2-pocket": "0x7cd882cC9BC92FD900320793c3159A5e212c33e3"
   }
 }
