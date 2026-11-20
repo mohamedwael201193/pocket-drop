@@ -78,10 +78,10 @@ export function LinkRow({ m, tx, onTx }: { m: MyLink; tx?: { what: string; hash:
   }
   const state = d ? d.state : p ? (p.closed ? 'Closed' : p.taken >= p.slots ? 'Full' : 'Open') : '…';
   const note = c.kind === 'pool'
-    ? (!p ? 'Reading…'
+    ? (!p ? 'Reading from the chain…'
       : p.closed ? `${p.taken} of ${p.slots} slots taken (${fmtQor(BigInt(p.taken) * p.perSlot)} QOR paid out). ${p.taken < p.slots ? `The unclaimed ${fmtQor(BigInt(p.slots - p.taken) * p.perSlot)} QOR came back to your Pocket when the pool closed.` : 'Nothing was left to return.'}`
       : `${p.taken} of ${p.slots} slots taken, ${fmtQor(p.perSlot)} QOR each.`)
-    : !d ? 'Reading…'
+    : !d ? 'Reading from the chain…'
     : d.state === 'Open' ? 'Waiting for someone to open the link.'
     : d.state === 'Bound' ? (d.mode === 'Open' ? 'Opened. The receiver is setting up and will claim by themselves.' : 'Opened.')
     : d.state === 'Confirmed' ? 'You confirmed. They can claim now.'

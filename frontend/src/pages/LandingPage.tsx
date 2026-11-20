@@ -192,7 +192,7 @@ export default function LandingPage() {
               <div className="text-sm font-semibold text-zinc-900">[PocketDrop] Only</div>
               <div className="mt-0.5 text-xs text-zinc-500">ML-DSA key not on the server</div>
               <div className="mt-3 border-t border-zinc-100 pt-2 font-mono text-[10px] text-zinc-400" data-testid="landing-window">
-                {h ? (h.window.live ? `Window live · ${left} blocks left` : 'Window expired · renewing') : 'Window …'} <SourceBadge kind="LIVE" />
+                {h ? (h.window.live ? `Window live · ${left} blocks left` : 'Window expired · renewing') : 'Reading the relayer window…'} <SourceBadge kind="LIVE" />
               </div>
             </div>
           </Reveal>

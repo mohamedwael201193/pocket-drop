@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from 'lucide-react';
 import type { Hex } from 'viem';
-import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
+import { Button, CopyButton, Fingerprint, Mono, Notice, Page, Skel, SourceBadge, TxLink, cx } from '../components/ui';
 import { bindDrop, claimDrop, keyStatus, readDrop, linkId4 } from '../lib/claim4';
 import { deriveAccount, loadRoot, keyHashOfAccount, type KeyAccount } from '../lib/identity';
 import { useAccount } from '../lib/account';
@@ -179,8 +179,8 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
           <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · {label}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : dead ? 'This link held' : expired ? 'This link holds' : 'You received'}</div>
-          <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link…'}</div>
+          <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? <Skel w="7rem" h="2.75rem" className="!bg-stone-700/70" label="Reading the link" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
+          <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
         </div>
 
         {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}

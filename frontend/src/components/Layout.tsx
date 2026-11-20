@@ -35,7 +35,7 @@ function SyncChip() {
   const qc = useQueryClient();
   const { data: h, isError } = useHealth();
   const fetching = useIsFetching({ queryKey: ['health'] }) + useIsFetching({ queryKey: ['stats'] }) > 0;
-  const label = fetching ? 'Syncing…' : isError ? 'Diana 9800 · API offline' : h ? (h.window.live ? 'Diana 9800 · live' : 'Diana 9800 · relayer paused') : 'Diana 9800';
+  const label = fetching && !h ? 'Connecting to Diana…' : isError ? 'Diana 9800 · API offline' : h ? (h.window.live ? 'Diana 9800 · live' : 'Diana 9800 · relayer paused') : 'Diana 9800';
   return (
     <button type="button" data-testid="testnet-badge" title="Diana testnet, chain id 9800. Click to re-read the relayer and stats."
       onClick={() => { void qc.invalidateQueries(); }}

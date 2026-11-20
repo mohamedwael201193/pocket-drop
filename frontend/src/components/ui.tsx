@@ -133,3 +133,8 @@ export function StepCard({ n, title, done, locked, children, testId }: { n: numb
     </section>
   );
 }
+
+/** Loading skeleton that keeps the layout of the value it stands for (UX-11). */
+export function Skel({ w = '4rem', h = '1em', className, label = 'Loading' }: { w?: string; h?: string; className?: string; label?: string }) {
+  return <span role="status" aria-label={label} className={cx('inline-block animate-pulse rounded-md bg-zinc-300/70 align-middle', className)} style={{ width: w, height: h }} />;
+}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Eye, EyeOff, KeyRound, Wallet } from 'lucide-react';
 import QRCode from 'qrcode';
-import { Button, CopyButton, Mono, Notice, Pill, SourceBadge, TxLink } from './ui';
+import { Button, CopyButton, Mono, Notice, Pill, Skel, SourceBadge, TxLink } from './ui';
 import { useAccount, useKeyAccount, usePocketView, useQorexBalance } from '../lib/account';
 import { fundFromQorex } from '../lib/qorex';
 import { fmtQor, cosmosAddressOf } from '../lib/chain';
@@ -118,9 +118,9 @@ export function PocketCard({ compact }: { compact?: boolean }) {
         <span className="flex items-center gap-1.5"><SourceBadge kind="LIVE" /><Pill tone={a.env === 'lab' ? 'warn' : 'neutral'}>{a.env === 'lab' ? 'Lab · 60 s delays' : 'Production instance'}</Pill></span>
       </div>
       <div className="flex flex-wrap items-baseline gap-x-3">
-        <span className="font-serif text-4xl text-zinc-900" data-testid="pocket-balance" data-wei={pv?.balance.toString() ?? ''}>{pv ? fmtQor(pv.balance) : '…'}</span>
+        <span className="font-serif text-4xl text-zinc-900" data-testid="pocket-balance" data-wei={pv?.balance.toString() ?? ''}>{pv ? fmtQor(pv.balance) : <Skel w="5rem" h="2.25rem" label="Reading your balance" />}</span>
         <span className="text-sm text-zinc-600">QOR</span>
-        <Pill tone={pv?.deployed ? 'ok' : 'neutral'} testId="pocket-deployed">{pv ? (pv.deployed ? 'deployed' : 'opens on first use') : '…'}</Pill>
+        <Pill tone={pv?.deployed ? 'ok' : 'neutral'} testId="pocket-deployed">{pv ? (pv.deployed ? 'deployed' : 'opens on first use') : 'reading…'}</Pill>
       </div>
       <a href={addrUrl(a.activePocket)} target="_blank" rel="noopener noreferrer" data-testid="pocket-address" data-address={a.activePocket} className="block break-all font-mono text-xs text-zinc-700 underline decoration-zinc-300 underline-offset-2">{a.activePocket}</a>
       {!compact && !lost && <FundOptions target={a.activePocket} label="Fund your Pocket" />}
