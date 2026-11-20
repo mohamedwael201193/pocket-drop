@@ -158,7 +158,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
   if (link === null) return <DeadEnd title="Link not found" testId="link-error">There is no link {label} on this instance. Check that you opened the whole link the sender shared, or ask them for a new one.</DeadEnd>;
   if (linkErr && !link) return <DeadEnd title="Could not read this link" testId="link-error">{explainError(linkErr)} Reload the page to try again.</DeadEnd>;
   if (!seed && !started && !(() => { try { return localStorage.getItem(startedKey(env, id)) === '1'; } catch { return false; } })()) {
-    if (link && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state)) return <DeadEnd title={`This link is already ${link.state.toLowerCase()}`} testId="link-dead" tone="warn">It held {fmtQor(link.amount)} QOR and cannot be claimed again.</DeadEnd>;
+    if (link && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state)) return <DeadEnd title={`This link is already ${link.state.toLowerCase()}`} testId="link-dead" tone="warn">It held {fmtQor(link.amount)} QOR and cannot be claimed again. Ask the sender for a new link if you expected it.</DeadEnd>;
     return <DeadEnd title="This link is incomplete" testId="no-key">The link is missing its key: the long part after the # is required. Open the full link exactly as the sender shared it.</DeadEnd>;
   }
 
@@ -186,8 +186,14 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
 
         {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
         {expired && <h1 className="font-serif text-3xl text-zinc-900">This link expired</h1>}
-        {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}
-        {expired && <Notice tone="warn" testId="link-expired">This link expired. The sender can take the money back.</Notice>}
+        {dead && <Notice tone="warn" testId="link-dead">{link!.state === 'Claimed' ? 'Someone already received this money, so it cannot be claimed again. If that was you in this browser, it is in your Pocket.' : `The sender took this money back (${link!.state.toLowerCase()}), so it cannot be claimed.`} Ask the sender for a new link if you expected it.</Notice>}
+        {expired && <Notice tone="warn" testId="link-expired">Nobody opened it in time, so the money goes back to the sender. Ask them to send a new link.</Notice>}
+        {(dead || expired) && (
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Link to="/pocket" className="inline-flex min-h-[44px] items-center rounded-full border border-zinc-300 bg-white px-5 font-medium text-zinc-900">Open my Pocket</Link>
+            <Link to="/receive" className="inline-flex min-h-[44px] items-center rounded-full px-4 text-zinc-700 underline">Paste another link</Link>
+          </div>
+        )}
 
         {state === 'ready' && !dead && !expired && (
           <div className="space-y-4 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
