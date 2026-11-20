@@ -203,6 +203,20 @@
     "TEAM-RUN qday-story W Pocket": "0x803B3ACEf3e7C7c54580663d1BFa05adA8cB6B17",
     "TEAM-RUN qday-story X (attacker submitter)": "0xF7bA1fbA4Bf4F48eCA666083b799f618997b072F",
     "TEAM-RUN qday-story G1 (guardian of V Pocket)": "0xcD72A8F082bc5Fe250D7aD0dC22CcE101c8633CE",
-    "TEAM-RUN qday-story G2 (guardian of V Pocket)": "0x750f93231543B41AC2224C0c0853Ae2953192De6"
+    "TEAM-RUN qday-story G2 (guardian of V Pocket)": "0x750f93231543B41AC2224C0c0853Ae2953192De6",
+    "TEAM-RUN qday bait B1 key account": "0xf2a37748aFf0Dc12E0C5abC1C3566A0c6D12121f",
+    "TEAM-RUN qday bait B1 Pocket": "0xCE272e8c261202C4c4e38479763c8892C64C2B1F",
+    "TEAM-RUN qday bait B2 key account": "0x17d3D6A9ddb1Da525D4A3a1a26ED9Fb369EBc754",
+    "TEAM-RUN qday bait B2 Pocket": "0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE",
+    "TEAM-RUN qday bait B3 key account": "0xbDfE6C1030712554Ce0f466BD4A3f377e966bE34",
+    "TEAM-RUN qday bait B3 Pocket": "0x5e08A3308f60b512d6958A46629E1EE3FEC8Bd06",
+    "TEAM-RUN qday bait B4 key account": "0x1991ab25891f7B1c475bA8e85Ccd685f0FC6d045",
+    "TEAM-RUN qday bait B4 Pocket": "0xb5056dC92734cdA2162D76E74Aaba3D338E6C28F",
+    "TEAM-RUN qday bait B5 key account": "0xaD127D5b5e7013038428ccdB4c5Dc1C6eDeB8464",
+    "TEAM-RUN qday bait B5 Pocket": "0xa5BFb1edE77C41d91450a0a918D3d5775a178f24",
+    "TEAM-RUN qday sender S key account": "0xFA45699C3F1F4A3D0C9cD117F2faEB06e80f9db7",
+    "TEAM-RUN qday sender Pocket S": "0x94974f4D977005B1D4F4623D4Fe9C647801c0151",
+    "TEAM-RUN qday bait B2 guardian G1": "0x41c008d14EF532f976Be20fE9410134b2C4a75b9",
+    "TEAM-RUN qday bait B2 guardian G2": "0x8460ed916F357ECdf0B59F4e8D89Cea5Ae775254"
   }
 }
