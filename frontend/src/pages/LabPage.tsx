@@ -13,7 +13,14 @@ import { addrUrl } from '../lib/config';
 interface Row { section: string; step: string; status: string; outcome: string; url: string | null; hash: string | null }
 const ROWS = v4.liveRows as Row[];
 const STOLEN = 'Guardian freeze and unanimous recovery';
-const clean = (s: string) => s.replace(/^ATTACK\s+/, '').replace(/\s+ATTACK\s+/, ' ').replace(/^[A-Z]{1,2}\d+[a-z]?\s+/, '');
+// test-account labels from the live suite, said in plain words on the page (UX-9)
+const NAMES: [RegExp, string][] = [
+  [/freeze-demo-thief/g, 'the thief'], [/freeze-demo-new-owner/g, 'the new owner'], [/freeze-demo-expiry-owner/g, 'the owner'],
+  [/new-owner-after-recovery/g, 'the new owner after recovery'], [/attacker-B/g, 'a second attacker'], [/pool-claimer-(\d)/g, 'pool claimer $1'],
+  [/guardian-(\d)/g, 'guardian $1'], [/lab-owner/g, 'the lab owner'], [/sender-owner/g, 'the sender'],
+];
+export const plainNames = (s: string) => NAMES.reduce((t, [re, w]) => t.replace(re, w), s);
+const clean = (s: string) => plainNames(s.replace(/^ATTACK\s+/, '').replace(/\s+ATTACK\s+/, ' ').replace(/^[A-Z]{1,2}\d+[a-z]?\s+/, ''));
 const inStolen = (r: Row) => r.section.startsWith(STOLEN);
 const isAttack = (r: Row) => r.status === 'reverted' || r.status === 'refused';
 
@@ -34,10 +41,10 @@ async function verify(hash: Hex): Promise<Check> {
 function AttackRow({ r, check }: { r: Row; check?: Check }) {
   const match = check?.replay && r.outcome && check.replay === r.outcome;
   return (
-    <li className="rounded-2xl border border-zinc-200 bg-white p-4" data-testid="attack-row" data-status={r.status}>
+    <li className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4" data-testid="attack-row" data-status={r.status}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1 text-sm font-medium text-zinc-900">{clean(r.step)}</div>
-        <div className="flex shrink-0 items-center gap-2"><Pill tone={r.status === 'reverted' ? 'warn' : 'neutral'}>{r.status === 'refused' ? 'refused at broadcast' : r.outcome}</Pill><SourceBadge kind="RECORDED" title="A mined (or chain-refused) transaction recorded in contracts-v4/LIVE_RESULTS.md" /></div>
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2"><Pill tone={r.status === 'reverted' ? 'warn' : 'neutral'}><span className="break-all">{r.status === 'refused' ? 'refused at broadcast' : plainNames(r.outcome)}</span></Pill><SourceBadge kind="RECORDED" title="A mined (or chain-refused) transaction recorded in contracts-v4/LIVE_RESULTS.md" /></div>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-600">
         {r.hash ? <TxLink hash={r.hash} testId="attack-tx" /> : <span>no hash: the chain refused to broadcast it</span>}
@@ -69,7 +76,7 @@ export default function LabPage() {
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8" data-testid="lab">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Lab · v4 · prod router <a className="underline" href={addrUrl(inst.prod.router.address)} target="_blank" rel="noopener noreferrer">{inst.prod.router.address.slice(0, 8)}…</a> · lab router <a className="underline" href={addrUrl(inst.lab.router.address)} target="_blank" rel="noopener noreferrer">{inst.lab.router.address.slice(0, 8)}…</a> <SourceBadge kind="RECORDED" /></p>
+          <p className="break-words font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Lab · v4 · prod router <a className="underline" href={addrUrl(inst.prod.router.address)} target="_blank" rel="noopener noreferrer">{inst.prod.router.address.slice(0, 8)}…</a> · lab router <a className="underline" href={addrUrl(inst.lab.router.address)} target="_blank" rel="noopener noreferrer">{inst.lab.router.address.slice(0, 8)}…</a> <SourceBadge kind="RECORDED" /></p>
           <h1 className="mt-1 font-serif text-3xl text-zinc-900 sm:text-5xl">{attacks.length + stolenAttacks.length} attacks the chain refused</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600">Each row below is a real transaction on Diana testnet. A &quot;reverted&quot; attack was decoded with eth_call first, then mined with an explicit gas limit so the revert itself is on-chain. Source: <code className="font-mono text-xs">contracts-v4/LIVE_RESULTS.md</code>, recorded when the live suite ran. The button re-checks them against the chain right now.</p>
         </div>
