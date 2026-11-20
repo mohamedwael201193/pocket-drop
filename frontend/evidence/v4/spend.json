@@ -1,5 +1,5 @@
 {
- "totalQor": 11.335,
+ "totalQor": 12.315,
  "entries": [
   {
    "qor": 2,
@@ -414,6 +414,131 @@
    "note": "relayer top-up 2 QOR from the main wallet after the QA run (owner-approved); the gas it replaces is already booked above as the 1.785 QOR relayer gas delta",
    "hash": "ED93794666AA2443269FBCE94E7481136BD716667F388FE14902D5921649E4C5",
    "at": "2026-11-20T02:52:00.000Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa a-confirmed sender key",
+   "hash": "0x6a8c608b321b9af283d99edd3d3358d2f3fec310b08b3c9b580445b386125d6b",
+   "at": "2026-11-20T03:19:17.832Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "qa a-confirmed sender pocket",
+   "hash": "0xa28bd705c9b9b35eb8cc81dd9ae97b9ac27da640d7ae979a8cbeb05fc008214e",
+   "at": "2026-11-20T03:19:19.526Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: qa a-confirmed recipient sweep",
+   "hash": "0x65737f355028e37db1f87aa119e68b8e841696f76dc70695ef49399fe63cc897",
+   "at": "2026-11-20T03:20:21.638Z"
+  },
+  {
+   "qor": -0.24,
+   "note": "recovered: qa a-confirmed sender sweep",
+   "hash": "0xaea735c6da0886852b3a6c2683bca901547ed2dc55434c59ab132c5f4f206c9d",
+   "at": "2026-11-20T03:20:25.498Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa b-giveaway sender key",
+   "hash": "0x4f9d2de613af05262e74feb9c33d0c1a79f76897d2e63d722afb85350e08165b",
+   "at": "2026-11-20T03:20:33.099Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "qa b-giveaway sender pocket",
+   "hash": "0xf5b597e2ebe247592471509a0bd4c6cdd1033ba2269c817549726ea050980ef0",
+   "at": "2026-11-20T03:20:34.811Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: qa b-giveaway recipient sweep",
+   "hash": "0x27f186ab99099a473d5218e4769504b03574a72b96bffd112d55ae4c5331ec4b",
+   "at": "2026-11-20T03:21:18.008Z"
+  },
+  {
+   "qor": -0.24,
+   "note": "recovered: qa b-giveaway sender sweep",
+   "hash": "0x0bd9b1e371342fa2bae6dfcbb74ed2a4b1845e19df738d460204193a685754b3",
+   "at": "2026-11-20T03:21:23.102Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool host key",
+   "hash": "0x6291b58dfae869f23a15d54e13d6c41d1bf4180c471dab96aa1498a57289fc4d",
+   "at": "2026-11-20T03:21:31.006Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa c-pool host pocket",
+   "hash": "0x054e0c62b86e79016378934f477bee0772eda5fe558ced98d3591a73042ffb84",
+   "at": "2026-11-20T03:21:32.703Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer1",
+   "hash": "0xb618c55a972b997bba8ae44187dea56985407913ea3272e1bb540a1cbe42f5e9",
+   "at": "2026-11-20T03:21:47.115Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer2",
+   "hash": "0x8568ad33e2fd9c846baa86dd030e74df24c88b4eaa9e1df5881d3a3cb76f7ac6",
+   "at": "2026-11-20T03:22:05.514Z"
+  },
+  {
+   "qor": -0.36,
+   "note": "recovered: qa c-pool host sweep",
+   "hash": "0x3dc7e8679134ec5150f505f3258a024e3d9edd4d94c0cbb519d5affe9a7cdb1f",
+   "at": "2026-11-20T03:23:40.551Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d-pocket-lab owner key",
+   "hash": "0x8f870af17fdfc8bfc70925d3ff6bfda940bf140d2f4ba3e8ca55e274c5fbc0dd",
+   "at": "2026-11-20T03:23:46.600Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "qa d-pocket-lab owner pocket",
+   "hash": "0xd467a348bf73754194e038295060289c072bda2dcd9fb09d3266eedae796caa8",
+   "at": "2026-11-20T03:23:48.287Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d new owner key",
+   "hash": "0x96ce7c15474e99d25cdd11fd1f1f65a284df4cd5ffa7cf8dc25563e1862510ef",
+   "at": "2026-11-20T03:27:40.666Z"
+  },
+  {
+   "qor": -0.58,
+   "note": "recovered: qa d-pocket-lab recovered LAB Pocket sweep",
+   "hash": "0x6db5e5c3c8beba720356d58c8c67638ea070507608c115492167e53f139140f3",
+   "at": "2026-11-20T03:30:31.843Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa e-cancel sender key",
+   "hash": "0x106f823d0c98824c282794edc1d2de8a3611debb2192f38b7017fd625e1bc9c4",
+   "at": "2026-11-20T03:30:46.201Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa e-cancel sender pocket",
+   "hash": "0xf28f8060c9591ba4559de2bc83401c5b6a89b61f7f06d392ca28390a33013c62",
+   "at": "2026-11-20T03:30:47.879Z"
+  },
+  {
+   "qor": -0.4,
+   "note": "recovered: qa e-cancel sender sweep",
+   "hash": "0xd93c57f75950686793052de97e491f24e8b7d62e1bab7af8850004ae03b09b7c",
+   "at": "2026-11-20T03:31:23.559Z"
+  },
+  {
+   "qor": 0,
+   "note": "retest 20 Nov: relayer paid 1.7849 QOR gas for 35 relayed txs (5.3589 -> 3.5740 QOR); deployer net 0.9499 QOR (7.1799 -> 6.2299)",
+   "at": "2026-11-20T03:35:00.000Z"
   }
  ]
 }
