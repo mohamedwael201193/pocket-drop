@@ -7,6 +7,8 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { reducedMotion } from './alive';
 
+const cx = (...a: Array<string | false | null | undefined>) => a.filter(Boolean).join(' ');
+
 const Pocket3D = lazy(() => import('./Pocket3D'));
 const SLOW_KEY = 'pd.3d.slow';
 
@@ -72,8 +74,8 @@ export function Stage({ eyebrow, title, children, action, object = true, live, t
     <header data-testid={testId} className="stage relative left-1/2 mb-8 -mt-8 w-screen -translate-x-1/2 sm:mb-10 sm:-mt-12">
       <div className="relative z-[1] mx-auto flex items-center gap-6 px-4 py-9 sm:px-6 sm:py-12 lg:px-8" style={{ maxWidth: 'calc(var(--page-w, 64rem))' }}>
         <motion.div className="min-w-0 flex-1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-          {eyebrow && <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-invMuted">{live && <span className="live-dot animate-pulseDot" aria-hidden />}{eyebrow}</div>}
-          <h1 className="mt-3 font-display text-[2.5rem] font-medium leading-[1.02] tracking-[-0.035em] text-stone-50 sm:text-[3.5rem]">{title}</h1>
+          {eyebrow && <div className={cx('flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-invMuted [overflow-wrap:anywhere]', object && 'pr-[84px] sm:pr-0')}>{live && <span className="live-dot animate-pulseDot" aria-hidden />}{eyebrow}</div>}
+          <h1 className={cx(object && 'pr-[72px] sm:pr-0', 'mt-3 font-display text-[2.5rem] font-medium leading-[1.02] tracking-[-0.035em] text-stone-50 sm:text-[3.5rem]')}>{title}</h1>
           {children && <div className="mt-4 max-w-2xl text-[15px] leading-relaxed text-stone-300 sm:text-base">{children}</div>}
           {action && <div className="mt-6">{action}</div>}
         </motion.div>

@@ -59,7 +59,7 @@ export default function LandingPage() {
             No wallet, no app, no seed phrase. Your friend taps a link in any chat app (WhatsApp, Telegram, SMS, email), reads 4 words, and gets a PoP-verified QoreChain account.
           </motion.p>
           <motion.div {...stagger(3)} className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/send" data-testid="hero-create" className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-6 py-3 text-sm font-medium text-stone-100 shadow-md transition-all hover:-translate-y-0.5 hover:bg-zinc-800">
+            <Link to="/send" data-testid="hero-create" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-[15px] font-medium text-stone-50 shadow-[0_10px_24px_-10px_rgba(11,107,75,.6)] transition-all hover:-translate-y-0.5 hover:bg-accentHover">
               <span>Send QOR</span><ChevronRight className="h-4 w-4" />
             </Link>
             <Link to="/receive" data-testid="hero-claim" className="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-stoneCard px-6 py-3 text-sm font-medium text-zinc-900 transition-all hover:-translate-y-0.5 hover:bg-white">
@@ -98,7 +98,7 @@ export default function LandingPage() {
                 <div className="mb-3 rounded-lg border border-white/10 bg-white/10 px-2 py-1.5 text-center font-mono text-xs uppercase tracking-widest text-stone-100" data-testid="hero-words">
                   {d.words ? d.words.join(' · ') : '4 words · from · your · key'}
                 </div>
-                <div className="flex items-center justify-between border-t border-white/10 pt-2 font-mono text-[9.5px] text-zinc-400">
+                <div className="flex items-center justify-between border-t border-white/10 pt-2 font-mono text-xs text-zinc-400">
                   <span>{d.id ? `link #${d.id} · latest claimed` : 'latest claimed drop'}</span>
                   <span className="text-emerald-400">ML-DSA-87 · PoP</span>
                 </div>
