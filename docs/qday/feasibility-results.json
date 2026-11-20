@@ -1,0 +1,304 @@
+[
+  {
+    "at": "2026-11-20T04:04:40.776Z",
+    "step": "S0 fund V 0.4, W 0.3, X 0.6 QOR from main (one hybrid MsgSend tx)",
+    "hash": "A6469E118CF517579F97FD75721BF4FA204F623138C835F910C008CC405190DD",
+    "code": 0,
+    "log": "",
+    "included": true,
+    "height": 10411767,
+    "gasUsed": "272071"
+  },
+  {
+    "at": "2026-11-20T04:04:50.486Z",
+    "step": "S1 unregistered X EVM tx with no window",
+    "hash": null,
+    "error": "Missing or invalid parameters.\nDouble check you have provided the correct parameters."
+  },
+  {
+    "at": "2026-11-20T04:04:53.802Z",
+    "step": "S2 V registers its ML-DSA-87 key with PoP (classical-signed, bootstrap-exempt)",
+    "hash": "33D3720AAE384AFD6E8809E31D5272BE862116670A394B01C898FAB84DBE0F41",
+    "registered": true,
+    "possessionProven": true,
+    "keyHash": "0x472c63de9b75af09bacd8374ece27cce26d21521825afef0f088742894f2fcf0",
+    "code": 0,
+    "included": true
+  },
+  {
+    "at": "2026-11-20T04:04:57.027Z",
+    "step": "S2 W registers its ML-DSA-87 key with PoP (classical-signed, bootstrap-exempt)",
+    "hash": "04F466562370E7AC9061C56EC0037C1F94C569C17AF6BAF74E5A2F5916E93E4B",
+    "registered": true,
+    "possessionProven": true,
+    "keyHash": "0x0abbee73027a079977e2c94c7d9c2c9944f2b015d47aa15aba5d19bc58ec8174",
+    "code": 0,
+    "included": true
+  },
+  {
+    "step": "S3 X registers ML-DSA (to be able to submit EVM txs)",
+    "hash": "F0D39A8AA690A66E82E9CF17E80A5470BED06D03A34F47A07FC4F18761796830",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "S3 X opens unscoped EVM window (hybrid, its own key)",
+    "hash": "2715EB16A9B8DC05F9861A67BE1D5AE6FDCAA901B436CD8C42753DCBFA06A67C",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "S4 deploy V Pocket via prod router (2 guardians, threshold 2, limit 0.05; submitted by X)",
+    "hash": "0xf97b6216d1a2a56e8eae7daf42632068ccbc96af10b5826a591db9ca3edfc2db",
+    "status": "success",
+    "pocket": "0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b",
+    "ownerKeyHash": "0x472c63de9b75af09bacd8374ece27cce26d21521825afef0f088742894f2fcf0"
+  },
+  {
+    "step": "S5 fund V Pocket 0.2 QOR",
+    "hash": "0xc9d917fcf1651deed559b0e014764f6e6e900f31fa93e76220551b14dc191ec1",
+    "status": "success"
+  },
+  {
+    "step": "S4 deploy W Pocket via prod router (no guardians, limit 0.05)",
+    "hash": "0x149bc79433bbe91e3042c4711016191caeebc966621cfe7bfa34bf48823ef29d",
+    "status": "success",
+    "pocket": "0x803B3ACEf3e7C7c54580663d1BFa05adA8cB6B17",
+    "ownerKeyHash": "0x0abbee73027a079977e2c94c7d9c2c9944f2b015d47aa15aba5d19bc58ec8174"
+  },
+  {
+    "step": "S5 fund W Pocket 0.05 QOR",
+    "hash": "0x91b146ff43ebeae4c84f7b1c38db1bb50b0ece9606333d7ee62ac5f027e57782",
+    "status": "success"
+  },
+  {
+    "step": "S6 top up X 0.6 QOR from main",
+    "hash": "A4BD31A17F4F2EEEBA7F6453D3BF5CB0E86B1AB2425D91ECD01A6906BB3DB808",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "A1 bank MsgSend 0.1 QOR out of V key account, CLASSICAL-signed",
+    "hash": "F9D78755442047FB0E1C017AA1F1CAAE4EEDF63C0B5452860A0056A6F8AD549B",
+    "code": 20,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key and must include the hybrid signature extension (hybrid mode: required): hybrid PQC signature required",
+    "included": false
+  },
+  {
+    "step": "A2 bank MsgSend out of V key account, HYBRID-signed with the attacker's own ML-DSA key",
+    "hash": "339E16C3FFDD0AD44C9A8B3B7806573EBFFBE4A37B74090737392F9AC9B2FAEF",
+    "code": 21,
+    "log": "PQC signature verification failed for qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n: hybrid PQC signature verification failed",
+    "included": false
+  },
+  {
+    "step": "A3 re-register V's PQC key to the attacker's ML-DSA key (MsgRegisterPQCKeyV2 + valid PoP), CLASSICAL-signed",
+    "hash": "3DD15725D5D1A38C7C1BC05381ED956DDDE71B4B3D068F8C9C2D1A6A502F067D",
+    "code": 234,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key; register and migrate need its hybrid signature: PQC key maintenance from a keyed account needs the hybrid signature",
+    "included": false
+  },
+  {
+    "step": "A3b same re-registration, HYBRID-signed with the attacker key",
+    "hash": "790745AD613A4D464271BA1044DFC065801E23466A8081DF44F1BB1307FB9185",
+    "code": 21,
+    "log": "PQC signature verification failed for qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n: hybrid PQC signature verification failed",
+    "included": false
+  },
+  {
+    "step": "A3c deprecated MsgRegisterPQCKey (v1) with the attacker key, CLASSICAL-signed",
+    "hash": "99AFBF5198A6BA525E70CE1940F8A820BAD8B066F88ED15705C64853B0D09DC2",
+    "code": 234,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key; register and migrate need its hybrid signature: PQC key maintenance from a keyed account needs the hybrid signature",
+    "included": false
+  },
+  {
+    "step": "A4 MsgRotatePQCKey old=V real key -> attacker key, old signature forged, CLASSICAL-signed",
+    "hash": "A8B7AAEB007E5CBBFA028D11A0E9186F8EB24C42B2A6F672C8E71F7BECA6D461",
+    "code": 20,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key and must include the hybrid signature extension (hybrid mode: required): hybrid PQC signature required",
+    "included": false
+  },
+  {
+    "step": "A4b same rotation, HYBRID-signed with the attacker key",
+    "hash": "59D9EDDAFF2C02B91362EA9DBCB97EEAF906082F522A5B350B3DA95BF1514B08",
+    "code": 21,
+    "log": "PQC signature verification failed for qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n: hybrid PQC signature verification failed",
+    "included": false
+  },
+  {
+    "step": "A5 open an EVM window for V, CLASSICAL-signed",
+    "hash": "5A301B275E329609769E0680765045ADEA3FEB8915F758FDB04860739F5C28DC",
+    "code": 20,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key and must include the hybrid signature extension (hybrid mode: required): hybrid PQC signature required",
+    "included": false
+  },
+  {
+    "step": "A5b open an EVM window for V, HYBRID-signed with the attacker key",
+    "hash": "3309B6990B6BAEF37680E89B03B97164C761C25061DE660E186F2D1C7845BA0A",
+    "code": 21,
+    "log": "PQC signature verification failed for qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n: hybrid PQC signature verification failed",
+    "included": false
+  },
+  {
+    "step": "A6 EVM transfer 0.1 QOR from V 0x address (no window)",
+    "hash": null,
+    "refusedAtBroadcast": true,
+    "error": "failed to broadcast transaction: account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has no open EVM authorisation window; open one with MsgOpenEVMWindow, signed on the Cosmos lane with the account's post-quantum key"
+  },
+  {
+    "step": "A7 link an attacker secp256k1 key as V's authenticator (MsgUpdateSpendingRules + MsgRegisterAuthenticator, send+evm), CLASSICAL-signed",
+    "hash": "49D1FDB508C1F1305EC0E20599C96A98550386832FF610BA3669F462CEC6AB80",
+    "code": 20,
+    "log": "account qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n has a registered PQC key and must include the hybrid signature extension (hybrid mode: required): hybrid PQC signature required",
+    "included": false
+  },
+  {
+    "step": "A7b same authenticator link, HYBRID-signed with the attacker key",
+    "hash": "7DDDE97D15CD30917B9A9209558003CD85E496DE8A7FF8B61F0C0143AC462FC0",
+    "code": 21,
+    "log": "PQC signature verification failed for qor13k5q2u0jxva9s8p8htt0gl9ejjkng3dkrk0t8n: hybrid PQC signature verification failed",
+    "included": false
+  },
+  {
+    "step": "E0 control: same spend intent signed by the REAL owner ML-DSA key, eth_call only (not mined)",
+    "simulated": "NO REVERT (owner key works)"
+  },
+  {
+    "step": "E1 Pocket.spend 0.04 QOR to attacker, signed with the attacker ML-DSA key",
+    "hash": "0xddd488e3ebb527033233fb4123c377aa9337c7876636ab65d0fa58270452ea4b",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E2 Pocket.spend 0.04 QOR to attacker, signed with V's CLASSICAL ECDSA key (65-byte sig)",
+    "hash": "0x2c982da910d14ccd6f48da6231d9268e3fabbe48edbc69bbb506e9f4baa8e769",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E3 Pocket.setGuardians -> attacker-controlled set, attacker ML-DSA sig",
+    "hash": "0x03f42b58964aa8fe302dd5d4a920d26c5a4cda75d647fcedf82b4943aabf9aeb",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E4 Pocket.setLimit 100 QOR, attacker ML-DSA sig",
+    "hash": "0xdafb6fdd0e09e895ccb03a766b06c5cf8580aaf459ddbdd92943cc9d1a4d1b25",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E5 Pocket.cancelPending, attacker ML-DSA sig",
+    "hash": "0x4dbd92beb4140caf582731f7b26b584bf861cceb0c6593b758298b0fdae267aa",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E6 Pocket.createDrop (Giveaway link the attacker holds), attacker ML-DSA sig",
+    "hash": "0x8b72d5c3de9259475c9f0ed1d50b892325a9c742de7c96bf36b69e09d05be5d5",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "300000"
+  },
+  {
+    "step": "E7 proposeRecovery to attacker account with forged guardian signatures",
+    "hash": "0xf444d843ad19e50a86576a71f3c3ddc22d6016fcc8944355abbbcd58dfeb9927",
+    "status": "reverted",
+    "revert": "BadSignature",
+    "gasUsed": "500000"
+  },
+  {
+    "step": "E8 executeQueued(1) (nothing queued)",
+    "hash": "0xbe5cccd91caee06bf2cda663d743a4c85c53d1de01d7840ce1605cd0b95414ed",
+    "status": "reverted",
+    "revert": "NotQueued",
+    "gasUsed": "100000"
+  },
+  {
+    "step": "E9 PocketDrop.cancel(19) of someone else's link",
+    "hash": "0x8948a203fc393e5181f698f78814f40dbbc87c5628cd094bd9f027481bc88c52",
+    "status": "reverted",
+    "revert": "NotSender",
+    "gasUsed": "100000"
+  },
+  {
+    "step": "E10 eth_call Pocket.isValidSignature with V ECDSA sig / attacker ML-DSA sig",
+    "ecdsa": "0xffffffff",
+    "attackerMldsa": "0xffffffff"
+  },
+  {
+    "step": "AFTER V attacks",
+    "vKeyAccountBefore": "0.34",
+    "vKeyAccountAfter": "0.34",
+    "pocketBefore": "0.2",
+    "pocketAfter": "0.2",
+    "pqKeyUnchanged": true,
+    "pocketNonce": "0"
+  },
+  {
+    "step": "W0 attacker derives the ML-DSA key from the classical key alone (current browser derivation)",
+    "derivedKeyMatchesRegistered": true
+  },
+  {
+    "step": "W1 THEFT: Pocket.spend 0.04 QOR to the attacker, signed with the ML-DSA key derived from the classical key",
+    "hash": "0x445b5443b9793485d1bac034e8c3fb0aa5021bd1efdf41a544272b21257b8893",
+    "status": "success",
+    "pocketBefore": "0.05",
+    "pocketAfter": "0.01"
+  },
+  {
+    "step": "W2 THEFT: hybrid MsgSend 0.1 QOR out of the W key account with the derived ML-DSA key",
+    "hash": "6099946011B4F4EDAC5EB2DEC736820CA56F077EDCEA7CF7FF4EE3E722143A1C",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "O1 legit owner opens a small EVM window (300 blocks, 2 txs, scoped to one address) with its REAL hybrid key",
+    "hash": "3463DF939131B54F8993C41E57F77BC9B56716D80D31F5D300D0000EA721776C",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "O2 attacker with ONLY the classical key sends 0.02 QOR from V while the window is live",
+    "hash": "0x5e58ba704f48e173ddac3b0a1b0782f386945c7adbef6a63d0847ce98493c03c",
+    "status": "success",
+    "keyAccountBefore": "0.24",
+    "keyAccountAfter": "0.21692875"
+  },
+  {
+    "step": "O3 classical-only EVM tx to an address OUTSIDE the window scope",
+    "hash": null,
+    "refusedAtBroadcast": true,
+    "error": "the window does not list 0x000000000000000000000000000000000000dEaD as an allowed recipient"
+  },
+  {
+    "step": "O4 owner closes the window (hybrid, real key)",
+    "hash": "F6B332B968F1CC033C0E32C133402CA5D36C9A97470AAD92D797F23D63B10E30",
+    "code": 0,
+    "log": "",
+    "included": true
+  },
+  {
+    "step": "L0 fund a legacy (no PQ key) account 0.1 QOR",
+    "hash": "0x4d130ec9398bf74f6537f3548b2404df5520a85ca8461f011e9e72b6217c5a6c",
+    "status": "success"
+  },
+  {
+    "step": "L1 CLASSICAL-only MsgSend out of the legacy (no PQ key) account",
+    "hash": "823F8B858883E1F3BCBF322BDD304A9AAB302930EAD021453E9D91E21C9B103E",
+    "code": 8,
+    "log": "account has no PQC key and classical fallback is disabled: classical fallback not allowed",
+    "included": false
+  }
+]
