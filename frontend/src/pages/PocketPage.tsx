@@ -101,7 +101,7 @@ export default function PocketPage() {
                 <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x… address" aria-label="Send to" data-testid="spend-to" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
                 <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
               </div>
-              {spendProblem && to + amt !== '' && <p className="mt-2 text-xs text-zinc-500">{spendProblem}</p>}
+              {spendProblem && to + amt !== '' && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
               {queuedWarn && <div className="mt-2"><Notice tone="warn" testId="spend-queue-warning">{queuedWarn}</Notice></div>}
               <div className="mt-3"><Button block busy={spendAct.busy === 'spend'} disabled={!canAct || !!spendProblem || pv.frozen} onClick={() => void spendAct.run('spend', () => spend(ctx!, to as Hex, spendAmt!))} data-testid="spend-send">Sign and send</Button></div>
               {pv.frozen && <p className="mt-2 text-xs text-red-800">Frozen by guardians: spending is paused.</p>}
@@ -152,9 +152,9 @@ export default function PocketPage() {
               <div className="mt-4 space-y-2">
                 <label className="text-sm font-semibold text-zinc-900" htmlFor="guardians-in">Set guardians (2 to 5 addresses, one per line)</label>
                 <textarea id="guardians-in" value={gText} onChange={(e) => setGText(e.target.value)} rows={3} placeholder={'0x… (their key account address)\n0x…'} data-testid="guardians-input" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
-                <label className="flex items-center gap-2 text-sm text-zinc-800">Threshold
+                <label className="flex flex-wrap items-center gap-2 text-sm text-zinc-800">How many guardians must sign to freeze or recover (the threshold)
                   <select value={gThr} onChange={(e) => setGThr(e.target.value)} data-testid="guardians-threshold" className="rounded-lg border border-zinc-300 bg-white px-2 py-1">{[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}</select></label>
-                {gText && gProblem && <p className="text-xs text-zinc-500">{gProblem}</p>}
+                {gText && gProblem && <p role="alert" className="text-sm font-medium text-red-700" data-testid="guardians-problem">{gProblem}</p>}
                 <Button block disabled={!canAct || !pv.deployed || !!gProblem} busy={guardAct.busy === 'set'} onClick={() => void guardAct.run('set guardians', () => setGuardians(ctx!, gList as Hex[], Number(gThr)))} data-testid="guardians-set">Queue this guardian set</Button>
                 {!pv.deployed && <p className="text-xs text-zinc-500">Your Pocket is deployed by its first drop or spend; guardians can be set right after.</p>}
               </div>
