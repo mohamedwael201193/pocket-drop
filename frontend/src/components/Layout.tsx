@@ -123,7 +123,7 @@ export function Layout() {
       </main>
       <footer className="border-t border-zinc-200/80 bg-white/70 py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 pb-20 text-center text-[13px] text-zinc-600 sm:flex-row sm:px-6 sm:pb-0 sm:text-left lg:px-8">
-          <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">Automated QCAI audit {scoreOf(QCAI.score)} then {scoreOf(QCAI.stage2Score)}/100, no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
+          <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">QCAI automated audit {scoreOf(QCAI.score)}, then {scoreOf(QCAI.stage2Score)} of 100 · no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
           <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <a href={`${API_BASE}/api/health`} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">API health</a>
             <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">v4 router</a>
