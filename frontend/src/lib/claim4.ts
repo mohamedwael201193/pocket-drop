@@ -73,6 +73,11 @@ export async function claimDrop(env: Env, id: bigint, acct: KeyAccount, payTo: H
   const sig = await signDigest(acct.pqc.secretKey, digest);
   return relayTo(env, INST[env].drop, encodeFunctionData({ abi: dropAbi, functionName: 'claim', args: [id, sig] }));
 }
+/** The pool link key's signature for (pool, recipient, payTo): what the slot claim uses, and what proves a pool link to the sponsor. */
+export async function poolLinkProof(env: Env, id: bigint, seed: Uint8Array, recipient: Hex, payTo: Hex): Promise<{ linkPk: Hex; linkSig: Hex }> {
+  const lk = await linkKey(seed);
+  return { linkPk: bytesToHex(lk.publicKey), linkSig: await signDigest(lk.secretKey, poolLinkDigest({ pool: INST[env].pool, id, recipient, payTo })) };
+}
 /** Pool slot: link-key signature plus the claimer's own signature, both over the pool digests. */
 export async function claimPoolSlot(env: Env, id: bigint, seed: Uint8Array, acct: KeyAccount, payTo: Hex): Promise<RouteResult> {
   const lk = await linkKey(seed);
