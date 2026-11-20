@@ -1,21 +1,22 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import { Skeleton } from './components/ui';
 import { AccountProvider } from './lib/account';
+import { lazyPage } from './lib/lazyPage';
 
-const SendPage = lazy(() => import('./pages/SendPage'));
-const InboxPage = lazy(() => import('./pages/InboxPage'));
-const ReceivePage = lazy(() => import('./pages/ReceivePage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const ClaimPage = lazy(() => import('./pages/ClaimPage'));
-const PoolClaimPage = lazy(() => import('./pages/PoolClaimPage'));
-const PocketPage = lazy(() => import('./pages/PocketPage'));
-const ProofPage = lazy(() => import('./pages/ProofPage'));
-const RadarPage = lazy(() => import('./pages/RadarPage'));
-const LabPage = lazy(() => import('./pages/LabPage'));
-const JudgesPage = lazy(() => import('./pages/JudgesPage'));
+const SendPage = lazyPage(() => import('./pages/SendPage'));
+const InboxPage = lazyPage(() => import('./pages/InboxPage'));
+const ReceivePage = lazyPage(() => import('./pages/ReceivePage'));
+const NotFoundPage = lazyPage(() => import('./pages/NotFoundPage'));
+const ClaimPage = lazyPage(() => import('./pages/ClaimPage'));
+const PoolClaimPage = lazyPage(() => import('./pages/PoolClaimPage'));
+const PocketPage = lazyPage(() => import('./pages/PocketPage'));
+const ProofPage = lazyPage(() => import('./pages/ProofPage'));
+const RadarPage = lazyPage(() => import('./pages/RadarPage'));
+const LabPage = lazyPage(() => import('./pages/LabPage'));
+const JudgesPage = lazyPage(() => import('./pages/JudgesPage'));
 
 export default function App() {
   return (
