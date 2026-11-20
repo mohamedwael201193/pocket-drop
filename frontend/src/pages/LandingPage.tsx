@@ -2,10 +2,14 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Cpu, ShieldCheck, Globe, MessageCircle, CheckCircle2, KeyRound, Droplets, Fingerprint, Compass, Hexagon } from '../components/icons';
+import { ChevronDown, ChevronRight, ShieldCheck, Globe, MessageCircle, CheckCircle2, KeyRound, Droplets, Fingerprint, Compass, Hexagon, Send, Users, Wallet } from '../components/icons';
 import { Reveal, SectionHead, SourcePill, Dash } from '../components/bits';
 import { SourceBadge, cx } from '../components/ui';
-import { ATTACKS, PHONE, TESTS, attackTx, REC } from '../data/proofs';
+import { useQuery } from '@tanstack/react-query';
+import { ATTACKS, PHONE, attackTx, REC } from '../data/proofs';
+import v4 from '../data/v4.json';
+import tests from '../data/tests.json';
+import { fetchQday } from '../lib/qday';
 import { useHealth, useLatestDrop } from '../lib/queries';
 import { fmtQor } from '../lib/chain';
 import { fingerprint, shortHash } from '../lib/protocol';
@@ -26,6 +30,29 @@ const STEP_ICONS = {
   whatsapp: <MessageCircle className="h-5 w-5" />, key: <KeyRound className="h-5 w-5" />, drip: <Droplets className="h-5 w-5" />,
   seal: <Fingerprint className="h-5 w-5" />, shield: <ShieldCheck className="h-5 w-5 text-emerald-600" />, explorer: <Compass className="h-5 w-5" />,
 };
+
+/** The Q-Day Drill, in one card: the live verdict and a way in. */
+function QdayTeaser() {
+  const { data: q } = useQuery({ queryKey: ['qday'], queryFn: fetchQday, refetchInterval: 60_000, retry: 1 });
+  const holding = q ? q.baits.filter((b) => b.alarm.length === 0).length : null;
+  return (
+    <div className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 lg:px-8" data-testid="landing-qday">
+      <Reveal className="capsule-obsidian grid gap-6 rounded-3xl p-6 text-stone-100 sm:p-10 md:grid-cols-[1.4fr_1fr] md:items-center">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-stone-300">— Q-DAY DRILL</p>
+          <h2 className="mt-3 font-serif text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">We published the classical keys. Try to take the QOR.</h2>
+          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-stone-300">On Q-Day a quantum computer can work out today&apos;s wallet keys. We rehearse it now: five real Pockets on Diana have their classical keys on the page, and only the post-quantum key can move their QOR. You can try from your own browser tab.</p>
+          <Link to="/qday" className="mt-6 inline-flex items-center gap-2 rounded-full bg-stone-50 px-5 py-3 text-sm font-medium text-zinc-950 transition-all hover:-translate-y-0.5" data-testid="landing-qday-open">Open the Q-Day Drill <ChevronRight className="h-4 w-4" aria-hidden /></Link>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <div className="flex items-center justify-between text-sm text-stone-300"><span>Pockets still holding</span><SourceBadge kind="LIVE" /></div>
+          <div className="mt-2 font-money text-6xl leading-none text-white" data-testid="landing-qday-holding">{q ? `${holding} of ${q.baits.length}` : <Dash />}</div>
+          <p className="mt-2 text-sm text-stone-300">{q ? (q.alarm.raised ? 'Breach alarm raised: see the page.' : (() => { const n = q.log.onChain.rows.filter((r) => r.failed).length; return `No breach. ${n} ${n === 1 ? 'attempt' : 'attempts'} mined and reverted so far.`; })()) : 'Reading the drill…'}</p>
+        </div>
+      </Reveal>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -50,13 +77,13 @@ export default function LandingPage() {
         <div className="relative z-20 mx-auto max-w-5xl px-4 text-center sm:px-6">
           <motion.div {...stagger(0)} className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/90 px-3.5 py-1.5 text-xs font-medium text-zinc-700 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span data-testid="hero-badge">Diana Testnet · Zero-Wallet Onboarding</span>
+            <span data-testid="hero-badge">Diana testnet · no wallet needed</span>
           </motion.div>
           <motion.h1 {...stagger(1)} className="mx-auto max-w-4xl font-serif text-5xl leading-[0.98] tracking-tight text-zinc-900 sm:text-7xl">
             Send Quantum-Safe QOR Through a Link
           </motion.h1>
           <motion.p {...stagger(2)} className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg">
-            No wallet, no app, no seed phrase. Your friend taps a link in any chat app (WhatsApp, Telegram, SMS, email), reads 4 words, and gets a PoP-verified QoreChain account.
+            No wallet, no app, no seed phrase. Your friend taps a link in any chat app (WhatsApp, Telegram, SMS, email) and gets a Pocket that only a quantum-safe key can move.
           </motion.p>
           <motion.div {...stagger(3)} className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link to="/send" data-testid="hero-create" className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-[15px] font-medium text-stone-50 shadow-[0_10px_24px_-10px_rgba(11,107,75,.6)] transition-all hover:-translate-y-0.5 hover:bg-accentHover">
@@ -73,12 +100,12 @@ export default function LandingPage() {
             <img src="/hero-sculptures.webp" width={1344} height={756} alt="Sculptural dialogue bridging legacy to post-quantum Web3" className="sculptures-blend h-auto w-full max-w-[1060px] select-none object-contain" />
           </div>
 
-          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-widest text-zinc-500">
-            <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3" /> 0x0A01</span>
-            <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> 0x0A02</span>
-            <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> Diana 9800</span>
+          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-widest text-zinc-600">
             <span className="inline-flex items-center gap-1"><MessageCircle className="h-3 w-3 text-emerald-600" /> Any chat app</span>
-            <span className="inline-flex items-center gap-1" title={`RECORDED: forge test, ${TESTS.verifiedOn}`}><CheckCircle2 className="h-3 w-3" /> Foundry {TESTS.foundry.passed}</span>
+            <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> Diana testnet</span>
+            <Link to="/judges" className="inline-flex items-center gap-1 hover:text-zinc-900" data-testid="hero-tests" title={`RECORDED: ${v4.tests.verifiedBy}; vitest counts from ${tests.command} on ${tests.recordedAt.slice(0, 10)}`}>
+              <CheckCircle2 className="h-3 w-3" /> {v4.tests.passed} contract + {tests.frontend.passed + tests.backend.passed} app tests pass
+            </Link>
           </div>
 
           <div ref={stageRef} className="tilt-stage relative z-20 w-full max-w-[295px] animate-float-slow sm:max-w-[315px]"
@@ -99,8 +126,8 @@ export default function LandingPage() {
                   {d.words ? d.words.join(' · ') : '4 words · from · your · key'}
                 </div>
                 <div className="flex items-center justify-between border-t border-white/10 pt-2 font-mono text-xs text-zinc-400">
-                  <span>{d.id ? `link #${d.id} · latest claimed` : 'latest claimed drop'}</span>
-                  <span className="text-emerald-400">ML-DSA-87 · PoP</span>
+                  <span>{d.id ? `Last claimed link ${d.id}` : 'Last claimed link'}</span>
+                  <span className="whitespace-nowrap text-emerald-400">quantum-safe</span>
                 </div>
                 <div className="mt-2 text-right"><SourcePill kind="LIVE" /></div>
               </div>
@@ -109,24 +136,37 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* SECTION 2: ZERO-WALLET ONBOARDING */}
+      {/* SECTION 2: HOW IT WORKS, IN THREE STEPS */}
       <div className="border-y border-zinc-200/80 bg-white/80 py-20 sm:py-28">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-16 grid items-end gap-8 md:grid-cols-2">
-            <div>
-              <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-zinc-500">— ZERO-WALLET ONBOARDING</p>
-              <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">From a chat link to a quantum-safe account</h2>
-            </div>
-            <div>
-              <p className="text-sm leading-relaxed text-zinc-600 sm:text-base">
-                Every Pocket Drop link abstracts away QoreChain's hardest onboarding barriers: ephemeral ML-DSA-87 keygen in the browser, drip-funded Proof-of-Possession registration, and 4-word human verification.
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-500" data-testid="phone-timing">
-                On real phones the three on-chain steps (register key, open window, claim) took {PHONE.androidLabel} on Android Chrome and {PHONE.iphoneLabel} on iPhone Safari. <SourceBadge kind="RECORDED" title={`Source: ${PHONE.source}`} />
-              </p>
-            </div>
+          <Reveal className="mb-10">
+            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-zinc-600">— HOW IT WORKS</p>
+            <h2 className="font-serif text-4xl leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">Three steps, no wallet</h2>
           </Reveal>
+          <ol className="grid gap-4 md:grid-cols-3" data-testid="how-it-works">
+            {([
+              [Send, 'Send a link', 'Put some QOR in a link and share it in any chat. If nobody opens it, you cancel and all of it comes back to you.'],
+              [Wallet, 'Your friend gets a quantum-safe Pocket', 'Opening the link makes a key inside their browser and pays into a Pocket that only that key can move. No wallet, no app, no seed phrase. You can compare four words with them, so nobody else takes it.'],
+              [Users, 'Guardians if the phone is lost', 'Pick a few people you trust as guardians. If the phone is lost they can move the Pocket to a new key after a waiting period, and if the key is stolen they can freeze the Pocket.'],
+            ] as const).map(([Icon, title, body], i) => (
+              <li key={title} className="rounded-3xl border border-zinc-200 bg-stoneBg/70 p-6">
+                <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full bg-zinc-900 font-mono text-sm text-white">{i + 1}</span><Icon className="h-5 w-5 text-zinc-700" aria-hidden /></div>
+                <h3 className="mt-4 font-serif text-2xl leading-tight text-zinc-900">{title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-zinc-700">{body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 text-sm leading-relaxed text-zinc-600" data-testid="phone-timing">
+            On real phones the three on-chain steps (register key, open window, claim) took {PHONE.androidLabel} on Android Chrome and {PHONE.iphoneLabel} on iPhone Safari. <SourceBadge kind="RECORDED" title={`Source: ${PHONE.source}`} />
+          </p>
 
+          <details className="group mt-8 rounded-3xl border border-zinc-200 bg-white/90 p-5 sm:p-6" data-testid="landing-tech">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-zinc-900 [&::-webkit-details-marker]:hidden">
+              <span>Technical details: what happens on-chain when a link is opened</span><ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+              The browser makes an ML-DSA-87 keypair, a small drip pays for its proof-of-possession registration, and the four words are a fingerprint of the recipient&apos;s key that the sender can confirm on-chain. The chain checks every signature with its native post-quantum precompiles (0x0A01 verify, 0x0A02 key status).
+            </p>
           <div className="relative flex flex-col items-center justify-between gap-8 py-6 md:flex-row">
             <div className="flex items-center justify-center gap-5 sm:gap-7">
               {[[STEP_ICONS.whatsapp, 'Chat link', 0, 'text-emerald-600'], [STEP_ICONS.key, 'Keygen', 0, 'text-zinc-800'], [STEP_ICONS.drip, 'Drip', 1, 'text-sky-600']].map(([icon, label, step, tone]) => (
@@ -164,12 +204,16 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
+          </details>
         </div>
       </div>
 
+      {/* SECTION 3: Q-DAY DRILL */}
+      <QdayTeaser />
+
       {/* SECTION 4: POST-QUANTUM ARCHITECTURE */}
       <div className="mx-auto max-w-6xl px-4 pb-24 pt-16 sm:px-6 lg:px-8">
-        <SectionHead eyebrow="— POST-QUANTUM ARCHITECTURE" sub="Enforced by native precompiles" title="Hardened at the protocol layer." className="mb-12" />
+        <SectionHead eyebrow="— TECHNICAL DETAILS" sub="Enforced by the chain's native post-quantum precompiles" title="Checked by the chain, not by our server." className="mb-12" />
         <div className="grid gap-5 md:grid-cols-12">
           <Reveal className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/90 bg-white/90 p-6 shadow-sm md:col-span-6">
             <div className="mb-2 font-mono text-xs uppercase tracking-widest text-zinc-500">Crystalline Lattice Seal · 0x0A01 &amp; 0x0A02</div>
