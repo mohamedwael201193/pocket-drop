@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Hex } from 'viem';
 import { API_BASE } from './config';
 
 const hex = z.string().regex(/^0x[0-9a-fA-F]*$/);
@@ -91,6 +92,11 @@ async function post<T>(path: string, body: unknown, schema: z.ZodType<T>): Promi
   }
   return schema.parse(j);
 }
+export interface RouteResult { txHash: Hex; status: string; explorer?: string; gasUsed?: string; env: string; action: string }
+const routeOk = z.object({ ok: z.literal(true), txHash: z.string(), status: z.string(), explorer: z.string().optional(), gasUsed: z.string().optional(), env: z.string(), action: z.string() }).passthrough();
+/** v4: relay a user-signed intent through PocketRouter. 422 means the simulation reverted (nothing was sent). */
+export const postRoute = (p: { env: 'prod' | 'lab'; target?: string; data: string; pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string } }): Promise<RouteResult> =>
+  post('/api/route', p, routeOk).then((r) => ({ ...r, txHash: r.txHash as Hex }));
 export const postBind = (p: { linkId: string; recipient: string; recipientKeyHash: string; linkPk: string; linkSig: string }) => post('/api/bind', p, txOk);
 export const postClaim = (p: { linkId: string; recipientSig: string }) => post('/api/claim', p, txOk);
 
@@ -109,6 +115,24 @@ export function explainError(e: unknown): string {
       PossessionNotProven: 'The account key registration is not finished yet.',
       NotRegistered: 'The account key is not registered yet.',
       LinkNotFound: 'No such link.',
+      BadSignature: 'The signature was refused: this key does not own that Pocket, or the signed action is out of date. Reload and try again.',
+      OverDailyLimit: 'That is above the Pocket daily limit. Use a smaller amount, or raise the limit (it takes effect after the timelock).',
+      Frozen: 'This Pocket is frozen by its guardians. Spending, drops and limit raises are paused until the freeze ends.',
+      TooEarly: 'The timelock has not ended yet.',
+      NotEnoughSigners: 'Not enough guardian signatures yet.',
+      NotGuardian: 'One of the signers is not a guardian of this Pocket.',
+      DuplicateSigner: 'The same guardian signed twice.',
+      AlreadyFrozen: 'This Pocket is already frozen.',
+      FreezeCapped: 'The same guardians already froze this Pocket twice in a row.',
+      NoRecoveryPending: 'There is no recovery pending.',
+      RecoveryPending: 'A recovery is pending, so this is paused.',
+      NotQueued: 'That queued spend is not pending any more.',
+      BadNonce: 'The signed freeze is stale. Sign it again.',
+      AlreadyClaimed: 'This account already took a slot in this pool.',
+      PoolFull: 'Every slot of this pool is taken.',
+      PoolExpired: 'This pool has expired.',
+      RecipientChanged: 'The recipient changed after you looked. Refresh and compare the 4 words again.',
+      NotAllowed: 'That address cannot be reached through the router.',
     };
     if (e.status === 503 && !map[e.name]) return RELAYER_PAUSED;
     return map[e.name] ?? `${e.name}: ${e.message}`;
