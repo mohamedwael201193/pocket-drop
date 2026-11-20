@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from 'lucide-react';
 import type { Hex } from 'viem';
 import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
@@ -37,6 +37,10 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
   const label = linkId4(env, id);
   const account = useAccount();
   const ensureKey = account.ensureKey;
+  // read inside run() without re-creating it: the Pocket this key already uses (a custom or recovered one), if any
+  const accountRef = useRef(account);
+  accountRef.current = account;
+  const qc = useQueryClient();
   const { data: link, error: linkErr } = useQuery({ queryKey: ['drop4', env, id.toString()], queryFn: () => readDrop(env, id), refetchInterval: 3000, retry: 1 });
 
   const [steps, setSteps] = useState(blank);
@@ -67,13 +71,17 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
       mark('key', 'running');
       const root = ensureKey(); // registers the key in the app's account state, never replaces an existing one
       const me = await deriveAccount(root);
-      const myPocket = await predictPocket(env, defaultCfg(me.evm as Hex));
+      const defaultPocket = await predictPocket(env, defaultCfg(me.evm as Hex));
+      // a returning user is paid into the Pocket they use in this app (for example one they took over by recovery), not always the default one
+      const ctx = accountRef.current;
+      const myPocket = ctx.acct && ctx.acct.evm.toLowerCase() === me.evm.toLowerCase() && ctx.activePocket ? ctx.activePocket : defaultPocket;
       if (!alive.current) return;
       setAcct(me); setPocket(myPocket);
       mark('key', 'done', { note: `Account ${me.evm.slice(0, 8)}…${me.evm.slice(-6)} · Pocket ${myPocket.slice(0, 8)}…${myPocket.slice(-6)}` });
 
       let l = await readDrop(env, id);
       if (!l) throw new Error('No such link.');
+      if (l.payTo && /^0x[0-9a-fA-F]{40}$/.test(l.payTo) && !/^0x0{40}$/.test(l.payTo) && l.recipient.toLowerCase() === me.evm.toLowerCase()) setPocket(l.payTo as Hex);
       if (['Claimed', 'Cancelled', 'Refunded'].includes(l.state) && !(l.state === 'Claimed' && l.recipient.toLowerCase() === me.evm.toLowerCase())) throw new Error(`This link is already ${l.state.toLowerCase()}.`);
       const mine = l.recipient.toLowerCase() === me.evm.toLowerCase();
       const now = Math.floor(Date.now() / 1000);
@@ -122,14 +130,22 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
       if (l.state === 'Claimed') mark('claim', 'skipped', { note: 'Already claimed.' });
       else {
         mark('claim', 'running');
-        const r = await claimDrop(env, id, me, myPocket);
-        mark('claim', 'done', { hash: r.txHash });
+        const payTo = (l.payTo && !/^0x0{40}$/.test(l.payTo) ? l.payTo : myPocket) as Hex;
+        const before = await pub.getBalance({ address: payTo });
+        const r = await claimDrop(env, id, me, payTo); // the claim signs over the payTo fixed at bind
+        // show the paid balance, not a stale 0: wait until the chain read includes the claim (B-04)
+        mark('claim', 'running', { hash: r.txHash, note: 'Claim mined. Reading your new balance…' });
+        let after = before;
+        for (let i = 0; i < 20 && after < before + l.amount; i++) { await sleep(1500); after = await pub.getBalance({ address: payTo }); }
+        qc.setQueryData(['balance', payTo], after);
+        setPocket(payTo);
+        mark('claim', 'done', { hash: r.txHash, note: undefined });
       }
     } catch (e) {
       patch(current, { status: 'error' });
       setFatal(explainError(e));
     } finally { running.current = false; }
-  }, [env, id, seed, patch, ensureKey]);
+  }, [env, id, seed, patch, ensureKey, qc]);
 
   // resume where it stopped when the same link is opened again in this browser
   useEffect(() => {
@@ -138,11 +154,12 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
     if (was && loadRoot()) void run();
   }, [env, id, run]);
 
+  if (link === null) return <DeadEnd title="Link not found" testId="link-error">There is no link {label} on this instance. Check that you opened the whole link the sender shared, or ask them for a new one.</DeadEnd>;
+  if (linkErr && !link) return <DeadEnd title="Could not read this link" testId="link-error">{explainError(linkErr)} Reload the page to try again.</DeadEnd>;
   if (!seed && !started && !(() => { try { return localStorage.getItem(startedKey(env, id)) === '1'; } catch { return false; } })()) {
-    return <Page narrow testId="claim-page"><Notice tone="error" testId="no-key">This link is missing its key. The long part after the # is required, so open the full link the sender shared.</Notice></Page>;
+    if (link && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state)) return <DeadEnd title={`This link is already ${link.state.toLowerCase()}`} testId="link-dead" tone="warn">It held {fmtQor(link.amount)} QOR and cannot be claimed again.</DeadEnd>;
+    return <DeadEnd title="This link is incomplete" testId="no-key">The link is missing its key: the long part after the # is required. Open the full link exactly as the sender shared it.</DeadEnd>;
   }
-  if (linkErr && !link) return <Page narrow testId="claim-page"><Notice tone="error" testId="link-error">{explainError(linkErr)}</Notice></Page>;
-  if (link === null) return <Page narrow testId="claim-page"><Notice tone="error" testId="link-error">No such link.</Notice></Page>;
 
   const done = steps.claim.status === 'done' || steps.claim.status === 'skipped';
   const dead = link && !started && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
@@ -161,7 +178,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
       <div data-done={done ? '1' : '0'} data-state={state} className="space-y-5" data-testid="claim-state">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
           <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · {label}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
-          <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : 'You received'}</div>
+          <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : dead ? 'This link held' : expired ? 'This link holds' : 'You received'}</div>
           <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
           <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
@@ -212,7 +229,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
         {state === 'yours' && pocket && (
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours">
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">It is yours.</h1><SourceBadge kind="LIVE" /></div>
-            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="final-balance" data-wei={pocketBal?.toString() ?? ''}>{pocketBal === undefined ? '…' : fmtQor(pocketBal)} <span className="text-xl text-zinc-500">QOR</span></div>
+            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="final-balance" data-wei={pocketBal?.toString() ?? ''}>{pocketBal === undefined ? <span className="inline-block h-10 w-32 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(pocketBal)} <span className="text-xl text-zinc-500">QOR</span></div>
             <p className="mt-1 text-xs text-zinc-600">Balance of Your Pocket, read from the chain.</p>
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>
@@ -246,3 +263,19 @@ function StepRow({ id, n, step }: { id: StepId; n: number; step: Step }) {
   );
 }
 
+
+/** A link that cannot be claimed: one heading, the reason, and where to go next. */
+function DeadEnd({ title, testId, tone = 'error', children }: { title: string; testId: string; tone?: 'error' | 'warn'; children: ReactNode }) {
+  return (
+    <Page narrow testId="claim-page">
+      <div className="space-y-4">
+        <h1 className="font-serif text-3xl text-zinc-900">{title}</h1>
+        <Notice tone={tone} testId={testId}>{children}</Notice>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <Link to="/receive" className="inline-flex min-h-[44px] items-center rounded-full border border-zinc-300 bg-white px-5 font-medium text-zinc-900">Paste another link</Link>
+          <Link to="/" className="inline-flex min-h-[44px] items-center rounded-full px-4 text-zinc-700 underline">What is Pocket Drop?</Link>
+        </div>
+      </div>
+    </Page>
+  );
+}
