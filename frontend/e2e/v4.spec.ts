@@ -2,6 +2,7 @@
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/v4.spec.ts --project=chromium-390
 // Every hash shown by the app is verified on the chain; every account is funded from the deployer (>= 0.8 QOR for a Pocket).
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import { readRoot } from './vault';
 import fs from 'node:fs';
 import path from 'node:path';
 import { keccak256, toHex, type Hex } from 'viem';
@@ -143,7 +144,7 @@ async function sendFlow(browser: Browser, opts: Record<string, unknown>, project
     run.checks.chain = { dropId: id, state: 'Claimed', senderIsPocket: true, paidIntoRecipientPocket: true };
     // the recipient's browser key is v2: its EVM address and its registered ML-DSA key both come from the pd2: master,
     // so the classical key cannot be used to compute the quantum-safe key (the root itself is never written to evidence)
-    const rRoot = await rp.evaluate(() => localStorage.getItem('pd.root.v4'));
+    const rRoot = await readRoot(rp);
     expect(rRoot?.startsWith('pd2:')).toBe(true);
     const km = keyMaterial(parseRoot(rRoot!)!);
     expect(privateKeyToAccount(toHex(km.secp)).address.toLowerCase()).toBe(link.recipient.toLowerCase());

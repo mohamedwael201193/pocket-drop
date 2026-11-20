@@ -2,6 +2,7 @@
 // must never be replaced by "Use this browser", and /pocket must show the Pocket that key owns.
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/overwrite.spec.ts --project=chromium-390
 import { test, expect, type Page } from '@playwright/test';
+import { readRoot } from '../vault';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 const ROOT = 'pd.root.v4';
@@ -19,7 +20,7 @@ test('a key written behind the app is kept: "Use this browser" adopts it instead
   await expect(create.or(pocket).first()).toBeVisible({ timeout: 60_000 });
   if (await create.isVisible().catch(() => false)) await create.click().catch(() => undefined);
   await expect(pocket).toBeVisible({ timeout: 60_000 });
-  expect(await page.evaluate((k) => localStorage.getItem(k), ROOT)).toBe(R1);
+  expect(await readRoot(page, ROOT)).toBe(R1);
 });
 
 test('the app follows a key created in another tab, without a reload', async ({ context }) => {
@@ -31,7 +32,7 @@ test('the app follows a key created in another tab, without a reload', async ({ 
   await b.evaluate(([k, r]) => localStorage.setItem(k, r), [ROOT, R1]); // fires a storage event in tab a
   await expect(a.getByTestId('create-key')).toBeHidden({ timeout: 30_000 });
   await expect(a.getByTestId('pocket-address')).toBeVisible({ timeout: 60_000 });
-  expect(await a.evaluate((k) => localStorage.getItem(k), ROOT)).toBe(R1);
+  expect(await readRoot(a, ROOT)).toBe(R1);
 });
 
 test('a stored key opens straight to its Pocket, with no "Use this browser" offer', async ({ page }) => {
@@ -40,5 +41,5 @@ test('a stored key opens straight to its Pocket, with no "Use this browser" offe
   await page.goto(`${BASE}/pocket`);
   await expect(page.getByTestId('pocket-address')).toBeVisible({ timeout: 60_000 });
   await expect(page.getByTestId('create-key')).toHaveCount(0);
-  expect(await page.evaluate((k) => localStorage.getItem(k), ROOT)).toBe(R1);
+  expect(await readRoot(page, ROOT)).toBe(R1);
 });

@@ -2,6 +2,7 @@
 // (lab) 180 s delay, and the new key sweeps the funds. Needs E2E_RECOVER_POCKET (the LAB Pocket whose guardians are the E2E guardians).
 //   E2E_RECOVER_POCKET=0x... E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/recover.spec.ts --project=chromium-390
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { readRoot } from './vault';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Hex } from 'viem';
@@ -45,7 +46,7 @@ test('e. Unanimous guardian recovery to a new key, then the new key moves the fu
     }
     const newCode = (await np.getByTestId('new-owner-code').textContent())!;
     // keep the new key outside the repo, so a failed run can never strand the recovered funds
-    const root = await np.evaluate(() => localStorage.getItem('pd.root.v4'));
+    const root = await readRoot(np);
     fs.writeFileSync(keep, JSON.stringify({ root, evm: keyAddr, pocket: POCKET }, null, 1));
 
     // each guardian signs the same unanimous-recovery request on their own device
