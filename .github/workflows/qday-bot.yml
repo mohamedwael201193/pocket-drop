@@ -1,0 +1,37 @@
+name: qday-bot
+# TEAM-RUN Q-Day attacker bot (ours; labelled as such on /qday). Every hour it tries every classical-key path against the
+# five bait Pockets, read-only. Every 6th hour it also puts one attempt on chain through the relayer (marker QDAYBOT1).
+# Diana testnet only. A failed run means a breach signal: someone (or something) got further than a revert.
+on:
+  schedule:
+    - cron: '41 * * * *'
+  workflow_dispatch:
+    inputs:
+      mine:
+        description: 'Also put one attempt on chain now'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: qday-bot
+  cancel-in-progress: false
+jobs:
+  attack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults: { run: { working-directory: contracts-v4 } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci --no-audit --no-fund
+      - run: forge build
+      - name: Attack every bait (read-only; one mined attempt every 6 h)
+        env:
+          QDAY_BAIT_KEYS: ${{ secrets.QDAY_BAIT_KEYS }}
+          QDAY_BOT_TOKEN: ${{ secrets.QDAY_BOT_TOKEN }}
+          MINE: ${{ inputs.mine && '1' || '0' }}
+          QORE_DIR: ${{ runner.temp }}
+        run: node script/qday/bot.mjs
