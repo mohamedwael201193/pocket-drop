@@ -1,5 +1,5 @@
 {
- "totalQor": 14.81,
+ "totalQor": 21.92,
  "entries": [
   {
    "qor": 2,
@@ -570,6 +570,48 @@
    "note": "recovered: chromium-390 b-giveaway sweep",
    "hash": "0x8350bc12def1379482e32af7773aeb944b0425e2dde87b63a821e29651898ffe",
    "at": "2026-11-20T04:22:35.907Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa sponsor-live sender pocket",
+   "hash": "0xee28999c4376237515fff110d57cb73cebc26e35a8e6a5962848ba5a88f48c57",
+   "at": "2026-11-20T04:36:06.426Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa sponsor-live sender pocket",
+   "hash": "0x9fc8558a805e0f740641d29d769bfaafe616467a5b2ed39a831edab0a849f9b5",
+   "at": "2026-11-20T04:52:19.505Z"
+  },
+  {
+   "qor": -0.12,
+   "note": "recovered: qa sponsor-live sender sweep",
+   "hash": "0xc75c79742400988e1a11814d0b424da25f3b737b934bb8dd8b21ffbc1460096d",
+   "at": "2026-11-20T04:53:20.169Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa sponsor-live sender pocket (run 1; the sponsor send failed on Vercel, ESM require)",
+   "hash": "0x7c6ee54c5162fca9c9786f9a3e9f14e0d31bd65dec493f977d2af4a307c1b7c4",
+   "at": "2026-11-20T04:20:34.683Z"
+  },
+  {
+   "qor": 3,
+   "note": "sponsor wallet funding, main -> 0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221 (/api/sponsor float)",
+   "hash": "C274171FA5FB4CCC8CDC8968025A0C5EEF30AF7F14F92D9A212DA85795C7029C",
+   "at": "2026-11-20T04:00:06Z"
+  },
+  {
+   "qor": 2.43,
+   "note": "relayer top-up, main -> 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
+   "hash": "1C273EE848357807EDF519B4CABB42BC823D50BEFDA41E5295F041CC5C3AD3A8",
+   "at": "2026-11-20T04:00:16Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "relayer top-up to about 6 QOR, main -> 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
+   "hash": "9A67DDA996FDCC112D79A229C521720C27FA977CF25D2B286B898C18AB733153",
+   "at": "2026-11-20T04:51:49Z"
   }
  ]
 }
