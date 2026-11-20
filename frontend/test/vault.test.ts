@@ -61,6 +61,16 @@ describe('vault', () => {
     expect(ID.loadRoot()).toBe(r);
     expect(ID.createRoot()).toBe(r); // never replaced
   });
+  it('notices a key written behind the app in the same tab and never replaces it', async () => {
+    await V.unlockVault();
+    expect(ID.loadRoot()).toBeNull();
+    localStorage.setItem('pd.root.v4', R1); // e.g. a claim page or a test, without a storage event
+    expect(ID.loadRoot()).toBe(R1);
+    expect(ID.createRoot()).toBe(R1);
+    await settle();
+    expect(localStorage.getItem('pd.root.v4')!.startsWith(V.ENC_PREFIX)).toBe(true);
+    expect(ID.loadRoot()).toBe(R1);
+  });
   it('binds each ciphertext to its storage key (no swapping values between keys)', async () => {
     const k = await V.wrappingKey();
     const s = await V.seal(k, 'pd.root.v4', R2);

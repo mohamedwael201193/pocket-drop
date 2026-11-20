@@ -13,6 +13,8 @@ const DB = 'pd-vault', STORE = 'keys', KEY_ID = 'root-wrap-v1';
 export type VaultMode = 'encrypted' | 'plaintext' | 'locked';
 
 const cache = new Map<string, string | null>();
+/** The raw localStorage value each cached entry came from, so a value written behind the app (same tab) is noticed. */
+const seen = new Map<string, string | null>();
 let aes: CryptoKey | null = null;
 let mode: VaultMode = 'plaintext';
 let unlocked = false;
@@ -65,10 +67,11 @@ export async function open(key: CryptoKey, name: string, sealed: string): Promis
 }
 
 async function absorb(k: string, raw: string | null): Promise<void> {
+  seen.set(k, raw);
   if (raw === null) { cache.set(k, null); return; }
   if (!raw.startsWith(ENC_PREFIX)) { // plaintext: use it now, encrypt it in place
     cache.set(k, raw);
-    if (aes) { const s = await seal(aes, k, raw); if (ls.get(k) === raw) ls.set(k, s); }
+    if (aes) { const s = await seal(aes, k, raw); if (ls.get(k) === raw) { ls.set(k, s); seen.set(k, s); } }
     return;
   }
   if (!aes) { cache.set(k, null); mode = 'locked'; return; }
@@ -92,22 +95,28 @@ export async function unlockVault(): Promise<VaultMode> {
     if (e.key === null) { for (const k of VAULT_KEYS) void absorb(k, ls.get(k)).then(() => window.dispatchEvent(new Event('pd-root-changed'))); return; }
     if (!isVaultKey(e.key)) return;
     const raw = e.newValue;
-    if (raw === null || !raw.startsWith(ENC_PREFIX)) cache.set(e.key, raw); // synchronous, so listeners that run next see it
+    if (raw === null || !raw.startsWith(ENC_PREFIX)) { cache.set(e.key, raw); seen.set(e.key, raw); } // synchronous, so listeners that run next see it
     void absorb(e.key, raw).then(() => window.dispatchEvent(new Event('pd-root-changed')));
   });
   return mode;
 }
 
 export function vaultGet(k: string): string | null {
-  if (!unlocked) return ls.get(k)?.startsWith(ENC_PREFIX) ? null : ls.get(k);
+  const raw = ls.get(k);
+  if (!unlocked) return raw?.startsWith(ENC_PREFIX) ? null : raw;
+  if (raw !== (seen.get(k) ?? null)) {
+    // written behind the app in this tab (storage events only reach other tabs)
+    if (raw === null || !raw.startsWith(ENC_PREFIX)) { cache.set(k, raw); void absorb(k, raw); }
+    else void absorb(k, raw).then(() => window.dispatchEvent(new Event('pd-root-changed')));
+  }
   return cache.get(k) ?? null;
 }
 export function vaultSet(k: string, v: string): void {
   cache.set(k, v);
-  ls.set(k, v);
-  if (aes) void seal(aes, k, v).then((s) => { if (cache.get(k) === v) ls.set(k, s); }).catch(() => undefined);
+  ls.set(k, v); seen.set(k, v);
+  if (aes) void seal(aes, k, v).then((s) => { if (cache.get(k) === v && ls.get(k) === v) { ls.set(k, s); seen.set(k, s); } }).catch(() => undefined);
 }
-export function vaultDel(k: string): void { cache.set(k, null); ls.del(k); }
+export function vaultDel(k: string): void { cache.set(k, null); seen.set(k, null); ls.del(k); }
 
 /** Test hook: forget everything in memory. */
-export function resetVaultForTests() { cache.clear(); aes = null; mode = 'plaintext'; unlocked = false; }
+export function resetVaultForTests() { cache.clear(); seen.clear(); aes = null; mode = 'plaintext'; unlocked = false; }
