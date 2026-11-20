@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { MotionConfig, motion } from 'framer-motion';
 import { SpotlightTracker } from './alive';
-import { ChevronDown, FlaskConical, Hexagon, Inbox, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from './icons';
+import { ChevronDown, FlaskConical, Hexagon, Inbox, KeyRound, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from './icons';
 import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
 import { INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';
@@ -16,10 +16,11 @@ const TABS = [
   { key: 'send', label: 'Send', to: '/send', Icon: Send, match: (p: string) => p === '/' || p.startsWith('/send') },
   { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p: string) => p.startsWith('/receive') || p.startsWith('/c/') || p.startsWith('/pool/') },
   { key: 'pocket', label: 'Pocket', to: '/pocket', Icon: Wallet, match: (p: string) => p.startsWith('/pocket') },
-  { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges'].some((x) => p.startsWith(x)) },
+  { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges', '/qday'].some((x) => p.startsWith(x)) },
 ] as const;
 export const PROOF_ITEMS = [
   { to: '/lab', label: 'Lab', sub: 'Attacks the chain refused', Icon: FlaskConical },
+  { to: '/qday', label: 'Steal this Pocket', sub: 'Q-Day drill: public keys, live', Icon: KeyRound },
   { to: '/radar', label: 'Radar', sub: 'Live stats from the chain', Icon: Radio },
   { to: '/judges', label: 'Judges', sub: '60-second checklist', Icon: Scale },
 ];
@@ -74,7 +75,7 @@ function ProofMenu({ active }: { active: boolean }) {
       {open && (
         <motion.div role="menu" initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.18 }} className="absolute right-0 top-full z-50 mt-1 w-72 origin-top-right rounded-2xl border border-white/10 bg-obsidian2 p-1.5 shadow-2xl">
           {PROOF_ITEMS.map(({ to, label, sub, Icon }) => (
-            <Link key={to} to={to} role="menuitem" data-testid={`proof-${label.toLowerCase()}`} className="group flex items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5">
+            <Link key={to} to={to} role="menuitem" data-testid={`proof-${to.slice(1)}`} className="group flex items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5">
               <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-[#6EE7B7]"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
               <span><span className="block text-[15px] font-medium text-stone-50">{label}</span><span className="block text-xs text-invMuted">{sub}</span></span>
             </Link>
