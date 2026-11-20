@@ -55,10 +55,10 @@ export function RescuePanel() {
     <div className="space-y-4" data-testid="rescue">
       <p className="text-sm leading-relaxed text-zinc-700">An account whose key never proved possession of a quantum-safe key cannot be protected by a post-quantum check: a future quantum computer could forge its classical signature. Paste an address to see whether it is one, then move its funds into Your Pocket, which only an ML-DSA key can move.</p>
       <div className="flex gap-2">
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="0x… or qor1… address" aria-label="Address to check" data-testid="rescue-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+        <input value={input} onChange={(e) => { setInput(e.target.value); setErr(null); }} placeholder="0x… or qor1… address" aria-label="Address to check" aria-invalid={!!err} data-testid="rescue-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
         <Button variant="secondary" onClick={() => void check()} data-testid="rescue-check">Check</Button>
       </div>
-      {err && <Notice tone="error" testId="rescue-error">{err}</Notice>}
+      {err && <p role="alert" className="text-sm font-medium text-red-700" data-testid="rescue-error">{err}</p>}
       {res && (
         <div className="space-y-3" data-testid="rescue-result" data-proven={res.ks.possessionProven ? '1' : '0'}>
           <div className="flex items-center gap-2 text-xs text-zinc-600"><SourceBadge kind="LIVE" />pqcKeyStatus: registered={String(res.ks.registered)}, possessionProven={String(res.ks.possessionProven)} · balance {fmtQor(res.bal)} QOR</div>
@@ -70,7 +70,7 @@ export function RescuePanel() {
               {qorexOwns && a.identity?.canFund ? (
                 <div className="space-y-2" data-testid="rescue-oneclick">
                   <p className="text-sm font-medium text-zinc-900">One tap with QoreX</p>
-                  <div className="flex gap-2"><input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder={`up to ${fmtQor(res.bal)} QOR`} inputMode="decimal" aria-label="Amount" className="w-40 rounded-xl border border-zinc-300 bg-white px-3 py-2 font-mono text-sm" /><Button busy={busy} onClick={() => void send()} data-testid="rescue-send">Send into my Pocket</Button></div>
+                  <div className="flex gap-2"><input value={amt} onChange={(e) => { setAmt(e.target.value); setErr(null); }} placeholder={`up to ${fmtQor(res.bal)} QOR`} inputMode="decimal" aria-label="Amount" className="w-40 rounded-xl border border-zinc-300 bg-white px-3 py-2 font-mono text-sm" /><Button busy={busy} onClick={() => void send()} data-testid="rescue-send">Send into my Pocket</Button></div>
                   {sent && <Notice tone="ok">Sent: <TxLink hash={sent} testId="rescue-tx" /></Notice>}
                 </div>
               ) : (

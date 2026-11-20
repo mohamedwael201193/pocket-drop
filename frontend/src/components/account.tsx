@@ -22,8 +22,9 @@ export function ConnectChoices() {
       <p className="text-xs leading-relaxed text-zinc-600">A quantum-safe key is created inside this tab and stays here. It owns your Pocket. Back it up on the Pocket page; guardians can recover it for you.</p>
       <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4">
         <summary className="cursor-pointer text-sm font-medium text-zinc-900">Restore from a backup key</summary>
-        <div className="mt-3 flex gap-2">
-          <input value={restore} onChange={(e) => setRestore(e.target.value)} placeholder="64-character backup key" data-testid="restore-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+        <label htmlFor="restore-input" className="mt-3 block text-xs font-medium text-zinc-700">Backup key (64 characters)</label>
+        <div className="mt-1 flex gap-2">
+          <input id="restore-input" value={restore} onChange={(e) => { setRestore(e.target.value); setErr(null); }} placeholder="64-character backup key" autoComplete="off" spellCheck={false} data-testid="restore-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
           <Button variant="secondary" data-testid="restore-key" onClick={() => { try { a.restoreKey(restore); setErr(null); } catch (e) { setErr((e as Error).message); } }}>Restore</Button>
         </div>
         {err && <div className="mt-2"><Notice tone="error">{err}</Notice></div>}

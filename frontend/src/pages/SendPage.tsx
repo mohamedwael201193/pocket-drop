@@ -19,10 +19,10 @@ import { fmtQor, parseQor } from '../lib/chain';
 export function SendTabs() {
   const cls = ({ isActive }: { isActive: boolean }) => cx('flex-1 rounded-full px-4 py-2 text-center text-sm font-medium', isActive ? 'bg-zinc-900 text-stone-100' : 'text-zinc-600');
   return (
-    <div className="mb-6 flex gap-1 rounded-full border border-zinc-200 bg-white/80 p-1" role="tablist" aria-label="Send views">
+    <nav className="mb-6 flex gap-1 rounded-full border border-zinc-200 bg-white/80 p-1" aria-label="Send views">
       <NavLink to="/send" end className={cls} data-testid="send-new">New drop</NavLink>
       <NavLink to="/send/inbox" className={cls} data-testid="send-inbox">Inbox</NavLink>
-    </div>
+    </nav>
   );
 }
 
