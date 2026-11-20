@@ -6,7 +6,8 @@ import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from 'luci
 import type { Hex } from 'viem';
 import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
 import { bindDrop, claimDrop, keyStatus, readDrop, linkId4 } from '../lib/claim4';
-import { createRoot, deriveAccount, loadRoot, keyHashOfAccount, type KeyAccount } from '../lib/identity';
+import { deriveAccount, loadRoot, keyHashOfAccount, type KeyAccount } from '../lib/identity';
+import { useAccount } from '../lib/account';
 import { defaultCfg, predictPocket, REGISTRATION_FEE_WEI, type Env } from '../lib/v4';
 import { explainError } from '../lib/api';
 import { fmtQor, pub } from '../lib/chain';
@@ -34,6 +35,8 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
   const { hash } = useLocation();
   const seed = useMemo(() => parseClaimFragment(hash), [hash]);
   const label = linkId4(env, id);
+  const account = useAccount();
+  const ensureKey = account.ensureKey;
   const { data: link, error: linkErr } = useQuery({ queryKey: ['drop4', env, id.toString()], queryFn: () => readDrop(env, id), refetchInterval: 3000, retry: 1 });
 
   const [steps, setSteps] = useState(blank);
@@ -62,7 +65,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
     };
     try {
       mark('key', 'running');
-      const root = loadRoot() ?? createRoot();
+      const root = ensureKey(); // registers the key in the app's account state, never replaces an existing one
       const me = await deriveAccount(root);
       const myPocket = await predictPocket(env, defaultCfg(me.evm as Hex));
       if (!alive.current) return;
@@ -126,7 +129,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
       patch(current, { status: 'error' });
       setFatal(explainError(e));
     } finally { running.current = false; }
-  }, [env, id, seed, patch]);
+  }, [env, id, seed, patch, ensureKey]);
 
   // resume where it stopped when the same link is opened again in this browser
   useEffect(() => {

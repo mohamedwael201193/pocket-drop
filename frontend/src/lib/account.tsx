@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Hex } from 'viem';
-import { createRoot, deriveAccount, forgetRoot, importRoot, loadRoot, type KeyAccount } from './identity';
+import { createRoot, deriveAccount, forgetRoot, importRoot, loadRoot, ROOT_EVENT, ROOT_STORAGE_KEY, type KeyAccount } from './identity';
 import { connectQorex, detectQorex, forgetQorex, qorexBalanceWei, restoreQorex, type QorexIdentity } from './qorex';
 import { useBalance } from './queries';
 import { defaultCfg, loadEnv, predictPocket, readPocket, saveEnv, type Env, type PocketCfg, type PocketView } from './v4';
@@ -16,7 +16,10 @@ interface Ctx {
   root: string | null;
   acct: KeyAccount | null;
   createKey: () => void;
-  restoreKey: (hex: string) => void;
+  /** Replaces the key only with `replace: true` (the UI asks first when the current key may own funds). */
+  restoreKey: (hex: string, opts?: { replace?: boolean }) => void;
+  /** Returns this browser's key, creating it only if none exists, and makes the whole app use it. */
+  ensureKey: () => string;
   forgetKey: () => void;
   /** The counterfactual Pocket of the key account in the current instance (shown everywhere as "Your Pocket"). */
   cfg: PocketCfg | null;
@@ -56,6 +59,16 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
   const cfg = useMemo(() => (acct ? defaultCfg(acct.evm as Hex) : null), [acct]);
 
+  // follow the stored key when another page of this tab (claim) or another tab changes it
+  useEffect(() => {
+    const sync = () => setRoot((cur) => { const r = loadRoot(); return r === cur ? cur : r; });
+    const onStorage = (e: StorageEvent) => { if (e.key === null || e.key === ROOT_STORAGE_KEY) sync(); };
+    window.addEventListener(ROOT_EVENT, sync);
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', sync);
+    return () => { window.removeEventListener(ROOT_EVENT, sync); window.removeEventListener('storage', onStorage); window.removeEventListener('focus', sync); };
+  }, []);
+
   useEffect(() => {
     let live = true;
     setAcct(null);
@@ -81,6 +94,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return () => { live = false; };
   }, []);
 
+  const ensureKey = useCallback(() => { const r = createRoot(); setRoot(r); return r; }, []);
+
   const connect = useCallback(async () => {
     setQ('connecting'); setErr(null);
     try { const id = await connectQorex(); setIdentity(id); setQ('connected'); }
@@ -93,7 +108,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       env, setEnv: (e) => { saveEnv(e); setEnvState(e); setActive(null); },
       root, acct,
       createKey: () => setRoot(createRoot()),
-      restoreKey: (h) => setRoot(importRoot(h)),
+      ensureKey,
+      restoreKey: (h, o) => setRoot(importRoot(h, o)),
       forgetKey: () => { forgetRoot(); setRoot(null); setActive(null); },
       cfg, pocket,
       actionCtx: acct && cfg && activePocket ? { env, cfg, address: activePocket, acct } : null,
@@ -103,7 +119,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       identity, qorexState, qorexError, connect,
       disconnect: () => { forgetQorex(); setIdentity(null); setQ('ready'); },
     };
-  }, [env, root, acct, cfg, pocket, adopted, active, identity, qorexState, qorexError, connect, setActive]);
+  }, [env, root, acct, cfg, pocket, adopted, active, identity, qorexState, qorexError, connect, setActive, ensureKey]);
   return <AccountCtx.Provider value={value}>{children}</AccountCtx.Provider>;
 }
 
