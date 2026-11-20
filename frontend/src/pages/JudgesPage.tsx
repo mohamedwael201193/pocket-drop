@@ -8,6 +8,8 @@ import { dropAbi, poolAbi } from '../lib/abi4';
 import { INST } from '../lib/v4';
 import { fmtQor, pub } from '../lib/chain';
 import { useHealth } from '../lib/queries';
+import tests from '../data/tests.json';
+import { SamplePoolCard } from '../components/samplePool';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
 const CONTRACTS = [['router', 'PocketRouter'], ['factory', 'PocketFactory'], ['vaultImpl', 'PocketVault (clone implementation)'], ['drop', 'PocketDrop'], ['pool', 'DropPool']] as const;
@@ -42,7 +44,7 @@ function Item({ n, title, children, action }: { n: number; title: string; childr
 export default function JudgesPage() {
   const { data: f } = useFacts();
   const { data: h } = useHealth();
-  const q = v4.qcai as { stage1: string; stage2: string; report: string | null; auditId?: string | null; score?: string | null; findings?: string | null; publicReport?: string | null };
+  const q = v4.qcai as { stage1: string; stage2: string; report: string | null; auditId?: string | null; score?: string | null; findings?: string | null; publicReport?: string | null; stage2AuditId?: string; stage2Score?: string; stage2PublicReport?: string };
   const t = v4.tests;
   return (
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8" data-testid="judges">
@@ -51,7 +53,13 @@ export default function JudgesPage() {
       </PageTitle>
 
       <div className="space-y-3">
-        <Item n={1} title="The v4 contracts are on Diana (two instances: production and a 60 s lab)" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
+        <Item n={1} title="Start here: the Q-Day Drill" action={<SourceBadge kind="LIVE" />}>
+          <p>Five real Pockets on Diana have their classical (secp256k1) keys published on the page, as if a quantum computer had already broken them. Each Pocket holds a little QOR. Try to take it, from your own tab: the chain refuses, because only the post-quantum key can move funds. The page lists the attempts that were mined and reverted, and a live breach check.</p>
+          <p className="text-xs text-zinc-500">The drill also found a bug in our own key derivation (the PQ key could be derived from the classical key) and the fix is part of this build. Details on the page.</p>
+          <Link className="inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/qday" data-testid="judges-qday">Open the Q-Day Drill</Link>
+        </Item>
+
+        <Item n={2} title="The v4 contracts are on Diana (two instances: production and a 60 s lab)" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
           <div className="overflow-x-auto rounded-xl bg-stoneBg p-3" data-testid="v4-addresses">
             <table className="w-full min-w-[34rem] text-left font-mono text-xs">
               <thead><tr className="text-zinc-500"><th className="pr-3">Contract</th><th className="pr-3">Production</th><th>Lab</th></tr></thead>
@@ -73,17 +81,17 @@ export default function JudgesPage() {
           <p className="text-xs text-zinc-500">No owner, no admin, no upgradeability. The relayer window is scoped to the two routers, so the relayer cannot reach a Pocket or the drop contract directly.</p>
         </Item>
 
-        <Item n={2} title="The attacks, including a stolen key, are refused on-chain" action={<SourceBadge kind="RECORDED" />}>
+        <Item n={3} title="The attacks, including a stolen key, are refused on-chain" action={<SourceBadge kind="RECORDED" />}>
           <p>{v4.liveRows.filter((r) => r.status === 'reverted' || r.status === 'refused').length} attack rows, each a mined revert (or a chain refusal at broadcast) with an explorer link, including the stolen-key freeze and unanimous-recovery scenario. The Lab re-checks them against the chain live.</p>
           <Link className="inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/lab">Open the lab</Link>
         </Item>
 
-        <Item n={3} title="Every sensitive action is a post-quantum intent, checked on-chain" >
+        <Item n={4} title="Every sensitive action is a post-quantum intent, checked on-chain" >
           <p>An owner or guardian signs an ML-DSA-87 intent over <code>&quot;qorechain-msg-v1|qorechain-diana|0x&quot; + lowercase hex(digest)</code>. The vault verifies it with <code>pqcVerify</code> (0x0A01) against the key from <code>pqcKeyStatus</code> (0x0A02), failing closed unless the key is registered, ML-DSA-87 and possession-proven. The relayer only pays gas; <code>PocketRouter</code> forwards only to factory Pockets, <code>PocketDrop</code> and <code>DropPool</code>.</p>
           <p className="text-xs text-zinc-500">The digests this app signs are tested against the contract view functions by eth_call (frontend/test/digests4.live.test.ts).</p>
         </Item>
 
-        <Item n={4} title="The relayer holds no user secret and has a scoped window" action={<SourceBadge kind="LIVE" />}>
+        <Item n={5} title="The relayer holds no user secret and has a scoped window" action={<SourceBadge kind="LIVE" />}>
           {!h ? <Skeleton className="h-10 w-full" /> : (
             <ul className="list-disc space-y-1 pl-5">
               <li>Relayer <Mono>{h.relayer?.address}</Mono> holds {h.relayer?.balance ?? '–'} QOR.</li>
@@ -94,39 +102,41 @@ export default function JudgesPage() {
           )}
         </Item>
 
-        <Item n={5} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
+        <Item n={6} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
           <ul className="grid gap-2 sm:grid-cols-3">
             {[[String(t.total), 'Foundry tests pass', `${t.unit} unit, ${t.fuzz} fuzz, ${t.invariantFns} invariant functions`], ['100%', 'line, statement, branch, function', 'coverage on every file in src/'], ['CI profile', 'fuzz 10,000 runs', 'invariants 256 runs x depth 50']].map(([big, a, b]) => (
               <li key={a} className="rounded-xl bg-stoneBg p-3"><div className="font-money text-3xl leading-none" data-testid={`test-${a.split(' ')[0]}`}>{big}</div><div className="mt-1 text-xs">{a}</div><div className="text-xs text-zinc-500">{b}</div></li>
             ))}
           </ul>
+          <p className="text-sm" data-testid="test-others">Also {tests.frontend.passed} frontend and {tests.backend.passed} backend unit tests pass ({tests.frontend.failed + tests.backend.failed} failed, {tests.backend.skipped} skipped live-chain tests), recorded by <code>frontend/scripts/count-tests.mjs</code> on {tests.recordedAt.slice(0, 10)}.</p>
           <p className="text-xs text-zinc-500">{t.verifiedBy}. Foundry cannot fork the native precompiles, so the live suite (<code>contracts-v4/test/live/*.mjs</code>) is the end-to-end proof. <a className="underline" href={blob('contracts-v4/COVERAGE.md')} target="_blank" rel="noopener noreferrer">COVERAGE.md</a></p>
         </Item>
 
-        <Item n={6} title="QCAI audit (two stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
+        <Item n={7} title="QCAI audit (two stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
           {q.stage1 === 'complete' ? (
             <div data-testid="qcai" className="space-y-1">
-              <p><b>Stage 1 complete.</b> Score {q.score}. {q.findings}. Stage 2 (on the final bytecode): {q.stage2}.</p>
-              {q.auditId && <p className="font-mono text-xs">Audit ID {q.auditId}</p>}
-              <p className="flex flex-wrap gap-3 text-xs"><a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md (triage and resolutions)</a>{q.publicReport && <a className="underline" href={q.publicReport} target="_blank" rel="noopener noreferrer">public report</a>}<a className="underline" href={blob('docs/audit/stage1/QCAI-stage1-2026-11-19.pdf')} target="_blank" rel="noopener noreferrer">Stage 1 PDF</a></p>
+              <p><b>Stage 1:</b> score {q.score}, {q.findings}. <b>Stage 2</b> (re-run on the final code): {q.stage2 === 'complete' ? <>score {q.stage2Score}.</> : 'not run yet.'} Both are automated QCAI audits; there was no human audit.</p>
+              {q.auditId && <p className="break-all font-mono text-xs">Stage 1 ID {q.auditId}{q.stage2AuditId ? ` · Stage 2 ID ${q.stage2AuditId}` : ''}</p>}
+              <p className="flex flex-wrap gap-3 text-xs"><a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md (triage and resolutions)</a>{q.publicReport && <a className="underline" href={q.publicReport} target="_blank" rel="noopener noreferrer">Stage 1 public report</a>}{q.stage2PublicReport && <a className="underline" href={q.stage2PublicReport} target="_blank" rel="noopener noreferrer">Stage 2 public report</a>}<a className="underline" href={blob('docs/audit/stage1/QCAI-stage1-2026-11-19.pdf')} target="_blank" rel="noopener noreferrer">Stage 1 PDF</a></p>
             </div>
           ) : <p data-testid="qcai"><b>Stage 1 in progress.</b> <a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md</a> appears when the report is in.</p>}
         </Item>
 
-        <Item n={7} title="Re-verify it yourself in one command" >
+        <Item n={8} title="Re-verify it yourself in one command" >
           <p><code className="rounded bg-stoneBg px-1.5 py-0.5 font-mono text-xs">node frontend/scripts/reverify.mjs</code> reads the chain (no key, no dependency beyond Node 20) and checks: every v4 contract has code and its recorded keccak, the router points at the factory, drop and pool, the timelock constants match, and every recorded live transaction is mined with the status we claim.</p>
           <a className="inline-block text-xs underline" href={blob('frontend/scripts/reverify.mjs')} target="_blank" rel="noopener noreferrer">reverify.mjs on GitHub</a>
         </Item>
 
-        <Item n={8} title="Try the whole thing yourself">
+        <Item n={9} title="Try the whole thing yourself">
           <p>Send creates a real drop from your Pocket (a quantum-safe key made in your browser); open the link in another browser to receive into that browser&apos;s Pocket, no wallet. The Pocket tab has the limit, veto, guardians, freeze, recovery and Q-Day Rescue. /radar shows the effect, counted from chain events.</p>
           <div className="flex flex-wrap gap-2"><Link className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/send">Send a drop</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/pocket">Open the Pocket</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/radar">Radar</Link></div>
+          <SamplePoolCard compact />
         </Item>
 
-        <Item n={9} title="What it does not do">
+        <Item n={10} title="What it does not do">
           <ul className="space-y-1.5">
             {[
-              'Unaudited by humans; QCAI Stage 1 is automated and Stage 2 is not run yet. Testnet only.',
+              `No human audit. Two automated QCAI audits: Stage 1 ${q.score ?? ''}, Stage 2 ${q.stage2Score ?? 'not run'} (findings and fixes in docs/AUDIT.md). Testnet only.`,
               'A thief who holds the owner key can spend up to the daily limit before the guardians freeze the Pocket (the freeze is guardian-signed, so it is only as fast as your guardians).',
               'A Drop Pool slot goes to a distinct proof-of-possession account, not a person: one person can hold many accounts.',
               'The sender can still lose a link: whoever opens it first becomes the recipient (Confirmed mode adds a 4-word check).',
