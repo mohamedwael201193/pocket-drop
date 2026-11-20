@@ -84,8 +84,9 @@ export default function LandingPage() {
           <div ref={stageRef} className="tilt-stage relative z-20 w-full max-w-[295px] animate-float-slow sm:max-w-[315px]"
             onMouseMove={(e) => { const r = stageRef.current!.getBoundingClientRect(); setTilt({ x: (e.clientX - r.left) / r.width - 0.5, y: (e.clientY - r.top) / r.height - 0.5 }); }}
             onMouseLeave={() => setTilt({ x: 0, y: 0 })}>
-            <div role="button" tabIndex={0} aria-label="Open the claim flow" data-testid="hero-capsule" onClick={() => navigate("/receive")} onKeyDown={(e) => { if (e.key === 'Enter') navigate("/receive"); }}
+            <div role="button" tabIndex={0} aria-describedby="hero-capsule-hint" data-testid="hero-capsule" onClick={() => navigate("/receive")} onKeyDown={(e) => { if (e.key === 'Enter') navigate("/receive"); }}
               className="tilt-card capsule-bezel cursor-pointer" style={{ transform: `rotateY(${tilt.x * 14}deg) rotateX(${-tilt.y * 12}deg)` }}>
+              <span id="hero-capsule-hint" className="sr-only">Opens the claim flow</span>
               <div className="rounded-[19px] capsule-obsidian p-5 text-stone-100">
                 <div className="mb-3.5 flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-300">POCKET DROP</span>
@@ -137,7 +138,8 @@ export default function LandingPage() {
             </div>
 
             <div className="flex shrink-0 flex-col items-center">
-              <div className="relative flex h-[210px] w-[240px] cursor-pointer items-center justify-center" onClick={() => setStack((v) => (v + 1) % 3)} role="button" aria-label="Next step" data-testid="stacked-deck">
+              <div className="relative flex h-[210px] w-[240px] cursor-pointer items-center justify-center" onClick={() => setStack((v) => (v + 1) % 3)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStack((v) => (v + 1) % 3); } }} role="button" tabIndex={0} aria-describedby="stacked-deck-hint" data-testid="stacked-deck">
+                <span id="stacked-deck-hint" className="sr-only">Shows the next step</span>
                 <div className="iso-slab absolute top-[56px] h-[126px] w-[200px] rounded-2xl opacity-85" />
                 <div className="iso-slab absolute top-[30px] h-[126px] w-[200px] rounded-2xl opacity-95" />
                 <div className="iso-slab absolute top-[4px] flex h-[126px] w-[200px] flex-col justify-between rounded-2xl p-4 transition-transform hover:-translate-y-1">
