@@ -99,6 +99,8 @@ export function FundOptions({ target, label }: { target: Hex; label: string }) {
             {msg && <div className="mt-2"><Notice tone={msg.tone}>{msg.text} {msg.hash && <TxLink hash={msg.hash} />}</Notice></div>}
           </div>
         ) : <Notice tone="warn">Your QoreX build cannot send from a web page, so use the address above.</Notice>
+      ) : a.qorexState === 'ready' ? (
+        <Button block variant="secondary" onClick={() => void a.connect()} data-testid="connect-qorex-fund"><Wallet className="h-4 w-4" aria-hidden />Connect QoreX to top up</Button>
       ) : (
         <p className="text-xs text-zinc-500">QoreX one-tap top-up appears here when QoreX is connected. QoreX is on mainnet today and this app runs on Diana testnet, so use the address or the faucet for now.</p>
       )}
