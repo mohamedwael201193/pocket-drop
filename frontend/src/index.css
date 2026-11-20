@@ -148,3 +148,11 @@ a:hover > .ph-i:not(.ph-arrow):not(.ph-ext), button:hover > .ph-i:not(.ph-arrow)
   .stage::before, .capsule-obsidian::before { display: none; }
   .ph-i { transition: none; }
 }
+
+/* Desktop reading comfort: on wide screens body copy on the light paper is a step larger and darker.
+   Dark surfaces (stage band, obsidian capsules, the tab bar) keep their own light text colours. */
+@media (min-width: 1024px) {
+  main p.text-sm, main li.text-sm, main dd.text-sm, main dt.text-sm, main .text-sm p, main .text-sm li { font-size: 0.9375rem; line-height: 1.6; }
+  main .text-zinc-600:not(.capsule-obsidian *):not(.stage *):not(:hover) { color: #4A4843; }
+  main .text-zinc-500:not(.capsule-obsidian *):not(.stage *):not(:hover) { color: #54524D; }
+}

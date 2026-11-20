@@ -112,9 +112,10 @@ export function PageTitle({ eyebrow, title, children, action }: { eyebrow: React
 }
 
 /** Page container: one width, one gutter, one vertical rhythm for every route. */
-export function Page({ children, narrow, testId }: { children: ReactNode; narrow?: boolean; testId?: string }) {
-  const style = { '--page-w': narrow ? '42rem' : '64rem' } as CSSProperties;
-  return <div data-testid={testId} style={style} className={cx('mx-auto px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8', narrow ? 'max-w-2xl' : 'max-w-5xl')}>{children}</div>;
+/** `form`: a narrow column on phones and tablets that widens on desktop, for the long Send and Pocket forms. */
+export function Page({ children, narrow, form, testId }: { children: ReactNode; narrow?: boolean; form?: boolean; testId?: string }) {
+  const style = { '--page-w': form ? '54rem' : narrow ? '42rem' : '64rem' } as CSSProperties;
+  return <div data-testid={testId} style={style} className={cx('mx-auto px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8', form ? 'max-w-2xl lg:max-w-[54rem]' : narrow ? 'max-w-2xl' : 'max-w-5xl')}>{children}</div>;
 }
 
 /** Small state pill. */

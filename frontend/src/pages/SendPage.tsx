@@ -103,7 +103,7 @@ export default function SendPage() {
 
   const pending = links.filter((l) => l.drop?.state === 'Bound' && l.drop.mode === 'Confirmed');
   return (
-    <Page narrow testId="send-page">
+    <Page narrow form testId="send-page">
       <PageTitle eyebrow="Send" title="Send QOR from your Pocket">Your friend opens the link and the QOR lands in a Pocket made for them. They need no wallet, and you need nothing but this page.</PageTitle>
       <details className="-mt-4 mb-6 text-xs text-zinc-600" data-testid="send-tech"><summary className="cursor-pointer">Technical details</summary><p className="mt-2 leading-relaxed">Each drop is an intent signed in this browser with your ML-DSA-87 key; the chain checks the signature with its post-quantum precompile. A relayer submits it and pays the gas, so there is no EVM window or activation step for you.</p></details>
       <SendTabs />
