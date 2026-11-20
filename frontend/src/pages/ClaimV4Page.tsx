@@ -183,6 +183,8 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
           <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
         </div>
 
+        {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
+        {expired && <h1 className="font-serif text-3xl text-zinc-900">This link expired</h1>}
         {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}
         {expired && <Notice tone="warn" testId="link-expired">This link expired. The sender can take the money back.</Notice>}
 

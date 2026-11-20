@@ -146,7 +146,7 @@ export default function ClaimV3Page() {
 
   /* ---------- guards */
   const guard = (testId: string, tone: 'error' | 'warn', msg: React.ReactNode) => (
-    <Page narrow><Notice tone={tone} testId={testId}>{msg}</Notice></Page>
+    <Page narrow><div className="space-y-4"><h1 className="font-serif text-3xl text-zinc-900">{testId === 'no-key' ? 'This link is incomplete' : testId === 'bad-link' ? 'Not a Pocket Drop link' : 'Could not open this link'}</h1><Notice tone={tone} testId={testId}>{msg}</Notice></div></Page>
   );
   if (!/^\d+$/.test(id)) return guard('bad-link', 'error', 'This is not a Pocket Drop link.');
   if (!seed && !loadSaved(id)) return guard('no-key', 'error', 'This link is missing its key. The long part after the # is required, so open the full link the sender shared.');
@@ -175,6 +175,7 @@ export default function ClaimV3Page() {
           <div className="mt-2 font-mono text-[11px] text-stone-400">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
 
+        {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
         {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}
         {expired && <Notice tone="warn" testId="link-expired">This link expired. The sender can take the money back.</Notice>}
 
