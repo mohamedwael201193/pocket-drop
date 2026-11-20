@@ -20,6 +20,10 @@ export function TestnetBanner() {
   );
 }
 
+/** A time with its zone, so a judge in another country reads it right. */
+const at = (t: string | number) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+const withLocalTimes = (label: string) => label.replace(/\d{4}-\d\d-\d\dT[\d:.]+Z/g, (m) => `${new Date(m).toLocaleDateString([], { day: 'numeric', month: 'short' })} ${at(m)}`);
+
 function BaitCard({ b }: { b: LiveBait }) {
   const ok = b.alarm.length === 0;
   return (
@@ -120,9 +124,10 @@ export default function QdayPage() {
       <section className={cx('mb-5 rounded-3xl border-2 p-5 sm:p-6', s?.alarm.raised ? 'border-red-500 bg-red-50' : 'border-emerald-400 bg-emerald-50')} data-testid="qday-alarm">
         {!s ? <p className="text-sm text-zinc-600">{q.error ? `Could not read the drill: ${(q.error as Error).message}` : <>Reading the chain… <Dash /></>}</p>
           : s.alarm.raised ? (<><div className="flex items-center gap-2 font-serif text-2xl text-red-800"><TriangleAlert className="h-6 w-6" aria-hidden /> Breach alarm</div><ul className="mt-2 list-disc pl-5 text-sm text-red-900">{s.alarm.reasons.map((r) => <li key={r}>{r}</li>)}</ul></>)
-          : (<><div className="flex items-center gap-2 font-serif text-2xl text-emerald-900"><ShieldCheck className="h-6 w-6" aria-hidden /> No breach</div><p className="mt-1 text-sm text-emerald-950">Every bait still holds what we left in it, every registered PQ key is unchanged, no EVM window is open, and no outside transaction against a bait has succeeded. Checked {new Date(s.generatedAt).toLocaleTimeString()}.</p></>)}
+          : (<><div className="flex items-center gap-2 font-serif text-2xl text-emerald-900"><ShieldCheck className="h-6 w-6" aria-hidden /> No breach</div><p className="mt-1 text-sm text-emerald-950">Every bait still holds what we left in it, every registered PQ key is unchanged, no EVM window is open, and no outside transaction against a bait has succeeded. Checked {at(s.generatedAt)}, re-checked every 30 s.</p></>)}
       </section>
 
+      <h2 className="sr-only">The five baits</h2>
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="qday-baits">
         {s ? s.baits.map((b) => <BaitCard key={b.id} b={b} />) : QDAY.baits.map((b) => <div key={b.id} className={card}><h3 className="font-serif text-xl">{b.id}</h3><p className="text-sm text-zinc-600">{b.description}</p><Dash /></div>)}
       </section>
@@ -133,7 +138,7 @@ export default function QdayPage() {
       <section className={cx(card, 'mt-5')} data-testid="qday-script">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Or attack from your terminal</h2>
           <select className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm" value={scriptBait} onChange={(e) => setScriptBait(e.target.value)} aria-label="Bait for the script">{QDAY.baits.map((b) => <option key={b.id}>{b.id}</option>)}</select></div>
-        <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>
+        <pre tabIndex={0} aria-label="Attack script" className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>
         <div className="mt-2 flex flex-wrap items-center gap-2"><CopyButton text={attackScript(scriptBait)} label="Copy script" testId="qday-copy-script" /><a className="text-xs underline" href={`${SOURCE_URL}/tree/main/contracts-v4/script/qday`} target="_blank" rel="noopener noreferrer">Read the script</a></div>
       </section>
 
@@ -143,12 +148,12 @@ export default function QdayPage() {
           <LogCol title="On chain, from anyone" label={s?.log.onChain.label ?? 'Transactions to the router, the drop contract and every bait Pocket, found by scanning blocks.'} rows={s?.log.onChain.rows ?? []} testId="qday-log-onchain" empty={s ? 'No attempts on chain yet.' : '…'} />
           <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4" data-testid="qday-log-refused">
             <h3 className="text-sm font-semibold text-zinc-900">Refused by our relayer</h3>
-            <p className="mt-0.5 text-xs text-zinc-500">{s?.log.relayerRefused.label ?? 'Attempts the relayer simulated and refused before sending.'}</p>
+            <p className="mt-0.5 text-xs text-zinc-500">{s ? withLocalTimes(s.log.relayerRefused.label) : 'Attempts the relayer simulated and refused before sending.'}</p>
             {(s?.log.relayerRefused.rows.length ?? 0) === 0 ? <p className="mt-3 text-xs text-zinc-500">{s ? 'None since this server instance started.' : '…'}</p> : (
-              <ul className="mt-3 space-y-1.5 text-xs">{s!.log.relayerRefused.rows.slice(0, 15).map((r) => <li key={r.at + r.call} className="border-b border-zinc-100 pb-1.5 last:border-0"><b>{r.bait}</b> {r.call} · <span className="text-emerald-800">{r.error}</span> <span className="text-zinc-400">{new Date(r.at).toLocaleTimeString()}</span></li>)}</ul>)}
+              <ul className="mt-3 space-y-1.5 text-xs">{s!.log.relayerRefused.rows.slice(0, 15).map((r) => <li key={r.at + r.call} className="border-b border-zinc-100 pb-1.5 last:border-0"><b>{r.bait}</b> {r.call} · <span className="text-emerald-800">{r.error}</span> <span className="text-zinc-500">{at(r.at)}</span></li>)}</ul>)}
           </div>
-          <LogCol title="Our attacker bot (team-run)" label={s?.log.teamBot.label ?? 'Hourly GitHub Actions run by the team.'} rows={s?.log.teamBot.rows ?? []} testId="qday-log-bot" empty={s ? 'No bot attempt on chain yet.' : '…'}>
-            {s && s.log.teamBot.runs.length > 0 && <ul className="mt-2 space-y-1 text-xs">{s.log.teamBot.runs.slice(0, 4).map((r) => <li key={r.id}><a className="underline" href={r.url} target="_blank" rel="noopener noreferrer">run {new Date(r.createdAt).toLocaleString()}</a> · {r.conclusion ?? r.status}</li>)}</ul>}
+          <LogCol title="Our attacker bot (team-run)" label={s?.log.teamBot.label ?? 'Hourly GitHub Actions run by the team.'} rows={s?.log.teamBot.rows ?? []} testId="qday-log-bot" empty={s ? (s.log.teamBot.runs.length > 0 ? 'No bot transaction on chain yet; the runs above are its read-only checks.' : 'No bot attempt on chain yet.') : '…'}>
+            {s && s.log.teamBot.runs.length > 0 && <ul className="mt-2 space-y-1 text-xs">{s.log.teamBot.runs.slice(0, 4).map((r) => <li key={r.id}><a className="underline" href={r.url} target="_blank" rel="noopener noreferrer">run {new Date(r.createdAt).toLocaleDateString([], { day: 'numeric', month: 'short' })} {at(r.createdAt)}</a> · {r.conclusion ?? r.status}</li>)}</ul>}
           </LogCol>
         </div>
       </section>
