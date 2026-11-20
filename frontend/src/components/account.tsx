@@ -11,6 +11,7 @@ import { REGISTRATION_FEE_WEI } from '../lib/v4';
 import { loadRoot } from '../lib/identity';
 import { explainError } from '../lib/api';
 import type { Hex } from 'viem';
+import { useSponsoredSetup, type PoolProofInput } from '../lib/sponsor';
 
 /** Step "key": the browser key path (the only signing path while QoreX is mainnet-only). */
 export function ConnectChoices() {
@@ -137,20 +138,29 @@ export const KEY_ACCOUNT_MIN_WEI = REGISTRATION_FEE_WEI + 10_000_000_000_000_000
 
 /** One-time registration of the ML-DSA key, paid from the key account (not the Pocket). Needed before the Pocket can first be used.
  *  A claimer with no QOR gets everything needed to get some: the qor1 address the faucet asks for, the 0x address, a QR and the faucet link (P1). */
-export function ActivationCard({ children }: { children?: ReactNode }) {
+export function ActivationCard({ children, pool }: { children?: ReactNode; pool?: PoolProofInput | null }) {
   const a = useAccount();
   const k = useKeyAccount();
+  const sp = useSponsoredSetup(pool);
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
   const btn = useRef<HTMLDivElement>(null);
-  const enough = (k.balance ?? 0n) >= KEY_ACCOUNT_MIN_WEI;
+  // a sponsored account receives exactly the registration fee, which is enough (measured on chain)
+  const minWei = sp.phase === 'sent' ? REGISTRATION_FEE_WEI : KEY_ACCOUNT_MIN_WEI;
+  const enough = (k.balance ?? 0n) >= minWei;
+  const autoTried = useRef(false);
   // when the funds arrive, bring the Register button into view above the phone tab bar (P6)
   useEffect(() => { if (enough && !k.ready) btn.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, [enough, k.ready]);
+  // sponsored: register by itself as soon as the fee lands
+  useEffect(() => {
+    if (sp.phase === 'sent' && enough && !k.ready && !busy && !autoTried.current) { autoTried.current = true; void register(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp.phase, enough, k.ready, busy]);
   if (!a.acct) return null;
   const qor1 = cosmosAddressOf(a.acct.evm);
-  const need = fmtQor(KEY_ACCOUNT_MIN_WEI);
+  const need = fmtQor(minWei);
   async function register() {
     setBusy(true); setErr(null);
     try {
@@ -160,8 +170,8 @@ export function ActivationCard({ children }: { children?: ReactNode }) {
     } catch (e) { setErr(explainError(e)); } finally { setBusy(false); }
   }
   if (k.ready) return <div data-testid="key-ready" className="flex items-center gap-2 text-sm text-emerald-900"><Check className="h-4 w-4" aria-hidden />Your quantum-safe key is registered.{hash && <TxLink hash={hash} />}</div>;
-  return (
-    <div className="space-y-3" data-testid="activation">
+  const fundingSteps = (
+    <>
       <p className="text-sm leading-relaxed text-zinc-700" data-testid="activation-note">
         <b>One-time setup: your key account needs at least {need} QOR</b> (0.1 is a safe round amount). It pays about {fmtQor(REGISTRATION_FEE_WEI)} QOR in network fees to register your quantum-safe key on-chain, once. This is separate from your Pocket: the Pocket holds your money, the key account only pays this fee.
       </p>
@@ -186,9 +196,32 @@ export function ActivationCard({ children }: { children?: ReactNode }) {
           </div>
         </div>
       </div>
+    </>
+  );
+  return (
+    <div className="space-y-3" data-testid="activation">
+      {sp.covering && (
+        <Notice tone="info" testId="sponsor-status">
+          {sp.phase === 'waiting-pocket'
+            ? <>Fund <b>only your Pocket</b> (address above) with at least {sp.senderMinPocketWei !== null ? fmtQor(sp.senderMinPocketWei) : '…'} QOR. Pocket Drop then covers your one-time key setup ({sp.amountWei !== null ? fmtQor(sp.amountWei) : '…'} QOR, testnet) and registers it for you.</>
+            : sp.phase === 'asking' ? <>Covering your one-time key setup ({sp.amountWei !== null ? fmtQor(sp.amountWei) : '…'} QOR, testnet). You need no QOR for it…</>
+            : <>Covered: {sp.amountWei !== null ? fmtQor(sp.amountWei) : ''} QOR sent to your key account{sp.txHash && <> (<TxLink hash={sp.txHash} testId="tx-sponsor" />)</>}. Registering your key…</>}
+        </Notice>
+      )}
+      {sp.phase === 'refused' && sp.message && <p className="text-xs text-zinc-600" data-testid="sponsor-reason">Free setup is not available: {sp.message} Use the faucet below.</p>}
+      {sp.covering ? (
+        <details className="text-xs text-zinc-600" data-testid="sponsor-fallback">
+          <summary className="cursor-pointer">Prefer to pay the setup yourself? Use the faucet</summary>
+          <div className="mt-3 space-y-3">
+      {fundingSteps}
+          </div>
+        </details>
+      ) : fundingSteps}
       <div ref={btn} className="scroll-mb-32">
         <Button block busy={busy} disabled={!enough} onClick={() => void register()} data-testid="register-key">Register my key</Button>
-        {!enough && <p className="mt-2 text-xs text-zinc-600" data-testid="register-reason">Waiting for at least {need} QOR on the key account (now {k.balance !== undefined ? fmtQor(k.balance) : '…'} QOR). Send it from the faucet or any wallet; the button turns on when it arrives.</p>}
+        {!enough && <p className="mt-2 text-xs text-zinc-600" data-testid="register-reason">{sp.covering
+          ? (sp.phase === 'waiting-pocket' ? 'Turns on by itself once your Pocket is funded and the covered setup arrives.' : 'Waiting for the covered setup to arrive; it registers by itself.')
+          : <>Waiting for at least {need} QOR on the key account (now {k.balance !== undefined ? fmtQor(k.balance) : '…'} QOR). Send it from the faucet or any wallet; the button turns on when it arrives.</>}</p>}
       </div>
       {err && <Notice tone="error">{err}</Notice>}
       {children}
