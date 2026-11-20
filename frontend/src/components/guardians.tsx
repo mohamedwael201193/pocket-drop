@@ -24,7 +24,7 @@ export function HelpFriend() {
   const [signIn, setSignIn] = useState('');
   const [signed, setSigned] = useState<string | null>(null);
   const [signErr, setSignErr] = useState<string | null>(null);
-  const [signInfo, setSignInfo] = useState<{ r: GuardianRequest; guardian: boolean } | null>(null);
+  const [signInfo, setSignInfo] = useState<{ r: GuardianRequest; guardians: Hex[] } | null>(null);
   const [sharesIn, setSharesIn] = useState('');
   const [sub, setSub] = useState<{ hash?: string; err?: string; busy?: boolean }>({});
   const env: Env = a.env;
@@ -52,7 +52,7 @@ export function HelpFriend() {
     try {
       const r = decodeCode<GuardianRequest>('pdreq1', text);
       const pv = await readPocket(r.env, r.pocket);
-      setSignInfo({ r, guardian: !!a.acct && pv.guardians.some((g) => g.toLowerCase() === a.acct!.evm.toLowerCase()) });
+      setSignInfo({ r, guardians: pv.guardians });
     } catch (e) { setSignErr((e as Error).message); }
   }
   async function sign() {
@@ -95,7 +95,7 @@ export function HelpFriend() {
             <div>Action: <b>{signInfo.r.kind}</b> on Pocket <Mono>{signInfo.r.pocket}</Mono> ({signInfo.r.env})</div>
             {signInfo.r.newOwner && <div>New owner: <Mono>{signInfo.r.newOwner}</Mono></div>}
             {!a.acct ? <Notice tone="warn">Open or restore your key first (Pocket and key, above).</Notice>
-              : !signInfo.guardian ? <Notice tone="warn" testId="not-guardian">This browser&apos;s key <Mono>{a.acct.evm}</Mono> is not a guardian of that Pocket.</Notice>
+              : !signInfo.guardians.some((g) => g.toLowerCase() === a.acct!.evm.toLowerCase()) ? <Notice tone="warn" testId="not-guardian">This browser&apos;s key <Mono>{a.acct.evm}</Mono> is not a guardian of that Pocket.</Notice>
               : !key.ready ? <Notice tone="warn">Register your quantum-safe key first (above), or the chain will refuse your signature.</Notice> : null}
           </div>
         )}

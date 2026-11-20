@@ -11,8 +11,9 @@ if (net.chainId !== 'qorechain-diana') throw new Error('testnet only');
 export const SECRET_FILE = process.env.DEPLOYER_SECRET_FILE || 'D:/route/QORE/.secrets/pocketdrop-deployer.json';
 export const chain = defineChain({ id: 9800, name: 'diana', nativeCurrency: { name: 'QOR', symbol: 'QOR', decimals: 18 }, rpcUrls: { default: { http: [net.endpoints.evmRpc] } } });
 export const pub = createPublicClient({ chain, transport: http() });
-export const SPEND_FILE = new URL('../evidence/v3/spend.json', import.meta.url);
-export const SPEND_CAP_QOR = 4;
+// the v4 run keeps its own ledger and cap (8 QOR net: outflow from the deployer minus what sweeps bring back)
+export const SPEND_FILE = new URL(process.env.SPEND_FILE || '../evidence/v3/spend.json', import.meta.url);
+export const SPEND_CAP_QOR = Number(process.env.SPEND_CAP_QOR || 4);
 
 export async function loadDeployer() {
   const j = JSON.parse(fs.readFileSync(SECRET_FILE, 'utf8')).deployer;
@@ -59,4 +60,6 @@ export async function fundFromDeployer(to, qor, note = 'fund') {
   recordSpend(qor, note, hash);
   return hash;
 }
+/** Book QOR that came back to the deployer (a sweep), so the cap counts NET spend. */
+export function recordRecovered(qor, note, hash) { return recordSpend(-Number(qor), `recovered: ${note}`, hash); }
 export { formatEther, parseEther, unifiedAccountFromSeed };
