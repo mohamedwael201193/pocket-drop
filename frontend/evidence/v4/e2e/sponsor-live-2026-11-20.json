@@ -1,0 +1,61 @@
+{
+ "flow": "sponsor-live",
+ "txs": {
+  "fund sender Pocket 0.4 (the only funding)": "0x9fc8558a805e0f740641d29d769bfaafe616467a5b2ed39a831edab0a849f9b5",
+  "sponsor -> sender key 0.06": "39D8D6CE6E676261192FECF4395050E0F34EE7ABE18530B07A6B6FCACDB8F788",
+  "sender register (sponsored)": "8AF3AA1855F87BD09ED0FCF776E8FBB3C3FF4E73D479B9EC69E5275410211126",
+  "sender createDrop": "0x66c72177156b93ad77bf753d6935ed097245eae256301bc63b5e2f09a9239733",
+  "recipient bind": "0x49fb32c682dfe7e028e556cccfacf17280197fef7a587e4304a42ba14c038b61",
+  "recipient register (drip)": "8ADBAA54A7BACF3AAE5ACAF1E03B7F120EF17C0EACA7DAC26BCF44B053BBAB63",
+  "recipient claim": "0xcf72499a68bce028de4c975a5689682eebc1997fc0c80fce641c5e67b2c1a5d5",
+  "host createPool 2x0.02": "0x36ae1f825a189df467527e4d6ec8528cd5ed7ca48b97155d515b17d6169310c3",
+  "sponsor -> claimer key 0.06": "A5D72D92453579CB3A869971C3B483210F568EEBCBBEBF057C1FF5A51D956F0A",
+  "claimer register (sponsored)": "2E120C51846B9D2D85359DBE25DDF4D3C108D7A6409FF5297E5E8691059DC6CC",
+  "claimer takes slot": "0x1a6698c5eef9bfdbcdd70081a7b5c75a70925ca77172eebb17330176ec5aa044",
+  "sweep sender Pocket to deployer": "0xc75c79742400988e1a11814d0b424da25f3b737b934bb8dd8b21ffbc1460096d"
+ },
+ "obs": [
+  "sponsor status before: {\"network\":\"diana-testnet\",\"ok\":true,\"enabled\":true,\"remainingToday\":19,\"sponsor\":\"0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221\",\"amountWei\":\"60000000000000000\",\"senderMinPocketWei\":\"100000000000000000\",\"dailyCap\":20}",
+  "PASS sender sees the covered notice with the sponsor tx",
+  "sender key registered by itself 7276 ms after the Pocket was funded",
+  "PASS pool page says the setup is covered",
+  "PASS claimer sees the covered notice",
+  "PASS claimer sponsor tx shown",
+  "second sponsor request for the sender key: HTTP 409 AlreadyRegistered",
+  "sender key 0xff8C9bC75154305120Db4a8211BB52F0D92C6071 funded by: [{\"from\":\"qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh\",\"amount\":\"60000\",\"hash\":\"39D8D6CE6E676261192FECF4395050E0F34EE7ABE18530B07A6B6FCACDB8F788\",\"memo\":\"pd-sponsor sender:prod\"}]",
+  "sender key balance after registering: 0 QOR",
+  "claimer key 0xfb04091845f81a399c8a5145900e2ca8948af46a funded by: [{\"from\":\"qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh\",\"amount\":\"60000\",\"hash\":\"A5D72D92453579CB3A869971C3B483210F568EEBCBBEBF057C1FF5A51D956F0A\",\"memo\":\"pd-sponsor pool:prod:9\"}]",
+  "claimer key balance after registering: 0 QOR",
+  "recipient Pocket 0x77828A73cdC642b3f001a1F14d327B74a124CDDE balance 0.1",
+  "receipt success fund sender Pocket 0.4 (the only funding) 0x9fc8558a805e0f740641d29d769bfaafe616467a5b2ed39a831edab0a849f9b5",
+  "receipt success sponsor -> sender key 0.06 39D8D6CE6E676261192FECF4395050E0F34EE7ABE18530B07A6B6FCACDB8F788",
+  "receipt success sender register (sponsored) 8AF3AA1855F87BD09ED0FCF776E8FBB3C3FF4E73D479B9EC69E5275410211126",
+  "receipt success sender createDrop 0x66c72177156b93ad77bf753d6935ed097245eae256301bc63b5e2f09a9239733",
+  "receipt success recipient bind 0x49fb32c682dfe7e028e556cccfacf17280197fef7a587e4304a42ba14c038b61",
+  "receipt success recipient register (drip) 8ADBAA54A7BACF3AAE5ACAF1E03B7F120EF17C0EACA7DAC26BCF44B053BBAB63",
+  "receipt success recipient claim 0xcf72499a68bce028de4c975a5689682eebc1997fc0c80fce641c5e67b2c1a5d5",
+  "receipt success host createPool 2x0.02 0x36ae1f825a189df467527e4d6ec8528cd5ed7ca48b97155d515b17d6169310c3",
+  "receipt success sponsor -> claimer key 0.06 A5D72D92453579CB3A869971C3B483210F568EEBCBBEBF057C1FF5A51D956F0A",
+  "receipt success claimer register (sponsored) 2E120C51846B9D2D85359DBE25DDF4D3C108D7A6409FF5297E5E8691059DC6CC",
+  "receipt success claimer takes slot 0x1a6698c5eef9bfdbcdd70081a7b5c75a70925ca77172eebb17330176ec5aa044",
+  "receipt success sweep sender Pocket to deployer 0xc75c79742400988e1a11814d0b424da25f3b737b934bb8dd8b21ffbc1460096d"
+ ],
+ "issues": [],
+ "accounts": {
+  "sender.pocket": "0x6D2b6D812f56De937Ac7B8659778EEAf65705689",
+  "sender.key": "0xff8C9bC75154305120Db4a8211BB52F0D92C6071",
+  "recipient.pocket": "0x77828A73cdC642b3f001a1F14d327B74a124CDDE",
+  "claimer.key": "0xfb04091845f81a399c8a5145900e2ca8948af46a",
+  "claimer.pocket": "0x23d7a6ec9637b4ca34eb1d2fefe04221e9b2d406"
+ },
+ "net": [],
+ "shots": [
+  "flow-sponsor-live-01-sender-fund-only-pocket-chromium-1440.png",
+  "flow-sponsor-live-02-sender-key-ready-chromium-1440.png",
+  "flow-sponsor-live-03-recipient-yours-webkit-390.png",
+  "flow-sponsor-live-04-claimer-covered-chromium-390.png",
+  "flow-sponsor-live-05-claimer-yours-chromium-390.png"
+ ],
+ "at": "2026-11-20T04:53:20.284Z",
+ "note": "Live sponsored-onboarding run against prod (frontend dpl_ELW885X5Vs2sNUwyzQwp1guDVtwR, backend dpl_5UvZnRkgrWAbNn4txt7Uq2T2ixEk). Fresh pd2 browser keys; no faucet; the sender funded only its Pocket."
+}
