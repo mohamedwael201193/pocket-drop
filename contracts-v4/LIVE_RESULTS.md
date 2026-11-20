@@ -134,3 +134,44 @@ Summary: {
   "deployerNetQor": "1.4984275",
   "relayerNetQor": "1.81292655375"
 }
+
+## Q-Day drill: "Steal this Pocket" baits (PROD instance, 20 Nov 2026, TEAM-RUN)
+Five bait Pockets whose classical secp256k1 keys are published on `/qday` (owner-approved, testnet). Each ML-DSA-87 secret is independent random entropy. Record: `deployments/qday-baits.json`; attack script: `script/qday/attack.mjs`; page: https://pocketdrop-app.vercel.app/qday.
+
+| Bait | Setup | Key account | Pocket |
+|---|---|---|---|
+| B1 | Plain: no guardians, daily limit 0.05 QOR | `0xf2a37748aFf0Dc12E0C5abC1C3566A0c6D12121f` | `0xCE272e8c261202C4c4e38479763c8892C64C2B1F` |
+| B2 | Guarded: 2 team guardians, threshold 2, daily limit 0.05 QOR | `0x17d3D6A9ddb1Da525D4A3a1a26ED9Fb369EBc754` | `0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE` |
+| B3 | Queued: the owner queued a 0.1 QOR spend to a team address (24 h timelock); nobody else can veto, redirect or add one | `0xbDfE6C1030712554Ce0f466BD4A3f377e966bE34` | `0x5e08A3308f60b512d6958A46629E1EE3FEC8Bd06` |
+| B4 | Recipient: bound and confirmed recipient of a 0.1 QOR Confirmed drop; only its ML-DSA key can claim it | `0x1991ab25891f7B1c475bA8e85Ccd685f0FC6d045` | `0xb5056dC92734cdA2162D76E74Aaba3D338E6C28F` |
+| B5 | Counterfactual: not deployed yet, 0.2 QOR waits at the predicted address; deploying it pins the real registered key | `0xaD127D5b5e7013038428ccdB4c5Dc1C6eDeB8464` | `0xa5BFb1edE77C41d91450a0a918D3d5775a178f24` |
+
+| Step | Tx | Result |
+|---|---|---|
+| fund 5 bait key accounts 0.09 QOR each + submitter X 1.4 QOR (main, one hybrid tx) | `EF24E9E0409C131C1BC0910635AE43B1ECCB6238F66072EA268A43B8AE995430` | cosmos code 0 |
+| B1 registers its ML-DSA-87 key with PoP (classical, one-time) | `24EF8BEFFA5AF6682973A1F05102F69EFD2B7DFCDD73D038F0804E4CC4AA30D5` | cosmos code 0 |
+| B2 registers its ML-DSA-87 key with PoP (classical, one-time) | `8B1336FAEC8276827BBF1EF3A6EF314C392AC0580301BDD4D529854A595C15AE` | cosmos code 0 |
+| B3 registers its ML-DSA-87 key with PoP (classical, one-time) | `32E53A20E18045EE1AED762DB98E900DF47B1E792B6246968D60AEAFD9C28FF1` | cosmos code 0 |
+| B4 registers its ML-DSA-87 key with PoP (classical, one-time) | `2A50DD5D2A03CFE0D8A7A835FC18E2C1E20B81E2BE610B638A334F1DC68E58C8` | cosmos code 0 |
+| B5 registers its ML-DSA-87 key with PoP (classical, one-time) | `3C6BF59195D2DF08F825EFAFE5985E6FE7428776F433573CB1DEDC5F0F33AE24` | cosmos code 0 |
+| B1 Pocket deployed through the prod router (submitter X) | `0x81dfba87bf9cc1403ba845cfe857f1fb831f472a3718896dc84a908e71187016` | success |
+| B1 Pocket funded 0.2 QOR | `0x32dbb7207328c8c7e7633f7507e0b644328d53abd7fcf0df584fcf56ab737df9` | success |
+| B2 Pocket deployed through the prod router (submitter X) | `0xecd3e8aed1f1e49a24847cf1aca70e4880f55924d1d5d1eb8d6613c3686df61d` | success |
+| B2 Pocket funded 0.2 QOR | `0x24673ec6a930d8d6ae82e438867ecbb78c09c35b3bbebf8b2b4e4be382ba3d52` | success |
+| B3 Pocket deployed through the prod router (submitter X) | `0x90a6d0fd004381dd3595456f197dbde78f00669d457ea86927426658a41d104d` | success |
+| B3 Pocket funded 0.2 QOR | `0xe064409b3e2dcc7f965982810bfb90da18730f4c90c7a94c490f567ececa6670` | success |
+| B4 Pocket deployed through the prod router (submitter X) | `0x8fd1ff57a5e0ffb1d52d5515504ad9d06c8bd54ff56690cd51bd6a5152c0e149` | success |
+| B4 Pocket funded 0.2 QOR | `0xb890602970d339a9d21af42e1b5f05f6fdf568d4ae87533b8495c843fbeccaf9` | success |
+| B5 Pocket funded 0.2 QOR | `0x18f96df60cd530922d45875376d04586aaf77c776887b685be8f295914368a03` | success |
+| B3 owner queues a 0.1 QOR spend to team address X (ML-DSA intent; 24 h timelock) | `0x7bb07d1ea414e4e42088821fb5fa0c37f9bd0db43b889bb4313bd1cc0c525169` | success |
+| team sender S key account funded 0.08 QOR (registration fee) | `0x2683af1402425fc4a371e07ca789e228fccbee409f79a8d752d879f35ba2c549` | success |
+| team sender S registers its ML-DSA-87 key with PoP | `F43D60090BB7C5C2F19F062DD7DC58AEB06A7D84E13064C1BCBF5F647A9D35A3` | cosmos code 0 |
+| team sender Pocket S deployed (limit 1 QOR) | `0x39456e7629dfb4bc31f625d89b4bad74e4b0515d9753bd23d17f66078c5231bb` | success |
+| team sender Pocket S funded 0.12 QOR | `0xf050f576455a19d4d79cbc2d7b4eb356f4a091e9c07f3043d76d4f5dbfa5f5bd` | success |
+| B4 setup: team sender Pocket S creates a 0.1 QOR Confirmed drop (ML-DSA intent) | `0x4b3b4439dd48a6b95a75ea44ed887b1e2e48b7643eedbb499d2d288577fc22ad` | success |
+| B4 setup: link key binds B4 as recipient of drop p23 (payTo = B4 Pocket) | `0xe5f5586b8d75cdd4cef27e99b26cf97605e5dcabb30d4bd16769523f3f1fdec6` | success |
+| B4 setup: sender Pocket S confirms B4's key for drop p23 | `0x78be4db118a0b0bb6eed9c31a3cc50f159a4bcaaabd9929320cf3b0847f11671` | success |
+
+First team-bot run after publishing (https://github.com/mohamedwael201193/pocket-drop/actions/runs/44680831601, every path against all five baits, read-only): 98 attempts, 0 succeeded (Cosmos paths refused with codes 20/21/234, Pocket paths revert BadSignature, NoGuardians or BadRecipientSignature; B4's drop claim BadRecipientSignature). In-browser paths (eth_call) for every bait: all refused (`frontend/test/qday.live.test.ts`).
+
+First attempt mined through the relayer (Try-it marker `QDAYTRY1`, B1 spend signed with an attacker ML-DSA key): `0xd0aede1a9056a76ea3b1ea477984646f59c94e8a6ce04dac509a9bc1e5fb7a0a`, status 0 (reverted), gasUsed 254,140, B1 still holds 0.2 QOR.
