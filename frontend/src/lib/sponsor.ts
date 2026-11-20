@@ -31,12 +31,13 @@ export type SponsorReply = { ok: true; txHash: string; amountWei: string } | { o
 
 export async function requestSponsor(body: SponsorBody): Promise<SponsorReply> {
   try {
-    const r = await fetch(`${API_BASE}/api/sponsor`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    // never leave the activation card waiting forever: after 45 s the faucet path takes over
+    const r = await fetch(`${API_BASE}/api/sponsor`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(45_000) });
     const j = await r.json().catch(() => null);
     if (r.ok && j?.ok && j.txHash) return { ok: true, txHash: String(j.txHash), amountWei: String(j.amountWei) };
     return { ok: false, name: j?.error?.name ?? `HTTP ${r.status}`, message: j?.error?.message ?? 'The sponsor did not answer.' };
   } catch {
-    return { ok: false, name: 'Network', message: 'Could not reach the sponsor.' };
+    return { ok: false, name: 'Network', message: 'Could not reach the sponsor in time.' };
   }
 }
 
@@ -82,7 +83,9 @@ export function useSponsoredSetup(pool?: PoolProofInput | null) {
     void (async () => {
       let body: SponsorBody;
       if (kind === 'pool' && pool?.payTo) {
-        const proof = await poolLinkProof(pool.env, pool.id, pool.seed, evm, pool.payTo);
+        // a failed proof must not leave the card on "Covering…": fall back to the faucet path
+        const proof = await poolLinkProof(pool.env, pool.id, pool.seed, evm, pool.payTo).catch(() => null);
+        if (!proof) { setMessage('Could not prove the pool link in this browser.'); setPhase('refused'); return; }
         body = { kind: 'pool', env: pool.env, poolId: pool.id.toString(), recipient: evm, payTo: pool.payTo, ...proof };
       } else {
         const c = a.cfg!;
