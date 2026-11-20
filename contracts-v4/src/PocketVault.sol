@@ -614,6 +614,10 @@ contract PocketVault is IERC1271 {
     }
 
     /// @dev Every signer must be a distinct configured guardian with a valid ML-DSA signature over `message`.
+    ///      Gas bound (QCAI ETH-004): the loops are bounded. `_guardians.length <= MAX_GUARDIANS` (5) because both
+    ///      `initialize` and `setGuardians` go through `_validateGuardians`, which reverts when `n > MAX_GUARDIANS`.
+    ///      Every signer must be a distinct guardian (`NotGuardian` / `DuplicateSigner`), so a call with more than
+    ///      MAX_GUARDIANS signers reverts at the latest on the sixth entry; the duplicate scan is at most 5 x 4 / 2 steps.
     function _checkGuardianSigs(address[] calldata signers, bytes[] calldata sigs, bytes memory message)
         internal
         view
