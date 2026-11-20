@@ -1,3 +1,5 @@
+import colors from 'tailwindcss/colors';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
@@ -22,6 +24,8 @@ export default {
         ink: '#18181B',
         live: '#0F7B5F',
         rec: '#6B5B2E',
+        // zinc-500 text reads 4.4:1 on stone paper; the muted grey is darkened to pass AA at 13 px (6.1:1).
+        zinc: { ...colors.zinc, 500: '#5E5C57' },
         obsidian: '#18181B',
         obsidian2: '#252427',
         accent: '#0B6B4B',

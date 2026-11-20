@@ -126,11 +126,11 @@ export function Pill({ tone = 'neutral', children, testId }: { tone?: 'neutral' 
 /** Numbered step card: the one card style used by every linear flow. */
 export function StepCard({ n, title, done, locked, children, testId }: { n: number; title: string; done?: boolean; locked?: boolean; children: ReactNode; testId?: string }) {
   return (
-    <motion.section data-testid={testId} data-done={done ? '1' : '0'} initial={{ opacity: 0, y: 14 }} animate={{ opacity: locked ? 0.6 : 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className={cx('rounded-3xl border bg-white/90 p-5 shadow-sm transition-colors sm:p-6', done ? 'border-emerald-300' : 'border-zinc-200')}>
+    <motion.section data-testid={testId} data-done={done ? '1' : '0'} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      data-locked={locked ? '1' : '0'} className={cx('rounded-3xl border p-5 transition-colors sm:p-6', locked ? 'border-dashed border-zinc-300 bg-stoneCard/60' : 'bg-white/90 shadow-sm', done ? 'border-emerald-300' : !locked && 'border-zinc-200')}>
       <div className="mb-4 flex items-center gap-3">
         <motion.span key={done ? 'd' : 'n'} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 18 }}
-          className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-sm font-medium', done ? 'bg-accent text-white' : 'bg-zinc-900 text-stone-100')}>{done ? <Check className="h-4 w-4" aria-hidden /> : n}</motion.span>
+          className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-sm font-medium', done ? 'bg-accent text-white' : locked ? 'bg-zinc-300 text-zinc-800' : 'bg-zinc-900 text-stone-100')}>{done ? <Check className="h-4 w-4" aria-hidden /> : n}</motion.span>
         <h2 className="font-serif text-2xl text-zinc-900">{title}</h2>
       </div>
       {children}

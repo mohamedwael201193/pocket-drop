@@ -207,7 +207,7 @@ export default function LandingPage() {
                   const t = attackTx(n as number); const a = ATTACKS[(n as number) - 1];
                   return (
                     <a key={n as number} href={txUrl(t.hash)} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-zinc-200/80 bg-stoneBg p-2.5">
-                      <span className={cx('inline-block rounded-full px-2 py-0.5 font-mono text-xs', tone as string)}>{a.error}</span>
+                      <span className={cx('inline-block max-w-full rounded-full px-2 py-0.5 font-mono text-xs [overflow-wrap:anywhere]', tone as string)}>{a.error}</span>
                       <div className="mt-1 font-mono text-xs text-zinc-500">Tx {shortHash(t.hash, 4)} · Reverted</div>
                     </a>
                   );
