@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Cpu, ShieldCheck, Globe, MessageCircle, CheckCircle2, KeyRound, Droplets, Fingerprint, Compass, Hexagon } from 'lucide-react';
+import { ChevronRight, Cpu, ShieldCheck, Globe, MessageCircle, CheckCircle2, KeyRound, Droplets, Fingerprint, Compass, Hexagon } from '../components/icons';
 import { Reveal, SectionHead, SourcePill, Dash } from '../components/bits';
 import { SourceBadge, cx } from '../components/ui';
 import { ATTACKS, PHONE, TESTS, attackTx, REC } from '../data/proofs';

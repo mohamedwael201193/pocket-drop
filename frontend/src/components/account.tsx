@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, Eye, EyeOff, KeyRound, Wallet } from 'lucide-react';
+import { Check, Eye, EyeOff, KeyRound, Wallet } from './icons';
 import QRCode from 'qrcode';
 import { Button, CopyButton, Mono, Notice, Pill, Skel, SourceBadge, TxLink } from './ui';
 import { useAccount, useKeyAccount, usePocketView, useQorexBalance } from '../lib/account';

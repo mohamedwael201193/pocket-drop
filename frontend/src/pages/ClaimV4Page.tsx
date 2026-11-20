@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from 'lucide-react';
+import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from '../components/icons';
 import type { Hex } from 'viem';
 import { Button, CopyButton, Fingerprint, Mono, Notice, Page, Skel, SourceBadge, TxLink, cx } from '../components/ui';
 import { bindDrop, claimDrop, keyStatus, readDrop, linkId4 } from '../lib/claim4';

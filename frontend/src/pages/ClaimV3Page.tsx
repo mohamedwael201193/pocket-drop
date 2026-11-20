@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, CircleDashed, Loader2, TriangleAlert, SkipForward, KeyRound, Droplets, CheckCircle2, MessageCircle, ShieldCheck, Fingerprint as FpIcon, Lock } from 'lucide-react';
+import { Check, CircleDashed, Loader2, TriangleAlert, SkipForward, KeyRound, Droplets, CheckCircle2, MessageCircle, ShieldCheck, Fingerprint as FpIcon, Lock } from '../components/icons';
 import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
 
 import { addrUrl } from '../lib/config';

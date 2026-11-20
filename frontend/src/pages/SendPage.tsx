@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Gift, ShieldCheck, Users } from 'lucide-react';
+import { Gift, ShieldCheck, Users } from '../components/icons';
 import { Button, Mono, Notice, Page, PageTitle, Pill, SourceBadge, StepCard, TxLink, cx } from '../components/ui';
 import { ActivationCard, ConnectChoices, KEY_ACCOUNT_MIN_WEI, PocketCard } from '../components/account';
 import { amountFormatProblem, countProblem } from '../lib/validate';

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '../components/icons';
 import { Mono, Page, PageTitle, SourceBadge } from '../components/ui';
 import { PROOF_ITEMS } from '../components/Layout';
 import { INST } from '../lib/v4';

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Check } from '../components/icons';
 import { Mono, PageTitle, Skeleton, SourceBadge, Notice } from '../components/ui';
 import v4 from '../data/v4.json';
 import { addrUrl, SOURCE_URL, TESTNET_BADGE, txUrl } from '../lib/config';

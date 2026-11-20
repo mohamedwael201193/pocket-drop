@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MessageCircle, Share2 } from 'lucide-react';
+import { MessageCircle, Share2 } from './icons';
 import { CopyButton } from './ui';
 import { shareMessage, whatsappUrl } from '../lib/protocol';
 

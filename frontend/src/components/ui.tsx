@@ -1,5 +1,5 @@
 import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
-import { Check, Copy, ExternalLink, Loader2 } from 'lucide-react';
+import { Check, Copy, ExternalLink, Loader2 } from './icons';
 import { txUrl } from '../lib/config';
 import { shortHash } from '../lib/protocol';
 

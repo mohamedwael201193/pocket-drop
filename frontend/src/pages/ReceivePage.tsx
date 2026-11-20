@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Inbox } from 'lucide-react';
+import { Inbox } from '../components/icons';
 import { Button, Notice, Page, PageTitle, Pill } from '../components/ui';
 import { PocketCard } from '../components/account';
 import { useAccount } from '../lib/account';

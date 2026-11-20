@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { decodeErrorResult, type Hex } from 'viem';
-import { CheckCircle2, Play, ShieldX, XCircle } from 'lucide-react';
+import { CheckCircle2, Play, ShieldX, XCircle } from '../components/icons';
 import { Button, Card, Notice, Pill, SourceBadge, TxLink } from '../components/ui';
 import { Reveal } from '../components/bits';
 import { ATTACKS, attackTx } from '../data/proofs';

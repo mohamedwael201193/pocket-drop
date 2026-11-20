@@ -2,7 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LegacyKeyStrip } from './upgrade';
 import { useEffect, useRef, useState } from 'react';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, FlaskConical, Hexagon, Inbox, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from 'lucide-react';
+import { ChevronDown, FlaskConical, Hexagon, Inbox, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from './icons';
 import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
 import { INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';

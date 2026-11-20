@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Lock, Inbox as InboxIcon } from 'lucide-react';
+import { Lock, Inbox as InboxIcon } from './icons';
 import type { Hex } from 'viem';
 import { Button, Fingerprint, Notice, Pill, TxLink } from './ui';
 import { ShareCard } from './share';
