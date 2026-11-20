@@ -196,6 +196,13 @@
     "qa-20nov-retest-e-cancel-sender-pocket": "0x5da4a726494b378C2Dd3C0Da000B8C779fdd2756",
     "qa-20nov-retest-e-cancel-sender-acct": "0xD2C10B5d86a8B36d25bE218eb3AC8116DFCd3Da5",
     "qa-20nov-retest-c-pool-claimer1-pocket": "0x99887327B8fC07Ffd5456d494c473505A886346A",
-    "qa-20nov-retest-c-pool-claimer2-pocket": "0x7cd882cC9BC92FD900320793c3159A5e212c33e3"
+    "qa-20nov-retest-c-pool-claimer2-pocket": "0x7cd882cC9BC92FD900320793c3159A5e212c33e3",
+    "TEAM-RUN qday-story V (owner, independent ML-DSA key)": "0x8DA80571f2333a581c27BaD6F47Cb994aD3445B6",
+    "TEAM-RUN qday-story V Pocket": "0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b",
+    "TEAM-RUN qday-story W (owner, legacy browser derivation)": "0x84095015682060930012267203FA5adD2706c1aF",
+    "TEAM-RUN qday-story W Pocket": "0x803B3ACEf3e7C7c54580663d1BFa05adA8cB6B17",
+    "TEAM-RUN qday-story X (attacker submitter)": "0xF7bA1fbA4Bf4F48eCA666083b799f618997b072F",
+    "TEAM-RUN qday-story G1 (guardian of V Pocket)": "0xcD72A8F082bc5Fe250D7aD0dC22CcE101c8633CE",
+    "TEAM-RUN qday-story G2 (guardian of V Pocket)": "0x750f93231543B41AC2224C0c0853Ae2953192De6"
   }
 }
