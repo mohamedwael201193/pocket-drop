@@ -57,11 +57,27 @@ const auditFile = path.resolve(here, '..', '..', 'docs', 'AUDIT.md');
 if (fs.existsSync(auditFile)) {
   const t = fs.readFileSync(auditFile, 'utf8');
   const g = (re) => (re.exec(t) ?? [])[1] ?? null;
+  const s2 = t.split(/^## Stage 2/m)[1] ?? '';
+  const g2 = (re) => (re.exec(s2) ?? [])[1] ?? null;
+  const stage2Done = /### Stage 2 run/.test(t) && !!g2(/Audit ID \| `([^`]+)`/);
   qcai = {
-    stage1: 'complete', stage2: /Stage 2 (?:run|result)/i.test(t) && !/Stage 2 is added/i.test(t) ? 'see report' : 'pending',
+    stage1: 'complete', stage2: stage2Done ? 'complete' : 'pending',
     report: 'docs/AUDIT.md', auditId: g(/Audit ID \| `([^`]+)`/), score: g(/Score \/ risk \| ([^|]+)\|/)?.trim() ?? null,
     findings: g(/Counts: (\d+ findings[^.]*)\./), publicReport: g(/Public report \| (https:\/\/\S+)/),
+    stage2AuditId: stage2Done ? g2(/Audit ID \| `([^`]+)`/) : null,
+    stage2Score: stage2Done ? (g2(/Score \/ risk \| \**([^|*]+)\**/)?.trim() ?? null) : null,
+    stage2PublicReport: stage2Done ? g2(/Public report \| (https:\/\/\S+)/) : null,
   };
+}
+
+// Foundry counts, read from contracts-v4/COVERAGE.md (written from the forge run), never typed here.
+function forgeTests() {
+  const t = fs.readFileSync(path.join(c4, 'COVERAGE.md'), 'utf8');
+  const m = /Tests: (\d+) unit, (\d+) fuzz, (\d+) invariant functions \((\d+) Foundry tests/.exec(t);
+  const ci = /`(FOUNDRY_PROFILE=ci forge test)`[^)]*\): (\d+) passed, (\d+) failed/.exec(t);
+  if (!m || !ci) throw new Error('COVERAGE.md: test counts not found');
+  return { total: Number(m[4]), unit: Number(m[1]), fuzz: Number(m[2]), invariantFns: Number(m[3]), passed: Number(ci[2]), failed: Number(ci[3]),
+    coverage: '100% line, statement, branch and function on src/', verifiedBy: `${ci[1]}: ${ci[2]} passed, ${ci[3]} failed (contracts-v4/COVERAGE.md)` };
 }
 
 const out = {
@@ -71,7 +87,7 @@ const out = {
   relayer: dep.relayer.address,
   liveRows: rows,
   qcai,
-  tests: { total: 167, unit: 145, fuzz: 18, invariantFns: 16, coverage: '100% line, statement, branch and function on src/', verifiedBy: 'orchestrator (FOUNDRY_PROFILE=ci forge test: 167 passed, 0 failed)' },
+  tests: forgeTests(),
 };
 fs.writeFileSync(path.resolve(here, '..', 'src', 'data', 'v4.json'), JSON.stringify(out, null, 1));
 console.log('abi4.ts written; v4.json rows:', rows.length, 'attacks (reverted/refused):', rows.filter((r) => r.status === 'reverted' || r.status === 'refused').length);
