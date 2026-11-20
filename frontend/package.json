@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src e2e scripts --max-warnings 0",
+    "lint": "eslint src e2e scripts test --max-warnings 0",
     "test": "vitest run",
     "test:digests": "vitest run test/digests.live.test.ts",
     "e2e": "playwright test"

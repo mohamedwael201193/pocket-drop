@@ -11,8 +11,10 @@ class MemStorage {
   removeItem(k: string) { this.m.delete(k); }
   clear() { this.m.clear(); }
 }
-(globalThis as any).localStorage = new MemStorage();
-(globalThis as any).window = Object.assign(new EventTarget(), { localStorage: (globalThis as any).localStorage });
+/** The globals this test swaps out (node has no DOM storage or window; fake-indexeddb provides indexedDB). */
+const g = globalThis as unknown as { localStorage: MemStorage; window: EventTarget & { localStorage: MemStorage }; indexedDB: IDBFactory | undefined };
+g.localStorage = new MemStorage();
+g.window = Object.assign(new EventTarget(), { localStorage: g.localStorage });
 
 const V = await import('../src/lib/vault');
 const ID = await import('../src/lib/identity');
@@ -21,7 +23,7 @@ const R2 = 'pd2:' + 'cd'.repeat(32);
 const R1 = 'ab'.repeat(32);
 
 beforeEach(async () => {
-  (globalThis as any).localStorage.clear();
+  g.localStorage.clear();
   V.resetVaultForTests();
   await new Promise<void>((r) => { const q = indexedDB.deleteDatabase('pd-vault'); q.onsuccess = q.onerror = () => r(); });
 });
@@ -86,11 +88,11 @@ describe('vault', () => {
     expect(localStorage.getItem('pd.root.v4.undecryptable')).toBe(foreign);
   });
   it('falls back to plaintext storage when IndexedDB is unavailable', async () => {
-    const saved = (globalThis as any).indexedDB; (globalThis as any).indexedDB = undefined;
+    const saved = g.indexedDB; g.indexedDB = undefined;
     try {
       expect(await V.unlockVault()).toBe('plaintext');
       const r = ID.createRoot(); await settle();
       expect(localStorage.getItem('pd.root.v4')).toBe(r);
-    } finally { (globalThis as any).indexedDB = saved; }
+    } finally { g.indexedDB = saved; }
   });
 });
