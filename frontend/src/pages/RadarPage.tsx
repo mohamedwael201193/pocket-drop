@@ -96,7 +96,7 @@ export default function RadarPage() {
   const ext = (s?: EnvStats) => (s ? s.pocketsOwn.external + s.dropSenders.external + s.dropRecipients.external + s.poolHosts.external + s.poolClaimers.external : 0);
   const extTotal = ext(prod.data) + ext(lab.data);
   const api = useQuery({ queryKey: ['api-stats'], queryFn: fetchStats, refetchInterval: 120_000, retry: 1 });
-  const apiV4 = api.data?.v4 as Record<string, any> | undefined;
+  const apiV4 = api.data?.v4 as Record<string, Parameters<typeof compareWithApi>[1]> | undefined;
   const diffs = prod.data && lab.data && apiV4 ? [...compareWithApi(prod.data, apiV4.prod).map((d) => `prod ${d}`), ...compareWithApi(lab.data, apiV4.lab).map((d) => `lab ${d}`)] : null;
   const eras = prod.data?.keyEras;
 
