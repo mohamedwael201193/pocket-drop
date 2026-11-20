@@ -8,12 +8,16 @@ import { fundFromQorex } from '../lib/qorex';
 import { fmtQor, cosmosAddressOf } from '../lib/chain';
 import { FAUCET_URL, addrUrl } from '../lib/config';
 import { REGISTRATION_FEE_WEI } from '../lib/v4';
+import { loadRoot } from '../lib/identity';
 import { explainError } from '../lib/api';
 import type { Hex } from 'viem';
 
 /** Step "key": the browser key path (the only signing path while QoreX is mainnet-only). */
 export function ConnectChoices() {
   const a = useAccount();
+  // never offer "Use this browser" over a key this browser already holds (for example one a claim page just created): adopt it (B-01)
+  const { ensureKey } = a;
+  useEffect(() => { if (loadRoot()) ensureKey(); }, [ensureKey]);
   const [restore, setRestore] = useState('');
   const [err, setErr] = useState<string | null>(null);
   return (
