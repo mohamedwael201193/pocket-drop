@@ -1,6 +1,6 @@
 {
   "note": "Addresses that belong to the Pocket Drop team/test setup. Everything else is reported as external. Public addresses only.",
-  "sources": "Team wallets (deployer, relayer, main test wallet, burner); v3 live-test, v4 live-suite, spike and E2E accounts from the address fields of the local key files (addresses only); senders, Pockets, guardians and claimers recorded in frontend/evidence/**/*.json; recipients whose bind tx is recorded in an E2E run file or whose link was created by a deployer-funded E2E sender a few blocks earlier; every account funded by the deployer in frontend/evidence/**/spend.json; Pockets named in contracts-v4/deployments/diana.json. The v3 link #17 recipient is the WhatsApp self-test link (frontend/WHATSAPP_TEST.md) that was only sent to the owner.",
+  "sources": "Team wallets (deployer, relayer, main test wallet, burner); v3 live-test, v4 live-suite, spike and E2E accounts from the address fields of the local key files (addresses only); senders, Pockets, guardians and claimers recorded in frontend/evidence/**/*.json; recipients whose bind tx is recorded in an E2E run file or whose link was created by a deployer-funded E2E sender a few blocks earlier; every account funded by the deployer in frontend/evidence/**/spend.json; Pockets named in contracts-v4/deployments/diana.json. The v3 link #17 recipient is the WhatsApp self-test link (frontend/WHATSAPP_TEST.md) that was only sent to the owner. QA runs: every key and Pocket created by a QA run, listed in frontend/evidence/v4/qa/*.json.",
   "accounts": {
     "relayer": "0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
     "burner": "0x664a2B7d5541B31C5C8A17849B5e85618309359E",
@@ -158,6 +158,27 @@
     "v4-live-pocket-ac6847": "0xac6847B04117eAD2AcDb27676df5D373013Ae918",
     "v4-live-pocket-bf8b57": "0xbf8b575AF6D7124a173A0157eaC24Fc159867241",
     "v4-live-pocket-801eb7": "0x801EB77057e60eED9AA348ed7E309f8495811Ef7",
-    "v4-live-pocket-fd20fc": "0xfd20FC9C7371aB4f0C8D2764B74A4Fd4768156d7"
+    "v4-live-pocket-fd20fc": "0xfd20FC9C7371aB4f0C8D2764B74A4Fd4768156d7",
+    "qa-20nov-a-confirmed-sender-acct": "0xF549029e7EdCA8eBC1cbb7cE710292d58F201a91",
+    "qa-20nov-a-confirmed-recipient-acct": "0x617bf1dcc7213bb76CE38a645cFf8d8b29640DC8",
+    "qa-20nov-b-giveaway-sender-acct": "0xf38ef6B38E999CF437Df98f942e1A7063365EA55",
+    "qa-20nov-b-giveaway-recipient-acct": "0xD02701A1d94C3C40b4a7181cDfcb4D975C519651",
+    "qa-20nov-c-pool-host-acct": "0xab86309ca13F270c715eb3196048730a4829b7bD",
+    "qa-20nov-c-pool-claimer1-acct": "0xF7660F39eA5dAB13235A8079c59d6Afdf1048CAc",
+    "qa-20nov-c-pool-claimer2-acct": "0xA28A96460eDD437F68eDFdE1204939c75F752Edb",
+    "qa-20nov-d-pocket-lab-owner-acct": "0x2341D40beFc534297Fdc14BEb54501391f8A65D8",
+    "qa-20nov-d-pocket-lab-newowner-acct": "0x0d4230670CB0eAac8B6D62EEEF86782F3BaC01eA",
+    "qa-20nov-e-cancel-sender-acct": "0x8d27a74F2119f2C342cAE94044bf9687f1Ca90eA",
+    "qa-20nov-a-confirmed-sender-pocket": "0x937d995F7A0B4202Ce571842a3BcA109a8343d53",
+    "qa-20nov-a-confirmed-recipient-pocket": "0x3cB8c35AA64cb6f7F94a1E4b37b7aB4d15772483",
+    "qa-20nov-b-giveaway-sender-pocket": "0x85C8cA3019c01DD2067186C3860cC7919C8AF388",
+    "qa-20nov-b-giveaway-recipient-pocket": "0x5eF999711bC4Ed516992bDF77b9509D88292fd6D",
+    "qa-20nov-c-pool-host-pocket": "0x3e9a1b3D50cA0Ff6746c613E04F6B63B6725b4E7",
+    "qa-20nov-d-pocket-lab-owner-pocket": "0x394BEe23e5695cDc3978072B4dcd8139729Cf42E",
+    "qa-20nov-e-cancel-sender-pocket": "0xc7D9584c139fdeCa3870b92489CF25415B968D48",
+    "qa-20nov-a-confirmed-attempt1-sender-pocket-lost": "0x6c07A8Dc8D70483Aa6845338aC379e9Ef9f67cea",
+    "qa-20nov-a-confirmed-attempt1-sender-acct-lost": "0x705B26B225f2F20A41220c05bFDD7B38d8213196",
+    "qa-20nov-c-pool-claimer1-pocket": "0x5DdB75E409756311FC568cA33956393014662A19",
+    "qa-20nov-c-pool-claimer2-pocket": "0x03A4d4551611D325434c563e4A39a1090F323AEE"
   }
 }
