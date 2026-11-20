@@ -36,6 +36,24 @@ for (const path of ROUTES) {
   });
 }
 
+// The LAB Pocket flow with a fresh key, a reload and the guardian forms open. WebKit prints "Refused to apply a stylesheet"
+// when Playwright's page.screenshot() injects its own <style> tag, so QA runs that take screenshots see that line; the app
+// itself injects no inline style. This test takes no screenshot and must stay clean in Chromium and WebKit.
+test('no CSP violation while using the LAB Pocket (create key, reload, guardian forms)', async ({ page }) => {
+  const violations: string[] = [];
+  page.on('console', (m) => { if (/Content Security Policy|Refused to (load|connect|execute|apply)/i.test(m.text())) violations.push(m.text().slice(0, 300)); });
+  await page.addInitScript(() => { document.addEventListener('securitypolicyviolation', (e) => console.error(`Content Security Policy violation: ${e.violatedDirective} ${e.blockedURI} ${e.sourceFile}:${e.lineNumber}`)); });
+  await page.goto(`${BASE}/pocket?env=lab`);
+  await page.getByTestId('create-key').click();
+  await expect(page.getByTestId('key-address')).toHaveAttribute('data-address', /^0x/, { timeout: 60_000 });
+  await page.waitForTimeout(3000);
+  await page.reload();
+  await expect(page.getByTestId('key-address')).toHaveAttribute('data-address', /^0x/, { timeout: 60_000 });
+  await page.getByTestId('adopt-input').fill('0x' + '11'.repeat(20)).catch(() => undefined);
+  await page.waitForTimeout(3000);
+  expect(violations).toEqual([]);
+});
+
 for (const [kind, R1] of [['pd2', 'pd2:' + 'ab'.repeat(32)], ['legacy v1', 'ab'.repeat(32)]] as const)
 test(`the browser key is sealed at rest, migrated from plaintext (${kind}), and opens the same Pocket after a reload`, async ({ page }) => {
   await page.goto(`${BASE}/receive`);
