@@ -17,6 +17,7 @@ const ProofPage = lazyPage(() => import('./pages/ProofPage'));
 const RadarPage = lazyPage(() => import('./pages/RadarPage'));
 const LabPage = lazyPage(() => import('./pages/LabPage'));
 const JudgesPage = lazyPage(() => import('./pages/JudgesPage'));
+const QdayPage = lazyPage(() => import('./pages/QdayPage'));
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="/radar" element={<RadarPage />} />
               <Route path="/stats" element={<Navigate to="/radar" replace />} />
               <Route path="/judges" element={<JudgesPage />} />
+              <Route path="/qday" element={<QdayPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
