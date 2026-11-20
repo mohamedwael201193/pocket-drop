@@ -1,0 +1,198 @@
+{
+ "note": "Public addresses created by the final retest and persona campaign of 20 Nov 2026 (TEAM-RUN), plus older team test accounts the radar scan found missing. All are own accounts; /api/stats and /radar must not count them as external.",
+ "run": "2026-11-20-final",
+ "accounts": [
+  {
+   "label": "TEAM-RUN qa-20nov-fixround-p17-recipient",
+   "address": "0x4C3BdA5bca14f42808326D36e8670AE31636ad53"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-fixround-p18-recipient",
+   "address": "0x3dcc16763BCf65884B964Bc381693c4Db60acBA4"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p20-owner",
+   "address": "0x7d57c336d4340D63a8b5F3BF997A5D582581C624"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p20-pocket",
+   "address": "0xa5DeeE50ff5B11cdc65F15999BFEFC169827B9F8"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p20-recipient",
+   "address": "0xFAba96B6fd6328dEdbBEb74C4a45A9be31aF4b68"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p20-recipient-pocket",
+   "address": "0x0915c5b116BAD0B49a70e8464D9AfF6473F25625"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p21-owner",
+   "address": "0x7fdFBd6777EFebDb962D0be742e59393AFB5763F"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p21-pocket",
+   "address": "0xcef4d6A66769446FbAd6A2523a2b2aEF85B655dB"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p21-recipient",
+   "address": "0x1ED2DD17F128F7b995c0DAC461Ea11379700d66E"
+  },
+  {
+   "label": "TEAM-RUN v2-key-proof-p21-recipient-pocket",
+   "address": "0xA5627D7B6Fc54b9D07E1085bF2127B1D15797980"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-a-confirmed-recipient-key",
+   "address": "0xAa4f6f9B792117DAcF3F7bEeB013D1B97De07192"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-a-confirmed-recipient-pocket",
+   "address": "0x54b2b2C2477D70a8A861c0618b2269Aad8ACd117"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-b-giveaway-recipient-key",
+   "address": "0xD11Da11C527A41bdE50e27B93b9Ca333cBdB21bD"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-b-giveaway-recipient-pocket",
+   "address": "0xF0E8814e0B8dc52bCfC081fFC5Cbf84De618b347"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P9-interceptor-key",
+   "address": "0x7Ad05D571A22baf634CFA8C888639Ee3485DBB7D"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-a-confirmed-sender.pocket",
+   "address": "0x211956E3DBa7F7fe7ee558623e36Bc3Eee179247"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-a-confirmed-sender.key",
+   "address": "0xeBa65d978AF0bd6B05650Be7b3fcEFf58aA6f050"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-b-giveaway-sender.pocket",
+   "address": "0x511d7d2bdf3B3b062ae5A4BA33732c2548354046"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-b-giveaway-sender.key",
+   "address": "0xAe009A700987BD7aC65D23c6051894BFe68b7deE"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-c-pool-host.pocket",
+   "address": "0xEaE9fE11E55461C335C98293ebB3f1501900B2e7"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-c-pool-host.key",
+   "address": "0x1e9F3EcaA76716832891fdE31160cCA2E184096c"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-c-pool-claimer1.key",
+   "address": "0x5fa69fBA0bCCBd1D9CC6cFb178B75Ed20fc3e59C"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-c-pool-claimer2.key",
+   "address": "0x963990195230f077D32B867ab43733561Ab2A86a"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-d-pocket-lab-owner.pocket",
+   "address": "0xf1359131b895EE22c1126862bb26E3d74D906Aa1"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-final-d-pocket-lab-owner.key",
+   "address": "0x28C6FDbA195aE0dbd073123ff78E36936e9DF7dA"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P1-recipient.pocket",
+   "address": "0x07a64F227e6B42B27f196E0D068a9F704d56600C"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P1-recipient.key",
+   "address": "0xf76D0254CDfb4Cbbf0D9E9918dA03E37cec54128"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P3-claimer.key",
+   "address": "0x10707d4bcc4a6DEded0D937a5Abda10B2ECf652b"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P4-claimer.key",
+   "address": "0xe5D0A337087A9a4014e0A8BA759D6ad0bb68AbB5"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P5-sender.pocket",
+   "address": "0xc9e30bFbdBC9e23f58cA442f0CF48a943aA8472D"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P5-sender.key",
+   "address": "0xEB0D4556ecFc9DC2adea7E63Beb066EBfe6a3588"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P6-sender.pocket",
+   "address": "0xcf814091860F7ceD508289cD253f9AA4B5f91F3d"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P6-sender.key",
+   "address": "0x57e684675295e985834577753ff68C8aa4aD10F0"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P8-recipient.pocket",
+   "address": "0xE1d12654Ebc3777549365b0DC30d14FE01099142"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P8-recipient.key",
+   "address": "0xa3c776E38b52B4f7fe9F418d54A86F8A38a902B6"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P9-interceptor.pocket",
+   "address": "0x195908F36Ab5391596F4399bc4750c45A298a9Cf"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P17-old.key",
+   "address": "0xC3de1F0450B4e52d14230ecF290c833C7c222B61"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P17-old.pocket",
+   "address": "0xF42EFC334d8db70AE4fB89bE5CE55ca4204C40a2"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P17-new.pocket",
+   "address": "0x3Cf06A4BB8086Ca255456c8B61cE302E4a633743"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P17-new.key",
+   "address": "0xD23d08fE73FB00b08A0E8de13C26B2bc700c7131"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P18-claimer.key",
+   "address": "0xa441056bF8A1cb9961FE8AC89c803810193e16b9"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P121-claimer.key",
+   "address": "0x5d052e63F8597F667a547EC789Ea0ce9A5470D1A"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-persona-P122-claimer.key",
+   "address": "0xcAB78e8ebad3411a4AfF124c15a8Ec4E132b4800"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-c-pool-host.pocket",
+   "address": "0xC4A1b34Be0e541fc47c926939E776923059cB5BA"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-c-pool-host.key",
+   "address": "0x8800a943ea8494982Bd353A72Fa1B7962C662ebe"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-c-pool-claimer1.key",
+   "address": "0x7b0d34f75dE9Df1d771C29aBBb67570e10b33Da7"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-c-pool-host.pocket 2",
+   "address": "0xb16fC642D242d740116E1ffc57474D7dbbCB38eC"
+  },
+  {
+   "label": "TEAM-RUN qa-20nov-c-pool-host.key 2",
+   "address": "0x23E45ccD8C19233a2ac02caDa9ebc6A80022a65D"
+  }
+ ]
+}
