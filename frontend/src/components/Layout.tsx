@@ -2,7 +2,8 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, FlaskConical, Hexagon, Inbox, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from 'lucide-react';
-import { SOURCE_URL, POCKETDROP_ADDRESS, addrUrl, API_BASE } from '../lib/config';
+import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
+import { INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';
 import { RELAYER_PAUSED } from '../lib/api';
 import { cx } from './ui';
@@ -10,7 +11,7 @@ import { cx } from './ui';
 /** The four tabs. Every route belongs to exactly one of them. */
 const TABS = [
   { key: 'send', label: 'Send', to: '/send', Icon: Send, match: (p: string) => p === '/' || p.startsWith('/send') },
-  { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p: string) => p.startsWith('/receive') || p.startsWith('/c/') },
+  { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p: string) => p.startsWith('/receive') || p.startsWith('/c/') || p.startsWith('/pool/') },
   { key: 'pocket', label: 'Pocket', to: '/pocket', Icon: Wallet, match: (p: string) => p.startsWith('/pocket') },
   { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges'].some((x) => p.startsWith(x)) },
 ] as const;
@@ -107,7 +108,7 @@ export function Layout() {
           <span>Testnet QOR only · No monetary value · Unaudited · Diana 9800</span>
           <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <a href={`${API_BASE}/api/health`} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">API health</a>
-            <a href={addrUrl(POCKETDROP_ADDRESS)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">Contract</a>
+            <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">v4 router</a>
             <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">Source</a>
           </span>
         </div>

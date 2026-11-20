@@ -1,18 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, MessageCircle, ShieldCheck, Gift } from 'lucide-react';
-import { Button, Mono, Notice, Page, PageTitle, Pill, StepCard, TxLink, cx } from '../components/ui';
-import { ConnectChoices, PocketStatus } from '../components/account';
+import { useQueryClient } from '@tanstack/react-query';
+import { Gift, ShieldCheck, Users } from 'lucide-react';
+import { Button, Mono, Notice, Page, PageTitle, Pill, SourceBadge, StepCard, TxLink, cx } from '../components/ui';
+import { ActivationCard, ConnectChoices, PocketCard } from '../components/account';
 import { ShareCard } from '../components/share';
-import { useAccount, usePocket } from '../lib/account';
-import { LIMITS } from '../lib/config';
+import { ConfirmCard, LinkRow, type OnTx } from '../components/links';
+import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
+import { useMyLinks } from '../lib/hooks4';
+import { createDrop, createPool } from '../lib/actions';
+import { claimUrl4, linkId4 } from '../lib/claim4';
+import { rememberNonce } from '../lib/links4';
+import { DEFAULTS, INST, receiptEvents } from '../lib/v4';
+import { explainError } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
-import { createLink } from '../lib/sender';
-
-const RELAYER_FEE = '0.01';
-const MIN_DRIP = '0.2';
-const CHIPS = ['0.1', '0.3', '1', '5'];
-const TTLS = [{ label: '1 hour', s: 3600 }, { label: '24 hours', s: 86_400 }, { label: '7 days', s: 604_800 }];
 
 export function SendTabs() {
   const cls = ({ isActive }: { isActive: boolean }) => cx('flex-1 rounded-full px-4 py-2 text-center text-sm font-medium', isActive ? 'bg-zinc-900 text-stone-100' : 'text-zinc-600');
@@ -24,59 +25,94 @@ export function SendTabs() {
   );
 }
 
+interface Made { url: string; id: string; kind: 'drop' | 'pool'; amountText: string; hash: string }
+
 export default function SendPage() {
-  const { sender, refreshLinks, links } = useAccount();
-  const pocket = usePocket();
+  const a = useAccount();
+  const { data: pv } = usePocketView();
+  const key = useKeyAccount();
+  const qc = useQueryClient();
+  const { links } = useMyLinks();
+  const inst = INST[a.env];
   const [mode, setMode] = useState<'Confirmed' | 'Open'>('Confirmed');
   const [amount, setAmount] = useState('0.3');
-  const [drip, setDrip] = useState('0.25');
-  const [ttl, setTtl] = useState(86_400);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [freshId, setFreshId] = useState<string | null>(null);
+  const [slots, setSlots] = useState('3');
+  const [perSlot, setPerSlot] = useState('0.02');
+  const [busy, setBusy] = useState<'drop' | 'pool' | null>(null);
+  const [err, setErr] = useState<{ where: 'drop' | 'pool'; text: string } | null>(null);
+  const [made, setMade] = useState<Made | null>(null);
+  const [txs, setTxs] = useState<Record<string, { what: string; hash: string }>>({});
+  const onTx: OnTx = (k, t) => setTxs((x) => ({ ...x, [k]: t }));
 
-  const a = parseQor(amount); const d = parseQor(drip); const fee = parseQor(RELAYER_FEE)!;
-  const ready = !!sender && pocket.funded && pocket.active;
-  const problem = useMemo(() => {
-    if (a === null) return 'Enter an amount like 0.3';
-    if (a < parseQor(String(LIMITS.minEscrowQor))!) return `Minimum is ${LIMITS.minEscrowQor} QOR`;
-    if (a > parseQor(String(LIMITS.maxAmountQor))!) return `Maximum is ${LIMITS.maxAmountQor} QOR`;
-    if (d === null) return 'Enter a gas drip like 0.25';
-    if (d < parseQor(MIN_DRIP)!) return `The gas drip must be at least ${MIN_DRIP} QOR so the recipient can register their key`;
-    if (d > parseQor(String(LIMITS.maxDripQor))!) return `The gas drip is capped at ${LIMITS.maxDripQor} QOR`;
-    if (!sender) return 'Set up your account in step 1.';
-    if (pocket.balance === undefined) return 'Reading your balance…';
-    if (!pocket.active) return 'Finish step 1: fund and activate your account.';
-    if (pocket.remainingUqor !== undefined && pocket.remainingUqor * 10n ** 12n < a + d + fee + 10_000_000_000_000_000n) return 'Your authorisation window is too small for this amount. Activate the account again to refresh it.';
-    if (pocket.balance < a + d + fee + 70_000_000_000_000_000n) return 'Balance too low for this amount plus network fees (about 0.07 QOR). Add QOR in step 1.';
-    return null;
-  }, [a, d, fee, sender, pocket.balance, pocket.active, pocket.remainingUqor]);
+  const ready = !!a.acct && key.ready;
+  const amt = parseQor(amount);
+  const total = amt !== null ? amt + DEFAULTS.drip + DEFAULTS.relayerFee : null;
+  const dropProblem = amt === null ? 'Enter an amount like 0.3.'
+    : amt < inst.minEscrow ? `The minimum is ${fmtQor(inst.minEscrow)} QOR.`
+    : amt > inst.maxAmount ? `The maximum is ${fmtQor(inst.maxAmount)} QOR.`
+    : pv && total! > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR; this drop needs ${fmtQor(total!)} QOR (amount + ${fmtQor(DEFAULTS.drip)} for the receiver's setup fee + ${fmtQor(DEFAULTS.relayerFee)} relayer fee).`
+    : pv && pv.deployed && total! > pv.allowanceLeft ? `Your daily limit has ${fmtQor(pv.allowanceLeft)} QOR left; this drop needs ${fmtQor(total!)} QOR.`
+    : pv && !pv.deployed && total! > DEFAULTS.dailyLimit ? `A new Pocket's daily limit is ${fmtQor(DEFAULTS.dailyLimit)} QOR.`
+    : pv?.frozen ? 'This Pocket is frozen by its guardians.' : null;
+  const ns = Number(slots);
+  const per = parseQor(perSlot);
+  const poolTotal = per !== null && Number.isInteger(ns) ? per * BigInt(ns) : null;
+  const poolProblem = !Number.isInteger(ns) || ns < 1 || ns > inst.maxSlots ? `Slots must be 1 to ${inst.maxSlots}.`
+    : per === null ? 'Enter a slot amount like 0.02.'
+    : per < inst.minPerSlot || per > inst.maxPerSlot ? `A slot must be ${fmtQor(inst.minPerSlot)} to ${fmtQor(inst.maxPerSlot)} QOR.`
+    : pv && poolTotal! > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR; this pool needs ${fmtQor(poolTotal!)} QOR.`
+    : pv && pv.deployed && poolTotal! > pv.allowanceLeft ? `Your daily limit has ${fmtQor(pv.allowanceLeft)} QOR left.`
+    : pv?.frozen ? 'This Pocket is frozen by its guardians.' : null;
 
-  async function submit() {
-    if (problem || a === null || d === null || !sender) return;
-    setBusy(true); setErr(null); setTxHash(null);
+  async function makeDrop() {
+    if (!a.actionCtx || !a.root || amt === null) return;
+    setBusy('drop'); setErr(null); setMade(null);
     try {
-      const l = await createLink(sender, { mode, amount: a, drip: d, relayerFee: fee, ttlSeconds: ttl });
-      setTxHash(l.txHash); setFreshId(l.id); refreshLinks();
-    } catch (e) {
-      const m = (e as { shortMessage?: string }).shortMessage ?? (e as Error).message;
-      setErr(/allowance/i.test(m) ? 'Your authorisation window is too small for this amount. Open the Pocket tab and activate the account again.' : m.slice(0, 280));
-    } finally { setBusy(false); }
+      const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: DEFAULTS.relayerFee, ttlSeconds: DEFAULTS.ttlSeconds });
+      const ev = (await receiptEvents(r.res.txHash)).drop.find((e) => e.eventName === 'LinkCreated') as { args: { linkId: bigint } } | undefined;
+      if (!ev) throw new Error('The drop was created but its LinkCreated event was not found.');
+      rememberNonce(a.env, 'drop', ev.args.linkId, r.nonce);
+      setMade({ url: claimUrl4(window.location.origin, a.env, ev.args.linkId, r.seed), id: linkId4(a.env, ev.args.linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
+      await qc.invalidateQueries();
+    } catch (e) { setErr({ where: 'drop', text: explainError(e) }); } finally { setBusy(null); }
   }
-  const fresh = freshId ? links.find((l) => l.id === freshId) : undefined;
+  async function makePool() {
+    if (!a.actionCtx || !a.root || per === null) return;
+    setBusy('pool'); setErr(null); setMade(null);
+    try {
+      const r = await createPool(a.actionCtx, a.root, ns, per, DEFAULTS.ttlSeconds);
+      const ev = (await receiptEvents(r.res.txHash)).pool.find((e) => e.eventName === 'PoolCreated') as { args: { poolId: bigint } } | undefined;
+      if (!ev) throw new Error('The pool was created but its PoolCreated event was not found.');
+      rememberNonce(a.env, 'pool', ev.args.poolId, r.nonce);
+      setMade({ url: claimUrl4(window.location.origin, a.env, ev.args.poolId, r.seed, 'pool'), id: linkId4(a.env, ev.args.poolId), kind: 'pool', amountText: fmtQor(per), hash: r.res.txHash });
+      await qc.invalidateQueries();
+    } catch (e) { setErr({ where: 'pool', text: explainError(e) }); } finally { setBusy(null); }
+  }
 
+  const pending = links.filter((l) => l.drop?.state === 'Bound' && l.drop.mode === 'Confirmed');
   return (
     <Page narrow testId="send-page">
-      <PageTitle eyebrow="Send" title="Send QOR through a link">Pick an amount, share one link. Your friend needs no wallet.</PageTitle>
+      <PageTitle eyebrow="Send" title="Send QOR from your Pocket">Your Pocket signs each drop with your quantum-safe key and a relayer pays the gas. No EVM window, no activation step for you.</PageTitle>
       <SendTabs />
       <div className="space-y-5">
-        <StepCard n={1} title="Your account" done={ready} testId="step-account">
-          {sender ? <PocketStatus compact /> : <ConnectChoices />}
-          {sender && <p className="mt-3 text-xs text-zinc-500">Backup, restore and QoreX live in the <Link to="/pocket" className="underline">Pocket tab</Link>.</p>}
+        <StepCard n={1} title="Your Pocket" done={ready && !!pv && pv.balance > 0n} testId="step-account">
+          {!a.root ? <ConnectChoices /> : (
+            <div className="space-y-5">
+              <PocketCard />
+              <ActivationCard />
+              <p className="text-xs text-zinc-500">Backup, limits, guardians and recovery live in the <Link to="/pocket" className="underline">Pocket tab</Link>.</p>
+            </div>
+          )}
         </StepCard>
 
-        <StepCard n={2} title="Amount and mode" done={!problem && ready} locked={!ready}>
+        {pending.length > 0 && (
+          <section className="space-y-3" data-testid="needs-you">
+            <div className="flex items-center gap-2"><h2 className="font-serif text-2xl text-zinc-900">Needs your confirmation</h2><Pill tone="warn">{pending.length}</Pill></div>
+            {pending.map((m) => <ConfirmCard key={m.created.id.toString()} m={m} onTx={onTx} />)}
+          </section>
+        )}
+
+        <StepCard n={2} title="Amount and mode" done={!dropProblem && ready} locked={!ready}>
           <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Mode">
             {([['Confirmed', 'Confirmed', ShieldCheck, 'You check 4 words before any money moves. Safest, for someone you know.'], ['Open', 'Giveaway', Gift, 'First person to open the link gets it, with no check.']] as const).map(([m, t, Icon, line]) => (
               <button key={m} type="button" role="radio" aria-checked={mode === m} data-testid={`mode-${m}`} onClick={() => setMode(m)}
@@ -86,45 +122,41 @@ export default function SendPage() {
               </button>
             ))}
           </div>
-          <div className="mt-5">
-            <label htmlFor="amount" className="text-xs font-medium text-zinc-600">Amount (QOR)</label>
-            <input id="amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} data-testid="amount" className="mt-1 w-full rounded-2xl border border-zinc-300 bg-white px-4 py-3 font-serif text-3xl text-zinc-900" />
-            <div className="mt-2 flex flex-wrap gap-2">{CHIPS.map((c) => <button key={c} type="button" onClick={() => setAmount(c)} className={cx('rounded-full border px-3 py-1 font-mono text-xs', amount === c ? 'border-zinc-900 bg-zinc-900 text-stone-100' : 'border-zinc-300 bg-white text-zinc-700')}>{c}</button>)}</div>
-          </div>
-          <details className="mt-4 text-sm">
-            <summary className="cursor-pointer text-zinc-600">Gas drip and expiry</summary>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="text-xs text-zinc-600">Gas drip for the receiver (QOR)
-                <input inputMode="decimal" value={drip} onChange={(e) => setDrip(e.target.value)} data-testid="drip" className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 font-mono text-sm" /></label>
-              <label className="text-xs text-zinc-600">Link valid for
-                <select value={ttl} onChange={(e) => setTtl(Number(e.target.value))} className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm">{TTLS.map((t) => <option key={t.s} value={t.s}>{t.label}</option>)}</select></label>
-            </div>
-            <p className="mt-2 text-xs text-zinc-500">The drip pays the receiver's first transactions and is spent when they open the link.</p>
-          </details>
+          <label htmlFor="amount" className="mt-4 block text-sm font-semibold text-zinc-900">Amount (QOR)</label>
+          <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" data-testid="amount" disabled={!ready}
+            className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-lg" />
+          <p className="mt-2 text-xs text-zinc-600" data-testid="drop-total">Total from your Pocket: {total !== null ? fmtQor(total) : '…'} QOR = amount + {fmtQor(DEFAULTS.drip)} setup fee for the receiver (their key registration) + {fmtQor(DEFAULTS.relayerFee)} relayer fee. Limits: {fmtQor(inst.minEscrow)} to {fmtQor(inst.maxAmount)} QOR.</p>
+          {ready && dropProblem && <div className="mt-3"><Notice tone="warn" testId="drop-problem">{dropProblem}</Notice></div>}
         </StepCard>
 
-        <StepCard n={3} title="Create the link" done={!!txHash} locked={!ready}>
-          <div className="rounded-2xl bg-stoneBg p-4 text-sm" data-testid="total">
-            <div className="flex justify-between"><span className="text-zinc-600">You deposit</span><span className="font-mono font-semibold" data-testid="deposit">{a !== null && d !== null ? fmtQor(a + d + fee) : '–'} QOR</span></div>
-            <div className="mt-1 text-xs text-zinc-500">{a !== null ? fmtQor(a) : '–'} for them + {d !== null ? fmtQor(d) : '–'} gas drip + {RELAYER_FEE} relayer fee. Unclaimed money returns to you.</div>
-          </div>
-          <Button block className="mt-4" busy={busy} disabled={!!problem} onClick={submit} data-testid="create-link"><MessageCircle className="h-4 w-4" aria-hidden />{busy ? 'Creating on-chain…' : 'Create link'}</Button>
-          {problem && ready && <p className="mt-3 text-sm text-amber-800" data-testid="create-problem">{problem}</p>}
-          {err && <div className="mt-3"><Notice tone="error" testId="create-error">{err}</Notice></div>}
+        <StepCard n={3} title="Create and share" done={made?.kind === 'drop'} locked={!ready || !!dropProblem}>
+          <Button block busy={busy === 'drop'} disabled={!ready || !!dropProblem || !!busy} onClick={() => void makeDrop()} data-testid="create-drop">Create drop link</Button>
+          {err?.where === 'drop' && <div className="mt-3"><Notice tone="error" testId="drop-error">{err.text}</Notice></div>}
+          {made?.kind === 'drop' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} amountText={made.amountText} headline="Your link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="create-tx" /> <SourceBadge kind="LIVE" /></p></div>}
         </StepCard>
 
-        <StepCard n={4} title="Share" done={!!fresh} locked={!fresh}>
-          {fresh ? (
-            <div className="space-y-4">
-              <p className="text-sm text-zinc-700">Created on-chain: {txHash && <TxLink hash={txHash} testId="tx-create" />}</p>
-              <ShareCard link={fresh} headline="Your link is ready" />
-              <Notice tone="info">{mode === 'Confirmed' ? 'When your friend opens it, their 4 words appear in your inbox. Compare and tap Confirm.' : 'Nothing more to do: the first person to open it receives the QOR.'}</Notice>
-              <Link to={`/send/inbox?link=${fresh.id}`} data-testid="go-inbox" className="inline-flex items-center gap-1 text-sm font-medium text-zinc-900 underline">Track it in your inbox <ArrowRight className="h-4 w-4" aria-hidden /></Link>
-            </div>
-          ) : <p className="text-sm text-zinc-500">Your link and the WhatsApp button appear here once it is created.</p>}
-        </StepCard>
+        <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="pool-card">
+          <div className="mb-3 flex items-center gap-3"><Users className="h-5 w-5 text-zinc-700" aria-hidden /><h2 className="font-serif text-2xl text-zinc-900">Drop Pool</h2><Pill>one link, many slots</Pill></div>
+          <p className="text-sm leading-relaxed text-zinc-700">One link, N slots of a small amount each. Each slot goes to a <b>distinct proof-of-possession account, not a person</b>: one person can hold several accounts, so a pool is a way to share a little QOR, not a way to count people. It is <b>self-funded</b>: the slots come from your Pocket and the unclaimed part returns when you close it.</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <label className="text-sm font-semibold text-zinc-900">Slots<input value={slots} onChange={(e) => setSlots(e.target.value)} inputMode="numeric" data-testid="pool-slots" disabled={!ready} className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono" /></label>
+            <label className="text-sm font-semibold text-zinc-900">Per slot (QOR)<input value={perSlot} onChange={(e) => setPerSlot(e.target.value)} inputMode="decimal" data-testid="pool-per-slot" disabled={!ready} className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono" /></label>
+          </div>
+          <p className="mt-2 text-xs text-zinc-600">Total from your Pocket: {poolTotal !== null ? fmtQor(poolTotal) : '…'} QOR. Slot size {fmtQor(inst.minPerSlot)} to {fmtQor(inst.maxPerSlot)} QOR, up to {inst.maxSlots} slots. A claimer must already have a registered quantum-safe key.</p>
+          {ready && poolProblem && <div className="mt-3"><Notice tone="warn" testId="pool-problem">{poolProblem}</Notice></div>}
+          <div className="mt-4"><Button block busy={busy === 'pool'} disabled={!ready || !!poolProblem || !!busy} onClick={() => void makePool()} data-testid="create-pool">Create pool link</Button></div>
+          {err?.where === 'pool' && <div className="mt-3"><Notice tone="error" testId="pool-error">{err.text}</Notice></div>}
+          {made?.kind === 'pool' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} kind="pool" amountText={made.amountText} headline="Your pool link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="pool-tx" /> <SourceBadge kind="LIVE" /></p></div>}
+        </section>
+
+        {ready && links.length > 0 && (
+          <section className="space-y-3">
+            <h2 className="font-serif text-2xl text-zinc-900">Your links</h2>
+            {links.slice(0, 4).map((m) => <LinkRow key={`${m.created.kind}${m.created.id}`} m={m} tx={txs[`${m.created.kind}:${m.created.id}`]} onTx={onTx} />)}
+            <p className="text-xs text-zinc-500">All of them, with confirmations, in the <Link to="/send/inbox" className="underline">Inbox</Link>. Pocket <Mono>{a.activePocket ?? ''}</Mono></p>
+          </section>
+        )}
       </div>
-      {sender && <p className="mt-6 text-center text-xs text-zinc-500">Sending from <Mono>{sender.address}</Mono></p>}
     </Page>
   );
 }

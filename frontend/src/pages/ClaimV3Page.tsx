@@ -8,6 +8,7 @@ import { addrUrl } from '../lib/config';
 
 import { explainError, fetchLink, postBind, postClaim, type ApiLink } from '../lib/api';
 import { fmtQor } from '../lib/chain';
+import { modeLine } from '../lib/copy';
 import { useBalance, useLink } from '../lib/queries';
 import { bytesToHex, fingerprint, hexToBytes, parseClaimFragment } from '../lib/protocol';
 import type { Hex } from 'viem';
@@ -34,7 +35,7 @@ const loadSaved = (id: string): Saved | null => { try { return JSON.parse(localS
 const persist = (id: string, s: Saved) => { try { localStorage.setItem(sk(id), JSON.stringify(s)); } catch { /* ignore */ } };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export default function ClaimPage() {
+export default function ClaimV3Page() {
   const { id = '' } = useParams();
   const { hash } = useLocation();
   const seed = useMemo(() => parseClaimFragment(hash), [hash]);
@@ -171,7 +172,7 @@ export default function ClaimPage() {
           <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · link #{id}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : 'You received'}</div>
           <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-[11px] text-stone-400">{link ? `${link.mode === 'Open' ? 'Giveaway' : 'Confirmed by the sender'}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
+          <div className="mt-2 font-mono text-[11px] text-stone-400">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
 
         {dead && <Notice tone="warn" testId="link-dead">This link is already <strong>{link!.state.toLowerCase()}</strong>. It cannot be claimed again.</Notice>}

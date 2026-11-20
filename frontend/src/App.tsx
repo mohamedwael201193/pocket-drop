@@ -9,6 +9,7 @@ const SendPage = lazy(() => import('./pages/SendPage'));
 const InboxPage = lazy(() => import('./pages/InboxPage'));
 const ReceivePage = lazy(() => import('./pages/ReceivePage'));
 const ClaimPage = lazy(() => import('./pages/ClaimPage'));
+const PoolClaimPage = lazy(() => import('./pages/PoolClaimPage'));
 const PocketPage = lazy(() => import('./pages/PocketPage'));
 const ProofPage = lazy(() => import('./pages/ProofPage'));
 const RadarPage = lazy(() => import('./pages/RadarPage'));
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/receive" element={<ReceivePage />} />
               <Route path="/claim" element={<Navigate to="/receive" replace />} />
               <Route path="/c/:id" element={<ClaimPage />} />
+              <Route path="/pool/:id" element={<PoolClaimPage />} />
               {/* Pocket tab */}
               <Route path="/pocket" element={<PocketPage />} />
               {/* Proof tab */}

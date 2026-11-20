@@ -1,13 +1,11 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, Share2 } from 'lucide-react';
 import { CopyButton } from './ui';
-import { fmtQor } from '../lib/chain';
-import { buildClaimUrl, hexToBytes, shareMessage, whatsappUrl } from '../lib/protocol';
-import type { StoredLink } from '../lib/sender';
+import { shareMessage, whatsappUrl } from '../lib/protocol';
 
-export function ShareCard({ link, headline }: { link: StoredLink; headline: string }) {
-  const url = buildClaimUrl(window.location.origin, link.id, hexToBytes(link.seed));
-  const msg = shareMessage(fmtQor(BigInt(link.amountWei)));
+/** Share sheet for a v4 drop or pool link. The key is in the #fragment, which browsers never send to a server. */
+export function ShareCard({ url, amountText, headline, kind = 'drop', id }: { url: string; amountText: string; headline: string; kind?: 'drop' | 'pool'; id: string }) {
+  const msg = kind === 'pool' ? `There are testnet QOR slots for the first accounts to open this link (${amountText} each):` : shareMessage(amountText);
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 rounded-2xl border border-zinc-300 bg-stoneBg p-4" data-testid="share-card">
@@ -19,7 +17,7 @@ export function ShareCard({ link, headline }: { link: StoredLink; headline: stri
         {canShare && <button type="button" data-testid="web-share" onClick={() => navigator.share({ title: 'Pocket Drop', text: msg, url }).catch(() => undefined)} className="min-h-[44px] rounded-full border border-zinc-300 bg-white px-5 text-sm font-medium text-zinc-900">Share…</button>}
         <CopyButton text={url} label="Copy link" testId="copy-link" className="!min-h-[44px]" />
       </div>
-      <p className="text-xs text-zinc-600">Link #{link.id}. Treat it like cash: whoever opens it first becomes the recipient. The key is after the # and never reaches a server.</p>
+      <p className="text-xs text-zinc-600">{kind === 'pool' ? 'Pool' : 'Link'} {id}. {kind === 'pool' ? 'Anyone with this link can take a slot with a distinct proven account, until all slots are taken.' : 'Treat it like cash: whoever opens it first becomes the recipient. Confirmed mode lets you check them first.'} The key is after the # and never reaches a server.</p>
     </motion.div>
   );
 }
