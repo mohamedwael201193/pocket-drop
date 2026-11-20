@@ -1,0 +1,29 @@
+{
+ "project": "chromium-1440",
+ "flow": "c-pool",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0xf616d771d83ab079d2c3e5a8cd954357a9bd079e1268c90a03ad7da37e4dca54",
+  "fund sender Pocket 0.8 QOR": "0x7653980e96fa5d6f14faf0765479f770636af724b661f6171dc80eb97fd9b53e",
+  "sender Pocket createPool (intent, 2 slots x 0.02 QOR)": "0x4bb7274991c0cdf63ab0391f2bbaa62878ca995771e326d20232e652d0c12f61",
+  "fund claimer1 key account 0.075 QOR": "0x546c9c625843efa1d2e01e10089ecfe00acd8b7633585f246b0fe9e9d78b3491",
+  "claimer1 takes a slot (link-key + own signature, relayed)": "0x7902a9608c49fff8a63f5823fe0993bbdf83dedb58cbe788a12b5f6194de131b",
+  "fund claimer2 key account 0.075 QOR": "0xe5848aab4d2162875015579b62b3891ba6bfa460d201b6bfc3bc605f8a76af77",
+  "claimer2 takes a slot (link-key + own signature, relayed)": "0xfe7c2f856c15a3f7f2be91f55da48308b853c3eb6a63b8320b570429bcf1b1b4",
+  "sweep sender Pocket back to the deployer": "0xac896f13c0d57ff708a62c080d28c66a931f7557a8555e07ba53653ce9669eba"
+ },
+ "checks": {
+  "chain": {
+   "poolId": "p5",
+   "taken": 2,
+   "slots": 2,
+   "perSlotWei": "20000000000000000"
+  }
+ },
+ "accounts": {
+  "sender.pocket": "0xD07C793DF14E3Ab733F36Fa5c1d6a94E7EEc920b",
+  "sender.key": "0x5C8d5178EB75D961D9eE48C5155aC8edc0c97a7b",
+  "claimer1.key": "0xF22eC5c5ff55bd68eF0A0Ed05392787cEc9a883D",
+  "claimer2.key": "0xF3CF1d02E23dCE1267544594FeEB7Aa0Dfad3387"
+ },
+ "finishedAt": "2026-11-20T00:57:52.910Z"
+}

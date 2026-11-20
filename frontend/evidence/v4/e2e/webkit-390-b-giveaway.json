@@ -1,0 +1,28 @@
+{
+ "project": "webkit-390",
+ "flow": "b-giveaway",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0x61518e3ea8e41233708ba4fb96aa495ea2270adf4c1fb3a7831256c589b88bd7",
+  "fund sender Pocket 0.8 QOR": "0x2cac19c5c3ccf1210ece4cca04ad1c276adba0466d7dbf043cad802906790d5d",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "0xdc2b0d9deb31fac7776036bbc53470e5fc2266b4f5d0f0c7ddb851c60a6435af",
+  "recipient claim (ML-DSA signature, relayed)": "0xa4c9d5ce03743ce4b026b44fd69007220a1599848cf64f3b688fc4c6da3710b3",
+  "recipient bind (link-key signature, relayed)": "0x3ad36195bf3f0906e3cfb45fa389581a7f28e8cf938edd849b8951cc97f452e1",
+  "recipient PQ key registration (paid from the drip)": "F2ECF79546F97091914C7AD167E20A53A3843613C71F93359FF69D03C9947445",
+  "sweep sender Pocket back to the deployer": "0xe4b6992aeb83c500844d1baebdca981b4d1c8a06b5572ba3cb076a3f094f0127"
+ },
+ "checks": {
+  "recipientPocketBalanceWei": "100000000000000000",
+  "chain": {
+   "dropId": "p13",
+   "state": "Claimed",
+   "senderIsPocket": true,
+   "paidIntoRecipientPocket": true
+  }
+ },
+ "accounts": {
+  "sender.pocket": "0xdb382a436D5f155D0EBd6A71FCc962Bf30E2d854",
+  "sender.key": "0x35aFAa0C5114Ebe040e46a7054039BA2E7AB40e1",
+  "recipient.pocket": "0x7778562707DCfB77081Ea5b12Dd9d2a786d5e33b"
+ },
+ "finishedAt": "2026-11-20T00:55:11.577Z"
+}

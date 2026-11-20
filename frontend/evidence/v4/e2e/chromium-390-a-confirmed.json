@@ -1,0 +1,36 @@
+{
+ "project": "chromium-390",
+ "flow": "a-confirmed",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0x569f137b887eccf5f314f9e1721c85c43a700a198f222aa5aa1885915d27ce6c",
+  "fund sender Pocket 0.8 QOR": "0xf8a646240f1920ef599b960b526c9d28aecaf5b4800789c21022adfe408d3e61",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "0xa8e0d38f225f9c536ea1d46159d7b82f73124e48b0179aadbf2a2c165ea9d018",
+  "recipient bind (link-key signature, relayed)": "0x27aa37aab0196815262f3459b67be363258b84fec484eac95553ab8f2efcd8de",
+  "sender Pocket confirmDrop (one-tap intent)": "0x75adf89da549f916bf7a67c47d76061fdfb21baa564f7135a4b61ab5935c639d",
+  "recipient claim (ML-DSA signature, relayed)": "0xf17ea87ab3dab38d850071b94dd894f7df2da8d9cd17e2fe540f88422deb1a40",
+  "recipient PQ key registration (paid from the drip)": "840EA16D5C0F26DA68FF400C16FAF04B7BD20C257876C6B1ADF36A9EAE7719A3",
+  "sweep sender Pocket back to the deployer": "0xe511aaf6aeead3d8c9be2480ba7d1fdc99ec3ea09c60765a5fde434c8c00698a"
+ },
+ "checks": {
+  "recipientWords": [
+   "monitor",
+   "couple",
+   "clip",
+   "dilemma"
+  ],
+  "senderWordsMatchRecipient": true,
+  "recipientPocketBalanceWei": "100000000000000000",
+  "chain": {
+   "dropId": "p12",
+   "state": "Claimed",
+   "senderIsPocket": true,
+   "paidIntoRecipientPocket": true
+  }
+ },
+ "accounts": {
+  "sender.pocket": "0x3C3486d49E83AA2d4Ea6953608b5842d9D1eda72",
+  "sender.key": "0x65BE1d6DB8b49EF9649ad994B0667119EC8e2674",
+  "recipient.pocket": "0x8164bC3E1076901eBEfEe98CB5CD6D045eA20bC0"
+ },
+ "finishedAt": "2026-11-20T00:54:19.814Z"
+}

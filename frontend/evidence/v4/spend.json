@@ -1,0 +1,263 @@
+{
+ "totalQor": 7.945,
+ "entries": [
+  {
+   "qor": 2,
+   "note": "relayer gas top-up for the v4 E2E",
+   "hash": "0xf2b82275b2fb4f0e41db5bec8198962ffa8bfd6ce560ca789363ae78160f1977",
+   "at": "2026-11-20T00:05:00.947Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0x29e66cc8d628e56ee49247fdc70de0bc76f166f5ec6c4c9055559f18a93c42ef",
+   "at": "2026-11-20T00:10:29.034Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0x5c7b04d2e8d6b3e6489ead2b370b40979624e079104487a49ba5f8ee86a5adbc",
+   "at": "2026-11-20T00:11:16.982Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0xbc1b88ae727308dc6fdbf3e169947b1fe293fabe01941e81eb982c73cc0f724a",
+   "at": "2026-11-20T00:11:19.556Z"
+  },
+  {
+   "qor": -0.54,
+   "note": "recovered: chromium-390 a-confirmed sweep",
+   "hash": "0xa5d1ec48fdfa069b1fe3f164fa7ea33756a220c7fff2ed4e62ee36e756a0c5c1",
+   "at": "2026-11-20T00:12:05.821Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 c-pool sender key",
+   "hash": "0xbcf91638e50d13a3327bdafa35efa991b10ab09aa32d9b360a7bacaf6ed06d70",
+   "at": "2026-11-20T00:12:29.210Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 c-pool sender pocket",
+   "hash": "0x1df57badb502fb5afa314bc1211a8e9c22674ebe399624e72a4c266bfb5b9c57",
+   "at": "2026-11-20T00:12:31.958Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 pool claimer1",
+   "hash": "0x35e7da7bcf137fb1820060c08a99a43ba18c025786e74bf3775a1d793145a507",
+   "at": "2026-11-20T00:12:49.269Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 pool claimer2",
+   "hash": "0xd31637aa18304d764ae0878a9798f63cacf9172190ceac5b2200b6e5c6a0099a",
+   "at": "2026-11-20T00:14:04.589Z"
+  },
+  {
+   "qor": -0.76,
+   "note": "recovered: chromium-390 c-pool sweep",
+   "hash": "0xea5ec77c722bec3bfb766d3cdf36d46aea83aa89a15caa9ecc30f89e13df1662",
+   "at": "2026-11-20T00:14:21.968Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "guardian 0xD9516C registration fee",
+   "hash": "0xa0a80b78d1fd828c5a019a28ae72ed6fd76985e328c8cae4dca82da66a859f9c",
+   "at": "2026-11-20T00:14:25.002Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "guardian 0xc8379F registration fee",
+   "hash": "0xea50544b6632d52b05e018cdb820b4f3e66ab1ea491d2b8888e3373addd34b8e",
+   "at": "2026-11-20T00:14:35.900Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "guardian 0xa0D6AC registration fee",
+   "hash": "0x4c0acbd8a217dc7ad0813e1946c441b4aacecf3aa4a2e900477afd988875d64e",
+   "at": "2026-11-20T00:14:43.441Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 d-freeze-lab owner key",
+   "hash": "0x5eac69efa2f945a578342bf87f0ec592ddb77059befec8601e34cf3cfc34d9c5",
+   "at": "2026-11-20T00:14:51.940Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 d-freeze-lab owner pocket",
+   "hash": "0x8dff0587bea9bcc4bf6dc660d03f12604bb7b4da8b8d24fa8b63a6b47e983b04",
+   "at": "2026-11-20T00:14:54.818Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 d-freeze-lab owner key",
+   "hash": "0xbffe0119e3f089574ca8b77da5f63de61af44bdf5939827267320d35ae55c8f2",
+   "at": "2026-11-20T00:28:31.852Z"
+  },
+  {
+   "qor": 0.2,
+   "note": "e2e chromium-390 d-freeze-lab owner pocket",
+   "hash": "0xf8fb9af7b9d1a7145bb111629d603e80b9a1817eaedbfecb79fb736f9ad61bc9",
+   "at": "2026-11-20T00:28:37.262Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 d-freeze-lab owner key",
+   "hash": "0xd294499905e8b78ea1c4d465f796650c304236dc215d1a92b24770ea789a9bc2",
+   "at": "2026-11-20T00:37:30.974Z"
+  },
+  {
+   "qor": 0.2,
+   "note": "e2e chromium-390 d-freeze-lab owner pocket",
+   "hash": "0x89cc3c4cf898c5a6d7ce7d8c38c5729c15d100c487c8152f823d38bb3a1f3946",
+   "at": "2026-11-20T00:37:35.674Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "e2e chromium-390 d-freeze-lab owner key",
+   "hash": "0xdec864a1061cff4cb5f8ee712771f20a610e98200b84bb1250d40736a006c389",
+   "at": "2026-11-20T00:40:26.889Z"
+  },
+  {
+   "qor": 0.2,
+   "note": "e2e chromium-390 d-freeze-lab owner pocket",
+   "hash": "0xcfdeee1f3a1d8d833d27c61cd29e9b8cf693cda04f8b6d90d278df6cc0517fff",
+   "at": "2026-11-20T00:40:30.014Z"
+  },
+  {
+   "qor": -0.19,
+   "note": "recovered: chromium-390 d-freeze-lab sweep",
+   "hash": "0xc188f03ec6e3e9e5b40248f4b5345237b360ed451809a2520080e1d48ffdb1b9",
+   "at": "2026-11-20T00:44:09.002Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0xa51acf08963e1f0ecdb7d8f69e38927a624bf66fa7c5e8f89f53a01021552980",
+   "at": "2026-11-20T00:45:57.199Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0x5f9b486030e70d9cbf60315c010cc8e4cb2dbe35e700a8e1349cc106f8089f1f",
+   "at": "2026-11-20T00:45:59.958Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e webkit-1440 a-confirmed sender key",
+   "hash": "0xce459d67fb0e4e5f02d611cd0bc8cc00b01099454accf9c8858ea44b2783ee90",
+   "at": "2026-11-20T00:50:23.886Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e webkit-1440 a-confirmed sender pocket",
+   "hash": "0xb9f6c023a5d4add1ba9bfd137349cb57966af650bff50fcf32747b3326605dbe",
+   "at": "2026-11-20T00:50:28.289Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0x569f137b887eccf5f314f9e1721c85c43a700a198f222aa5aa1885915d27ce6c",
+   "at": "2026-11-20T00:53:32.143Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0xf8a646240f1920ef599b960b526c9d28aecaf5b4800789c21022adfe408d3e61",
+   "at": "2026-11-20T00:53:34.994Z"
+  },
+  {
+   "qor": -0.54,
+   "note": "recovered: chromium-390 a-confirmed sweep",
+   "hash": "0xe511aaf6aeead3d8c9be2480ba7d1fdc99ec3ea09c60765a5fde434c8c00698a",
+   "at": "2026-11-20T00:54:19.811Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e webkit-390 b-giveaway sender key",
+   "hash": "0x61518e3ea8e41233708ba4fb96aa495ea2270adf4c1fb3a7831256c589b88bd7",
+   "at": "2026-11-20T00:54:34.254Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e webkit-390 b-giveaway sender pocket",
+   "hash": "0x2cac19c5c3ccf1210ece4cca04ad1c276adba0466d7dbf043cad802906790d5d",
+   "at": "2026-11-20T00:54:36.813Z"
+  },
+  {
+   "qor": -0.54,
+   "note": "recovered: webkit-390 b-giveaway sweep",
+   "hash": "0xe4b6992aeb83c500844d1baebdca981b4d1c8a06b5572ba3cb076a3f094f0127",
+   "at": "2026-11-20T00:55:11.576Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-1440 c-pool sender key",
+   "hash": "0x725e30013bd636f0b27a227d201cb1fa218f8b1cc1f6cc541664f30b0cb73777",
+   "at": "2026-11-20T00:55:23.531Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-1440 c-pool sender key",
+   "hash": "0xf616d771d83ab079d2c3e5a8cd954357a9bd079e1268c90a03ad7da37e4dca54",
+   "at": "2026-11-20T00:55:56.411Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-1440 c-pool sender pocket",
+   "hash": "0x7653980e96fa5d6f14faf0765479f770636af724b661f6171dc80eb97fd9b53e",
+   "at": "2026-11-20T00:56:00.517Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-1440 pool claimer1",
+   "hash": "0x546c9c625843efa1d2e01e10089ecfe00acd8b7633585f246b0fe9e9d78b3491",
+   "at": "2026-11-20T00:56:18.762Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-1440 pool claimer2",
+   "hash": "0xe5848aab4d2162875015579b62b3891ba6bfa460d201b6bfc3bc605f8a76af77",
+   "at": "2026-11-20T00:57:32.612Z"
+  },
+  {
+   "qor": -0.76,
+   "note": "recovered: chromium-1440 c-pool sweep",
+   "hash": "0xac896f13c0d57ff708a62c080d28c66a931f7557a8555e07ba53653ce9669eba",
+   "at": "2026-11-20T00:57:52.910Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e webkit-1440 d-freeze-lab owner key",
+   "hash": "0x5d9813119e8661c795ba0fdd5450b865364a944c2c670a425035964d45ee5510",
+   "at": "2026-11-20T00:58:07.554Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e webkit-1440 d-freeze-lab owner pocket",
+   "hash": "0x796342de1dcaacfbad5768dd633559de809ad828888bba9576361dd9517e8fb1",
+   "at": "2026-11-20T00:58:10.784Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e recovery new key",
+   "hash": "0x77f2b566fead87a7cbb4460d27d494b164ada432b02696e477041a0a387991a0",
+   "at": "2026-11-20T01:08:30.549Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e recovery new key",
+   "hash": "0x2b649f6c83f8787b0b3acc1d4173aa623f930fc4ec91236b8480fa862ad955cf",
+   "at": "2026-11-20T01:14:52.955Z"
+  },
+  {
+   "qor": -0.79,
+   "note": "recovered: recovery sweep",
+   "hash": "0xb6fcde1c000729febb9f058e680a6d5406eb91a3b50a80bc85668271fc8c8dff",
+   "at": "2026-11-20T01:19:41.989Z"
+  }
+ ]
+}

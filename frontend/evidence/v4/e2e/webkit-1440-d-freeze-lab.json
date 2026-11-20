@@ -1,0 +1,33 @@
+{
+ "project": "webkit-1440",
+ "flow": "d-freeze-lab",
+ "txs": {
+  "fund owner key account 0.075 QOR": "0x5d9813119e8661c795ba0fdd5450b865364a944c2c670a425035964d45ee5510",
+  "fund owner Pocket 0.8 QOR": "0x796342de1dcaacfbad5768dd633559de809ad828888bba9576361dd9517e8fb1",
+  "owner Pocket lazy-deploys on its first intent (spend 0.01 QOR)": "0xd1c86a088776fe74e4bf551aedbdfb851142dda357667cca989f3dab8cb925f3",
+  "owner queues the guardian set (setGuardians intent)": "0x164b10b1b485cb996b7a57a311b2a33fd1368a6e967bdaaf7dd4a76bd889c816",
+  "anyone applies the guardian set after the timelock": "0x4150542966041237a83b2b69b83300d0d35f033a08d1f0a2561201b8fbaa3265",
+  "2 of 3 guardians freeze the Pocket (ML-DSA signatures checked on-chain)": "0x0c653400b781cf9501a28d76b1ace95dfb6398282b0f053e5d7c61a60e769007"
+ },
+ "checks": {
+  "chain": {
+   "frozen": true,
+   "frozenUntil": "1795136506",
+   "guardians": [
+    "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175",
+    "0xc8379F3839E350da12E9FFacA978365801176AEF",
+    "0xa0D6ACbb2135a09c2266A3f92b1543594124b338"
+   ],
+   "threshold": 2
+  },
+  "pageerror:owner": "/pocketdrop-api.vercel.app/api/health due to access control checks."
+ },
+ "accounts": {
+  "guardian1": "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175",
+  "guardian2": "0xc8379F3839E350da12E9FFacA978365801176AEF",
+  "guardian3": "0xa0D6ACbb2135a09c2266A3f92b1543594124b338",
+  "owner.pocket": "0xD162356fBb0fc52a8C326f9635E2c1F61964f5D5",
+  "owner.key": "0x339f926D2250BEA4f520513e8CDf1f2d64947D40"
+ },
+ "finishedAt": "2026-11-20T01:05:57.904Z"
+}

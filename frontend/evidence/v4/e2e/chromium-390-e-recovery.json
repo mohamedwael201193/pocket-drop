@@ -1,0 +1,11 @@
+{
+ "project": "chromium-390",
+ "flow": "e-recovery",
+ "pocket": "0xD162356fBb0fc52a8C326f9635E2c1F61964f5D5",
+ "newOwner": "0x0a8fa4aA877aB97B5B17EAC500B75EeCDE3366D7",
+ "txs": {
+  "3 of 3 guardians propose a unanimous recovery to the new key": "0x2452055d3d58238709d79e4e2fffe98ff76d3981be09e5ce2c7e3f58a52b25be",
+  "new owner sweeps the recovered Pocket back to the deployer": "0xb6fcde1c000729febb9f058e680a6d5406eb91a3b50a80bc85668271fc8c8dff"
+ },
+ "finishedAt": "2026-11-20T01:19:41.990Z"
+}

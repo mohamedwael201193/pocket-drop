@@ -43,6 +43,22 @@
     "v4-account-without-pq-key-5b148e": "0x5b148e4692d5f1B62b5DCB36d79045b74e5c3Cd5",
     "v4-freeze-demo-thief-holds-the-stolen-owner-key--6E3110": "0x6E311088E4D215b6007891d11Ec48E4586180601",
     "v4-freeze-demo-new-owner-90C763": "0x90C763D9e56845d592C2A738ce9eCf3745B7300b",
-    "v4-freeze-demo-expiry-owner-bf832b": "0xbf832bC4062F24bAFC9cdeF224C04B2Ce334b54A"
+    "v4-freeze-demo-expiry-owner-bf832b": "0xbf832bC4062F24bAFC9cdeF224C04B2Ce334b54A",
+    "e2e-chromium-1440-c-pool-sender-pocket": "0xD07C793DF14E3Ab733F36Fa5c1d6a94E7EEc920b",
+    "e2e-chromium-1440-c-pool-sender-key": "0x5C8d5178EB75D961D9eE48C5155aC8edc0c97a7b",
+    "e2e-chromium-1440-c-pool-claimer1-key": "0xF22eC5c5ff55bd68eF0A0Ed05392787cEc9a883D",
+    "e2e-chromium-1440-c-pool-claimer2-key": "0xF3CF1d02E23dCE1267544594FeEB7Aa0Dfad3387",
+    "e2e-chromium-390-a-confirmed-sender-pocket": "0x3C3486d49E83AA2d4Ea6953608b5842d9D1eda72",
+    "e2e-chromium-390-a-confirmed-sender-key": "0x65BE1d6DB8b49EF9649ad994B0667119EC8e2674",
+    "e2e-chromium-390-a-confirmed-recipient-pocket": "0x8164bC3E1076901eBEfEe98CB5CD6D045eA20bC0",
+    "e2e-chromium-390-e-recovery-recoveredpocket": "0xD162356fBb0fc52a8C326f9635E2c1F61964f5D5",
+    "e2e-chromium-390-e-recovery-newowner": "0x0a8fa4aA877aB97B5B17EAC500B75EeCDE3366D7",
+    "e2e-webkit-1440-d-freeze-lab-guardian1": "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175",
+    "e2e-webkit-1440-d-freeze-lab-guardian2": "0xc8379F3839E350da12E9FFacA978365801176AEF",
+    "e2e-webkit-1440-d-freeze-lab-guardian3": "0xa0D6ACbb2135a09c2266A3f92b1543594124b338",
+    "e2e-webkit-1440-d-freeze-lab-owner-key": "0x339f926D2250BEA4f520513e8CDf1f2d64947D40",
+    "e2e-webkit-390-b-giveaway-sender-pocket": "0xdb382a436D5f155D0EBd6A71FCc962Bf30E2d854",
+    "e2e-webkit-390-b-giveaway-sender-key": "0x35aFAa0C5114Ebe040e46a7054039BA2E7AB40e1",
+    "e2e-webkit-390-b-giveaway-recipient-pocket": "0x7778562707DCfB77081Ea5b12Dd9d2a786d5e33b"
   }
 }
