@@ -10,6 +10,11 @@ import { INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';
 import { RELAYER_PAUSED } from '../lib/api';
 import { cx } from './ui';
+import v4 from '../data/v4.json';
+import { titleFor } from '../lib/titles';
+
+const QCAI = v4.qcai as { score?: string; stage2Score?: string };
+const scoreOf = (s?: string) => (s ?? '').split(' ')[0];
 
 /** The four tabs. Every route belongs to exactly one of them. */
 const TABS = [
@@ -88,7 +93,7 @@ function ProofMenu({ active }: { active: boolean }) {
 
 export function Layout() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); document.title = titleFor(pathname); }, [pathname]);
   return (
     <MotionConfig reducedMotion="user">
     <div className="flex min-h-screen flex-col">
@@ -118,7 +123,7 @@ export function Layout() {
       </main>
       <footer className="border-t border-zinc-200/80 bg-white/70 py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 pb-20 text-center text-[13px] text-zinc-600 sm:flex-row sm:px-6 sm:pb-0 sm:text-left lg:px-8">
-          <span>Testnet QOR only · No monetary value · Unaudited · <span className="whitespace-nowrap">Diana 9800</span></span>
+          <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">Automated QCAI audit {scoreOf(QCAI.score)} then {scoreOf(QCAI.stage2Score)}/100, no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
           <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <a href={`${API_BASE}/api/health`} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">API health</a>
             <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">v4 router</a>
