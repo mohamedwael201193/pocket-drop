@@ -62,7 +62,7 @@ export default function PocketPage() {
 
   const spendAmt = parseQor(amt);
   const spendProblem = !isAddress(to) ? 'Enter the 0x address to send to.' : spendAmt === null || spendAmt === 0n ? 'Enter an amount like 0.1.' : pv && spendAmt > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR.` : null;
-  const queuedWarn = pv?.deployed && spendAmt !== null && spendAmt > pv.allowanceLeft ? `Above the ${fmtQor(pv.allowanceLeft)} QOR left today: it will be queued for ${dur(inst.timelockSec)} and you can veto it.` : null;
+  const queuedWarn = pv?.deployed && spendAmt !== null && spendAmt > pv.allowanceLeft ? `Above the ${fmtQor(pv.allowanceLeft)} QOR left today: it will wait ${dur(inst.timelockSec)} before going out, and you can cancel it (veto) until then.` : null;
   const gList = gText.split(/[\s,;]+/).filter(Boolean);
   const gProblem = gList.length < 2 || gList.length > 5 ? 'Add 2 to 5 guardian addresses.' : gList.some((g) => !isAddress(g)) ? 'Every guardian must be a 0x address.'
     : new Set(gList.map((g) => g.toLowerCase())).size !== gList.length ? 'A guardian is listed twice.'
@@ -72,7 +72,7 @@ export default function PocketPage() {
 
   return (
     <Page narrow testId="pocket-page">
-      <PageTitle eyebrow="Pocket" title="Your Pocket">A vault that only your quantum-safe key can move, with a daily limit, a veto on big spends, and guardians who can freeze it or replace a lost key. Everything here is a real on-chain action.</PageTitle>
+      <PageTitle eyebrow="Pocket" title="Your Pocket">Your money, which only your quantum-safe key can move. Big spends wait so you can stop them, and people you trust can pause it or move it to a new phone. Everything here is a real on-chain action on testnet.</PageTitle>
       <div className="space-y-5">
         <StepCard n={1} title="Pocket and key" done={key.ready && !!pv && pv.balance > 0n} testId="pocket-main">
           {!a.root ? <ConnectChoices /> : (
@@ -121,8 +121,8 @@ export default function PocketPage() {
               <ActResult act={limitAct} testId="limit" />
             </Section>
 
-            <Section title="Queued spends" testId="queue-section" badge={<Pill>{pv.queue.filter((q) => q.state === 'Pending').length} pending</Pill>}>
-              {pv.queue.length === 0 ? <p className="text-sm text-zinc-500">Nothing queued. A spend above the daily limit shows up here with a veto button for the whole timelock.</p> : (
+            <Section title="Waiting to go out" testId="queue-section" badge={<Pill>{pv.queue.filter((q) => q.state === 'Pending').length} pending</Pill>}>
+              {pv.queue.length === 0 ? <p className="text-sm text-zinc-500">Nothing waiting. A spend above the daily limit waits here for {dur(inst.timelockSec)}, and you can cancel it (veto) the whole time.</p> : (
                 <ul className="space-y-2">
                   {pv.queue.map((q) => (
                     <li key={q.id} className="rounded-2xl border border-zinc-200 bg-white p-3 text-sm" data-testid={`queued-${q.id}`} data-state={q.state}>
@@ -140,7 +140,7 @@ export default function PocketPage() {
             </Section>
 
             <Section title="Guardians" testId="guardian-section" badge={<SourceBadge kind="LIVE" />}>
-              <p className="text-sm text-zinc-700">Guardians are people (or your other accounts) with their own registered quantum-safe key. Any <b>threshold</b> of them (at least 2) can <b>freeze</b> your Pocket if your key is stolen, or start a <b>recovery</b> to a new key. Changes to the guardian set wait {dur(inst.timelockSec)}.</p>
+              <p className="text-sm text-zinc-700">Guardians are people you trust (or your other accounts) who can <b>pause</b> your Pocket if your key is stolen, or <b>move it to a new phone</b> if you lose yours. You choose how many of them must agree (at least 2; this number is called the threshold). Each needs their own registered quantum-safe key. Changes to the list wait {dur(inst.timelockSec)}.</p>
               <div className="mt-3 rounded-2xl border border-zinc-200 bg-white p-3 text-sm" data-testid="guardian-list">
                 {pv.guardians.length === 0 ? <span className="text-zinc-500">No guardians yet.</span> : <><div className="text-xs text-zinc-500">{pv.threshold} of {pv.guardians.length} needed</div>{pv.guardians.map((g) => <div key={g}><Mono>{g}</Mono></div>)}</>}
               </div>

@@ -100,7 +100,8 @@ export default function SendPage() {
   const pending = links.filter((l) => l.drop?.state === 'Bound' && l.drop.mode === 'Confirmed');
   return (
     <Page narrow testId="send-page">
-      <PageTitle eyebrow="Send" title="Send QOR from your Pocket">Your Pocket signs each drop with your quantum-safe key and a relayer pays the gas. No EVM window, no activation step for you.</PageTitle>
+      <PageTitle eyebrow="Send" title="Send QOR from your Pocket">Your friend opens the link and the QOR lands in a Pocket made for them. They need no wallet, and you need nothing but this page.</PageTitle>
+      <details className="-mt-4 mb-6 text-xs text-zinc-600" data-testid="send-tech"><summary className="cursor-pointer">Technical details</summary><p className="mt-2 leading-relaxed">Each drop is an intent signed in this browser with your ML-DSA-87 key; the chain checks the signature with its post-quantum precompile. A relayer submits it and pays the gas, so there is no EVM window or activation step for you.</p></details>
       <SendTabs />
       <div className="space-y-5">
         <StepCard n={1} title="Your Pocket" done={ready && !!pv && pv.balance > 0n} testId="step-account">
@@ -122,7 +123,7 @@ export default function SendPage() {
 
         <StepCard n={2} title="Amount and mode" done={!dropProblem && ready} locked={!ready}>
           <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Mode">
-            {([['Confirmed', 'Confirmed', ShieldCheck, 'You check 4 words before any money moves. Safest, for someone you know.'], ['Open', 'Giveaway', Gift, 'First person to open the link gets it, with no check.']] as const).map(([m, t, Icon, line]) => (
+            {([['Confirmed', 'Someone I know', ShieldCheck, 'Confirmed mode: you compare 4 words with them before any money moves. The safest choice.'], ['Open', 'First to open it', Gift, 'Giveaway mode: whoever opens the link first gets it, with no check.']] as const).map(([m, t, Icon, line]) => (
               <button key={m} type="button" role="radio" aria-checked={mode === m} data-testid={`mode-${m}`} onClick={() => setMode(m)}
                 className={cx('rounded-2xl border p-4 text-left transition', mode === m ? 'border-zinc-900 bg-stoneBg ring-1 ring-zinc-900' : 'border-zinc-200 bg-white hover:bg-stoneBg')}>
                 <span className="flex items-center gap-2 text-sm font-semibold text-zinc-900"><Icon className="h-4 w-4" aria-hidden />{t}{m === 'Confirmed' && <Pill tone="dark">default</Pill>}</span>

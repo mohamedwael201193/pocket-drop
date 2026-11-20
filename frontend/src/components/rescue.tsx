@@ -53,7 +53,7 @@ export function RescuePanel() {
 
   return (
     <div className="space-y-4" data-testid="rescue">
-      <p className="text-sm leading-relaxed text-zinc-700">An account whose key never proved possession of a quantum-safe key cannot be protected by a post-quantum check: a future quantum computer could forge its classical signature. Paste an address to see whether it is one, then move its funds into Your Pocket, which only an ML-DSA key can move.</p>
+      <p className="text-sm leading-relaxed text-zinc-700">An account whose key never proved possession of a quantum-safe key cannot be protected by a post-quantum check: a future quantum computer could forge its classical signature. Paste an address to see whether it is one, then move its funds into Your Pocket, which only your quantum-safe key can move.</p>
       <div className="flex gap-2">
         <input value={input} onChange={(e) => { setInput(e.target.value); setErr(null); }} placeholder="0x… or qor1… address" aria-label="Address to check" aria-invalid={!!err} data-testid="rescue-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
         <Button variant="secondary" onClick={() => void check()} data-testid="rescue-check">Check</Button>

@@ -21,11 +21,11 @@ type Status = 'idle' | 'running' | 'done' | 'error' | 'skipped';
 interface Step { status: Status; hash?: string; note?: string; ms?: number }
 const ORDER: StepId[] = ['key', 'bind', 'register', 'verify', 'claim'];
 const LABELS: Record<StepId, [string, string]> = {
-  key: ['Create your key here', 'A quantum-safe key is generated inside this tab. It never leaves it.'],
-  bind: ['Link opens your account', 'The relayer pays gas and a small setup fee lands in your key account.'],
-  register: ['Register your key on-chain', 'Proof of possession of your ML-DSA-87 key, paid from the setup fee.'],
-  verify: ['Sender check', 'Confirmed mode waits for the sender to compare 4 words (nothing for a giveaway).'],
-  claim: ['Claim into your Pocket', 'You sign the claim in this tab; the relayer submits it. The QOR lands in your Pocket.'],
+  key: ['Create your key here', 'A quantum-safe key is made inside this tab. It never leaves it.'],
+  bind: ['Reserve the link for you', 'Pocket Drop pays the network fee, and the sender\'s small setup fee lands in your account.'],
+  register: ['Prove the key is yours', 'Your new key proves on-chain that it is really yours (once), paid from the setup fee.'],
+  verify: ['Sender check', 'If the sender asked for it, they compare 4 words with you (nothing to do for a giveaway).'],
+  claim: ['Into your Pocket', 'You approve in this tab and the QOR lands in your Pocket. Pocket Drop pays the network fee.'],
 };
 const blank = (): Record<StepId, Step> => Object.fromEntries(ORDER.map((s) => [s, { status: 'idle' as Status }])) as Record<StepId, Step>;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -189,7 +189,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
         {state === 'ready' && !dead && !expired && (
           <div className="space-y-4 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
             <h1 className="font-serif text-3xl text-zinc-900">Open your Pocket</h1>
-            <p className="text-sm leading-relaxed text-zinc-600">One tap creates a quantum-safe key inside this browser and a Pocket address for it. A relayer pays the gas. No wallet, no extension, no seed phrase. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, they compare 4 words with you first; you will see them here.'}</p>
+            <p className="text-sm leading-relaxed text-zinc-600">Your money is safe and waiting. One tap makes a quantum-safe key inside this browser and a Pocket for it, and Pocket Drop pays the network fees. No wallet, no extension, no seed phrase. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, they compare 4 words with you first; you will see them here.'}</p>
             <Button block onClick={() => void run()} data-testid="start-claim" className="min-h-[52px] text-base">Receive {amount ?? ''} QOR into my Pocket</Button>
           </div>
         )}
