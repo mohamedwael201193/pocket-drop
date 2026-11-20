@@ -1,5 +1,5 @@
 {
- "totalQor": 21.92,
+ "totalQor": 22.25,
  "entries": [
   {
    "qor": 2,
@@ -612,6 +612,12 @@
    "note": "relayer top-up to about 6 QOR, main -> 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
    "hash": "9A67DDA996FDCC112D79A229C521720C27FA977CF25D2B286B898C18AB733153",
    "at": "2026-11-20T04:51:49Z"
+  },
+  {
+   "qor": 0.33,
+   "note": "relayer top-up back to 6.0 QOR after the sponsor run, main -> 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
+   "hash": "9DBBD2F46066698B586978C1852B8F7CDDF2748D2770C8E0269AE806B529A72E",
+   "at": "2026-11-20T05:00:28Z"
   }
  ]
 }
