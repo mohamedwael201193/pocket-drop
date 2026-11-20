@@ -43,16 +43,29 @@ async function user(browser: Browser, opts: Record<string, unknown>, name: strin
 }
 
 /** First visit: create the key in the browser, fund the key account and the Pocket from the deployer, register the key. */
+/** The sponsor is on in prod. QA_SPONSOR=off (default) mocks GET /api/sponsor as disabled so the classic funded path runs
+ *  unchanged and repeatable; QA_SPONSOR=live leaves the real sponsor on (the key setup is then paid by the sponsor). */
+const SPONSOR_MODE = process.env.QA_SPONSOR === 'live' ? 'live' : 'off';
+const CORS_H = { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type' };
+async function sponsorOff(p: Page) {
+  if (SPONSOR_MODE !== 'off') return;
+  await p.route('**/api/sponsor', (r) => r.request().method() === 'OPTIONS' ? r.fulfill({ status: 204, headers: CORS_H })
+    : r.request().method() === 'GET' ? r.fulfill({ headers: CORS_H, json: { ok: true, enabled: false, reason: 'mocked off by the e2e run', amountWei: '60000000000000000', senderMinPocketWei: '100000000000000000' } })
+    : r.fulfill({ status: 503, headers: CORS_H, json: { ok: false, error: { name: 'Disabled', message: 'mocked off by the e2e run' } } }));
+}
 async function onboard(p: Page, run: Run, who: string, o: { pocketQor?: number; path?: string } = {}) {
+  await sponsorOff(p);
   await p.goto(`${URL}${o.path ?? '/send'}`);
   await p.getByTestId('create-key').click();
   const pocket = (await p.getByTestId('pocket-address').getAttribute('data-address', { timeout: T }))! as Hex;
   const keyAddr = (await p.getByTestId('key-address').getAttribute('data-address', { timeout: T }))! as Hex;
   run.accounts[`${who}.pocket`] = pocket; run.accounts[`${who}.key`] = keyAddr;
-  run.txs[`fund ${who} key account ${KEY_FUND} QOR`] = await fund(keyAddr, KEY_FUND, `e2e ${run.project} ${run.flow} ${who} key`);
+  if (SPONSOR_MODE === 'off') run.txs[`fund ${who} key account ${KEY_FUND} QOR`] = await fund(keyAddr, KEY_FUND, `e2e ${run.project} ${run.flow} ${who} key`);
   if (o.pocketQor) run.txs[`fund ${who} Pocket ${o.pocketQor} QOR`] = await fund(pocket, o.pocketQor, `e2e ${run.project} ${run.flow} ${who} pocket`);
-  await expect.poll(async () => BigInt((await p.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(70_000_000_000_000_000n);
-  await p.getByTestId('register-key').click();
+  if (SPONSOR_MODE === 'off') {
+    await expect.poll(async () => BigInt((await p.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(70_000_000_000_000_000n);
+    await p.getByTestId('register-key').click();
+  }
   await expect(p.getByTestId('key-ready')).toBeVisible({ timeout: T });
   if (o.pocketQor) await expect.poll(async () => BigInt((await p.getByTestId('pocket-balance').first().getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(BigInt(Math.round(o.pocketQor * 1e18)));
   return { pocket, keyAddr };

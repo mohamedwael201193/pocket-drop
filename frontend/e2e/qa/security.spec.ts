@@ -36,8 +36,8 @@ for (const path of ROUTES) {
   });
 }
 
-test('the browser key is sealed at rest, migrated from plaintext, and opens the same Pocket after a reload', async ({ page }) => {
-  const R1 = 'pd2:' + 'ab'.repeat(32);
+for (const [kind, R1] of [['pd2', 'pd2:' + 'ab'.repeat(32)], ['legacy v1', 'ab'.repeat(32)]] as const)
+test(`the browser key is sealed at rest, migrated from plaintext (${kind}), and opens the same Pocket after a reload`, async ({ page }) => {
   await page.goto(`${BASE}/receive`);
   await page.evaluate((r) => localStorage.setItem('pd.root.v4', r), R1); // plaintext, as older builds stored it
   await page.goto(`${BASE}/pocket`);
