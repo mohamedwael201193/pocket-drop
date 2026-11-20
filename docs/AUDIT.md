@@ -1,6 +1,6 @@
 # Pocket Drop v4 - QCAI audit
 
-Two-stage QoreChain AI (QCAI) audit of the v4 contracts. This file covers **Stage 1**. Stage 2 is added after the Stage 1 follow-ups.
+Two-stage QoreChain AI (QCAI) audit of the v4 contracts: Stage 1 (score 82) and Stage 2 (score 78, after a comment-only change).
 
 ## Stage 1 run
 
@@ -48,4 +48,52 @@ All of this runs on the Diana testnet (chain id 9800); the QOR has no monetary v
 
 ## Stage 2
 
-To be added after the follow-ups, using the same blockchain setting (Ethereum, EVM/Solidity) and a new flattened file under `docs/audit/stage2/`.
+### Change between the stages
+
+One comment-only change to `contracts-v4/src/PocketVault.sol` (4 NatSpec lines above `_checkGuardianSigs`, commit `9c03147`) documenting the ETH-004 bound: `_guardians.length <= MAX_GUARDIANS` (5), enforced by `_validateGuardians` on both `initialize` and `setGuardians`, and a call with more than 5 signers reverts at the latest on the sixth entry (`NotGuardian` / `DuplicateSigner`). No logic change.
+
+Bytecode check (`forge build --force`, solc 0.8.28, optimizer 200, `bytecode_hash = "none"`, `cbor_metadata = false`): the `deployedBytecode` of PocketVault, PocketFactory, PocketRouter, PocketDrop and DropPool is **byte-for-byte identical** before and after the comment, including the tail. Because the project is built without CBOR metadata, there is not even a metadata hash that changes; the deployed v4 contracts are therefore still valid for the Stage 2 source. (Had CBOR metadata been on, only the trailing metadata hash would differ.)
+
+### Stage 2 run
+
+| Item | Value |
+|---|---|
+| Audit ID | `QCAIA-1795138339351-F6A93427` |
+| Public report | https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427 |
+| Created (UTC) | 2026-11-20T01:32:19Z |
+| Source audited | `docs/audit/stage2/PocketDrop-v4-flattened.sol` (1605 lines, 70,505 bytes), same flattening as Stage 1 (the only diff to Stage 1 is the 4 comment lines) |
+| SHA-256 (source) | `c4b19a8d00879b64417aece0d7dd65a20e1398285c4fbf895f19e78cdfe1b0cf` |
+| SHA-256 (JSON) | `a1d587ebb749c6cd8601b47bbcf63f6cf4f5709e0b72f6168c114ba2eb30bbc7` |
+| Blockchain setting | Ethereum (EVM/Solidity), same as Stage 1 |
+| Score / risk | **78 / MEDIUM** (Stage 1: 82 / MEDIUM). The score went down by 4. |
+| Findings | 5 (1 high, 2 medium, 1 low, 1 info), same counts as Stage 1 |
+| Quantum readiness | Not scored (expected on EVM, see above) |
+| Cost shown | 150 QOR (testnet), confirmed once |
+| Reports | `docs/audit/stage2/QCAI-stage2-2026-11-20.json`, `docs/audit/stage2/QCAI-stage2-2026-11-20.pdf` |
+
+The PDF was generated locally from the official JSON (the dashboard "Export PDF" was not used, as in Stage 1); a note on the first page says so and the content is unchanged.
+
+Charge evidence: the confirm dialog showed 150 QOR and no wallet prompt appeared. The EVM balance of the paying address (`0x8ab5...bBDd`, `eth_getBalance` on evm-testnet.qore.host) read 405.825 QOR immediately before the run and 405.825 QOR after, so the charge is not visible as an on-chain balance change at that address (the dashboard may bill a separate account or ledger). The report was created and is listed in the dashboard under "My audits".
+
+The score fell although the only change is a comment. The auditor is a model and its output varies between runs on near-identical input; the drop reflects that, not a code regression. Both scores are reported as they came.
+
+Local test and coverage results on the Stage 2 source: `forge test` 167 passed, 0 failed, 0 skipped (14 suites). `forge coverage --report summary`: 100.00% lines, statements, branches and functions on every file under `src/` (PocketVault 258/258 lines, 324/324 statements, 60/60 branches, 42/42 functions; the "Total" row of 98.95% lines includes `test/` and `script/` files).
+
+### Stage 1 findings vs Stage 2
+
+| Stage 1 | Stage 2 | Status |
+|---|---|---|
+| ETH-001 HIGH, recovery finalize has no access control | ETH-001 HIGH, same claim | Still reported. **False positive**, unchanged triage (see Triage above). |
+| ETH-002 MEDIUM, `_dripSpent + drip` overflow | ETH-002 MEDIUM, same claim | Still reported. **False positive**: checked arithmetic, `drip <= MAX_DRIP`, sum bounded by `DAILY_DRIP_CAP`. |
+| ETH-003 MEDIUM, `PocketVault._send` return value | ETH-003 MEDIUM, now about `Payout._pay` raw call | Still reported, different target. **False positive**, see below. |
+| ETH-004 LOW, guardian loop | ETH-004 LOW, same claim | Still reported even with the comment in the audited source. **Real, already bounded**; comment added as planned. Not resolved from the auditor's point of view. |
+| ETH-005 INFO, ERC-1271 not fully compliant | ETH-005 INFO, now "missing ERC-165" | Claim changed. **Not a defect**, see below. |
+
+New findings: none by count or severity. Two Stage 2 entries have a different subject than their Stage 1 namesakes (ETH-003, ETH-005), so they are triaged as new claims:
+
+| ID | Claim | Verdict | Reasoning and tests |
+|---|---|---|---|
+| ETH-003 (S2) | `Payout._pay` uses a raw call without checking return values, reentrancy | **False positive** | The return value is checked: `_pay` tests `_rawSend` and, on failure, credits `pending[to]` and emits `PayoutDeferred` (pull payment) instead of reverting. The call is gas-capped (`SEND_GAS` = 100,000), copies no return data, and callers finish all state updates first and hold the `nonReentrant` lock in `Payout`. Tests: `test_reverting_pocket_defers_payout_and_withdraw_works_later` and `test_gas_burning_pocket_cannot_block_claim` and `test_hostile_sender_cancel_is_deferred` (test/PocketDrop.t.sol), `test_reverting_pocket_defers_pool_payout` (test/DropPool.t.sol), `test_reentrant_pocket_is_blocked_by_the_lock` (test/PocketDrop.t.sol). |
+| ETH-005 (S2) | PocketVault implements ERC-1271 but not ERC-165 | **False positive / not required** | ERC-1271 does not require ERC-165, and nothing in `src/` calls `supportsInterface` on a Pocket. ERC-1271 behaviour is covered by `test_erc1271` (test/PocketVault.t.sol). No code change; adding ERC-165 would change bytecode for no security benefit. |
+
+Other notes on the Stage 2 report: the cited line numbers do not match the audited file (for example flattened line 675 is a NatSpec line of the owner-veto function, not `finalizeRecovery`), the report cites `src/` paths rather than the flattened file, and its gas suggestions (a mapping for the 5-entry guardian list, assembly address compares) are not adopted because they would change audited, deployed code for negligible gain. Outcome: no new real issue, ETH-004 remains the only real one and stays bounded by `MAX_GUARDIANS = 5`.

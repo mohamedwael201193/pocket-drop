@@ -113,6 +113,7 @@ Every row is a mined EVM transaction on Diana. Rows marked "reverted" are lab at
 - [backend/README.md](backend/README.md): relayer API
 - [frontend/README.md](frontend/README.md): web app, tests and E2E evidence
 - [contracts/SECURITY.md](contracts/SECURITY.md): threat model, invariants, Slither review
+- [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit of the v4 contracts (reports `QCAIA-1795130931306-3D8DAA40` and `QCAIA-1795138339351-F6A93427`), with finding-by-finding triage
 
 ## License
 
