@@ -1,4 +1,7 @@
-import { useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { useMagnetic } from './alive';
+import { Stage } from './stage';
 import { Check, Copy, ExternalLink, Loader2 } from './icons';
 import { txUrl } from '../lib/config';
 import { shortHash } from '../lib/protocol';
@@ -8,11 +11,11 @@ export const cx = (...a: Array<string | false | null | undefined>) => a.filter(B
 /** LIVE = read from chain/API just now. RECORDED = taken from files in the repo (deployments/diana.json, test output). */
 export function SourceBadge({ kind, title }: { kind: 'LIVE' | 'RECORDED' | 'ILLUSTRATION'; title?: string }) {
   const live = kind === 'LIVE';
-  if (kind === 'ILLUSTRATION') return <span title={title ?? 'A walkthrough drawing, not a live transaction'} className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-zinc-700">ILLUSTRATION</span>;
+  if (kind === 'ILLUSTRATION') return <span title={title ?? 'A walkthrough drawing, not a live transaction'} className="inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 font-mono text-xs font-semibold tracking-wider text-zinc-700">ILLUSTRATION</span>;
   return (
     <span
       title={title ?? (live ? 'Read from the chain or the relayer API just now' : 'Taken from a recorded file in the repository')}
-      className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider',
+      className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-xs font-semibold tracking-wider',
         live ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-900')}
     >
       <span className={cx('h-1.5 w-1.5 rounded-full', live ? 'animate-pulseDot bg-emerald-500' : 'bg-amber-500')} />
@@ -26,23 +29,26 @@ export function Card({ children, className, dark, id, ...rest }: { children: Rea
 }
 
 export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{children}</p>;
+  return <p className="text-sm font-medium text-zinc-600">{children}</p>;
 }
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'whatsapp'; busy?: boolean; block?: boolean };
 export function Button({ variant = 'primary', busy, block, className, children, disabled, ...rest }: BtnProps) {
+  const ref = useRef<HTMLButtonElement>(null);
+  useMagnetic(ref, variant === 'primary' || variant === 'whatsapp');
   const v = {
-    primary: 'bg-zinc-900 text-stone-50 hover:bg-zinc-800 shadow-sm',
-    secondary: 'border border-zinc-300 bg-white text-zinc-900 hover:bg-stoneCard',
+    primary: 'bg-accent text-stone-50 hover:bg-accentHover shadow-[0_8px_20px_-8px_rgba(11,107,75,.55)]',
+    secondary: 'border border-zinc-300 bg-white text-zinc-900 hover:border-zinc-400 hover:bg-stoneCard',
     ghost: 'text-zinc-700 hover:bg-stoneCard',
     danger: 'border border-red-300 bg-red-50 text-red-800 hover:bg-red-100',
     whatsapp: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm',
   }[variant];
   return (
     <button
+      ref={ref}
       {...rest}
       disabled={disabled || busy}
-      className={cx('inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full px-5 text-sm font-medium transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50', v, block && 'w-full', className)}
+      className={cx('btn-b transform inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed', v, block && 'w-full', className)}
     >
       {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
       {children}
@@ -61,7 +67,7 @@ export function CopyButton({ text, label = 'Copy', className, testId }: { text: 
   }
   return (
     <Button type="button" variant="secondary" onClick={copy} className={cx('min-h-[40px] px-4', className)} data-testid={testId}>
-      {done ? <Check className="h-4 w-4 text-emerald-700" /> : <Copy className="h-4 w-4" />}
+      {done ? <Check key="ok" className="h-4 w-4 text-emerald-700" /> : <Copy key="copy" className="h-4 w-4" />}
       {done ? 'Copied' : label}
     </Button>
   );
@@ -90,47 +96,45 @@ export function Notice({ tone = 'info', children, testId }: { tone?: 'info' | 'w
 export function Fingerprint({ words, testId }: { words: string[]; testId?: string }) {
   return (
     <div className="capsule-titanium rounded-2xl border border-zinc-300 p-4 text-center">
-      <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-zinc-500">4-word verification seal</div>
+      <div className="mb-2 text-sm font-medium text-zinc-600">4-word verification seal</div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid={testId}>
         {words.map((w, i) => (
-          <div key={i} className="word-tile rounded-xl py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900"><span className="mr-1 text-[9px] text-zinc-400">{i + 1}</span>{w}</div>
+          <div key={i} className="word-tile rounded-xl py-2.5 text-center font-mono text-xs font-semibold uppercase tracking-wider text-zinc-900"><span className="mr-1 text-xs text-zinc-400">{i + 1}</span>{w}</div>
         ))}
       </div>
     </div>
   );
 }
 
-export function PageTitle({ eyebrow, title, children }: { eyebrow: ReactNode; title: string; children?: ReactNode }) {
-  return (
-    <header className="mb-8">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h1 className="mt-1 font-serif text-3xl leading-[1.05] tracking-tight text-zinc-900 sm:text-5xl">{title}</h1>
-      {children && <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600 sm:text-base">{children}</p>}
-    </header>
-  );
+/** Page title: the obsidian stage (direction B). Same props as before, so every page opens the same way. */
+export function PageTitle({ eyebrow, title, children, action }: { eyebrow: ReactNode; title: ReactNode; children?: ReactNode; action?: ReactNode }) {
+  return <Stage eyebrow={eyebrow} title={title} action={action}>{children}</Stage>;
 }
 
 /** Page container: one width, one gutter, one vertical rhythm for every route. */
 export function Page({ children, narrow, testId }: { children: ReactNode; narrow?: boolean; testId?: string }) {
-  return <div data-testid={testId} className={cx('mx-auto px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8', narrow ? 'max-w-2xl' : 'max-w-5xl')}>{children}</div>;
+  const style = { '--page-w': narrow ? '42rem' : '64rem' } as CSSProperties;
+  return <div data-testid={testId} style={style} className={cx('mx-auto px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8', narrow ? 'max-w-2xl' : 'max-w-5xl')}>{children}</div>;
 }
 
 /** Small state pill. */
 export function Pill({ tone = 'neutral', children, testId }: { tone?: 'neutral' | 'ok' | 'warn' | 'dark'; children: ReactNode; testId?: string }) {
   const t = { neutral: 'border-zinc-300 bg-stoneCard text-zinc-700', ok: 'border-emerald-300 bg-emerald-50 text-emerald-900', warn: 'border-amber-300 bg-amber-50 text-amber-900', dark: 'border-zinc-800 bg-zinc-900 text-stone-100' }[tone];
-  return <span data-testid={testId} className={cx('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium', t)}>{children}</span>;
+  return <span data-testid={testId} className={cx('inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 font-mono text-xs font-medium', t)}>{children}</span>;
 }
 
 /** Numbered step card: the one card style used by every linear flow. */
 export function StepCard({ n, title, done, locked, children, testId }: { n: number; title: string; done?: boolean; locked?: boolean; children: ReactNode; testId?: string }) {
   return (
-    <section data-testid={testId} data-done={done ? '1' : '0'} className={cx('rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6', locked && 'opacity-60')}>
+    <motion.section data-testid={testId} data-done={done ? '1' : '0'} initial={{ opacity: 0, y: 14 }} animate={{ opacity: locked ? 0.6 : 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className={cx('rounded-3xl border bg-white/90 p-5 shadow-sm transition-colors sm:p-6', done ? 'border-emerald-300' : 'border-zinc-200')}>
       <div className="mb-4 flex items-center gap-3">
-        <span className={cx('flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold', done ? 'bg-emerald-600 text-white' : 'bg-zinc-900 text-stone-100')}>{done ? <Check className="h-4 w-4" aria-hidden /> : n}</span>
+        <motion.span key={done ? 'd' : 'n'} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+          className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-sm font-medium', done ? 'bg-accent text-white' : 'bg-zinc-900 text-stone-100')}>{done ? <Check className="h-4 w-4" aria-hidden /> : n}</motion.span>
         <h2 className="font-serif text-2xl text-zinc-900">{title}</h2>
       </div>
       {children}
-    </section>
+    </motion.section>
   );
 }
 
