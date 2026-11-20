@@ -34,7 +34,7 @@ export default function PoolClaimPage() {
     let live = true; setPocket(null);
     if (a.acct) {
       if (a.env === env && a.activePocket) setPocket(a.activePocket);
-      else void predictPocket(env, defaultCfg(a.acct.evm as Hex)).then((x) => { if (live) setPocket(x); });
+      else void predictPocket(env, defaultCfg(a.acct.evm as Hex)).then((x) => { if (live) setPocket(x); }).catch(() => undefined);
     }
     return () => { live = false; };
   }, [a.acct, a.env, a.activePocket, env]);
@@ -51,11 +51,11 @@ export default function PoolClaimPage() {
     if (!a.acct || !pocket) return;
     setBusy(true); setErr(null);
     try {
-      const before = await pub.getBalance({ address: pocket });
+      const before = await pub.getBalance({ address: pocket }).catch(() => 0n);
       const r = await claimPoolSlot(env, pid, seed!, a.acct, pocket);
       // show the paid balance, not a stale 0 (B-04)
       let after = before;
-      for (let i = 0; i < 20 && pool && after < before + pool.perSlot; i++) { await new Promise((ok) => setTimeout(ok, 1500)); after = await pub.getBalance({ address: pocket }); }
+      for (let i = 0; i < 20 && pool && after < before + pool.perSlot; i++) { await new Promise((ok) => setTimeout(ok, 1500)); after = await pub.getBalance({ address: pocket }).catch(() => after); }
       qc.setQueryData(['balance', pocket], after);
       setTx(r.txHash);
     }

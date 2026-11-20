@@ -66,3 +66,13 @@ describe('receive box explains a bad paste in plain words (UX-7)', () => {
     expect(claimInputProblem('https://x/c/p3#k=abc')).toMatch(/damaged/);
   });
 });
+
+describe('network failures are told apart from chain errors (B-08)', () => {
+  it('matches browser fetch failures only', async () => {
+    const { isNetworkFailure } = await import('../src/lib/chain');
+    expect(isNetworkFailure(new TypeError('Fetch API cannot load https://evm-testnet.qore.host/ due to access control checks.'))).toBe(true);
+    expect(isNetworkFailure(new TypeError('Failed to fetch'))).toBe(true);
+    expect(isNetworkFailure(new TypeError('Load failed'))).toBe(true);
+    expect(isNetworkFailure(new Error('execution reverted: NotOwner()'))).toBe(false);
+  });
+});

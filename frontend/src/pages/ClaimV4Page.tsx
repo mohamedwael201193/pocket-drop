@@ -131,12 +131,12 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
       else {
         mark('claim', 'running');
         const payTo = (l.payTo && !/^0x0{40}$/.test(l.payTo) ? l.payTo : myPocket) as Hex;
-        const before = await pub.getBalance({ address: payTo });
+        const before = await pub.getBalance({ address: payTo }).catch(() => 0n);
         const r = await claimDrop(env, id, me, payTo); // the claim signs over the payTo fixed at bind
         // show the paid balance, not a stale 0: wait until the chain read includes the claim (B-04)
         mark('claim', 'running', { hash: r.txHash, note: 'Claim mined. Reading your new balance…' });
         let after = before;
-        for (let i = 0; i < 20 && after < before + l.amount; i++) { await sleep(1500); after = await pub.getBalance({ address: payTo }); }
+        for (let i = 0; i < 20 && after < before + l.amount; i++) { await sleep(1500); after = await pub.getBalance({ address: payTo }).catch(() => after); }
         qc.setQueryData(['balance', payTo], after);
         setPocket(payTo);
         mark('claim', 'done', { hash: r.txHash, note: undefined });

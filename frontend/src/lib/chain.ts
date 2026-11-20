@@ -2,7 +2,14 @@ import { createPublicClient, formatEther, http, parseEther, type Hex } from 'vie
 import { bech32 } from '@scure/base';
 import { dianaChain, EVM_RPC } from './config';
 
-export const pub = createPublicClient({ chain: dianaChain, transport: http(EVM_RPC) });
+// Safari reports a dropped or rate-limited RPC response as a CORS failure ("access control checks"); retry those reads (B-08)
+export const pub = createPublicClient({ chain: dianaChain, transport: http(EVM_RPC, { retryCount: 4, retryDelay: 400, timeout: 20_000 }) });
+
+/** A browser-level fetch failure (offline, CORS on an error response, aborted), as opposed to an RPC or contract error. */
+export const isNetworkFailure = (e: unknown): boolean => {
+  const m = String((e as { message?: string })?.message ?? e);
+  return /Failed to fetch|Load failed|NetworkError|access control checks|HTTP request failed|fetch failed|The network connection was lost/i.test(m);
+};
 
 export const fmtQor = (wei: bigint, digits = 4): string => {
   const n = Number(formatEther(wei));

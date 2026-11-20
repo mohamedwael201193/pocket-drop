@@ -72,7 +72,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let live = true;
     setAcct(null);
-    if (root) void deriveAccount(root).then((a) => { if (live) setAcct(a); });
+    if (root) void deriveAccount(root).then((a) => { if (live) setAcct(a); }).catch(() => undefined);
     return () => { live = false; };
   }, [root]);
 
