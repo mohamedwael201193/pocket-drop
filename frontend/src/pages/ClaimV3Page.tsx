@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Celebrate } from '../components/alive';
 import { Check, CircleDashed, Loader2, TriangleAlert, SkipForward, KeyRound, Droplets, CheckCircle2, MessageCircle, ShieldCheck, Fingerprint as FpIcon, Lock } from '../components/icons';
 import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
 
@@ -164,10 +165,10 @@ export default function ClaimV3Page() {
     <Page narrow testId="claim-page">
       <div data-done={done ? '1' : '0'} data-state={state} className="space-y-5" data-testid="claim-state">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
-          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · link #{id}</span><SourceBadge kind="LIVE" /></div>
+          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Pocket Drop · link #{id}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : 'You received'}</div>
-          <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-[11px] text-stone-400">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
+          <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
+          <div className="mt-2 font-mono text-xs text-stone-400">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
 
         {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
@@ -216,8 +217,9 @@ export default function ClaimV3Page() {
 
         {state === 'yours' && address && (
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours">
+            <Celebrate once={String(`v3-${id}`)} />
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">It is yours.</h1><SourceBadge kind="LIVE" /></div>
-            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="final-balance" data-wei={balance?.toString() ?? ''}>{balance === undefined ? '…' : fmtQor(balance)} <span className="text-xl text-zinc-500">QOR</span></div>
+            <div className="mt-2 font-money text-5xl text-zinc-900" data-testid="final-balance" data-wei={balance?.toString() ?? ''}>{balance === undefined ? '…' : fmtQor(balance)} <span className="text-xl text-zinc-500">QOR</span></div>
             <p className="mt-1 text-xs text-zinc-600">Balance of your new account, read from the chain.</p>
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Account: <a className="underline" href={addrUrl(address)} target="_blank" rel="noopener noreferrer"><Mono>{address}</Mono></a></div>
@@ -256,11 +258,11 @@ function StepRow({ id, n, step, started }: { id: StepId; n: number; step: Step; 
       className={cx('rounded-xl border border-zinc-200 p-3', step.status === 'idle' ? 'bg-white/60 opacity-75' : 'bg-white')}>
       <div className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2 font-medium"><Icon className="h-4 w-4 shrink-0 text-zinc-600" aria-hidden />{n}. {title}</span>
-        <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] text-zinc-600">{badge}{stateIcon}</span>
+        <span className="flex shrink-0 items-center gap-1 font-mono text-xs text-zinc-600">{badge}{stateIcon}</span>
       </div>
-      <div className="mt-1 text-[11px] leading-snug text-zinc-500">{step.note ?? sub}</div>
+      <div className="mt-1 text-xs leading-snug text-zinc-500">{step.note ?? sub}</div>
       {step.hash && <div className="mt-0.5"><TxLink hash={step.hash} testId={`tx-${id}`} /></div>}
-      {step.error && <div className="mt-0.5 text-[11px] text-red-700">{step.error}</div>}
+      {step.error && <div className="mt-0.5 text-xs text-red-700">{step.error}</div>}
     </li>
   );
 }

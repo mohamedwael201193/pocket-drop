@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Hex } from 'viem';
 import { Button, Mono, Notice, Page, Pill, SourceBadge, TxLink } from '../components/ui';
+import { Celebrate } from '../components/alive';
 import { ActivationCard, KEY_ACCOUNT_MIN_WEI } from '../components/account';
 import { claimPoolSlot, linkId4, parseLinkId, poolClaimed, readPool } from '../lib/claim4';
 import { useAccount, useKeyAccount } from '../lib/account';
@@ -67,10 +68,10 @@ export default function PoolClaimPage() {
     <Page narrow testId="pool-page">
       <div className="space-y-5">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
-          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Drop Pool · {linkId4(env, pid)}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
+          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Drop Pool · {linkId4(env, pid)}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">One slot is worth</div>
-          <div className="font-serif text-5xl leading-none" data-testid="slot-amount">{pool ? fmtQor(pool.perSlot) : <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-stone-700/70 align-middle" aria-label="Loading the pool" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="pool-slots-left">{pool ? `${pool.slots - pool.taken} of ${pool.slots} slots left · self-funded by the host · Testnet` : <span className="inline-block h-3 w-48 animate-pulse rounded bg-stone-700/70 align-middle" aria-hidden />}</div>
+          <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="slot-amount">{pool ? fmtQor(pool.perSlot) : <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-stone-700/70 align-middle" aria-label="Loading the pool" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
+          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="pool-slots-left">{pool ? `${pool.slots - pool.taken} of ${pool.slots} slots left · self-funded by the host · Testnet` : <span className="inline-block h-3 w-48 animate-pulse rounded bg-stone-700/70 align-middle" aria-hidden />}</div>
         </div>
         <Notice tone="info">Each slot goes to a <b>distinct proof-of-possession account, not a person</b>. One person can hold several accounts, so this is a way to share a little testnet QOR, not a count of people.</Notice>
         {pool && !open && !took && !tx && <h1 className="font-serif text-3xl text-zinc-900">{pool.closed ? 'This pool is closed' : pool.taken >= pool.slots ? 'No slots left' : 'This pool has expired'}</h1>}
@@ -95,8 +96,9 @@ export default function PoolClaimPage() {
         )}
         {(took || tx) && pocket && (
           <div className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="pool-yours">
+            <Celebrate once={`pool-${env}-${pid}`} />
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">Slot taken.</h1><Pill tone="ok">paid</Pill></div>
-            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="pool-balance" data-wei={bal?.toString() ?? ''}>{bal === undefined ? <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(bal)} <span className="text-xl text-zinc-500">QOR</span></div>
+            <div className="mt-2 font-money text-5xl text-zinc-900" data-testid="pool-balance" data-wei={bal?.toString() ?? ''}>{bal === undefined ? <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(bal)} <span className="text-xl text-zinc-500">QOR</span></div>
             <p className="mt-1 text-xs text-zinc-600">Balance of Your Pocket, read from the chain.</p>
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>

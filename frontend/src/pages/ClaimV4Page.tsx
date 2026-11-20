@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Celebrate } from '../components/alive';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from '../components/icons';
 import type { Hex } from 'viem';
@@ -177,10 +178,10 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
     <Page narrow testId="claim-page">
       <div data-done={done ? '1' : '0'} data-state={state} className="space-y-5" data-testid="claim-state">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
-          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400"><span>Pocket Drop · {label}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
+          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Pocket Drop · {label}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : dead ? 'This link held' : expired ? 'This link holds' : 'You received'}</div>
-          <div className="font-serif text-5xl leading-none" data-testid="incoming-amount">{amount ?? <Skel w="7rem" h="2.75rem" className="!bg-stone-700/70" label="Reading the link" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-[11px] text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
+          <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="incoming-amount">{amount ?? <Skel w="7rem" h="2.75rem" className="!bg-stone-700/70" label="Reading the link" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
+          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
         </div>
 
         {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
@@ -230,8 +231,9 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
 
         {state === 'yours' && pocket && (
           <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours">
+            <Celebrate once={String(label)} />
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">It is yours.</h1><SourceBadge kind="LIVE" /></div>
-            <div className="mt-2 font-serif text-5xl text-zinc-900" data-testid="final-balance" data-wei={pocketBal?.toString() ?? ''}>{pocketBal === undefined ? <span className="inline-block h-10 w-32 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(pocketBal)} <span className="text-xl text-zinc-500">QOR</span></div>
+            <div className="mt-2 font-money text-5xl text-zinc-900" data-testid="final-balance" data-wei={pocketBal?.toString() ?? ''}>{pocketBal === undefined ? <span className="inline-block h-10 w-32 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(pocketBal)} <span className="text-xl text-zinc-500">QOR</span></div>
             <p className="mt-1 text-xs text-zinc-600">Balance of Your Pocket, read from the chain.</p>
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>
@@ -258,8 +260,8 @@ function StepRow({ id, n, step }: { id: StepId; n: number; step: Step }) {
   }[step.status];
   return (
     <li data-testid={`step-${id}`} data-status={step.status} className={cx('rounded-xl border border-zinc-200 p-3', step.status === 'idle' ? 'bg-white/60 opacity-75' : 'bg-white')}>
-      <div className="flex items-center justify-between gap-2"><span className="font-medium">{n}. {title}</span><span className="flex shrink-0 items-center gap-1 font-mono text-[10px] text-zinc-600">{badge}{icon}</span></div>
-      <div className="mt-1 text-[11px] leading-snug text-zinc-500">{step.note ?? sub}</div>
+      <div className="flex items-center justify-between gap-2"><span className="font-medium">{n}. {title}</span><span className="flex shrink-0 items-center gap-1 font-mono text-xs text-zinc-600">{badge}{icon}</span></div>
+      <div className="mt-1 text-xs leading-snug text-zinc-500">{step.note ?? sub}</div>
       {step.hash && <div className="mt-0.5"><TxLink hash={step.hash} testId={`tx-${id}`} /></div>}
     </li>
   );
