@@ -1,0 +1,90 @@
+{
+ "note": "Public addresses created by the QA run of 20 Nov 2026 (keys and Pockets). All are own accounts; /api/stats and /radar must not count them as external.",
+ "run": "2026-11-20",
+ "accounts": [
+  {
+   "label": "qa-20nov-a-confirmed-sender-acct",
+   "address": "0xF549029e7EdCA8eBC1cbb7cE710292d58F201a91"
+  },
+  {
+   "label": "qa-20nov-a-confirmed-recipient-acct",
+   "address": "0x617bf1dcc7213bb76CE38a645cFf8d8b29640DC8"
+  },
+  {
+   "label": "qa-20nov-b-giveaway-sender-acct",
+   "address": "0xf38ef6B38E999CF437Df98f942e1A7063365EA55"
+  },
+  {
+   "label": "qa-20nov-b-giveaway-recipient-acct",
+   "address": "0xD02701A1d94C3C40b4a7181cDfcb4D975C519651"
+  },
+  {
+   "label": "qa-20nov-c-pool-host-acct",
+   "address": "0xab86309ca13F270c715eb3196048730a4829b7bD"
+  },
+  {
+   "label": "qa-20nov-c-pool-claimer1-acct",
+   "address": "0xF7660F39eA5dAB13235A8079c59d6Afdf1048CAc"
+  },
+  {
+   "label": "qa-20nov-c-pool-claimer2-acct",
+   "address": "0xA28A96460eDD437F68eDFdE1204939c75F752Edb"
+  },
+  {
+   "label": "qa-20nov-d-pocket-lab-owner-acct",
+   "address": "0x2341D40beFc534297Fdc14BEb54501391f8A65D8"
+  },
+  {
+   "label": "qa-20nov-d-pocket-lab-newowner-acct",
+   "address": "0x0d4230670CB0eAac8B6D62EEEF86782F3BaC01eA"
+  },
+  {
+   "label": "qa-20nov-e-cancel-sender-acct",
+   "address": "0x8d27a74F2119f2C342cAE94044bf9687f1Ca90eA"
+  },
+  {
+   "label": "qa-20nov-a-confirmed-sender-pocket",
+   "address": "0x937d995F7A0B4202Ce571842a3BcA109a8343d53"
+  },
+  {
+   "label": "qa-20nov-a-confirmed-recipient-pocket",
+   "address": "0x3cB8c35AA64cb6f7F94a1E4b37b7aB4d15772483"
+  },
+  {
+   "label": "qa-20nov-b-giveaway-sender-pocket",
+   "address": "0x85C8cA3019c01DD2067186C3860cC7919C8AF388"
+  },
+  {
+   "label": "qa-20nov-b-giveaway-recipient-pocket",
+   "address": "0x5eF999711bC4Ed516992bDF77b9509D88292fd6D"
+  },
+  {
+   "label": "qa-20nov-c-pool-host-pocket",
+   "address": "0x3e9a1b3D50cA0Ff6746c613E04F6B63B6725b4E7"
+  },
+  {
+   "label": "qa-20nov-d-pocket-lab-owner-pocket",
+   "address": "0x394BEe23e5695cDc3978072B4dcd8139729Cf42E"
+  },
+  {
+   "label": "qa-20nov-e-cancel-sender-pocket",
+   "address": "0xc7D9584c139fdeCa3870b92489CF25415B968D48"
+  },
+  {
+   "label": "qa-20nov-a-confirmed-attempt1-sender-pocket-lost",
+   "address": "0x6c07A8Dc8D70483Aa6845338aC379e9Ef9f67cea"
+  },
+  {
+   "label": "qa-20nov-a-confirmed-attempt1-sender-acct-lost",
+   "address": "0x705B26B225f2F20A41220c05bFDD7B38d8213196"
+  },
+  {
+   "label": "qa-20nov-c-pool-claimer1-pocket",
+   "address": "0x5DdB75E409756311FC568cA33956393014662A19"
+  },
+  {
+   "label": "qa-20nov-c-pool-claimer2-pocket",
+   "address": "0x03A4d4551611D325434c563e4A39a1090F323AEE"
+  }
+ ]
+}
