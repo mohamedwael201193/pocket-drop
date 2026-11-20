@@ -128,7 +128,7 @@ const HARMLESS = new Set(['Initialized', 'Received']);
 export interface BaitState {
   id: string; description: string; keyAccount: Address; keyAccountCosmos: string; pocket: Address; deployed: boolean; config: Bait['config'];
   classicalKey: Hex | null; pocketWei: string; keyAccountWei: string; ownerKeyHash: Hex; liveKeyHash: Hex | null; keyUnchanged: boolean;
-  windowLive: boolean | null; nonce: string; events: { name: string; tx: string; planned: boolean }[]; alarm: string[];
+  windowLive: boolean | null; nonce: string; planned: unknown; events: { name: string; tx: string; planned: boolean }[]; alarm: string[];
 }
 
 export async function baitState(b: Bait, ch: Chain, cfg: QdayConfig, keys: Record<string, Hex> | null): Promise<BaitState> {
@@ -154,7 +154,7 @@ export async function baitState(b: Bait, ch: Chain, cfg: QdayConfig, keys: Recor
   return {
     id: b.id, description: b.description, keyAccount: b.keyAccount, keyAccountCosmos: b.keyAccountCosmos, pocket: b.pocket, deployed, config: b.config,
     classicalKey: keys?.[b.id] ?? null, pocketWei: pw.toString(), keyAccountWei: kw.toString(), ownerKeyHash: b.ownerKeyHash, liveKeyHash,
-    keyUnchanged: !!liveKeyHash && liveKeyHash.toLowerCase() === b.ownerKeyHash.toLowerCase(), windowLive: wl, nonce: nonce.toString(), events, alarm,
+    keyUnchanged: !!liveKeyHash && liveKeyHash.toLowerCase() === b.ownerKeyHash.toLowerCase(), windowLive: wl, nonce: nonce.toString(), planned: b.planned, events, alarm,
   };
 }
 
