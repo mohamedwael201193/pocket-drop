@@ -78,7 +78,7 @@ export default function PocketPage() {
           {!a.root ? <ConnectChoices /> : (
             <div className="space-y-5">
               <PocketCard />
-              <ActivationCard />
+              {!(pv?.deployed && pv.owner && !owned) && <ActivationCard />}
               {a.adopted.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 text-xs"><span className="text-zinc-500">Active Pocket:</span>
                   {[a.pocket as Hex, ...a.adopted].filter(Boolean).map((p) => <button key={p} type="button" onClick={() => a.setActivePocket(p)} className={cx('rounded-full border px-3 py-1 font-mono', p === a.activePocket ? 'border-zinc-900 bg-zinc-900 text-stone-50' : 'border-zinc-300 bg-white')}>{short(p)}</button>)}

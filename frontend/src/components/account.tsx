@@ -99,10 +99,17 @@ export function PocketCard({ compact }: { compact?: boolean }) {
   const a = useAccount();
   const { data: pv } = usePocketView();
   if (!a.activePocket) return null;
+  // after a recovery the vault belongs to another key: say so, and never offer to fund it
+  const lost = !!pv && pv.deployed && !!pv.owner && !!a.acct && pv.owner.toLowerCase() !== a.acct.evm.toLowerCase();
   return (
-    <div className="space-y-3" data-testid="pocket-card">
+    <div className="space-y-3" data-testid="pocket-card" data-lost={lost ? '1' : '0'}>
+      {lost && (
+        <Notice tone="error" testId="pocket-lost">
+          <b>You no longer control this Pocket.</b> It was recovered to another key (<Mono>{pv!.owner!}</Mono>), so this browser&apos;s key cannot move its funds. Do not send QOR to it. If that was not you, ask your guardians now.
+        </Notice>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Your Pocket</span>
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">{lost ? 'Former Pocket' : 'Your Pocket'}</span>
         <span className="flex items-center gap-1.5"><SourceBadge kind="LIVE" /><Pill tone={a.env === 'lab' ? 'warn' : 'neutral'}>{a.env === 'lab' ? 'Lab · 60 s delays' : 'Production instance'}</Pill></span>
       </div>
       <div className="flex flex-wrap items-baseline gap-x-3">
@@ -111,7 +118,7 @@ export function PocketCard({ compact }: { compact?: boolean }) {
         <Pill tone={pv?.deployed ? 'ok' : 'neutral'} testId="pocket-deployed">{pv ? (pv.deployed ? 'deployed' : 'opens on first use') : '…'}</Pill>
       </div>
       <a href={addrUrl(a.activePocket)} target="_blank" rel="noopener noreferrer" data-testid="pocket-address" data-address={a.activePocket} className="block break-all font-mono text-xs text-zinc-700 underline decoration-zinc-300 underline-offset-2">{a.activePocket}</a>
-      {!compact && <FundOptions target={a.activePocket} label="Fund your Pocket" />}
+      {!compact && !lost && <FundOptions target={a.activePocket} label="Fund your Pocket" />}
     </div>
   );
 }
