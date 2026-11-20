@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Celebrate } from '../components/alive';
 import { Check, CircleDashed, Loader2, TriangleAlert, SkipForward, KeyRound, Droplets, CheckCircle2, MessageCircle, ShieldCheck, Fingerprint as FpIcon, Lock } from '../components/icons';
-import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx } from '../components/ui';
+import { Button, CopyButton, Fingerprint, Mono, Notice, Page, SourceBadge, TxLink, cx, PageTitle } from '../components/ui';
 
 import { addrUrl } from '../lib/config';
 
@@ -142,7 +142,7 @@ export default function ClaimV3Page() {
 
   /* ---------- guards */
   const guard = (testId: string, tone: 'error' | 'warn', msg: React.ReactNode) => (
-    <Page narrow><div className="space-y-4"><h1 className="font-serif text-3xl text-zinc-900">{testId === 'no-key' ? 'This link is incomplete' : testId === 'bad-link' ? 'Not a Pocket Drop link' : 'Could not open this link'}</h1><Notice tone={tone} testId={testId}>{msg}</Notice></div></Page>
+    <Page narrow><div className="space-y-4"><PageTitle eyebrow="Receive" title={testId === 'no-key' ? 'This link is incomplete' : testId === 'bad-link' ? 'Not a Pocket Drop link' : 'Could not open this link'} /><Notice tone={tone} testId={testId}>{msg}</Notice></div></Page>
   );
   if (!/^\d+$/.test(id)) return guard('bad-link', 'error', 'This is not a Pocket Drop link.');
   if (!seed && !loadSaved(id)) return guard('no-key', 'error', 'This link is missing its key. The long part after the # is required, so open the full link the sender shared.');

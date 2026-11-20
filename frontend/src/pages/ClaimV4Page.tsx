@@ -5,7 +5,7 @@ import { Celebrate } from '../components/alive';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CircleDashed, Loader2, MessageCircle, TriangleAlert } from '../components/icons';
 import type { Hex } from 'viem';
-import { Button, CopyButton, Fingerprint, Mono, Notice, Page, Skel, SourceBadge, TxLink, cx } from '../components/ui';
+import { Button, CopyButton, Fingerprint, Mono, Notice, Page, Skel, SourceBadge, TxLink, cx, PageTitle } from '../components/ui';
 import { bindDrop, claimDrop, keyStatus, readDrop, linkId4 } from '../lib/claim4';
 import { deriveAccount, loadRoot, keyHashOfAccount, type KeyAccount } from '../lib/identity';
 import { useAccount } from '../lib/account';
@@ -273,7 +273,7 @@ function DeadEnd({ title, testId, tone = 'error', children }: { title: string; t
   return (
     <Page narrow testId="claim-page">
       <div className="space-y-4">
-        <h1 className="font-serif text-3xl text-zinc-900">{title}</h1>
+        <PageTitle eyebrow="Receive" title={title} />
         <Notice tone={tone} testId={testId}>{children}</Notice>
         <div className="flex flex-wrap gap-2 text-sm">
           <Link to="/receive" className="inline-flex min-h-[44px] items-center rounded-full border border-zinc-300 bg-white px-5 font-medium text-zinc-900">Paste another link</Link>

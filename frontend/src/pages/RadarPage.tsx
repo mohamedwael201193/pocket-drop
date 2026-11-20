@@ -48,7 +48,7 @@ function EnvCard({ s }: { s: EnvStats }) {
         <Bar label="Opened (bound)" value={s.drops.bound} max={max} tone="bg-amber-600" />
         <Bar label="Confirmed by sender" value={s.drops.confirmed} max={max} tone="bg-sky-700" />
         <Bar label="Claimed into a Pocket" value={s.drops.claimed} max={max} tone="bg-emerald-600" />
-        <Bar label="Pool slots claimed" value={s.pools.slotsClaimed} max={Math.max(max, s.pools.slotsClaimed)} tone="bg-violet-700" />
+        <Bar label="Pool slots claimed" value={s.pools.slotsClaimed} max={Math.max(max, s.pools.slotsClaimed)} tone="bg-teal-800" />
       </div>
       <div className="mt-5" data-testid={`${s.env}-own-external`}>
         <h3 className="mb-1 text-sm font-semibold text-zinc-900">Own accounts vs external accounts</h3>

@@ -77,7 +77,7 @@ export function Stage({ eyebrow, title, children, action, object = true, live, t
           {children && <div className="mt-4 max-w-2xl text-[15px] leading-relaxed text-stone-300 sm:text-base">{children}</div>}
           {action && <div className="mt-6">{action}</div>}
         </motion.div>
-        {object && <PocketObject className="pointer-events-none order-last h-20 w-20 shrink-0 sm:h-40 sm:w-40 md:h-52 md:w-52 lg:h-60 lg:w-60" />}
+        {object && <PocketObject className="pointer-events-none absolute right-3 top-5 h-20 w-20 shrink-0 sm:static sm:order-last sm:h-40 sm:w-40 md:h-52 md:w-52 lg:h-60 lg:w-60" />}
       </div>
     </header>
   );

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Hex } from 'viem';
-import { Button, Mono, Notice, Page, Pill, SourceBadge, TxLink } from '../components/ui';
+import { Button, Mono, Notice, Page, Pill, SourceBadge, TxLink, PageTitle } from '../components/ui';
 import { Celebrate } from '../components/alive';
 import { ActivationCard, KEY_ACCOUNT_MIN_WEI } from '../components/account';
 import { claimPoolSlot, linkId4, parseLinkId, poolClaimed, readPool } from '../lib/claim4';
@@ -117,7 +117,7 @@ function PoolDeadEnd({ title, testId, children }: { title: string; testId: strin
   return (
     <Page narrow testId="pool-page">
       <div className="space-y-4">
-        <h1 className="font-serif text-3xl text-zinc-900">{title}</h1>
+        <PageTitle eyebrow="Receive" title={title} />
         <Notice tone="error" testId={testId}>{children}</Notice>
         <div className="flex flex-wrap gap-2 text-sm">
           <Link to="/receive" className="inline-flex min-h-[44px] items-center rounded-full border border-zinc-300 bg-white px-5 font-medium text-zinc-900">Paste another link</Link>
