@@ -56,3 +56,13 @@ describe('guardian codes and addresses', () => {
     expect(c.guardians).toEqual([]); expect(c.threshold).toBe(0); expect(c.userSalt).toBe(ZERO_SALT); expect(c.limit).toBe(5n * 10n ** 18n);
   });
 });
+
+describe('receive box explains a bad paste in plain words (UX-7)', () => {
+  it('names what is wrong', async () => {
+    const { claimInputProblem } = await import('../src/pages/ReceivePage');
+    expect(claimInputProblem('')).toMatch(/Paste the link/);
+    expect(claimInputProblem('hello')).toMatch(/not a Pocket Drop link/);
+    expect(claimInputProblem('https://x/c/p3')).toMatch(/cut short/);
+    expect(claimInputProblem('https://x/c/p3#k=abc')).toMatch(/damaged/);
+  });
+});

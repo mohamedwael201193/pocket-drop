@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Inbox } from 'lucide-react';
 import { Button, Notice, Page, PageTitle, Pill } from '../components/ui';
@@ -15,6 +15,15 @@ export function parseClaimInput(raw: string): string | null {
   const m = /\/(c|pool)\/([pl]?\d+)#k=([0-9a-fA-F]{64})\s*$/.exec(raw.trim());
   if (!m || (m[1] === 'pool' && !/^[pl]/.test(m[2]))) return null;
   return `/${m[1]}/${m[2]}#k=${m[3].toLowerCase()}`;
+}
+
+/** Why a pasted text is not a link, in plain words (UX-7). */
+export function claimInputProblem(raw: string): string {
+  const t = raw.trim();
+  if (!t) return 'Paste the link you were sent first.';
+  if (!/\/(c|pool)\//.test(t)) return 'That is not a Pocket Drop link. Paste the whole link from your message, starting with https://.';
+  if (!t.includes('#k=')) return 'The link is cut short: the secret part after # is missing. Copy the whole link again, all the way to the end.';
+  return 'The link looks damaged: its secret part is incomplete. Copy the whole link again, all the way to the end.';
 }
 
 /** Links already opened in this browser (their keys are stored locally under pd.recv.<id> for v3 and pd.recv4.<env>.<id> for v4). */
@@ -56,22 +65,24 @@ export default function ReceivePage() {
   const [text, setText] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const ids = useMemo(openedHere, []);
+  const badLink = (useLocation().state as { badLink?: string } | null)?.badLink;
   function open() {
     const p = parseClaimInput(text);
-    if (!p) { setErr('That does not look like a Pocket Drop link. It contains /c/ or /pool/, an id and #k= followed by 64 characters.'); return; }
+    if (!p) { setErr(claimInputProblem(text)); return; }
     setErr(null); nav(p);
   }
   return (
     <Page narrow testId="receive-page">
       <PageTitle eyebrow="Receive" title="Open a link you were sent">Normally you just tap the link in your chat and land on the claim screen. If it did not open, paste it here. What you receive is paid into Your Pocket.</PageTitle>
       <div className="space-y-5">
+        {badLink && <Notice tone="warn" testId="bad-link">The address <code className="break-all font-mono text-xs">{badLink}</code> is not a Pocket Drop link. Paste the whole link you were sent below.</Notice>}
         <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="claim-entry">
           <label htmlFor="claim-input" className="text-sm font-semibold text-zinc-900">Paste your link</label>
           <div className="mt-2 flex gap-2">
-            <input id="claim-input" value={text} onChange={(e) => setText(e.target.value)} placeholder="https://…/c/p12#k=…" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+            <input id="claim-input" value={text} onChange={(e) => { setText(e.target.value); setErr(null); }} placeholder="https://…/c/p12#k=…" aria-invalid={!!err} aria-describedby="claim-input-error" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
             <Button onClick={open} data-testid="claim-open">Open</Button>
           </div>
-          {err && <div className="mt-3"><Notice tone="error" testId="claim-input-error">{err}</Notice></div>}
+          {err && <p id="claim-input-error" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="claim-input-error">{err}</p>}
           <p className="mt-3 text-xs text-zinc-500">Links from WhatsApp, Telegram, SMS or email all work. You need no wallet.</p>
         </section>
         {a.root && <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6"><PocketCard compact /></section>}
