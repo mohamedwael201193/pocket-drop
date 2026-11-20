@@ -127,7 +127,7 @@ export default function QdayPage() {
         <ul className="mt-2 space-y-2 text-[15px] leading-relaxed text-zinc-700">
           <li><b>A rehearsal of Q-Day, enforced by the chain.</b> On Q-Day, classical keys (secp256k1, the kind every wallet uses today) can be computed from public data. Here we skip ahead: the classical keys of five real Pockets are published, so anyone holds what a quantum attacker would hold.</li>
           <li><b>On real post-quantum smart accounts.</b> Each Pocket is a live contract on Diana testnet that only moves with a signature from its registered ML-DSA-87 key. The chain checks that signature, not our server, so every attempt below either reverts on chain or is refused before it is sent.</li>
-          <li><b>It already found a bug, in our own code.</b> An earlier version derived the ML-DSA key from the same seed as the classical key, so a stolen classical key also gave the PQ key. We robbed a test Pocket on purpose to prove it, then fixed the derivation. The before and after are at the bottom of this page.</li>
+          <li><b>It already found a bug, in our own code.</b> Before 20 Nov our browser derived the ML-DSA key from the classical key itself, so whoever had the classical key also had the PQ key. We robbed a test Pocket on purpose to prove it, then fixed the derivation. The before and after are at the bottom of this page.</li>
         </ul>
       </section>
 
