@@ -4,6 +4,7 @@ import { isAddress, type Hex } from 'viem';
 import { Button, CopyButton, Mono, Notice, Page, PageTitle, Pill, SourceBadge, StepCard, TxLink, cx } from '../components/ui';
 import { ActivationCard, BackupCard, ConnectChoices, PocketCard } from '../components/account';
 import { LegacyKeyBanner } from '../components/upgrade';
+import { ChevronDown } from '../components/icons';
 import { RescuePanel } from '../components/rescue';
 import { HelpFriend, LostPhone } from '../components/guardians';
 import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
@@ -72,7 +73,7 @@ export default function PocketPage() {
   const limitVal = parseQor(newLimit);
 
   return (
-    <Page narrow testId="pocket-page">
+    <Page narrow form testId="pocket-page">
       <PageTitle eyebrow="Pocket" title="Your Pocket">Your money, which only your quantum-safe key can move. Big spends wait so you can stop them, and people you trust can pause it or move it to a new phone. Everything here is a real on-chain action on testnet.</PageTitle>
       <div className="space-y-5">
         <StepCard n={1} title="Pocket and key" done={key.ready && !!pv && pv.balance > 0n} testId="pocket-main">
@@ -187,14 +188,33 @@ export default function PocketPage() {
           </>
         )}
 
-        <Section title="Help a friend recover" testId="help-section" badge={<Pill>guardian tools</Pill>}>
-          <HelpFriend />
-        </Section>
-        {a.root && <Section title="I lost my phone" testId="lost-section" badge={<Pill>new key</Pill>}><LostPhone /></Section>}
-
-        <Section title="Q-Day Rescue" testId="rescue-section" badge={<Pill tone="warn">legacy accounts</Pill>}>
-          <RescuePanel />
-        </Section>
+        {a.root ? (
+          <>
+            <Section title="Help a friend recover" testId="help-section" badge={<Pill>guardian tools</Pill>}>
+              <HelpFriend />
+            </Section>
+            <Section title="I lost my phone" testId="lost-section" badge={<Pill>new key</Pill>}><LostPhone /></Section>
+            <Section title="Q-Day Rescue" testId="rescue-section" badge={<Pill tone="warn">legacy accounts</Pill>}>
+              <RescuePanel />
+            </Section>
+          </>
+        ) : (
+          // a first-time visitor sees one thing to do: create the key. Guardian tools and Rescue wait under Advanced.
+          <details className="group rounded-3xl border border-zinc-200 bg-white/80 p-5 sm:p-6" data-testid="pocket-advanced">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden" data-testid="pocket-advanced-toggle">
+              <span><span className="block text-sm font-semibold text-zinc-900">Advanced</span><span className="block text-xs text-zinc-600">Guardian tools for helping a friend, and Q-Day Rescue for old accounts. You need your own key for both.</span></span>
+              <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-open:rotate-180" aria-hidden />
+            </summary>
+            <div className="mt-5 space-y-5">
+              <Section title="Help a friend recover" testId="help-section" badge={<Pill>guardian tools</Pill>}>
+                <HelpFriend />
+              </Section>
+              <Section title="Q-Day Rescue" testId="rescue-section" badge={<Pill tone="warn">legacy accounts</Pill>}>
+                <RescuePanel />
+              </Section>
+            </div>
+          </details>
+        )}
 
         {a.root && pv && !pv.deployed && a.acct && <p className="text-center text-xs text-zinc-500">Your Pocket opens on its first drop or spend. Until then it simply holds what you send to its address.</p>}
         {a.root && <KeyOnlyBalance />}
