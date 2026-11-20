@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { encodeEventTopics, encodeAbiParameters, type Log } from 'viem';
 import { pocketDropAbi } from '../src/abi.js';
 import { setSink } from '../src/log.js';
-import { buildStats, collectLogs, getStats, kindOf, loadOwnAccounts, resetStatsCache } from '../src/stats.js';
+import { buildStats, collectLogs, getStats, kindOf, loadOwnAccounts, ownAccountsCandidates, resetStatsCache } from '../src/stats.js';
 import { ADDR, CONTRACT, cfg } from './helpers.js';
 
 setSink(() => {});
@@ -88,6 +88,7 @@ describe('getStats', () => {
     const a = await getStats(p, cfg({ statsLookback: 1000n }), own, () => t);
     expect(a.ok && (a.value as any).fromBlock).toBe('4000');
     expect((a.value as any).network).toBe('diana-testnet');
+    expect((a.value as any).ownAccountsListed).toBe(own.size);
     t = 5000;
     await getStats(p, cfg(), own, () => t);
     expect(p.getBlockNumber).toHaveBeenCalledTimes(1);
@@ -123,5 +124,32 @@ describe('loadOwnAccounts', () => {
     const m = loadOwnAccounts();
     const labels = new Set(m.values());
     for (const l of ['relayer', 'burner', 'mainTestWallet']) expect(labels.has(l)).toBe(true);
+  });
+  it('module-relative fallback path points at the same committed file', () => {
+    const c = ownAccountsCandidates();
+    expect(c.some((f) => f.endsWith(path.join('config', 'own-accounts.json')))).toBe(true);
+    for (const f of c) expect(loadOwnAccounts(f).size).toBe(loadOwnAccounts().size);
+  });
+  it('the frontend copy (src/data/own.json) lists exactly the same addresses', () => {
+    const fe = path.join(process.cwd(), '..', 'frontend', 'src', 'data', 'own.json');
+    if (!fs.existsSync(fe)) return; // backend checked out alone
+    const a = [...loadOwnAccounts().keys()].sort();
+    const b = [...loadOwnAccounts(fe).keys()].sort();
+    expect(b).toEqual(a);
+  });
+  it('every sender recorded in the v3-contract E2E evidence and the v3 live-test recipients are own', () => {
+    const m = loadOwnAccounts();
+    const ev = path.join(process.cwd(), '..', 'frontend', 'evidence');
+    if (!fs.existsSync(ev)) return;
+    const files = [
+      ...fs.readdirSync(ev).filter((f) => /^e2e-.*\.json$/.test(f)).map((f) => path.join(ev, f)),
+      ...fs.readdirSync(path.join(ev, 'v2')).filter((f) => /^e2e-.*\.json$/.test(f)).map((f) => path.join(ev, 'v2', f)),
+      ...fs.readdirSync(path.join(ev, 'v3', 'e2e')).filter((f) => f.endsWith('.json') && f !== 'tx-verification.json').map((f) => path.join(ev, 'v3', 'e2e', f)),
+    ];
+    expect(files.length).toBeGreaterThanOrEqual(16);
+    for (const f of files) {
+      const s = (JSON.parse(fs.readFileSync(f, 'utf8')) as { sender?: string }).sender;
+      if (s) expect(m.has(s.toLowerCase()), f).toBe(true);
+    }
   });
 });
