@@ -1,5 +1,5 @@
 {
- "totalQor": 25.98,
+ "totalQor": 26.225,
  "entries": [
   {
    "qor": 2,
@@ -912,6 +912,36 @@
    "note": "sample pool (TEAM-HOSTED): fund c-pool host Pocket for 20 x 0.05 QOR standing sample pool",
    "hash": "0xe84f2374b4f6458ccc3eaef8652a295e1ccdad7c1cbd555c712831ebaf00143d",
    "at": "2026-11-20T08:09:42.865Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d-pocket-lab owner key",
+   "hash": "0xc981fba1e5362e916560c439eb652f8d232ee534b078a31d68d3314e50cbd71c",
+   "at": "2026-11-20T08:14:53.955Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "qa d-pocket-lab owner pocket",
+   "hash": "0x2a3a1db62e8162da00ccb577a1af3455082ee47a5d77777ea1b1bf0dfb122e4a",
+   "at": "2026-11-20T08:15:00.526Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d new owner key",
+   "hash": "0x99e68fdb8d9e3b3b83b3ddedfd5aa6acb721c960739e98849e2ba206aa76bf17",
+   "at": "2026-11-20T08:18:58.937Z"
+  },
+  {
+   "qor": -0.58,
+   "note": "recovered: qa d-pocket-lab recovered LAB Pocket sweep",
+   "hash": "0xa7cb8a647f4e68b7076ce8e0287f61e59faa29df1ad6caa0281c762203273010",
+   "at": "2026-11-20T08:21:57.203Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d unanimous new owner key",
+   "hash": "0x45345a0405b0b45f8045d8ee5d61b761563a8b01f7921bad713cb4fb6e361ec6",
+   "at": "2026-11-20T08:22:09.578Z"
   }
  ]
 }

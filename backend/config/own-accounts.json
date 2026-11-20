@@ -287,6 +287,13 @@
     "TEAM-RUN qa-20nov-final-d-pocket-lab-owner.key 2": "0xaC4FEeFA449c1EeCf8E82eA5E6Ac6B760680380A",
     "TEAM-RUN qa-20nov-final-d-pocket-lab-newowner.key": "0xa90465B2c1D9659DB90d20D6aFEB53d93A942313",
     "TEAM-RUN qa-20nov-persona-P3-claimer.key 2": "0xC2b7713259dC2F50E674707Ad45a2E1856235C54",
-    "TEAM-RUN qa-20nov-persona-P18-claimer.key 2": "0x61a049f55eF95ef1A0F47d1B72081e22Ad0f86ED"
+    "TEAM-RUN qa-20nov-persona-P18-claimer.key 2": "0x61a049f55eF95ef1A0F47d1B72081e22Ad0f86ED",
+    "TEAM-RUN qa-20nov-d-lab-rerun-owner.pocket": "0x7C772f1bA3B3Dd49B9982aA70538826dEA4e8cd7",
+    "TEAM-RUN qa-20nov-d-lab-rerun-owner.key": "0x21eE79B367af3Aac1d56c2D748FA227FD95fE560",
+    "TEAM-RUN qa-20nov-d-lab-rerun-newowner.key": "0xC7832aacCF1E94B4d4CF646dd905388cA5ef7B54",
+    "TEAM-RUN qa-20nov-d-lab-rerun-newowner2.key": "0x8Dc42D86db9d34e87637a36338fe81b2bF764652",
+    "TEAM-RUN qorex-format-Q-key": "0x1B8598440a1B02efD3623c9e4fe0b9dBeD3098FE",
+    "TEAM-RUN qorex-format-Q-pocket": "0xcb1b21f0Ef016829e235F806FD4D6EE45ceB972D",
+    "TEAM-RUN qorex-wallet-R (QoreX extension test wallet)": "0x084db19736a1326f6b84a9ab2f2b4f516f978914"
   }
 }

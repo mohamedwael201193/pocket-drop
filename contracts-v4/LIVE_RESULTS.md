@@ -175,3 +175,61 @@ Five bait Pockets whose classical secp256k1 keys are published on `/qday` (owner
 First team-bot run after publishing (https://github.com/mohamedwael201193/pocket-drop/actions/runs/44680831601, every path against all five baits, read-only): 98 attempts, 0 succeeded (Cosmos paths refused with codes 20/21/234, Pocket paths revert BadSignature, NoGuardians or BadRecipientSignature; B4's drop claim BadRecipientSignature). In-browser paths (eth_call) for every bait: all refused (`frontend/test/qday.live.test.ts`).
 
 First attempt mined through the relayer (Try-it marker `QDAYTRY1`, B1 spend signed with an attacker ML-DSA key): `0xd0aede1a9056a76ea3b1ea477984646f59c94e8a6ce04dac509a9bc1e5fb7a0a`, status 0 (reverted), gasUsed 254,140, B1 still holds 0.2 QOR.
+
+
+## Depth round, 20 Nov 2026 (TEAM-RUN, Diana testnet)
+
+### Old-key team Pockets emptied to main (prod, 10:13 Cairo)
+Six prod Pockets deployed before the v2 key release block (10412597) still held QOR, all team-owned. Each was emptied by its owner's ML-DSA-87 spend intent, relayed by `POST /api/route` to main `0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd`. Evidence: `frontend/evidence/v4/oldkey-drain-2026-11-20.json`.
+
+| Pocket | Amount | Tx | Result |
+|---|---|---|---|
+| `0xe7eBB8dBD9fea7a84160dFd41688a4C5dD42E8e8` | 0.78 | `0x0101ae7cf9e5850287565b6f748d968c97252fa9ea5cde10d19fd469332413ab` | paid, balance 0 |
+| `0x10B0ac40a1f6Ae5dE5DDd4393086504e91A0b2cB` | 0.25 | `0xa23b76db687edd23c812ad4737105fba9f55f68fc746fc1eb44478f1884ffaf5` | paid, balance 0 |
+| `0x801EB77057e60eED9AA348ed7E309f8495811Ef7` | 1.03 | `0x529b7ec32c6a9ce28e59afee65bce4e77f9e8b4e9c23148a996bada836092a44` | paid, balance 0 |
+| `0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b` (V, /qday "after") | 0.05 | `0xf8e5bd455c7276a8006e507363729b62b410668836bdab5c90ed970694998262` | paid (daily limit 0.05) |
+| same | 0.15 | `0xf111ffec09a91064950bfd56e490a29e316f42b18e6ed6de977f5007aa1620d3` | queued #1, unlocks 2026-11-21 08:13 UTC; anyone may executeQueued |
+| `0x803B3ACEf3e7C7c54580663d1BFa05adA8cB6B17` (W, the robbed twin) | 0.01 | `0x1a91a8cfb93610b0ea79df6a2f9886aaad826a8f304a2c44c634181ffd2303d5` | paid, balance 0 |
+| `0xa5DeeE50ff5B11cdc65F15999BFEFC169827B9F8` (P20) | 0.04 | none | stays: its browser key was not retained |
+
+Relayer gas 0.266 QOR. Funded v1-era prod Pockets: 6 before, 2 after (V until its queued spend executes, and P20).
+
+### LAB flow d rerun: full pass, now including unanimous recovery (10:14 to 10:26 Cairo)
+Playwright on the live app (`chromium-1440` project; owner chromium 1440, new owners webkit 390 and chromium 390, guardians chromium/webkit): 1 passed in 11.9 min, 0 issues. All 23 txs were mined (receipts checked in the run and by `frontend/scripts/reverify.mjs`). New in this run: during the freeze, all three guardians moved the Pocket to a fresh key by unanimous recovery, and that key finished it after the 180 s LAB delay. Evidence: `frontend/evidence/v4/e2e/flow-d-lab-rerun-2026-11-20.json`, screenshots `QORE/qa/shots-d-rerun/`.
+
+| Step | Tx | Result |
+|---|---|---|
+| fund owner key 0.075 | `0xc981fba1e5362e916560c439eb652f8d232ee534b078a31d68d3314e50cbd71c` | success |
+| fund owner Pocket 0.6 | `0x2a3a1db62e8162da00ccb577a1af3455082ee47a5d77777ea1b1bf0dfb122e4a` | success |
+| owner spend 0.01 (lazy deploy) | `0x7eee5bf2231e1a710432f1aa7f89ce665cc6b662c7bd1398f4204fb1adab89ee` | success |
+| owner lowers limit to 0.05 | `0xdf2f2ff70f60ac6c3440a22084019424ddcdfceb6b3ec0e63329d48021d57481` | success |
+| owner queues spend 0.08 | `0x71bd55ed59f5c95ea209f6952a7cb07c7aec8dbd7952e5fb31e6ad5653354486` | success |
+| owner vetoes queued #1 | `0x8a20362fb2c4b70838bb921d7a25b951c043a3a24e0bd1346383e3ef6c1584bf` | success |
+| owner queues spend 0.06 | `0xa2e577601ebbb52d6e5738cc00bb3fabc50b885ffa19b8e33650156bc408029b` | success |
+| anyone executes queued #2 | `0x41e19e75a37fcd4902541ca82849933b4f32a846dda60f523f71a192dd1d2ae4` | success |
+| owner queues limit raise to 1 | `0x834a38b75d5d29d0f363ed8317aecbe81049bf6b4c2e97fab2b84054509894ad` | success |
+| anyone applies the limit raise | `0x287359114ba6ca69770691686796cf8bac812fed54749ffcb61e3d5839fc0373` | success |
+| owner queues guardians 2-of-3 | `0xc54edcecc81cb5ac98cfe7da30c79108cd54909cc7607e8b3dcccb0844686f1e` | success |
+| anyone applies guardians | `0x0bbb61ff71b25f323e11feaf5b5692e059701dcf29369987937cde8a52c72141` | success |
+| Q-Day rescue: legacy main wallet sends 0.05 into the LAB Pocket (cosmos) | `578EFC0A681698ACB0FE688A2968731B21ED2751373BE9DDE9603F09754BEF94` | cosmos code 0 |
+| fund new owner key | `0x99e68fdb8d9e3b3b83b3ddedfd5aa6acb721c960739e98849e2ba206aa76bf17` | success |
+| guardians 2-of-3 propose threshold recovery #1 | `0xaabc1770fe7e544e41d81b54504d25275389eca19388e6370448bd14d8f15b8e` | success |
+| owner vetoes recovery #1 | `0x913dd2c3605bc8936efba50f7624e49c5b8df3ea189411fb2d8b1cdf5a9a9c35` | success |
+| guardians 2-of-3 propose threshold recovery #2 | `0x71bacdd2c3e6061e837188a07dd88e93505e347850ee3501979fe4f528d901c8` | success |
+| new owner finishes recovery #2 | `0x781ad702aaed1c5e78ad18bfc9ffadaf6fb99895d2770d849d2ee421f58cfcf3` | success |
+| sweep recovered LAB Pocket Pocket to deployer | `0xa7cb8a647f4e68b7076ce8e0287f61e59faa29df1ad6caa0281c762203273010` | success |
+| guardians 2-of-3 freeze | `0xc271b106f7570f81528117027fa901015e77047a8139b0912a6a622e969884fb` | success |
+| fund unanimous new owner key | `0x45345a0405b0b45f8045d8ee5d61b761563a8b01f7921bad713cb4fb6e361ec6` | success |
+| guardians 3-of-3 propose unanimous recovery (while frozen) | `0x687da019fcfe23f5acbdc4c80a15cb4a1e0ad4fa180f43d0623f6b25bc7f8ec9` | success |
+| new owner finishes unanimous recovery | `0x2b2fabf145d60fa25fc07f391818959e4671544d34612c1a94c83f0a1f3cdc2d` | success |
+
+### QoreX-format signed intent through the prod router (10:20 Cairo)
+Account Q is a fresh mnemonic. Its ML-DSA-87 key is `deriveCanonicalPqKey` from `@qorechain/qoresign` (the QoreX canonical derivation), registered with proof of possession. The spend intent digest was signed with `qoresign.signMessage`, which is the exact `signArbitrary` response format, and relayed with lazy deploy. Evidence: `frontend/evidence/v4/e2e/qorex-format-intent-2026-11-20.json`.
+
+| Step | Tx | Result |
+|---|---|---|
+| main funds Q key account 0.09 and Q's counterfactual Pocket 0.05 | `C83C5D588DDAC593AE42471557D794865EBF958878F7DE57A2A09E0FB64A4510` | cosmos code 0 |
+| Q registers its canonical ML-DSA-87 key with PoP | `9EDC000FD332D062F3AAD8A65C9BE4FBD8056415D645850A46ABDC882553F385` | cosmos code 0 |
+| QoreX-format intent: deploy Pocket `0xcb1b21f0Ef016829e235F806FD4D6EE45ceB972D` + spend 0.02 to main | `0x36909c05a300789652254abcaad394d36ab1be2e37cd7c64090818eda61cd04d` | success (503,646 gas) |
+
+This is not yet the QoreX app signing. The QoreX extension (0.4.3) was installed and run headlessly with a test wallet on testnet (`qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e`, funded by `1B270665EF435A0CA51EFC01A98D0F4C2FA3B939ADBAED06BE88A6008CD7597F`). Its key registration needs a send from the wallet, which is waiting for the owner's approval.

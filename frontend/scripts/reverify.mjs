@@ -8,7 +8,8 @@
 //   5. Q-Day drill: each bait Pocket is still owned by its key account, its registered ML-DSA-87 key is the one it pins
 //      (keccak256 of the 0x0A02 pubkey == ownerKeyHash), it still holds its QOR, and every setup tx is mined as recorded
 //   6. Q-Day attack attempts (committed snapshot + the live /api/qday log): every mined attempt reverted, alarm not raised
-//   7. persona campaign, sponsored onboarding runs and the spend ledger: every EVM hash mined with status 1
+//   7. persona campaign, sponsored onboarding runs, LAB flow d rerun, the QoreX-format intent, the old-key drain and
+//      the spend ledger: every EVM hash mined with status 1
 //   8. every Cosmos tx hash in the evidence (registrations, funding, sponsor sends) has code 0 via the Cosmos REST API
 import fs from 'node:fs';
 import path from 'node:path';
@@ -124,7 +125,7 @@ const isEvmHash = (h) => typeof h === 'string' && /^0x[0-9a-fA-F]{64}$/.test(h);
 const isCosmosHash = (h) => typeof h === 'string' && /^[0-9A-Fa-f]{64}$/.test(h);
 const section = (t) => console.log(`\n== ${t}`);
 const tally = {};
-const mark = (k, before) => { tally[k] = { evm: evmTxs - before.e, cosmos: cosmosTxs - before.c }; };
+const mark = (k, before) => { const t = (tally[k] ??= { evm: 0, cosmos: 0 }); t.evm += evmTxs - before.e; t.cosmos += cosmosTxs - before.c; };
 let b = { e: 0, c: 0 };
 
 section('v4 live suite (src/data/v4.json)');
@@ -188,6 +189,12 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^personas-.*
 for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^sponsor-live-.*\.json$/.test(f)).sort()) {
   const S = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
   evidenceSets.push([`sponsored onboarding run (${f})`, Object.entries(S.txs ?? {}).map(([k, h]) => [h, `sponsor run: ${k}`])]);
+}
+for (const [dir, re] of [['e2e', /^(flow-d-|qorex-).*\.json$/], ['.', /^oldkey-drain-.*\.json$/]]) {
+  for (const f of fs.readdirSync(path.join(ev, dir)).filter((f) => re.test(f)).sort()) {
+    const J = JSON.parse(fs.readFileSync(path.join(ev, dir, f), 'utf8'));
+    evidenceSets.push([`team run (${f})`, Object.entries(J.txs ?? {}).map(([k, h]) => [h, `${f.replace(/-2026.*$/, '')}: ${k}`])]);
+  }
 }
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {

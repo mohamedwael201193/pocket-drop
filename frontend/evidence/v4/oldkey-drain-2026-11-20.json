@@ -1,0 +1,83 @@
+{
+ "note": "Old-key (v1-era, deployed before block 10412597) prod team Pockets emptied back to main by their owners' ML-DSA-87 intents, relayed by POST /api/route (TEAM-RUN). V's daily limit is 0.05, so its remaining 0.15 is a queued spend (24 h timelock; anyone may executeQueued after unlock). P20 has no retained key (browser key from a wrong-port run), so its 0.04 stays.",
+ "main": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+ "at": "2026-11-20T08:13:24.178Z",
+ "relayerGasQor": 0.26631891,
+ "results": [
+  {
+   "pocket": "0xe7eBB8dBD9fea7a84160dFd41688a4C5dD42E8e8",
+   "owner": "0xd9BA3EEa53a9cc0b114d5e4C9d0dd272fbF87BA5",
+   "qor": "0.78",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "spent now",
+   "tx": "0x0101ae7cf9e5850287565b6f748d968c97252fa9ea5cde10d19fd469332413ab",
+   "ok": true
+  },
+  {
+   "pocket": "0x10B0ac40a1f6Ae5dE5DDd4393086504e91A0b2cB",
+   "owner": "0x324bB71a6C397506A755A03a42E428937B0F88C3",
+   "qor": "0.25",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "spent now",
+   "tx": "0xa23b76db687edd23c812ad4737105fba9f55f68fc746fc1eb44478f1884ffaf5",
+   "ok": true
+  },
+  {
+   "pocket": "0x801EB77057e60eED9AA348ed7E309f8495811Ef7",
+   "owner": "0x322C5F02ED69B7b61d6378B6078a62d7860DB0fC",
+   "qor": "1.03",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "spent now",
+   "tx": "0x529b7ec32c6a9ce28e59afee65bce4e77f9e8b4e9c23148a996bada836092a44",
+   "ok": true
+  },
+  {
+   "pocket": "0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b",
+   "owner": "0x8DA80571f2333a581c27BaD6F47Cb994aD3445B6",
+   "qor": "0.05",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "spent now",
+   "tx": "0xf8e5bd455c7276a8006e507363729b62b410668836bdab5c90ed970694998262",
+   "ok": true
+  },
+  {
+   "pocket": "0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b",
+   "owner": "0x8DA80571f2333a581c27BaD6F47Cb994aD3445B6",
+   "qor": "0.15",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "queued (24 h timelock, executeQueued by anyone after)",
+   "tx": "0xf111ffec09a91064950bfd56e490a29e316f42b18e6ed6de977f5007aa1620d3",
+   "ok": true
+  },
+  {
+   "pocket": "0x803B3ACEf3e7C7c54580663d1BFa05adA8cB6B17",
+   "owner": "0x84095015682060930012267203FA5adD2706c1aF",
+   "qor": "0.01",
+   "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+   "kind": "spent now",
+   "tx": "0x1a91a8cfb93610b0ea79df6a2f9886aaad826a8f304a2c44c634181ffd2303d5",
+   "ok": true
+  },
+  {
+   "pocket": "0xa5DeeE50ff5B11cdc65F15999BFEFC169827B9F8",
+   "owner": "0x7d57c336d4340D63a8b5F3BF997A5D582581C624",
+   "qor": "0.04",
+   "outcome": "no key held (browser key not retained)"
+  }
+ ],
+ "queued": {
+  "pocket": "0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b",
+  "id": 1,
+  "amountQor": 0.15,
+  "to": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+  "unlockAt": "2026-11-21T08:13:11Z"
+ },
+ "txs": {
+  "0xe7eBB8dB spent now 0.78 QOR to main": "0x0101ae7cf9e5850287565b6f748d968c97252fa9ea5cde10d19fd469332413ab",
+  "0x10B0ac40 spent now 0.25 QOR to main": "0xa23b76db687edd23c812ad4737105fba9f55f68fc746fc1eb44478f1884ffaf5",
+  "0x801EB770 spent now 1.03 QOR to main": "0x529b7ec32c6a9ce28e59afee65bce4e77f9e8b4e9c23148a996bada836092a44",
+  "0xD6b6Fd3D spent now 0.05 QOR to main": "0xf8e5bd455c7276a8006e507363729b62b410668836bdab5c90ed970694998262",
+  "0xD6b6Fd3D queued (24 h timelock, executeQueued by anyone after) 0.15 QOR to main": "0xf111ffec09a91064950bfd56e490a29e316f42b18e6ed6de977f5007aa1620d3",
+  "0x803B3ACE spent now 0.01 QOR to main": "0x1a91a8cfb93610b0ea79df6a2f9886aaad826a8f304a2c44c634181ffd2303d5"
+ }
+}
