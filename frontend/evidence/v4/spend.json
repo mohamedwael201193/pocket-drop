@@ -408,6 +408,12 @@
    "note": "qa 20 Nov: relayer gas used during the QA run (relayer balance 5.143759555 at 02:21Z -> 3.3589425175 at end; about 30 relayed intents), measured by eth_getBalance, not a single tx",
    "hash": "n/a (balance delta of 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD)",
    "at": "2026-11-20T03:05:00.000Z"
+  },
+  {
+   "qor": 0,
+   "note": "relayer top-up 2 QOR from the main wallet after the QA run (owner-approved); the gas it replaces is already booked above as the 1.785 QOR relayer gas delta",
+   "hash": "ED93794666AA2443269FBCE94E7481136BD716667F388FE14902D5921649E4C5",
+   "at": "2026-11-20T02:52:00.000Z"
   }
  ]
 }
