@@ -1,132 +1,105 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { decodeErrorResult, type Hex } from 'viem';
-import { ShieldX, Play, CheckCircle2, XCircle } from 'lucide-react';
-import { Button, Card, Mono, Notice, SourceBadge, TxLink, cx } from '../components/ui';
+import { CheckCircle2, Play, ShieldX, XCircle } from 'lucide-react';
+import { Button, Card, Notice, Pill, SourceBadge, TxLink } from '../components/ui';
 import { Reveal } from '../components/bits';
-import { ATTACKS, REC, attackTx } from '../data/proofs';
-import { addrUrl, LAB_ADDRESS, POCKETDROP_ADDRESS } from '../lib/config';
-import { pub } from '../lib/chain';
+import { ATTACKS, attackTx } from '../data/proofs';
+import v4 from '../data/v4.json';
+import { errorsAbi } from '../lib/abi4';
 import { pocketDropAbi } from '../lib/abi';
+import { pub } from '../lib/chain';
+import { addrUrl } from '../lib/config';
 
-interface Check { receipt?: 'success' | 'reverted'; replay?: string; block?: string; error?: string }
+interface Row { section: string; step: string; status: string; outcome: string; url: string | null; hash: string | null }
+const ROWS = v4.liveRows as Row[];
+const STOLEN = 'Guardian freeze and unanimous recovery';
+const clean = (s: string) => s.replace(/^ATTACK\s+/, '').replace(/\s+ATTACK\s+/, ' ').replace(/^[A-Z]{1,2}\d+[a-z]?\s+/, '');
+const inStolen = (r: Row) => r.section.startsWith(STOLEN);
+const isAttack = (r: Row) => r.status === 'reverted' || r.status === 'refused';
 
+interface Check { receipt?: string; replay?: string; block?: string; error?: string }
 /** LIVE: fetch the receipt, then replay the exact call against the chain state one block before it was mined. */
 async function verify(hash: Hex): Promise<Check> {
   const [tx, rc] = await Promise.all([pub.getTransaction({ hash }), pub.getTransactionReceipt({ hash })]);
   let replay = 'did not revert';
-  try {
-    await pub.call({ account: tx.from, to: tx.to!, data: tx.input, value: tx.value, blockNumber: rc.blockNumber - 1n });
-  } catch (e) {
+  try { await pub.call({ account: tx.from, to: tx.to!, data: tx.input, value: tx.value, blockNumber: rc.blockNumber - 1n }); }
+  catch (e) {
     const err = e as { walk?: (f: (x: unknown) => boolean) => { data?: string } | undefined; data?: string };
     const data = (err.walk?.((x) => typeof (x as { data?: unknown })?.data === 'string') as { data?: string } | undefined)?.data ?? err.data;
-    try { replay = decodeErrorResult({ abi: pocketDropAbi, data: data as Hex }).errorName; } catch { replay = 'reverted (undecoded)'; }
+    try { replay = decodeErrorResult({ abi: errorsAbi as never, data: data as Hex }).errorName; } catch { replay = 'reverted (undecoded)'; }
   }
   return { receipt: rc.status, replay, block: rc.blockNumber.toString() };
 }
 
-const CAT: Record<number, 'sig' | 'pop'> = { 1: 'sig', 2: 'sig', 3: 'pop', 4: 'pop', 5: 'sig', 6: 'pop' };
+function AttackRow({ r, check }: { r: Row; check?: Check }) {
+  const match = check?.replay && r.outcome && check.replay === r.outcome;
+  return (
+    <li className="rounded-2xl border border-zinc-200 bg-white p-4" data-testid="attack-row" data-status={r.status}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 text-sm font-medium text-zinc-900">{clean(r.step)}</div>
+        <div className="flex shrink-0 items-center gap-2"><Pill tone={r.status === 'reverted' ? 'warn' : 'neutral'}>{r.status === 'refused' ? 'refused at broadcast' : r.outcome}</Pill><SourceBadge kind="RECORDED" title="A mined (or chain-refused) transaction recorded in contracts-v4/LIVE_RESULTS.md" /></div>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-600">
+        {r.hash ? <TxLink hash={r.hash} testId="attack-tx" /> : <span>no hash: the chain refused to broadcast it</span>}
+        {check && !check.error && <span className="inline-flex items-center gap-1 font-mono" data-testid="live-check">{check.receipt === 'reverted' ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" /> : <XCircle className="h-3.5 w-3.5 text-red-700" />}receipt {check.receipt} · block {check.block} · replay {check.replay}{match ? ' (matches)' : ''}</span>}
+        {check?.error && <span className="text-red-700">{check.error}</span>}
+      </div>
+    </li>
+  );
+}
 
 export default function LabPage() {
-  const [checks, setChecks] = useState<Record<number, Check>>({});
+  const [checks, setChecks] = useState<Record<string, Check>>({});
   const [busy, setBusy] = useState(false);
-  const [showAll, setShowAll] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'sig' | 'pop'>('all');
+  const attacks = useMemo(() => ROWS.filter((r) => isAttack(r) && !inStolen(r)), []);
+  const stolen = useMemo(() => ROWS.filter((r) => inStolen(r) && r.status !== 'info'), []);
+  const stolenAttacks = stolen.filter(isAttack);
 
   async function runAll() {
     setBusy(true);
-    const out: Record<number, Check> = {};
-    await Promise.all(ATTACKS.map(async (a) => {
-      try { out[a.n] = await verify(attackTx(a.n).hash as Hex); } catch (e) { out[a.n] = { error: (e as Error).message }; }
+    const out: Record<string, Check> = {};
+    await Promise.all([...attacks, ...stolenAttacks].filter((r) => r.hash && r.status === 'reverted').map(async (r) => {
+      try { out[r.hash!] = await verify(r.hash as Hex); } catch (e) { out[r.hash!] = { error: (e as Error).message }; }
     }));
     setChecks(out); setBusy(false);
   }
-  const items = ATTACKS.filter((a) => filter === 'all' || CAT[a.n] === filter);
-  const short = (a: string) => `${a.slice(0, 6)}...${a.slice(-4)}`;
+  const inst = v4.instances;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8" data-testid="lab">
+    <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8" data-testid="lab">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Lab Instance: {short(LAB_ADDRESS)} <SourceBadge kind="RECORDED" title="Attack transactions recorded in deployments/diana.json; the button below re-verifies them live" /></p>
-          <h1 className="mt-1 font-serif text-3xl text-zinc-900 sm:text-5xl">6 On-Chain Revert Defences</h1>
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Lab · v4 · prod router <a className="underline" href={addrUrl(inst.prod.router.address)} target="_blank" rel="noopener noreferrer">{inst.prod.router.address.slice(0, 8)}…</a> · lab router <a className="underline" href={addrUrl(inst.lab.router.address)} target="_blank" rel="noopener noreferrer">{inst.lab.router.address.slice(0, 8)}…</a> <SourceBadge kind="RECORDED" /></p>
+          <h1 className="mt-1 font-serif text-3xl text-zinc-900 sm:text-5xl">{attacks.length + stolenAttacks.length} attacks the chain refused</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-600">Each row below is a real transaction on Diana testnet. A &quot;reverted&quot; attack was decoded with eth_call first, then mined with an explicit gas limit so the revert itself is on-chain. Source: <code className="font-mono text-xs">contracts-v4/LIVE_RESULTS.md</code>, recorded when the live suite ran. The button re-checks them against the chain right now.</p>
         </div>
-        <div className="flex gap-1.5 self-start rounded-full border border-zinc-200 bg-white p-1">
-          {([['all', `All (${ATTACKS.length})`], ['sig', 'Signatures'], ['pop', 'PoP & State']] as const).map(([f, l]) => (
-            <button key={f} type="button" onClick={() => setFilter(f)} className={cx('rounded-full px-3 py-1 text-xs font-medium', filter === f ? 'bg-zinc-900 text-white' : 'text-zinc-600')}>{l}</button>
-          ))}
-        </div>
+        <Button onClick={() => void runAll()} busy={busy} data-testid="verify-all"><Play className="h-4 w-4" aria-hidden />Verify live</Button>
       </div>
 
-      <Card className="mb-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-sm text-zinc-700">
-            <p className="mb-2 max-w-2xl text-xs leading-relaxed text-zinc-600">Each attack below was mined as a real transaction on Diana against the main contract and reverted with the custom error shown. The hashes come from the recorded live run. The button re-runs each call against the chain state it originally faced.</p>
-            <div>Main contract <a className="underline" href={addrUrl(POCKETDROP_ADDRESS)} target="_blank" rel="noopener noreferrer"><Mono>{POCKETDROP_ADDRESS}</Mono></a></div>
-            <div className="mt-1">Lab instance (60 s bind timeout, used for the rebind scenario) <a className="underline" href={addrUrl(LAB_ADDRESS)} target="_blank" rel="noopener noreferrer"><Mono>{LAB_ADDRESS}</Mono></a></div>
-          </div>
-          <Button onClick={runAll} busy={busy} data-testid="lab-verify"><Play className="h-4 w-4" />Re-run all 6 against the chain</Button>
-        </div>
-        <p className="mt-2 text-xs text-zinc-500">This reads the receipt and replays the same call with eth_call at the block before it was mined, then decodes the revert. It changes nothing on-chain and costs nothing.</p>
-      </Card>
+      <Reveal>
+        <Card className="mb-6" data-testid="stolen-key">
+          <div className="flex flex-wrap items-center gap-2"><ShieldX className="h-5 w-5 text-zinc-700" aria-hidden /><h2 className="font-serif text-2xl text-zinc-900">Stolen key: freeze, then unanimous recovery</h2><SourceBadge kind="RECORDED" /></div>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-700">A thief holds the owner key. The thief can spend only inside the daily limit before the guardians act. Then a threshold of guardians freeze the Pocket (the owner key cannot lift it), and all guardians replace the owner by a unanimous recovery that the thief cannot veto. This is the lab (60 s) instance run end to end; the residual risk (what a thief can take before the freeze) is shown honestly in the first step.</p>
+          <ul className="mt-4 space-y-2" data-testid="stolen-rows">{stolen.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+        </Card>
+      </Reveal>
 
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3" data-testid="lab-grid">
-        {items.map((a, idx) => {
-          const t = attackTx(a.n); const c = checks[a.n];
-          const ok = c && !c.error && c.receipt === 'reverted' && c.replay === a.error;
-          return (
-            <Reveal key={a.n} delay={(idx % 3) * 0.06} className="flex">
-              <div data-testid={`attack-${a.n}`} data-verified={c ? (ok ? 'ok' : 'bad') : 'idle'} className="flex w-full flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:shadow-md">
-                <div>
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-rose-700"><ShieldX className="h-3 w-3" />REVERTED</span>
-                    <span className="font-mono text-[11px] text-zinc-500">{a.error}</span>
-                  </div>
-                  <h3 className="mb-2 font-serif text-xl text-zinc-900">{a.n}. {a.title}</h3>
-                  <p className="mb-4 text-xs leading-relaxed text-zinc-600">{a.plain}</p>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between border-t border-zinc-100 pt-3 text-xs">
-                    <TxLink hash={t.hash} testId={`attack-tx-${a.n}`} />
-                    <span className="text-[11px] text-zinc-500">recorded: {t.status} / {t.outcome}</span>
-                  </div>
-                  {c && (
-                    <div className={cx('mt-2 flex items-start gap-2 rounded-lg px-2.5 py-2 text-xs', ok ? 'bg-emerald-50 text-emerald-900' : 'bg-red-50 text-red-900')}>
-                      {ok ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" /> : <XCircle className="mt-0.5 h-4 w-4 shrink-0" />}
-                      <div>
-                        <SourceBadge kind="LIVE" />
-                        <div className="mt-1">{c.error ? c.error : `Receipt in block ${c.block}: ${c.receipt}. Replay at block ${(BigInt(c.block!) - 1n).toString()}: ${c.replay}.`}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Reveal>
-          );
-        })}
-      </div>
+      <Reveal>
+        <h2 className="mb-3 font-serif text-2xl text-zinc-900">Everything else it refused</h2>
+        <p className="mb-4 text-xs text-zinc-500">Vault signatures, replays, timelocks, recovery, the router and pool rules, and the v3 attacks on the v4 drop. Production and lab instances.</p>
+        <ul className="space-y-2" data-testid="attack-list">{attacks.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+      </Reveal>
 
-      <div className="mt-6"><Notice tone="info"><span className="font-medium">Why a revert counts as proof.</span> A reverted transaction is mined and visible on the explorer with status failed. Re-running the same call at the earlier block shows the contract itself names the reason.</Notice></div>
-
-      <div className="mt-6">
-        <Button variant="secondary" onClick={() => setShowAll((v) => !v)}>{showAll ? 'Hide' : 'Show'} all {REC.liveTxs.length} recorded live transactions</Button>
-        {showAll && (
-          <Card className="mt-3 overflow-x-auto p-0 sm:p-0">
-            <table className="w-full min-w-[520px] text-left text-xs">
-              <thead className="bg-stoneCard text-zinc-600"><tr><th className="p-2.5">Step</th><th className="p-2.5">Status</th><th className="p-2.5">Outcome</th><th className="p-2.5">Tx</th></tr></thead>
-              <tbody>
-                {REC.liveTxs.map((t, i) => (
-                  <tr key={i} className="border-t border-zinc-100">
-                    <td className="p-2.5">{t.step}</td>
-                    <td className={cx('p-2.5 font-mono', t.status === 'reverted' ? 'text-red-700' : 'text-emerald-700')}>{t.status}</td>
-                    <td className="p-2.5">{t.outcome}</td>
-                    <td className="p-2.5"><TxLink hash={t.hash} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        )}
-      </div>
+      <Reveal>
+        <details className="mt-8 rounded-3xl border border-zinc-200 bg-white/80 p-5">
+          <summary className="cursor-pointer font-serif text-xl text-zinc-900">The six v3 attacks (v3 contract, still deployed)</summary>
+          <ul className="mt-3 space-y-2">{ATTACKS.map((a) => (
+            <li key={a.n} className="rounded-2xl border border-zinc-200 bg-white p-3 text-sm"><div className="flex items-center justify-between gap-2"><span className="font-medium text-zinc-900">{a.n}. {a.title}</span><span className="flex items-center gap-2"><Pill tone="warn">{a.error}</Pill><SourceBadge kind="RECORDED" /></span></div><div className="mt-1 text-xs text-zinc-600">{a.plain}</div><div className="mt-1"><TxLink hash={attackTx(a.n).hash} /></div></li>
+          ))}</ul>
+          <p className="mt-2 text-xs text-zinc-500">v3 decoded against its own ABI ({pocketDropAbi.filter((x) => x.type === 'error').length} custom errors).</p>
+        </details>
+      </Reveal>
+      <div className="mt-6"><Notice tone="info">LIVE means this page read it from the chain just now. RECORDED means it comes from a file in the repository. Nothing on this page is simulated.</Notice></div>
     </div>
   );
 }
