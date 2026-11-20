@@ -9,6 +9,6 @@ const ClaimV4Page = lazy(() => import('./ClaimV4Page'));
 export default function ClaimPage() {
   const { id = '' } = useParams();
   const p = parseLinkId(id);
-  if (!p) return <Navigate to="/receive" replace />;
+  if (!p) return <Navigate to="/receive" replace state={{ badLink: `/c/${id}` }} />;
   return p.v === 3 ? <ClaimV3Page /> : <ClaimV4Page env={p.env} id={p.id} />;
 }

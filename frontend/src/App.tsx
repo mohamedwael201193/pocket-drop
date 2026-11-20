@@ -8,6 +8,7 @@ import { AccountProvider } from './lib/account';
 const SendPage = lazy(() => import('./pages/SendPage'));
 const InboxPage = lazy(() => import('./pages/InboxPage'));
 const ReceivePage = lazy(() => import('./pages/ReceivePage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const ClaimPage = lazy(() => import('./pages/ClaimPage'));
 const PoolClaimPage = lazy(() => import('./pages/PoolClaimPage'));
 const PocketPage = lazy(() => import('./pages/PocketPage'));
@@ -41,7 +42,7 @@ export default function App() {
               <Route path="/radar" element={<RadarPage />} />
               <Route path="/stats" element={<Navigate to="/radar" replace />} />
               <Route path="/judges" element={<JudgesPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
         </Suspense>
