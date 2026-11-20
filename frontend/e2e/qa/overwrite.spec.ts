@@ -13,9 +13,12 @@ test('a key written behind the app is kept: "Use this browser" adopts it instead
   await page.evaluate(([k, r]) => localStorage.setItem(k, r), [ROOT, R1]); // what a claim page did before B-01 was fixed
   await toPocket(page);
   await page.waitForURL(/\/pocket/);
+  // either the page adopts the stored key by itself, or "Use this browser" must adopt it; it must never replace it
   const create = page.getByTestId('create-key');
-  if (await create.isVisible().catch(() => false)) await create.click();
-  await expect(page.getByTestId('pocket-address')).toBeVisible({ timeout: 60_000 });
+  const pocket = page.getByTestId('pocket-address');
+  await expect(create.or(pocket).first()).toBeVisible({ timeout: 60_000 });
+  if (await create.isVisible().catch(() => false)) await create.click().catch(() => undefined);
+  await expect(pocket).toBeVisible({ timeout: 60_000 });
   expect(await page.evaluate((k) => localStorage.getItem(k), ROOT)).toBe(R1);
 });
 
