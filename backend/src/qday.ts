@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decodeEventLog, decodeFunctionData, encodeFunctionData, decodeFunctionResult, keccak256, parseAbi, type Address, type Hex, type Log } from 'viem';
+import { decodeEventLog, decodeFunctionData, encodeFunctionData, decodeFunctionResult, getAddress, keccak256, parseAbi, type Address, type Hex, type Log } from 'viem';
 import { routerAbi } from './abi4.js';
 import { EXPLORER_TX, type Config } from './config.js';
 import { log } from './log.js';
@@ -105,6 +105,7 @@ export interface Chain {
   call(to: Address, data: Hex): Promise<Hex>;
   getLogs(address: Address, fromBlock: bigint): Promise<Log[]>;
   getTx(hash: Hex): Promise<{ input: Hex; from: Address; to: Address | null } | null>;
+  receiptOk?(hash: Hex): Promise<boolean | null>;
   getCode(a: Address): Promise<Hex>;
   readNonce(pocket: Address): Promise<bigint>;
   windowLive(cosmos: string): Promise<boolean | null>;
@@ -166,15 +167,15 @@ export async function onChainAttempts(ch: Chain, cfg: QdayConfig): Promise<Attem
   const targets = [cfg.router, cfg.drop, ...cfg.baits.map((b) => b.pocket)];
   const seen = new Map<string, { height: number; failed: boolean; error: string | null }>();
   for (const t of targets) {
-    const rows = await ch.txSearch(`ethereum_tx.recipient='${t}'`, t === cfg.router ? 60 : 30).catch(() => []);
+    // The recipient attribute is indexed in EIP-55 checksum form, so the query must use it exactly.
+    const rows = await ch.txSearch(`ethereum_tx.recipient='${getAddress(t)}'`, t === cfg.router ? 100 : 30).catch(() => []);
     for (const r of rows) {
-      for (const e of r.events) {
-        if (e.type !== 'ethereum_tx') continue;
-        const a = Object.fromEntries(e.attributes.map((x) => [x.key, x.value]));
-        if (!a.ethereumTxHash || !a.recipient) continue;
-        if (Number(r.height) < cfg.fromBlock) continue;
-        seen.set(a.ethereumTxHash.toLowerCase(), { height: Number(r.height), failed: !!a.ethereumTxFailed, error: a.ethereumTxFailed ?? null });
-      }
+      if (Number(r.height) < cfg.fromBlock) continue;
+      // one EVM tx emits several ethereum_tx events (hash only, then hash + recipient + failure): merge them
+      const a: Record<string, string> = {};
+      for (const e of r.events) if (e.type === 'ethereum_tx') for (const x of e.attributes) a[x.key] = x.value;
+      if (!a.ethereumTxHash || !a.recipient) continue;
+      seen.set(a.ethereumTxHash.toLowerCase(), { height: Number(r.height), failed: !!a.ethereumTxFailed, error: a.ethereumTxFailed ?? null });
     }
   }
   const out: Attempt[] = [];
@@ -185,7 +186,9 @@ export async function onChainAttempts(ch: Chain, cfg: QdayConfig): Promise<Attem
     if (!c) continue;
     const m = markerOf(tx.input);
     const source: Attempt['source'] = plannedTx.has(hash) || team.has(tx.from.toLowerCase()) ? 'team-setup' : m === 'bot' ? 'team-bot' : m === 'try' ? 'try-it' : 'anyone';
-    out.push({ tx: hash, height: s.height, from: tx.from, bait: c.bait, call: c.call, failed: s.failed, error: s.error, source, explorer: EXPLORER_TX + hash.replace(/^0x/, '') });
+    let failed = s.failed, error = s.error;
+    if (!failed && source !== 'team-setup' && ch.receiptOk) { const ok = await ch.receiptOk(hash as Hex).catch(() => null); if (ok === false) { failed = true; error = error ?? 'execution reverted'; } }
+    out.push({ tx: hash, height: s.height, from: tx.from, bait: c.bait, call: c.call, failed, error, source, explorer: EXPLORER_TX + hash.replace(/^0x/, '') });
   }
   return out;
 }
@@ -266,6 +269,7 @@ export function makeChain(pub: any, cfg: Config, opts: { comet?: string; repo?: 
     getLogs: (address, fromBlock) => pub.getLogs({ address, fromBlock, toBlock: 'latest' }),
     getTx: async (hash) => { const t = await pub.getTransaction({ hash }); return t ? { input: t.input, from: t.from, to: t.to } : null; },
     getCode: async (a) => ((await pub.getCode({ address: a })) ?? '0x') as Hex,
+    receiptOk: async (hash) => { const r = await pub.getTransactionReceipt({ hash }); return r ? r.status === 'success' : null; },
     readNonce: (p) => pub.readContract({ address: p, abi: NONCE, functionName: 'nonce' }),
     windowLive: async (cosmos) => { const r = await f(`${cfg.rest}/qorechain/pqc/v1/evm_window/${cosmos}`); if (!r.ok) return null; const j = await r.json() as any; return !!j.live; },
     txSearch: async (query, perPage) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { encodeFunctionData, parseAbi, type Hex } from 'viem';
+import { encodeFunctionData, getAddress, parseAbi, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { routerAbi } from '../src/abi4.js';
 import { classify, getQday, handleAttempt, listRefusals, loadQdayConfig, markerOf, MARKERS, noteRouteRefusal, publishedKeys, resetQdayCache, type Chain } from '../src/qday.js';
@@ -133,8 +133,9 @@ describe('getQday', () => {
     const s: any = await getQday(chain({
       windowLive: async (c) => c === B1.keyAccountCosmos,
       getBalance: async (a) => (a.toLowerCase() === B1.pocket.toLowerCase() ? 0n : 2n * 10n ** 17n),
-      txSearch: async (q) => (q.includes(qcfg.router) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }] }] }] : []),
+      txSearch: async (q) => (q.includes(getAddress(qcfg.router)) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }] }, { type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }] }] }] : []),
       getTx: async () => ({ input: relayData, from: stranger, to: qcfg.router }),
+      receiptOk: async () => true,
     }), {}, qcfg, 2);
     const r = s.alarm.reasons.join('\n');
     expect(s.alarm.raised).toBe(true);
@@ -143,10 +144,20 @@ describe('getQday', () => {
     expect(r).toMatch(/SUCCEEDED/);
     expect(s.log.onChain.rows[0]).toMatchObject({ bait: 'B1', call: 'spend', source: 'anyone', failed: false });
   });
+  it('trusts the receipt over a missing failure attribute (no false breach)', async () => {
+    resetQdayCache();
+    const s: any = await getQday(chain({
+      txSearch: async (q) => (q.includes(getAddress(qcfg.router)) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }] }] }] : []),
+      getTx: async () => ({ input: relayData, from: '0x000000000000000000000000000000000000dEaD' as any, to: qcfg.router }),
+      receiptOk: async () => false,
+    }), {}, qcfg, 4);
+    expect(s.alarm.raised).toBe(false);
+    expect(s.log.onChain.rows[0]).toMatchObject({ failed: true, source: 'anyone' });
+  });
   it('sorts marked attempts into the team-bot and try-it columns', async () => {
     resetQdayCache();
     const s: any = await getQday(chain({
-      txSearch: async (q) => (q.includes(qcfg.router) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }, { key: 'ethereumTxFailed', value: 'execution reverted' }] }] }] : []),
+      txSearch: async (q) => (q.includes(getAddress(qcfg.router)) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }] }, { type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }, { key: 'ethereumTxFailed', value: 'execution reverted' }] }] }] : []),
       getTx: async () => ({ input: (relayData + MARKERS.bot.slice(2)) as Hex, from: ADDR as any, to: qcfg.router }),
     }), {}, qcfg, 3);
     expect(s.log.teamBot.rows).toHaveLength(1);
