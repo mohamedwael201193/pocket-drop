@@ -28,7 +28,10 @@ export interface EnvStats {
   drops: { created: number; bound: number; confirmed: number; claimed: number; cancelled: number };
   dropSenders: Split; dropRecipients: Split;
   pools: { created: number; slotsClaimed: number }; poolHosts: Split; poolClaimers: Split;
-  recent: { kind: string; id: string; tx: Hex; block: bigint }[];
+  /** newest first; `who` is the account behind the event, `at` the block time (unix seconds) when it could be read (UX-10) */
+  recent: { kind: string; id: string; tx: Hex; block: bigint; who: string; own: boolean; at?: number }[];
+  /** every pool slot claim: which account took it, where it was paid, own or external, and the tx (P4) */
+  claimers: { pool: string; recipient: string; payTo: string; own: boolean; tx: Hex; block: bigint }[];
 }
 
 const bump = (s: Split, a: string) => { if (isOwnAddress(a)) s.own++; else s.external++; };
@@ -55,17 +58,27 @@ export async function envStats(env: Env): Promise<EnvStats> {
   const dropRecipients: Split = { own: 0, external: 0 }; for (const b of bound) bump(dropRecipients, String(b.args.recipient));
   const poolHosts: Split = { own: 0, external: 0 }; for (const p of poolsMade) bump(poolHosts, viaPocket(p.args.host));
   const poolClaimers: Split = { own: 0, external: 0 }; for (const c of poolClaims) bump(poolClaimers, String(c.args.recipient));
-  const recent = [
-    ...deployed.map((x) => ({ kind: 'Pocket deployed', id: String(x.args.pocket).slice(0, 10) + '…', tx: x.transactionHash, block: x.blockNumber })),
-    ...created.map((x) => ({ kind: 'Drop created', id: `#${x.args.linkId}`, tx: x.transactionHash, block: x.blockNumber })),
-    ...claimed.map((x) => ({ kind: 'Drop claimed', id: `#${x.args.linkId}`, tx: x.transactionHash, block: x.blockNumber })),
-    ...poolsMade.map((x) => ({ kind: 'Pool created', id: `#${x.args.poolId}`, tx: x.transactionHash, block: x.blockNumber })),
-    ...poolClaims.map((x) => ({ kind: 'Pool slot claimed', id: `#${x.args.poolId}`, tx: x.transactionHash, block: x.blockNumber })),
+  const tag = (who: string) => ({ who, own: isOwnAddress(who) });
+  const recipientOf = new Map<string, string>(bound.map((b) => [String(b.args.linkId), String(b.args.recipient)]));
+  const idOf = (p: string, n: unknown) => `${p}${n}`;
+  const pre = env === 'prod' ? 'p' : 'l';
+  const recent: EnvStats['recent'] = [
+    ...deployed.map((x) => ({ kind: 'Pocket deployed', id: String(x.args.pocket), tx: x.transactionHash, block: x.blockNumber, ...tag(String(x.args.owner)) })),
+    ...created.map((x) => ({ kind: 'Drop created', id: idOf(pre, x.args.linkId), tx: x.transactionHash, block: x.blockNumber, ...tag(viaPocket(x.args.sender)) })),
+    ...claimed.map((x) => ({ kind: 'Drop claimed', id: idOf(pre, x.args.linkId), tx: x.transactionHash, block: x.blockNumber, ...tag(recipientOf.get(String(x.args.linkId)) ?? '') })),
+    ...poolsMade.map((x) => ({ kind: 'Pool created', id: idOf(pre, x.args.poolId), tx: x.transactionHash, block: x.blockNumber, ...tag(viaPocket(x.args.host)) })),
+    ...poolClaims.map((x) => ({ kind: 'Pool slot claimed', id: idOf(pre, x.args.poolId), tx: x.transactionHash, block: x.blockNumber, ...tag(String(x.args.recipient)) })),
   ].sort((a, b) => (a.block === b.block ? 0 : a.block < b.block ? 1 : -1)).slice(0, 8);
+  const times = await Promise.all([...new Set(recent.map((r) => r.block))].map(async (b) => [b, await pub.getBlock({ blockNumber: b }).then((x) => Number(x.timestamp)).catch(() => undefined)] as const));
+  const tmap = new Map(times);
+  for (const r of recent) r.at = tmap.get(r.block);
+  const claimers: EnvStats['claimers'] = poolClaims.map((c) => ({
+    pool: idOf(pre, c.args.poolId), recipient: String(c.args.recipient), payTo: String(c.args.payTo ?? ''), own: isOwnAddress(String(c.args.recipient)), tx: c.transactionHash, block: c.blockNumber,
+  })).sort((a, b) => (a.block < b.block ? 1 : -1));
   return {
     env, pockets: deployed.length, pocketsOwn,
     drops: { created: created.length, bound: bound.length, confirmed: confirmed.length, claimed: claimed.length, cancelled: cancelled.length },
-    dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent,
+    dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent, claimers,
   };
 }
 

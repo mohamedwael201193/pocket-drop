@@ -9,6 +9,8 @@ import { useHealth } from '../lib/queries';
 import { PHONE } from '../data/proofs';
 
 const card = 'rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm';
+const short = (a: string) => `${a.slice(0, 8)}…${a.slice(-6)}`;
+const ago = (t: number) => { const s = Math.max(0, Math.floor(Date.now() / 1000) - t); return s < 90 ? `${s} s ago` : s < 5400 ? `${Math.round(s / 60)} min ago` : s < 172800 ? `${Math.round(s / 3600)} h ago` : `${Math.round(s / 86400)} days ago`; };
 
 function Bar({ label, value, max, tone = 'bg-zinc-900' }: { label: string; value: number; max: number; tone?: string }) {
   const pct = max > 0 ? Math.max(value > 0 ? 4 : 0, Math.round((value / max) * 100)) : 0;
@@ -55,7 +57,27 @@ function EnvCard({ s }: { s: EnvStats }) {
         <SplitRow label="Pool claimers" s={s.poolClaimers} />
       </div>
       {s.recent.length > 0 && (
-        <ul className="mt-4 space-y-1.5 text-xs">{s.recent.map((r) => <li key={r.tx + r.kind} className="flex items-center justify-between gap-2"><span className="text-zinc-700">{r.kind} {r.id}</span><TxLink hash={r.tx} /></li>)}</ul>
+        <div className="mt-5">
+          <h3 className="mb-1 text-sm font-semibold text-zinc-900">Latest events</h3>
+          <ul className="space-y-1.5 text-xs" data-testid={`${s.env}-recent`}>{s.recent.map((r) => (
+            <li key={r.tx + r.kind} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-b border-zinc-100 py-1.5 last:border-0">
+              <span className="min-w-0 text-zinc-700">{r.kind} {r.kind === 'Pocket deployed' ? <a className="font-mono underline" href={addrUrl(r.id)} target="_blank" rel="noopener noreferrer" title={r.id}>{short(r.id)}</a> : <span className="font-mono">{r.id}</span>}
+                {r.who && <> · <span className={r.own ? 'text-zinc-500' : 'font-semibold text-emerald-800'}>{r.own ? 'own' : 'external'}</span></>}</span>
+              <span className="flex items-center gap-2 text-zinc-500">{r.at ? <time dateTime={new Date(r.at * 1000).toISOString()} title={new Date(r.at * 1000).toLocaleString()}>{ago(r.at)}</time> : <span>block {r.block.toString()}</span>}<TxLink hash={r.tx} /></span>
+            </li>
+          ))}</ul>
+        </div>
+      )}
+      {s.claimers.length > 0 && (
+        <details className="mt-4 text-xs" data-testid={`${s.env}-claimers`}>
+          <summary className="cursor-pointer text-sm font-semibold text-zinc-900">Every pool claimer ({s.claimers.length}: own {s.claimers.filter((c) => c.own).length}, external {s.claimers.filter((c) => !c.own).length})</summary>
+          <ul className="mt-2 space-y-1.5">{s.claimers.map((c) => (
+            <li key={c.tx} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-b border-zinc-100 py-1.5 last:border-0">
+              <span className="min-w-0">Pool <span className="font-mono">{c.pool}</span> · <a className="font-mono underline" href={addrUrl(c.recipient)} target="_blank" rel="noopener noreferrer" title={c.recipient}>{short(c.recipient)}</a> · <span className={c.own ? 'text-zinc-500' : 'font-semibold text-emerald-800'}>{c.own ? 'own' : 'external'}</span></span>
+              <TxLink hash={c.tx} />
+            </li>
+          ))}</ul>
+        </details>
       )}
     </div>
   );
