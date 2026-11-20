@@ -15,6 +15,7 @@ import { rememberNonce } from '../lib/links4';
 import { DEFAULTS, INST, REGISTRATION_FEE_WEI, receiptEvents } from '../lib/v4';
 import { explainError } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
+import { useSponsorStatus } from '../lib/sponsor';
 
 export function SendTabs() {
   const cls = ({ isActive }: { isActive: boolean }) => cx('flex-1 rounded-full px-4 py-2 text-center text-sm font-medium', isActive ? 'bg-zinc-900 text-stone-100' : 'text-zinc-600');
@@ -32,6 +33,7 @@ export default function SendPage() {
   const a = useAccount();
   const { data: pv } = usePocketView();
   const key = useKeyAccount();
+  const { data: sponsor } = useSponsorStatus();
   const qc = useQueryClient();
   const { links } = useMyLinks();
   const inst = INST[a.env];
@@ -51,7 +53,9 @@ export default function SendPage() {
   // why the form is locked, said next to every disabled control (UX-1)
   const lockReason = !a.root ? 'Locked: create your key in step 1 first.'
     : !a.acct ? 'Loading your key…'
-    : !key.ready ? `Locked: register your key in step 1 first (send at least ${fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR to your key account).` : null;
+    : !key.ready ? (sponsor?.enabled
+      ? 'Locked: finish step 1 first (fund your Pocket; the one-time key setup is covered and runs by itself).'
+      : `Locked: register your key in step 1 first (send at least ${fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR to your key account).`) : null;
   const dropProblem = amt === null ? (amountFormatProblem(amount) ?? 'Enter an amount like 0.3.')
     : amt < inst.minEscrow ? `The minimum is ${fmtQor(inst.minEscrow)} QOR.`
     : amt > inst.maxAmount ? `The maximum is ${fmtQor(inst.maxAmount)} QOR.`
@@ -165,7 +169,7 @@ export default function SendPage() {
             <label className="text-sm font-semibold text-zinc-900">Per slot (QOR)<input value={perSlot} onChange={(e) => setPerSlot(e.target.value)} inputMode="decimal" data-testid="pool-per-slot" disabled={!ready} aria-invalid={ready && !!perProblem} aria-describedby="pool-per-error" className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono" />
               {ready && perProblem && <span id="pool-per-error" role="alert" className="mt-1 block text-xs font-medium text-red-700" data-testid="pool-per-error">{perProblem}</span>}</label>
           </div>
-          <p className="mt-2 text-xs text-zinc-600">Total from your Pocket: {poolTotal !== null ? fmtQor(poolTotal) : '…'} QOR. Slot size {fmtQor(inst.minPerSlot)} to {fmtQor(inst.maxPerSlot)} QOR, up to {inst.maxSlots} slots. A claimer needs a registered quantum-safe key: the pool page walks them through it, and that one-time setup needs about {fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR from the faucet (a pool slot does not include a setup fee).</p>
+          <p className="mt-2 text-xs text-zinc-600">Total from your Pocket: {poolTotal !== null ? fmtQor(poolTotal) : '…'} QOR. Slot size {fmtQor(inst.minPerSlot)} to {fmtQor(inst.maxPerSlot)} QOR, up to {inst.maxSlots} slots. A claimer needs a registered quantum-safe key: the pool page walks them through it. {sponsor?.enabled ? 'Pocket Drop covers that one-time setup for new accounts (daily cap; the faucet is the fallback).' : <>That one-time setup needs about {fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR from the faucet (a pool slot does not include a setup fee).</>}</p>
           {ready && poolProblem && <p className="sr-only" data-testid="pool-problem">{poolProblem}</p>}
           {ready && poolFundsProblem && <div className="mt-3"><Notice tone="warn" testId="pool-funds-problem">{poolFundsProblem}</Notice></div>}
           <div className="mt-4"><Button block busy={busy === 'pool'} disabled={!ready || !!poolProblem || !!busy} onClick={() => void makePool()} data-testid="create-pool">Create pool link</Button>
