@@ -5,6 +5,7 @@ import { decodeEventLog, formatEther, type Address, type Log, type PublicClient 
 import { pocketDropAbi } from './abi.js';
 import { NETWORK, type Config } from './config.js';
 import { log } from './log.js';
+import { getV4Stats, makeV4Reader } from './statsv4.js';
 
 export type OwnMap = Map<string, string>;
 
@@ -109,14 +110,20 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   if (cache && now() - cache.at < ttlMs) return { ok: true as const, value: cache.value };
   const head = await pub.getBlockNumber();
   const from = cfg.deployBlock ?? (head > cfg.statsLookback ? head - cfg.statsLookback : 0n);
-  const { logs, scannedTo, truncated } = await collectLogs(pub, cfg.contract as Address, from, head);
+  const [{ logs, scannedTo, truncated }, v4] = await Promise.all([
+    collectLogs(pub, cfg.contract as Address, from, head),
+    'getBalance' in pub ? getV4Stats(makeV4Reader(pub), own).catch((e) => { log('warn', 'stats.v4_failed', { message: String((e as Error)?.message ?? e) }); return null; }) : Promise.resolve(null),
+  ]);
   const value = {
     network: NETWORK, contract: cfg.contract, fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
     truncated, note: truncated ? 'Scan was capped; counts are a lower bound. Set POCKETDROP_DEPLOY_BLOCK to index from deployment.' : undefined,
     ownAccountsNote: 'Addresses listed in config/own-accounts.json (team/test accounts) are marked own; all others are external. Counts are addresses, not users.',
     // How many addresses the deployed function actually loaded; 0 means the list was not bundled and every address reads as external.
     ownAccountsListed: own.size,
+    // v3 (the legacy PocketDrop above) and v4 (Pockets, drops, pools) are reported separately; never summed.
+    v3: { label: 'v3 PocketDrop (legacy)', ...buildStats(logs, own) },
     ...buildStats(logs, own),
+    v4: v4 ?? { error: 'v4 logs could not be read just now' },
     generatedAt: new Date(now()).toISOString(),
   };
   cache = { at: now(), value };
