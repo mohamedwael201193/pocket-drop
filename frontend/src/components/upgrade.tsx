@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from './icons';
 import type { Hex } from 'viem';
 import { Button, Notice, TxLink } from './ui';
 import { useAccount, usePocketView } from '../lib/account';

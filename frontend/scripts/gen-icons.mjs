@@ -16,7 +16,7 @@ const MAP = {
   FlaskConical: ['flask', 'duotone', ''], Gift: ['gift', 'duotone', ''], Globe: ['globe', 'duotone', ''], Hexagon: ['hexagon', 'duotone', ''],
   Inbox: ['tray', 'duotone', '', ['fill']], KeyRound: ['key', 'duotone', ''], Lock: ['lock-simple', 'duotone', ''], MessageCircle: ['chat-circle', 'duotone', ''],
   Play: ['play', 'duotone', ''], Radio: ['broadcast', 'duotone', ''], Scale: ['scales', 'duotone', ''], Send: ['paper-plane-tilt', 'duotone', '', ['fill']],
-  Share2: ['share-network', 'duotone', ''], ShieldCheck: ['shield-check', 'duotone', '', ['fill']], ShieldX: ['shield-slash', 'duotone', ''],
+  Share2: ['share-network', 'duotone', ''], ShieldCheck: ['shield-check', 'duotone', '', ['fill']], ShieldX: ['shield-slash', 'duotone', ''], ShieldAlert: ['shield-warning', 'duotone', ''],
   SkipForward: ['skip-forward', 'duotone', ''], TriangleAlert: ['warning', 'duotone', ''], Users: ['users', 'duotone', ''], Wallet: ['wallet', 'duotone', '', ['fill']],
 };
 const jsx = (svg) => svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
