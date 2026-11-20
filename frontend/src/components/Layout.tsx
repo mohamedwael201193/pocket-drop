@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { LegacyKeyStrip } from './upgrade';
 import { useEffect, useRef, useState } from 'react';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, FlaskConical, Hexagon, Inbox, Radio, RefreshCw, Scale, Send, ShieldCheck, Wallet } from 'lucide-react';
@@ -102,6 +103,7 @@ export function Layout() {
         </div>
       </header>
       <RelayerBanner />
+      <LegacyKeyStrip path={pathname} />
       <main className="flex-1"><Outlet /></main>
       <footer className="border-t border-zinc-200/80 bg-white/70 py-8">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 pb-20 text-center font-mono text-[11px] text-zinc-500 sm:flex-row sm:px-6 sm:pb-0 sm:text-left lg:px-8">

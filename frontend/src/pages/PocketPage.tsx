@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAddress, type Hex } from 'viem';
 import { Button, CopyButton, Mono, Notice, Page, PageTitle, Pill, SourceBadge, StepCard, TxLink, cx } from '../components/ui';
 import { ActivationCard, BackupCard, ConnectChoices, PocketCard } from '../components/account';
+import { LegacyKeyBanner } from '../components/upgrade';
 import { RescuePanel } from '../components/rescue';
 import { HelpFriend, LostPhone } from '../components/guardians';
 import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
@@ -77,6 +78,7 @@ export default function PocketPage() {
         <StepCard n={1} title="Pocket and key" done={key.ready && !!pv && pv.balance > 0n} testId="pocket-main">
           {!a.root ? <ConnectChoices /> : (
             <div className="space-y-5">
+              <LegacyKeyBanner />
               <PocketCard />
               {!(pv?.deployed && pv.owner && !owned) && <ActivationCard />}
               {a.adopted.length > 0 && (
