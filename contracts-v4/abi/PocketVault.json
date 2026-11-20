@@ -1,0 +1,1951 @@
+{
+ "contract": "PocketVault",
+ "source": "src/PocketVault.sol",
+ "abi": [
+  {
+   "type": "constructor",
+   "inputs": [
+    {
+     "name": "timelock_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "recoveryDelay_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "freezePeriod_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "unanimousDelay_",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "receive",
+   "stateMutability": "payable"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CANCEL_DROP",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CANCEL_PENDING",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CLOSE_POOL",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CONFIRM_DROP",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CREATE_DROP",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_CREATE_POOL",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_FREEZE",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_RECOVER",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_RECOVER_UNANIMOUS",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_SET_GUARDIANS",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_SET_LIMIT",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_SPEND",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_VETO_QUEUED",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_VETO_RECOVERY",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "FREEZE_COOLDOWN_PERIODS",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "FREEZE_PERIOD",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "MAX_DELAY",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "MAX_FREEZE_STREAK",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "MAX_GUARDIANS",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "RECOVERY_DELAY",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "TIMELOCK",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "UNANIMOUS_RECOVERY_DELAY",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "allowanceLeft",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "applyGuardians",
+   "inputs": [],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "applyLimit",
+   "inputs": [],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "cancelDrop",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "cancelPending",
+   "inputs": [
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "closePool",
+   "inputs": [
+    {
+     "name": "pool",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "poolId",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "confirmDrop",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "expectedRecipientKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "createDrop",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "linkKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "mode",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "expiry",
+     "type": "uint64",
+     "internalType": "uint64"
+    },
+    {
+     "name": "drip",
+     "type": "uint96",
+     "internalType": "uint96"
+    },
+    {
+     "name": "relayerFee",
+     "type": "uint96",
+     "internalType": "uint96"
+    },
+    {
+     "name": "value",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "createPool",
+   "inputs": [
+    {
+     "name": "pool",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "linkKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "slots",
+     "type": "uint32",
+     "internalType": "uint32"
+    },
+    {
+     "name": "perSlot",
+     "type": "uint96",
+     "internalType": "uint96"
+    },
+    {
+     "name": "expiry",
+     "type": "uint64",
+     "internalType": "uint64"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "poolId",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "dailyLimit",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "epoch",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "executeQueued",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "factory",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "finalizeRecovery",
+   "inputs": [],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "finalizeRecoveryUnanimous",
+   "inputs": [],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "freezeDigest",
+   "inputs": [
+    {
+     "name": "nonce_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "freezeNonce",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "freezeStreak",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint8",
+     "internalType": "uint8"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "frozen",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bool",
+     "internalType": "bool"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "frozenUntil",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint64",
+     "internalType": "uint64"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "getQueued",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "tuple",
+     "internalType": "struct PocketVault.Queued",
+     "components": [
+      {
+       "name": "to",
+       "type": "address",
+       "internalType": "address"
+      },
+      {
+       "name": "unlockAt",
+       "type": "uint64",
+       "internalType": "uint64"
+      },
+      {
+       "name": "epoch",
+       "type": "uint32",
+       "internalType": "uint32"
+      },
+      {
+       "name": "state",
+       "type": "uint8",
+       "internalType": "enum PocketVault.QState"
+      },
+      {
+       "name": "amount",
+       "type": "uint256",
+       "internalType": "uint256"
+      }
+     ]
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "guardianFreeze",
+   "inputs": [
+    {
+     "name": "signers",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "sigs",
+     "type": "bytes[]",
+     "internalType": "bytes[]"
+    },
+    {
+     "name": "nonce_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "guardians",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address[]",
+     "internalType": "address[]"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "initialize",
+   "inputs": [
+    {
+     "name": "owner_",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "guardians_",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold_",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "dailyLimit_",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "intentDigest",
+   "inputs": [
+    {
+     "name": "action",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "nonce_",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "params",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "isValidSignature",
+   "inputs": [
+    {
+     "name": "hash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "signature",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes4",
+     "internalType": "bytes4"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "nonce",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "owner",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ownerKeyHash",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pendingGuardians",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address[]",
+     "internalType": "address[]"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pendingGuardiansAt",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint64",
+     "internalType": "uint64"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pendingLimit",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pendingLimitAt",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint64",
+     "internalType": "uint64"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pendingThreshold",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint8",
+     "internalType": "uint8"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "proposeRecovery",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "signers",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "sigs",
+     "type": "bytes[]",
+     "internalType": "bytes[]"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "proposeRecoveryUnanimous",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "signers",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "sigs",
+     "type": "bytes[]",
+     "internalType": "bytes[]"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "queueCount",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "recoveryAt",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint64",
+     "internalType": "uint64"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "recoveryDigest",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "recoveryKeyHash",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "recoveryNonce",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "recoveryOwner",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "setGuardians",
+   "inputs": [
+    {
+     "name": "guardians_",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold_",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "setLimit",
+   "inputs": [
+    {
+     "name": "newLimit",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "spend",
+   "inputs": [
+    {
+     "name": "to",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "amount",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "queuedId",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "spentDay",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "spentToday",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "threshold",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint8",
+     "internalType": "uint8"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "uRecoveryAt",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "uint64",
+     "internalType": "uint64"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "uRecoveryKeyHash",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "uRecoveryOwner",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "unanimousDigest",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "vetoQueued",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "vetoRecovery",
+   "inputs": [
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "event",
+   "name": "DropCancelled",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "DropConfirmed",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "DropCreated",
+   "inputs": [
+    {
+     "name": "drop",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "linkId",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    },
+    {
+     "name": "value",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "GuardianFrozen",
+   "inputs": [
+    {
+     "name": "frozenUntil",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    },
+    {
+     "name": "freezeNonce",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    },
+    {
+     "name": "streak",
+     "type": "uint8",
+     "indexed": false,
+     "internalType": "uint8"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "GuardiansApplied",
+   "inputs": [
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "indexed": false,
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "indexed": false,
+     "internalType": "uint8"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "GuardiansQueued",
+   "inputs": [
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "indexed": false,
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "indexed": false,
+     "internalType": "uint8"
+    },
+    {
+     "name": "unlockAt",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "Initialized",
+   "inputs": [
+    {
+     "name": "factory",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "owner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "ownerKeyHash",
+     "type": "bytes32",
+     "indexed": false,
+     "internalType": "bytes32"
+    },
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "LimitRaiseQueued",
+   "inputs": [
+    {
+     "name": "newLimit",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    },
+    {
+     "name": "unlockAt",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "LimitSet",
+   "inputs": [
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "PendingCancelled",
+   "inputs": [],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "PoolClosed",
+   "inputs": [
+    {
+     "name": "pool",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "poolId",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "PoolCreated",
+   "inputs": [
+    {
+     "name": "pool",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "poolId",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    },
+    {
+     "name": "value",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "QueuedExecuted",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    },
+    {
+     "name": "to",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "amount",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "QueuedVetoed",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "Received",
+   "inputs": [
+    {
+     "name": "from",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "amount",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "RecoveryFinalized",
+   "inputs": [
+    {
+     "name": "oldOwner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "newOwner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "indexed": false,
+     "internalType": "bytes32"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "RecoveryProposed",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "indexed": false,
+     "internalType": "bytes32"
+    },
+    {
+     "name": "finalizeAfter",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    },
+    {
+     "name": "recoveryNonce",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "RecoveryVetoed",
+   "inputs": [],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "SpendQueued",
+   "inputs": [
+    {
+     "name": "id",
+     "type": "uint256",
+     "indexed": true,
+     "internalType": "uint256"
+    },
+    {
+     "name": "to",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "amount",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    },
+    {
+     "name": "unlockAt",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "Spent",
+   "inputs": [
+    {
+     "name": "to",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "amount",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
+   "name": "UnanimousRecoveryProposed",
+   "inputs": [
+    {
+     "name": "newOwner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "newKeyHash",
+     "type": "bytes32",
+     "indexed": false,
+     "internalType": "bytes32"
+    },
+    {
+     "name": "finalizeAfter",
+     "type": "uint64",
+     "indexed": false,
+     "internalType": "uint64"
+    },
+    {
+     "name": "recoveryNonce",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "error",
+   "name": "AlreadyFrozen",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "AlreadyInitialized",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "BadNonce",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "BadParams",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "BadSignature",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "DuplicateSigner",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "Expired",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "FreezeCapped",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "Frozen",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "InvalidConfig",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "KeyMismatch",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "KeyUnavailable",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NoGuardians",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NoRecoveryPending",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NotEnoughSigners",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NotGuardian",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NotQueued",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NotRegistered",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NothingPending",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "OverDailyLimit",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "PossessionNotProven",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "RecoveryPending",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "SendFailed",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "StaleEpoch",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "TooEarly",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "UnsupportedAlgo",
+   "inputs": []
+  }
+ ]
+}

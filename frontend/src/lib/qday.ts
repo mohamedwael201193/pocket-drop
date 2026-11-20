@@ -105,9 +105,9 @@ export async function putOnChain(data: Hex): Promise<{ ok: boolean; txHash?: str
   return r.json();
 }
 
-export const attackScript = (baitId: string) => `# Diana TESTNET only. Needs Node 20+ and Foundry (forge).
+export const attackScript = (baitId: string) => `# Diana TESTNET only. Needs Node 20+ only (ABIs are committed; no Foundry).
 git clone https://github.com/mohamedwael201193/pocket-drop && cd pocket-drop/contracts-v4
-npm ci && forge build
+npm ci
 # every classical-key path, read-only (CometBFT check_tx + eth_call); the key comes from /api/qday
 node script/qday/attack.mjs --bait ${baitId}
 # put one Pocket attempt on chain through our relayer (rate-limited; it only mines calls that revert)

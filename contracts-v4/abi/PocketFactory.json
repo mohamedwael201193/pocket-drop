@@ -1,0 +1,201 @@
+{
+ "contract": "PocketFactory",
+ "source": "src/PocketFactory.sol",
+ "abi": [
+  {
+   "type": "constructor",
+   "inputs": [
+    {
+     "name": "implementation_",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "deploy",
+   "inputs": [
+    {
+     "name": "owner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "userSalt",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "pocket",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "implementation",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "isPocket",
+   "inputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bool",
+     "internalType": "bool"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "predict",
+   "inputs": [
+    {
+     "name": "owner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "userSalt",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "saltOf",
+   "inputs": [
+    {
+     "name": "owner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "userSalt",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "pure"
+  },
+  {
+   "type": "event",
+   "name": "PocketDeployed",
+   "inputs": [
+    {
+     "name": "pocket",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "owner",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "salt",
+     "type": "bytes32",
+     "indexed": false,
+     "internalType": "bytes32"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "error",
+   "name": "AlreadyDeployed",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "NoImplementation",
+   "inputs": []
+  }
+ ]
+}

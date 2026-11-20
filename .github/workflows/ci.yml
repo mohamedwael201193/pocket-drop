@@ -19,6 +19,8 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge --version
       - run: forge test -vv
+      - name: committed ABIs (read by the Node attack script) match the build
+        run: node script/export-abi.mjs --check
   frontend:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: frontend } }

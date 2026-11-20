@@ -1,0 +1,197 @@
+{
+ "contract": "PocketRouter",
+ "source": "src/PocketRouter.sol",
+ "abi": [
+  {
+   "type": "constructor",
+   "inputs": [
+    {
+     "name": "factory_",
+     "type": "address",
+     "internalType": "contract IPocketFactory"
+    },
+    {
+     "name": "drop_",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "pool_",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "receive",
+   "stateMutability": "payable"
+  },
+  {
+   "type": "function",
+   "name": "deployAndRelay",
+   "inputs": [
+    {
+     "name": "owner",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "guardians",
+     "type": "address[]",
+     "internalType": "address[]"
+    },
+    {
+     "name": "threshold",
+     "type": "uint8",
+     "internalType": "uint8"
+    },
+    {
+     "name": "dailyLimit",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "userSalt",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "data",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "pocket",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "ret",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "function",
+   "name": "drop",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "factory",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "contract IPocketFactory"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "isAllowed",
+   "inputs": [
+    {
+     "name": "target",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bool",
+     "internalType": "bool"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "pool",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "address",
+     "internalType": "address"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "relay",
+   "inputs": [
+    {
+     "name": "target",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "data",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "ret",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
+   "stateMutability": "nonpayable"
+  },
+  {
+   "type": "event",
+   "name": "Relayed",
+   "inputs": [
+    {
+     "name": "target",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "lazyDeployed",
+     "type": "bool",
+     "indexed": false,
+     "internalType": "bool"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "error",
+   "name": "NotAllowed",
+   "inputs": [
+    {
+     "name": "target",
+     "type": "address",
+     "internalType": "address"
+    }
+   ]
+  },
+  {
+   "type": "error",
+   "name": "SweepFailed",
+   "inputs": []
+  }
+ ]
+}

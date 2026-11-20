@@ -27,7 +27,8 @@ export const sha256 = (b) => new Uint8Array(crypto.createHash('sha256').update(b
 
 const deployments = JSON.parse(fs.readFileSync(path.join(C4, 'deployments', 'diana.json'), 'utf8'));
 export const PROD = deployments.v4.prod;
-export const art = (n) => JSON.parse(fs.readFileSync(path.join(C4, 'out', `${n}.sol`, `${n}.json`), 'utf8')).abi;
+/** ABIs come from the committed abi/ folder (CI checks it matches `forge build`), so no Foundry is needed to attack. */
+export const art = (n) => JSON.parse(fs.readFileSync(path.join(C4, 'abi', `${n}.json`), 'utf8')).abi;
 export const ABI = { vault: art('PocketVault'), factory: art('PocketFactory'), drop: art('PocketDrop'), router: art('PocketRouter') };
 export const LIB_ERRORS = parseAbi(['error KeyUnavailable()', 'error NotRegistered()', 'error UnsupportedAlgo()', 'error PossessionNotProven()', 'error KeyMismatch()']);
 export const ALL_ERRORS = [...ABI.vault, ...ABI.router, ...ABI.drop, ...ABI.factory, ...LIB_ERRORS];
