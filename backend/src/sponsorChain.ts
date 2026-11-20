@@ -4,6 +4,9 @@
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex, type PublicClient } from 'viem';
 import { bytesToHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Config } from './config.js';
 import { evmToQor } from './relayer.js';
 import type { PocketCfgIn, PoolView, SponsorChain, SponsorRules, SponsorSend } from './sponsor.js';
@@ -20,25 +23,37 @@ const KEYS = '0x0000000000000000000000000000000000000a02' as const;
 const PQV = '0x0000000000000000000000000000000000000a01' as const;
 const ZERO = '0x0000000000000000000000000000000000000000';
 
-const hexBytes = (h: string) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
-
 interface TxResp { timestamp: string; tx: { body: { memo?: string; messages: { to_address?: string }[] } } }
 
 export function createSponsorChain(cfg: Config, pub: PublicClient, rules: SponsorRules, env: Record<string, string | undefined> = process.env): SponsorChain | null {
   const secp = env.SPONSOR_SECP_KEY?.trim();
   const pqc = env.SPONSOR_PQC_SECRET?.trim();
   if (!secp || !pqc) return null;
-  let acctP: Promise<{ evm: Hex; cosmos: string } & Record<string, unknown>> | null = null;
-  const account = async () => {
-    acctP ??= (async () => {
-      const { unifiedAccountFromSeed } = await import('@qorechain/sdk');
-      return unifiedAccountFromSeed(hexBytes(secp), { pqcSecret: hexBytes(pqc) }) as never;
-    })();
-    return acctP;
-  };
+  // the signer is pre-bundled (see src/sponsorSigner.ts); load it by file URL so the runtime never require()s ESM
+  type SignerMod = typeof import('./sponsorSigner.js');
+  let signerP: Promise<SignerMod> | null = null;
+  const signerMod = () => (signerP ??= (async () => {
+    const cands = [path.join(process.cwd(), 'vendor', 'sponsor-signer.mjs')];
+    try { cands.push(fileURLToPath(new URL('../vendor/sponsor-signer.mjs', import.meta.url))); } catch { /* no file URL */ }
+    const file = cands.find((c) => existsSync(c));
+    if (!file) throw new Error('sponsor signer bundle missing');
+    return (await import(pathToFileURL(file).href)) as SignerMod;
+  })());
   const sponsorEvm = privateKeyToAccount((secp.startsWith('0x') ? secp : `0x${secp}`) as Hex).address;
   const sponsorQor = evmToQor(sponsorEvm);
   const rest = cfg.rest.replace(/\/$/, '');
+
+  async function waitTx(hash: string): Promise<{ code: number; log: string }> {
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 1500));
+      const r = await fetch(`${rest}/cosmos/tx/v1beta1/txs/${hash}`, { signal: AbortSignal.timeout(10_000) }).catch(() => null);
+      if (r?.ok) {
+        const j = (await r.json()) as { tx_response?: { code?: number; raw_log?: string } };
+        return { code: j.tx_response?.code ?? 0, log: j.tx_response?.raw_log ?? '' };
+      }
+    }
+    throw new Error(`tx ${hash} not found after 45s`);
+  }
 
   async function txSearch(query: string, limit: number): Promise<{ total: number; txs: TxResp[] }> {
     const u = `${rest}/cosmos/tx/v1beta1/txs?query=${encodeURIComponent(query)}&order_by=ORDER_BY_DESC&pagination.limit=${limit}`;
@@ -80,31 +95,32 @@ export function createSponsorChain(cfg: Config, pub: PublicClient, rules: Sponso
     sponsorBalanceWei: () => pub.getBalance({ address: sponsorEvm }),
     now: () => Date.now(),
     send: async (to, amountUqor, memo) => {
-      const acct = await account();
-      const { EthNativeSigner, bank, getNetwork } = await import('@qorechain/sdk');
-      const { StargateClient } = await import('@cosmjs/stargate');
-      const net = getNetwork('testnet');
+      const { signSend } = await signerMod();
       const seq = async () => {
-        const r = await fetch(`${rest}/cosmos/auth/v1beta1/accounts/${acct.cosmos}`, { signal: AbortSignal.timeout(15_000) });
+        const r = await fetch(`${rest}/cosmos/auth/v1beta1/accounts/${sponsorQor}`, { signal: AbortSignal.timeout(15_000) });
         const j = (await r.json()) as { account?: { base_account?: { account_number?: string; sequence?: string }; account_number?: string; sequence?: string } };
         const a = j.account?.base_account ?? j.account ?? {};
         return { accountNumber: BigInt(a.account_number ?? 0), sequence: BigInt(a.sequence ?? 0) };
       };
-      const signer = new EthNativeSigner(acct as never, { signMode: 'hybrid', rest });
-      const client = await StargateClient.connect(env.COSMOS_RPC_URL?.trim() || net.endpoints.rpc);
-      try {
-        for (let attempt = 0; ; attempt++) {
-          const s = await seq();
-          const res = await signer.signAndBroadcast(client as never, {
-            chainId: net.chainId, accountNumber: s.accountNumber, sequence: s.sequence, memo,
-            fee: { amount: [{ denom: 'uqor', amount: rules.sendFeeUqor.toString() }], gas: rules.sendGas.toString() },
-            messages: [bank.send({ fromAddress: acct.cosmos, toAddress: evmToQor(to), amount: [{ denom: 'uqor', amount: amountUqor.toString() }] })],
-          } as never) as { code: number; transactionHash: string; rawLog?: string };
-          if (res.code === 0) return { hash: res.transactionHash };
-          if (res.code === 32 && attempt < 2) continue; // sequence race with another instance
-          throw new Error(`send failed code ${res.code}: ${(res.rawLog ?? '').slice(0, 200)}`);
-        }
-      } finally { client.disconnect(); }
+      for (let attempt = 0; ; attempt++) {
+        const s = await seq();
+        const { txBytes } = await signSend({
+          secp, pqc, rest, to: evmToQor(to), amountUqor: amountUqor.toString(), memo,
+          feeUqor: rules.sendFeeUqor.toString(), gas: rules.sendGas.toString(), accountNumber: s.accountNumber, sequence: s.sequence,
+        });
+        const b = await fetch(`${rest}/cosmos/tx/v1beta1/txs`, {
+          method: 'POST', headers: { 'content-type': 'application/json' }, signal: AbortSignal.timeout(20_000),
+          body: JSON.stringify({ tx_bytes: txBytes, mode: 'BROADCAST_MODE_SYNC' }),
+        });
+        const bj = (await b.json()) as { tx_response?: { code?: number; txhash?: string; raw_log?: string } };
+        const tr = bj.tx_response;
+        if (!b.ok || !tr?.txhash) throw new Error(`broadcast HTTP ${b.status}`);
+        if (tr.code === 32 && attempt < 2) continue; // sequence race with another instance
+        if (tr.code) throw new Error(`send refused code ${tr.code}: ${(tr.raw_log ?? '').slice(0, 200)}`);
+        const res = await waitTx(tr.txhash);
+        if (res.code === 0) return { hash: tr.txhash };
+        throw new Error(`send failed code ${res.code}: ${res.log.slice(0, 200)}`);
+      }
     },
   };
 }
