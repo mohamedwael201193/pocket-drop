@@ -294,6 +294,7 @@
     "TEAM-RUN qa-20nov-d-lab-rerun-newowner2.key": "0x8Dc42D86db9d34e87637a36338fe81b2bF764652",
     "TEAM-RUN qorex-format-Q-key": "0x1B8598440a1B02efD3623c9e4fe0b9dBeD3098FE",
     "TEAM-RUN qorex-format-Q-pocket": "0xcb1b21f0Ef016829e235F806FD4D6EE45ceB972D",
-    "TEAM-RUN qorex-wallet-R (QoreX extension test wallet)": "0x084db19736a1326f6b84a9ab2f2b4f516f978914"
+    "TEAM-RUN qorex-wallet-R (QoreX extension test wallet)": "0x084db19736a1326f6b84a9ab2f2b4f516f978914",
+    "TEAM-RUN qorex-wallet-R-pocket": "0x088e8f3240523d73E5d6b14C48B3996685e5eD22"
   }
 }

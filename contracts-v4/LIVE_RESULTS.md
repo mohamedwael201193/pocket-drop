@@ -233,3 +233,13 @@ Account Q is a fresh mnemonic. Its ML-DSA-87 key is `deriveCanonicalPqKey` from 
 | QoreX-format intent: deploy Pocket `0xcb1b21f0Ef016829e235F806FD4D6EE45ceB972D` + spend 0.02 to main | `0x36909c05a300789652254abcaad394d36ab1be2e37cd7c64090818eda61cd04d` | success (503,646 gas) |
 
 This is not yet the QoreX app signing. The QoreX extension (0.4.3) was installed and run headlessly with a test wallet on testnet (`qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e`, funded by `1B270665EF435A0CA51EFC01A98D0F4C2FA3B939ADBAED06BE88A6008CD7597F`). Its key registration needs a send from the wallet, which is waiting for the owner's approval.
+
+### Real QoreX wallet signature through the prod router (11:10 Cairo)
+This step used the QoreX extension 0.4.3 itself, running headless with a team test wallet on testnet; the earlier intent was QoreX format made by a script. On its first send the wallet registered its own ML-DSA-87 key with proof of possession. A dApp page then called `window.qorex.native.signArbitrary("qorechain-diana", wallet, digest)`. The QoreX approval window showed the digest, the request was approved, and its `pq.signature` went unchanged into the Pocket spend. Evidence: `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`.
+
+| Step | Tx | Result |
+|---|---|---|
+| QoreX registers its ML-DSA-87 key (MsgRegisterPQCKeyV2, sent by the wallet) | `D409DE041B4EFEA3B9E6A58586D66937147036F13C2E7FCBE758EB72DCD98426` | cosmos code 0 |
+| QoreX hybrid send 0.001 QOR to main | `22AD39137B19A8D541AD30160E3A4A9A491955190239D7855DF3A33F012C2BF4` | cosmos code 0 |
+| main funds the counterfactual Pocket `0x088e8f3240523d73E5d6b14C48B3996685e5eD22` 0.05 | `809127BDA39D9CEC9B2BE698EA0F64D56C7E8AD4742B69DB65A93D4F753AB8F2` | cosmos code 0 |
+| QoreX-signed intent: deploy Pocket + spend 0.02 to main | `0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a` | success (503,790 gas) |
