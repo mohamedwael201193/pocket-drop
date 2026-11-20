@@ -163,7 +163,10 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
   }
 
   const done = steps.claim.status === 'done' || steps.claim.status === 'skipped';
-  const dead = link && !started && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
+  // cancelled or refunded is final for everyone, even a browser that had opened the link before the sender took it back
+  const dead = link && !done && (['Cancelled', 'Refunded'].includes(link.state) || (!started && link.state === 'Claimed'));
+  // opened by another browser and still reserved for it: this visitor cannot take it (the contract would refuse)
+  const reserved = link && !started && !dead && (link.state === 'Confirmed' || (link.state === 'Bound' && link.bindDeadline * 1000 > Date.now()));
   const expired = link && !started && link.expiry * 1000 < Date.now() && !['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
   const amount = link ? fmtQor(link.amount) : null;
   const drip = link ? fmtQor(link.drip) : null;
@@ -185,6 +188,8 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
         </div>
 
         {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
+        {reserved && <h1 className="font-serif text-3xl text-zinc-900">Someone already opened this link</h1>}
+        {reserved && <Notice tone="warn" testId="link-reserved">Another browser opened it first, so it is reserved for that account{link!.state === 'Bound' ? ' while the sender checks 4 words with them' : ''}. If you are the person it was meant for, tell the sender: the words they see are not yours, so they should cancel it and send you a new link.</Notice>}
         {expired && <h1 className="font-serif text-3xl text-zinc-900">This link expired</h1>}
         {dead && <Notice tone="warn" testId="link-dead">{link!.state === 'Claimed' ? 'Someone already received this money, so it cannot be claimed again. If that was you in this browser, it is in your Pocket.' : `The sender took this money back (${link!.state.toLowerCase()}), so it cannot be claimed.`} Ask the sender for a new link if you expected it.</Notice>}
         {expired && <Notice tone="warn" testId="link-expired">Nobody opened it in time, so the money goes back to the sender. Ask them to send a new link.</Notice>}
@@ -195,7 +200,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
           </div>
         )}
 
-        {state === 'ready' && !dead && !expired && (
+        {state === 'ready' && !dead && !expired && !reserved && (
           <div className="space-y-4 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
             <h1 className="font-serif text-3xl text-zinc-900">Open your Pocket</h1>
             <p className="text-sm leading-relaxed text-zinc-600">Your money is safe and waiting. One tap makes a quantum-safe key inside this browser and a Pocket for it, and Pocket Drop pays the network fees. No wallet, no extension, no seed phrase. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, they compare 4 words with you first; you will see them here.'}</p>
@@ -217,7 +222,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
           </motion.div>
         )}
 
-        {(state === 'opening' || state === 'waiting' || state === 'yours') && (
+        {!dead && (state === 'opening' || state === 'waiting' || state === 'yours') && (
           <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
             <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount}/{ORDER.length}</span></div>
             <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : 'bg-zinc-200')} />)}</div>
@@ -228,7 +233,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
           </div>
         )}
 
-        {fatal && (
+        {fatal && !dead && (
           <div className="space-y-3">
             <Notice tone="error" testId="claim-error">{fatal}</Notice>
             <Button variant="secondary" block onClick={() => void run()} data-testid="retry-claim">Try again</Button>
