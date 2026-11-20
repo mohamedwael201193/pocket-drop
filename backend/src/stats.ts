@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { decodeEventLog, formatEther, type Address, type Log, type PublicClient } from 'viem';
 import { pocketDropAbi } from './abi.js';
 import { NETWORK, type Config } from './config.js';
@@ -7,9 +8,17 @@ import { log } from './log.js';
 
 export type OwnMap = Map<string, string>;
 
+/** Default locations of config/own-accounts.json: the working directory (local runs, tests) and the path next to this
+ * module (serverless bundles, where the working directory is not guaranteed to be the project root). */
+export function ownAccountsCandidates(): string[] {
+  const out = [path.join(process.cwd(), 'config', 'own-accounts.json')];
+  try { out.push(fileURLToPath(new URL('../config/own-accounts.json', import.meta.url))); } catch { /* no file URL */ }
+  return [...new Set(out)];
+}
+
 /** Load config/own-accounts.json ({ accounts: { label: 0x... } }). Missing file -> empty map (everything external). */
 export function loadOwnAccounts(file?: string): OwnMap {
-  const candidates = file ? [file] : [path.join(process.cwd(), 'config', 'own-accounts.json')];
+  const candidates = file ? [file] : ownAccountsCandidates();
   for (const f of candidates) {
     try {
       const j = JSON.parse(fs.readFileSync(f, 'utf8')) as { accounts?: Record<string, string> };
@@ -105,6 +114,8 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
     network: NETWORK, contract: cfg.contract, fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
     truncated, note: truncated ? 'Scan was capped; counts are a lower bound. Set POCKETDROP_DEPLOY_BLOCK to index from deployment.' : undefined,
     ownAccountsNote: 'Addresses listed in config/own-accounts.json (team/test accounts) are marked own; all others are external. Counts are addresses, not users.',
+    // How many addresses the deployed function actually loaded; 0 means the list was not bundled and every address reads as external.
+    ownAccountsListed: own.size,
     ...buildStats(logs, own),
     generatedAt: new Date(now()).toISOString(),
   };
