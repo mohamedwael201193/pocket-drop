@@ -164,7 +164,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
 
   const done = steps.claim.status === 'done' || steps.claim.status === 'skipped';
   // cancelled or refunded is final for everyone, even a browser that had opened the link before the sender took it back
-  const dead = link && !done && (['Cancelled', 'Refunded'].includes(link.state) || (!started && link.state === 'Claimed'));
+  const dead = link && !done && (['Cancelled', 'Refunded'].includes(link.state) || (link.state === 'Claimed' && (!started || (!!acct && link.recipient.toLowerCase() !== acct.evm.toLowerCase()))));
   // opened by another browser and still reserved for it: this visitor cannot take it (the contract would refuse)
   const reserved = link && !started && !dead && (link.state === 'Confirmed' || (link.state === 'Bound' && link.bindDeadline * 1000 > Date.now()));
   const expired = link && !started && link.expiry * 1000 < Date.now() && !['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
@@ -184,7 +184,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
           <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Pocket Drop · {label}{env === 'lab' ? ' · lab' : ''}</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : dead ? 'This link held' : expired ? 'This link holds' : 'You received'}</div>
           <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="incoming-amount">{amount ?? <Skel w="7rem" h="2.75rem" className="!bg-stone-700/70" label="Reading the link" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
+          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="mode-line">{link ? `${modeLine(link.mode, link.state)}${drip && link.drip > 0n ? ` · +${drip} QOR setup fee included` : ''} · Testnet` : 'Reading the link from the chain…'}</div>
         </div>
 
         {dead && <h1 className="font-serif text-3xl text-zinc-900">This link is already {link!.state.toLowerCase()}</h1>}
@@ -241,7 +241,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
         )}
 
         {state === 'yours' && pocket && (
-          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours">
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="rounded-3xl border border-emerald-300 bg-emerald-50 p-5 sm:p-6" data-testid="yours" role="status" aria-live="polite">
             <Celebrate once={String(label)} />
             <div className="flex items-center justify-between"><h1 className="font-serif text-3xl text-zinc-900">It is yours.</h1><SourceBadge kind="LIVE" /></div>
             <div className="mt-2 font-money text-5xl text-zinc-900" data-testid="final-balance" data-wei={pocketBal?.toString() ?? ''}>{pocketBal === undefined ? <span className="inline-block h-10 w-32 animate-pulse rounded-xl bg-emerald-200/70 align-middle" aria-label="Reading your balance" /> : fmtQor(pocketBal)} <span className="text-xl text-zinc-500">QOR</span></div>
@@ -252,7 +252,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
               {steps.claim.hash && <div>Claim transaction: <TxLink hash={steps.claim.hash} testId="tx-claim" /></div>}
             </div>
             <div className="mt-4 rounded-2xl border border-emerald-300 bg-white/70 p-3 text-sm text-zinc-800" data-testid="backup-cta">
-              <b>Back up and add guardians.</b> Your key lives in this browser only. Save the backup key and name 2 to 5 guardians who can recover your Pocket if you lose it.
+              <b>Back up and add guardians.</b> Your key lives in this browser only (in a private window it is gone when you close it). Save the backup key and name 2 to 5 guardians who can recover your Pocket if you lose it.
               <div className="mt-2"><Link to="/pocket" className="inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50" data-testid="to-pocket">Open my Pocket</Link></div>
             </div>
           </motion.div>
