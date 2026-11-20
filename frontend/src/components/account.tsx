@@ -17,7 +17,7 @@ import { useSponsoredSetup, type PoolProofInput } from '../lib/sponsor';
 /** Step "key": the browser key path (the only signing path while QoreX is mainnet-only). */
 export function ConnectChoices() {
   const a = useAccount();
-  // never offer "Use this browser" over a key this browser already holds (for example one a claim page just created): adopt it (B-01)
+  // never offer "Create my quantum-safe key" over a key this browser already holds (for example one a claim page just created): adopt it (B-01)
   const { ensureKey } = a;
   useEffect(() => { if (loadRoot()) ensureKey(); }, [ensureKey]);
   const [restore, setRestore] = useState('');
@@ -25,7 +25,7 @@ export function ConnectChoices() {
   const onPocket = useLocation().pathname.startsWith('/pocket');
   return (
     <div className="space-y-4" data-testid="connect-choices">
-      <Button block onClick={a.createKey} data-testid="create-key"><KeyRound className="h-4 w-4" aria-hidden />Use this browser</Button>
+      <Button block onClick={a.createKey} data-testid="create-key"><KeyRound className="h-4 w-4" aria-hidden />Create my quantum-safe key</Button>
       <p className="text-xs leading-relaxed text-zinc-600">A quantum-safe key is created inside this tab and stays here. It owns your Pocket. {onPocket ? 'Back it up below' : 'Back it up on the Pocket page'}; guardians can recover it for you.</p>
       <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4">
         <summary className="cursor-pointer text-sm font-medium text-zinc-900">Restore from a backup key</summary>

@@ -1,5 +1,5 @@
 // B-01 regression (no funds needed): a key written to this browser outside the current page (a claim page, another tab)
-// must never be replaced by "Use this browser", and /pocket must show the Pocket that key owns.
+// must never be replaced by "Create my quantum-safe key", and /pocket must show the Pocket that key owns.
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/overwrite.spec.ts --project=chromium-390
 import { type Page } from '@playwright/test';
 import { test, expect } from '../fixtures';
@@ -10,12 +10,12 @@ const ROOT = 'pd.root.v4';
 const R1 = 'ab'.repeat(32);
 const toPocket = (p: Page) => p.locator('[data-testid=tab-pocket]:visible, [data-testid=nav-pocket]:visible').first().click();
 
-test('a key written behind the app is kept: "Use this browser" adopts it instead of replacing it', async ({ page }) => {
+test('a key written behind the app is kept: "Create my quantum-safe key" adopts it instead of replacing it', async ({ page }) => {
   await page.goto(`${BASE}/receive`);
   await page.evaluate(([k, r]) => localStorage.setItem(k, r), [ROOT, R1]); // what a claim page did before B-01 was fixed
   await toPocket(page);
   await page.waitForURL(/\/pocket/);
-  // either the page adopts the stored key by itself, or "Use this browser" must adopt it; it must never replace it
+  // either the page adopts the stored key by itself, or "Create my quantum-safe key" must adopt it; it must never replace it
   const create = page.getByTestId('create-key');
   const pocket = page.getByTestId('pocket-address');
   await expect(create.or(pocket).first()).toBeVisible({ timeout: 60_000 });
@@ -36,7 +36,7 @@ test('the app follows a key created in another tab, without a reload', async ({ 
   expect(await readRoot(a, ROOT)).toBe(R1);
 });
 
-test('a stored key opens straight to its Pocket, with no "Use this browser" offer', async ({ page }) => {
+test('a stored key opens straight to its Pocket, with no "Create my quantum-safe key" offer', async ({ page }) => {
   await page.goto(`${BASE}/receive`);
   await page.evaluate(([k, r]) => localStorage.setItem(k, r), [ROOT, R1]);
   await page.goto(`${BASE}/pocket`);
