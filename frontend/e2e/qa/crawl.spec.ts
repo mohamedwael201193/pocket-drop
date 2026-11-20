@@ -2,6 +2,7 @@
 //   E2E_URL=https://pocketdrop-app.vercel.app QA_AXE=/path/to/axe.min.js npx playwright test e2e/qa/crawl.spec.ts --project=chromium-390
 // Results: one JSON per route and width in $QA_OUT (default test-results/qa/crawl), screenshots at 390 and 1440 in $QA_SHOTS.
 // axe-core is not a dependency of the app: point QA_AXE at axe.min.js (npm i axe-core in any folder) or the axe field is skipped.
+// With QA_AXE the crawl contexts bypass the strict CSP so axe can be injected (security.spec checks the CSP itself).
 import { test, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +17,7 @@ const ROUTES: [string, string][] = [
   ['claim-v4-missing', '/c/p99999#k=' + 'ab'.repeat(32)], ['claim-garbage', '/c/zzz'],
   ['pool-p5', '/pool/p5'], ['pool-missing', '/pool/p99999#k=' + 'ab'.repeat(32)],
   ['pocket', '/pocket'], ['pocket-lab', '/pocket?env=lab'], ['proof', '/proof'], ['lab', '/lab'], ['radar', '/radar'],
-  ['stats-redirect', '/stats'], ['judges', '/judges'], ['dashboard-redirect', '/dashboard'], ['claim-redirect', '/claim'], ['unknown', '/nope-404'],
+  ['stats-redirect', '/stats'], ['judges', '/judges'], ['qday', '/qday'], ['dashboard-redirect', '/dashboard'], ['claim-redirect', '/claim'], ['unknown', '/nope-404'],
 ];
 async function audit(page: Page, name: string, w: number, project: string) {
   const rec: Record<string, unknown> = { name, w, project };
@@ -51,7 +52,7 @@ test('crawl', async ({ browser, browserName }, info) => {
   const mobile = info.project.name.endsWith('390');
   const widths = browserName === 'chromium' ? (mobile ? [360, 390] : [768, 1440]) : (mobile ? [390] : [1440]);
   for (const w of widths) for (const [name] of ROUTES) {
-    const ctx = await browser.newContext({ viewport: { width: w, height: w < 800 ? 844 : 900 }, isMobile: w < 800 && browserName === 'chromium', hasTouch: w < 800, deviceScaleFactor: w < 800 ? 2 : 1 });
+    const ctx = await browser.newContext({ bypassCSP: !!AXE, viewport: { width: w, height: w < 800 ? 844 : 900 }, isMobile: w < 800 && browserName === 'chromium', hasTouch: w < 800, deviceScaleFactor: w < 800 ? 2 : 1 });
     const page = await ctx.newPage();
     try { await audit(page, name, w, info.project.name); } catch (e) { fs.writeFileSync(path.join(OUT, `${info.project.name.split('-')[0]}-${w}-${name}.err`), String(e)); }
     await ctx.close();
