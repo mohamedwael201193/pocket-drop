@@ -17,6 +17,8 @@ test('P2: a pool link without an instance or without its key explains itself', a
 });
 
 test('P1: a new key with no QOR gets the qor1 address, a QR, the faucet and the amount up front, and Register says why it is off', async ({ page }) => {
+  // the faucet path is what everyone gets when the sponsor is off or capped
+  await page.route('**/api/sponsor', (r) => r.fulfill({ json: { ok: true, enabled: false, reason: 'switched off', amountWei: '60000000000000000', senderMinPocketWei: '100000000000000000' } }));
   await page.goto(`${BASE}/pocket`);
   await page.getByTestId('create-key').click();
   const act = page.getByTestId('activation');
