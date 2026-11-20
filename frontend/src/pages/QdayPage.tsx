@@ -39,7 +39,7 @@ function BaitCard({ b }: { b: LiveBait }) {
       <div className="mt-3 rounded-xl bg-stoneCard p-3" data-testid={`qday-key-${b.id}`}>
         <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-800"><KeyRound className="h-3.5 w-3.5" aria-hidden /> Classical secp256k1 private key</div>
         {b.classicalKey ? (
-          <div className="mt-1 flex flex-wrap items-center gap-2"><Mono className="min-w-0 flex-1 text-[11px]">{b.classicalKey}</Mono><CopyButton text={b.classicalKey} label="Copy key" testId={`qday-copy-${b.id}`} /></div>
+          <div className="mt-1 flex flex-wrap items-center gap-2"><Mono className="min-w-0 flex-1 text-xs">{b.classicalKey}</Mono><CopyButton text={b.classicalKey} label="Copy key" testId={`qday-copy-${b.id}`} /></div>
         ) : <p className="mt-1 text-xs text-zinc-600">Not published yet. It appears here when publishing is switched on.</p>}
       </div>
       {b.alarm.length > 0 && <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-red-800">{b.alarm.map((a) => <li key={a}>{a}</li>)}</ul>}
@@ -133,7 +133,7 @@ export default function QdayPage() {
       <section className={cx(card, 'mt-5')} data-testid="qday-script">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Or attack from your terminal</h2>
           <select className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm" value={scriptBait} onChange={(e) => setScriptBait(e.target.value)} aria-label="Bait for the script">{QDAY.baits.map((b) => <option key={b.id}>{b.id}</option>)}</select></div>
-        <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-[11px] leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>
+        <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>
         <div className="mt-2 flex flex-wrap items-center gap-2"><CopyButton text={attackScript(scriptBait)} label="Copy script" testId="qday-copy-script" /><a className="text-xs underline" href={`${SOURCE_URL}/tree/main/contracts-v4/script/qday`} target="_blank" rel="noopener noreferrer">Read the script</a></div>
       </section>
 
