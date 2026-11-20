@@ -56,7 +56,7 @@ function LogCol({ title, label, rows, testId, empty, children }: { title: string
       {rows.length === 0 ? <p className="mt-3 text-xs text-zinc-500">{empty}</p> : (
         <ul className="mt-3 space-y-1.5 text-xs">{rows.slice(0, 15).map((r) => (
           <li key={r.tx} className="flex flex-wrap items-center justify-between gap-x-2 border-b border-zinc-100 pb-1.5 last:border-0">
-            <span className="min-w-0"><b>{r.bait}</b> {r.call} · <span className={r.failed ? 'text-emerald-800' : r.source === 'team-setup' ? 'text-zinc-500' : 'font-semibold text-red-700'}>{r.failed ? 'reverted' : r.source === 'team-setup' ? 'team setup' : 'succeeded'}</span></span>
+            <span className="min-w-0"><b>{r.bait}</b> {r.call} <span className="text-zinc-500">({r.source === 'try-it' ? 'Try it' : r.source === 'team-bot' ? 'our bot' : r.source === 'team-setup' ? 'team' : 'anyone'})</span> · <span className={r.failed ? 'text-emerald-800' : r.source === 'team-setup' ? 'text-zinc-500' : 'font-semibold text-red-700'}>{r.failed ? 'reverted' : r.source === 'team-setup' ? 'team setup' : 'succeeded'}</span></span>
             <TxLink hash={r.tx} />
           </li>
         ))}</ul>
