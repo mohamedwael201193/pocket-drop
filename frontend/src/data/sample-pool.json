@@ -1,0 +1,14 @@
+{
+ "label": "TEAM-HOSTED sample pool",
+ "note": "Hosted by the PocketDrop team's own test Pocket so a visitor with no link can try receiving. Self-funded by the team, not by a user.",
+ "poolId": 14,
+ "path": "/pool/p14#k=a17d8e9ed3d9674b12c3e93fd351e9510add9d4524598d5d038901f941a4940d",
+ "slots": 20,
+ "perSlotQor": "0.05",
+ "totalQor": "1.00",
+ "hostPocket": "0xEaE9fE11E55461C335C98293ebB3f1501900B2e7",
+ "createTx": "0x9a95030c7ced36566462a0e661aa16dc478ae3e6196964fac0696dc445cc6bed",
+ "fundTx": "0xe84f2374b4f6458ccc3eaef8652a295e1ccdad7c1cbd555c712831ebaf00143d",
+ "createdAt": "2026-11-20T08:10:04Z",
+ "expiresAt": "2026-12-19T08:09:59Z"
+}

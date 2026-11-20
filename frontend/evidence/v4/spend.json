@@ -1,5 +1,5 @@
 {
- "totalQor": 24.96,
+ "totalQor": 25.98,
  "entries": [
   {
    "qor": 2,
@@ -906,6 +906,12 @@
    "note": "recovered: qa d-pocket-lab recovered LAB Pocket sweep",
    "hash": "0x08e0283d6db203c14eeef359fb317ece4545404230f47f30cec4c023d9adc613",
    "at": "2026-11-20T07:38:12.185Z"
+  },
+  {
+   "qor": 1.02,
+   "note": "sample pool (TEAM-HOSTED): fund c-pool host Pocket for 20 x 0.05 QOR standing sample pool",
+   "hash": "0xe84f2374b4f6458ccc3eaef8652a295e1ccdad7c1cbd555c712831ebaf00143d",
+   "at": "2026-11-20T08:09:42.865Z"
   }
  ]
 }
