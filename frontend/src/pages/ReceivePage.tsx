@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Inbox } from '../components/icons';
 import { Button, Notice, Page, PageTitle, Pill } from '../components/ui';
 import { PocketCard } from '../components/account';
+import { SamplePoolCard } from '../components/samplePool';
 import { useAccount } from '../lib/account';
 import { useLink } from '../lib/queries';
 import { parseLinkId, readDrop } from '../lib/claim4';
@@ -85,6 +86,7 @@ export default function ReceivePage() {
           {err && <p id="claim-input-error" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="claim-input-error">{err}</p>}
           <p className="mt-3 text-xs text-zinc-500">Links from WhatsApp, Telegram, SMS or email all work. You need no wallet.</p>
         </section>
+        <SamplePoolCard />
         {a.root && <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6"><PocketCard compact /></section>}
         <section className="space-y-3">
           <h2 className="font-serif text-2xl text-zinc-900">Opened in this browser</h2>
