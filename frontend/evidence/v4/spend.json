@@ -1,5 +1,5 @@
 {
- "totalQor": 24.595,
+ "totalQor": 24.96,
  "entries": [
   {
    "qor": 2,
@@ -870,6 +870,42 @@
    "note": "recovered: persona 98 flow c aborted host sweep",
    "hash": "0xdc08dabf5b23a4266cb8d1f3e4c197ce92db2487e9102b952ea3104786be21af",
    "at": "2026-11-20T07:06:49.109Z"
+  },
+  {
+   "qor": 0.12,
+   "note": "persona 212 sender pocket top-up",
+   "hash": "0xb978b4bcaca00774dcc30dc8d93fe23727640776d84e16e44da90c717ec0d1b8",
+   "at": "2026-11-20T07:23:46.844Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 18 claimer key",
+   "hash": "0xe46ab9ab3199edc81216658c71cfb973341be2436ff22c98879b154749cf9c3c",
+   "at": "2026-11-20T07:24:40.806Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d-pocket-lab owner key",
+   "hash": "0x8f5880457b6d2972236a92f1ebfa19cd9e5f95d3c6de447baa6e1b1bb8d55df9",
+   "at": "2026-11-20T07:31:19.775Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "qa d-pocket-lab owner pocket",
+   "hash": "0x538768b8fe978c13634b6f2e68da369aab1bf4d94bb82b5d6ee2f4f30c43a881",
+   "at": "2026-11-20T07:31:21.462Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d new owner key",
+   "hash": "0x60b83f9f9bc571ce14a99801d15b502e64b72dded54d3b490ab2b18f456bb2b6",
+   "at": "2026-11-20T07:35:18.829Z"
+  },
+  {
+   "qor": -0.58,
+   "note": "recovered: qa d-pocket-lab recovered LAB Pocket sweep",
+   "hash": "0x08e0283d6db203c14eeef359fb317ece4545404230f47f30cec4c023d9adc613",
+   "at": "2026-11-20T07:38:12.185Z"
   }
  ]
 }

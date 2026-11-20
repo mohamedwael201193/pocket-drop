@@ -1,8 +1,8 @@
 {
  "note": "TEAM-RUN persona campaign, 20 Nov 2026, Diana testnet. No link keys (#k) or roots.",
  "medianFirstQorS": {
-  "all": 16.133,
-  "receivers": 16.06,
+  "all": 16.085,
+  "receivers": 15.964,
   "senders": 18.798
  },
  "lab": {
@@ -90,33 +90,32 @@
    "name": "Private-browsing user",
    "profile": "Safari private (ephemeral context), claim then reload, then a new private window",
    "device": "webkit 390",
-   "flow": "pool p12 claim",
-   "startedAt": "2026-11-20T06:38:51.005Z",
-   "firstQorMs": 16060,
+   "flow": "pool p13 claim",
+   "startedAt": "2026-11-20T07:23:55.595Z",
+   "firstQorMs": 15964,
    "steps": [
-    "2.0s pool page: 5 of 5 slots left \u00b7 self-funded by the host \u00b7 Testnet",
-    "3.0s PASS sponsor covers the setup (zero QOR needed)",
-    "16.1s first QOR visible (16.1 s)",
+    "1.5s pool page: ",
+    "2.9s PASS sponsor covers the setup (zero QOR needed)",
+    "16.0s first QOR visible (16.0 s)",
+    "16.1s PASS F-22: the result warns that a private window loses the key",
     "26.8s after reload: yours=1 closed=\"(absent)\"",
-    "33.5s Pocket page mentions backup/private-mode risk: true",
-    "42.8s new private window: create-key shown=1 (the key is gone, as expected for private mode)"
+    "33.4s Pocket page mentions backup/private-mode risk: true",
+    "40.3s new private window: create-key shown=1 (the key is gone, as expected for private mode)"
    ],
    "txs": {
-    "sponsor -> claimer key 0.06": "A672BD7612DEE70537FF7F6F05F46C1BC044FC7A80B9CB7B8E7A95E44B25B997",
-    "pool tx 1": "0xdf79a168c440b7d27cfc0126fd78eceed68a4171d4677adf2265ca225b5c11a7"
+    "sponsor -> claimer key 0.06": "540359AE5A51926D33BDC269B6C8D8FF2EED4C74D21666C28F25EFDD183B77BE",
+    "pool tx 1": "0x4e6c3740cbdc89f1293501321d74f6a9cb53f690ef24470613bad70de3d8a062"
    },
-   "friction": [
-    "Private mode: closing the window loses the key; the app shows a generic backup prompt but no private-window warning."
-   ],
+   "friction": [],
    "issues": [],
    "accounts": {
-    "claimer.key": "0x10707d4bcc4a6DEded0D937a5Abda10B2ECf652b"
+    "claimer.key": "0xC2b7713259dC2F50E674707Ad45a2E1856235C54"
    },
    "outcome": "passed",
    "shots": [
-    "P03-003-pool-landing-webkit-390.png",
-    "P03-004-pool-yours-webkit-390.png",
-    "P03-005-pocket-after-reload-webkit-390.png"
+    "P03-002-pool-landing-webkit-390.png",
+    "P03-003-pool-yours-webkit-390.png",
+    "P03-004-pocket-after-reload-webkit-390.png"
    ]
   },
   {
@@ -274,33 +273,26 @@
   },
   {
    "id": 9,
-   "name": "Link interceptor",
-   "profile": "third browser opens a Confirmed link before the friend",
+   "name": "Link interceptor (rerun on the fixed build)",
+   "profile": "the P9 browser state: its key restored, link marked as started",
    "device": "webkit 1440",
-   "flow": "intercepted bind, sender refuses, interceptor gets nothing",
-   "startedAt": "2026-11-20T06:32:28.785Z",
+   "flow": "reopen the cancelled Confirmed link p27",
+   "startedAt": "2026-11-20T07:23:32.240Z",
    "firstQorMs": null,
    "steps": [
-    "7.1s interceptor tapped Receive first",
-    "102.9s FAIL interceptor sees the link is dead after the cancel",
-    "107.9s interceptor sees: \"(absent)\""
+    "10.5s PASS cancelled link shows as cancelled (link-dead) with next steps",
+    "10.5s PASS no stale step error and no Try again",
+    "10.5s screen: The sender took this money back (cancelled), so it cannot be claimed. Ask the sender for a new link if you expected it."
    ],
-   "txs": {
-    "interceptor bind": "0xebcf55e166fe9102a12564bce9282dea23c91baddb71311c88f91a54fc740339"
-   },
+   "txs": {},
    "friction": [
-    "The interceptor still receives the drip (0.1 QOR gas money) on its key account: the bounded cost of an intercepted Confirmed link."
+    "The interceptor still receives the drip (0.1 QOR gas money) on its key account: the bounded cost of an intercepted Confirmed link (by design)."
    ],
-   "issues": [
-    "interceptor sees the link is dead after the cancel: expect(locator).toBeVisible() failed | "
-   ],
-   "accounts": {
-    "interceptor.pocket": "0x195908F36Ab5391596F4399bc4750c45A298a9Cf"
-   },
-   "outcome": "passed with issues",
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
    "shots": [
-    "P09-002-interceptor-waiting-webkit-1440.png",
-    "P09-005-interceptor-after-cancel-webkit-1440.png"
+    "P09-001-rerun-after-cancel-webkit-1440.png"
    ]
   },
   {
@@ -390,33 +382,33 @@
    "name": "Screen-reader / keyboard user",
    "profile": "Chrome 1440, keyboard only, accessible names checked",
    "device": "chromium 1440 keyboard",
-   "flow": "pool p12 claim",
-   "startedAt": "2026-11-20T06:40:02.525Z",
-   "firstQorMs": 13522,
+   "flow": "pool p13 claim",
+   "startedAt": "2026-11-20T07:24:36.910Z",
+   "firstQorMs": 14446,
    "steps": [
-    "1.6s pool page: ",
-    "1.7s PASS start button has an accessible name",
-    "1.8s Tab reaches \"Create my key and Pocket\": true",
-    "1.8s focus style on the start button: solid 2px rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0",
+    "1.2s pool page: ",
+    "1.3s PASS start button has an accessible name",
+    "1.4s Tab reaches \"Create my key and Pocket\": true",
+    "1.4s focus style on the start button: solid 2px rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0",
     "6.7s PASS Register has an accessible name",
-    "9.1s PASS \"Take my slot\" has an accessible name",
-    "13.5s first QOR visible (13.5 s)",
-    "13.8s live regions on the result page: 0"
+    "10.1s PASS \"Take my slot\" has an accessible name",
+    "14.4s first QOR visible (14.4 s)",
+    "14.6s live regions on the result page: 1",
+    "14.6s PASS F-21: \"Slot taken\" sits in a role=status aria-live region"
    ],
    "txs": {
-    "fund claimer key 0.075": "0x6ba3025e03c93aac6fe6248bbfddecb05258097ae6fca16dd732ef294e3ed914"
+    "fund claimer key 0.075": "0xe46ab9ab3199edc81216658c71cfb973341be2436ff22c98879b154749cf9c3c",
+    "pool tx 1": "0x953a50ea974cab0871f7684a78facc66b89ebde8fdbecf515b2e9b2efe444710"
    },
-   "friction": [
-    "No aria-live/role=status region announces \"Slot taken\"; a screen reader user must explore to find the result."
-   ],
+   "friction": [],
    "issues": [],
    "accounts": {
-    "claimer.key": "0xa441056bF8A1cb9961FE8AC89c803810193e16b9"
+    "claimer.key": "0x61a049f55eF95ef1A0F47d1B72081e22Ad0f86ED"
    },
    "outcome": "passed",
    "shots": [
-    "P18-008-pool-landing-chromium-1440.png",
-    "P18-009-pool-yours-chromium-1440.png"
+    "P18-005-pool-landing-chromium-1440.png",
+    "P18-006-pool-yours-chromium-1440.png"
    ]
   },
   {
@@ -538,6 +530,49 @@
    "outcome": "passed",
    "shots": [
     "P123-014-sixth-refused-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 212,
+   "name": "Rerun host for P3 + P18",
+   "profile": "2-slot pool on the fixed build",
+   "device": "chromium 1440",
+   "flow": "host a 2 x 0.01 pool",
+   "startedAt": "2026-11-20T07:23:42.929Z",
+   "firstQorMs": null,
+   "steps": [
+    "12.7s pool p13 created",
+    "70.1s chain: taken 2 of 2; 2 UI claims",
+    "70.1s PASS chain shows 2 of 2 taken"
+   ],
+   "txs": {
+    "top up sender Pocket 0.12": "0xb978b4bcaca00774dcc30dc8d93fe23727640776d84e16e44da90c717ec0d1b8",
+    "host createPool 5x0.02": "0x1b03bc3a8fbd7192a860053323d0c02887ce0b5bf0c434c51b7cbbfe29f35475"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": []
+  },
+  {
+   "id": 223,
+   "name": "Pool crowd 6th visitor",
+   "profile": "Chrome 1440 after all slots are taken",
+   "device": "chromium 1440",
+   "flow": "pool p13 refused",
+   "startedAt": "2026-11-20T07:24:51.586Z",
+   "firstQorMs": null,
+   "steps": [
+    "1.3s PASS sixth visitor sees \"Every slot is taken\" and no claim button"
+   ],
+   "txs": {},
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": [
+    "P223-007-sixth-refused-chromium-1440.png"
    ]
   }
  ]
