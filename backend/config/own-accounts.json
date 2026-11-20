@@ -282,6 +282,11 @@
     "TEAM-RUN qa-20nov-c-pool-host.key": "0x8800a943ea8494982Bd353A72Fa1B7962C662ebe",
     "TEAM-RUN qa-20nov-c-pool-claimer1.key": "0x7b0d34f75dE9Df1d771C29aBBb67570e10b33Da7",
     "TEAM-RUN qa-20nov-c-pool-host.pocket 2": "0xb16fC642D242d740116E1ffc57474D7dbbCB38eC",
-    "TEAM-RUN qa-20nov-c-pool-host.key 2": "0x23E45ccD8C19233a2ac02caDa9ebc6A80022a65D"
+    "TEAM-RUN qa-20nov-c-pool-host.key 2": "0x23E45ccD8C19233a2ac02caDa9ebc6A80022a65D",
+    "TEAM-RUN qa-20nov-final-d-pocket-lab-owner.pocket 2": "0x4B41dBF7baADB6269aCf100fa8a836bB4273b531",
+    "TEAM-RUN qa-20nov-final-d-pocket-lab-owner.key 2": "0xaC4FEeFA449c1EeCf8E82eA5E6Ac6B760680380A",
+    "TEAM-RUN qa-20nov-final-d-pocket-lab-newowner.key": "0xa90465B2c1D9659DB90d20D6aFEB53d93A942313",
+    "TEAM-RUN qa-20nov-persona-P3-claimer.key 2": "0xC2b7713259dC2F50E674707Ad45a2E1856235C54",
+    "TEAM-RUN qa-20nov-persona-P18-claimer.key 2": "0x61a049f55eF95ef1A0F47d1B72081e22Ad0f86ED"
   }
 }
