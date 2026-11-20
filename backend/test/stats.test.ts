@@ -137,6 +137,18 @@ describe('loadOwnAccounts', () => {
     const b = [...loadOwnAccounts(fe).keys()].sort();
     expect(b).toEqual(a);
   });
+  it('every key and Pocket created by a QA run (frontend/evidence/v4/qa/*.json) is own, so /radar never counts QA as outside use', () => {
+    const m = loadOwnAccounts();
+    const dir = path.join(process.cwd(), '..', 'frontend', 'evidence', 'v4', 'qa');
+    if (!fs.existsSync(dir)) return;
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
+    expect(files.length).toBeGreaterThanOrEqual(1);
+    for (const f of files) {
+      const list = (JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as { accounts: { label: string; address: string }[] }).accounts;
+      expect(list.length).toBeGreaterThan(0);
+      for (const a of list) expect(m.has(a.address.toLowerCase()), `${f}: ${a.label} ${a.address}`).toBe(true);
+    }
+  });
   it('every sender recorded in the v3-contract E2E evidence and the v3 live-test recipients are own', () => {
     const m = loadOwnAccounts();
     const ev = path.join(process.cwd(), '..', 'frontend', 'evidence');
