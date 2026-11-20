@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Eye, EyeOff, KeyRound, Wallet } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -36,11 +36,11 @@ export function ConnectChoices() {
   );
 }
 
-function Qr({ text }: { text: string }) {
+function Qr({ text, alt = 'QR code of the address', testId = 'address-qr' }: { text: string; alt?: string; testId?: string }) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => { void QRCode.toDataURL(text, { margin: 1, width: 220, errorCorrectionLevel: 'M' }).then(setUrl).catch(() => setUrl(null)); }, [text]);
   return url
-    ? <img src={url} alt="QR code of the address" width={176} height={176} className="rounded-xl border border-zinc-200 bg-white p-2" data-testid="address-qr" />
+    ? <img src={url} alt={alt} width={176} height={176} className="rounded-xl border border-zinc-200 bg-white p-2" data-testid={testId} />
     : <div className="h-[176px] w-[176px] rounded-xl border border-zinc-200" />;
 }
 
@@ -68,10 +68,14 @@ export function FundOptions({ target, label }: { target: Hex; label: string }) {
         <Qr text={target} />
         <div className="min-w-0 flex-1 space-y-2">
           <p className="text-sm font-semibold text-zinc-900">{label}</p>
-          <Mono className="block">{target}</Mono>
+          <div className="text-xs text-zinc-500">For EVM wallets</div>
+          <Mono className="block break-all">{target}</Mono>
+          <div className="text-xs text-zinc-500">Same address for the faucet and Cosmos wallets</div>
+          <span data-testid="fund-address-qor1" className="block break-all"><Mono>{cosmosAddressOf(target)}</Mono></span>
           <div className="flex flex-wrap gap-2">
-            <CopyButton text={target} label="Copy address" testId="copy-fund-address" />
-            <a href={FAUCET_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-stoneCard">Official faucet</a>
+            <CopyButton text={target} label="Copy 0x address" testId="copy-fund-address" />
+            <CopyButton text={cosmosAddressOf(target)} label="Copy qor1 address" testId="copy-fund-qor1" />
+            <a href={FAUCET_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[40px] items-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-stoneCard">Get free testnet QOR</a>
           </div>
           <p className="text-xs leading-relaxed text-zinc-600">Any wallet can send testnet QOR to this address, even before the Pocket exists on-chain. The funds are safe: the address is fixed by your key.</p>
         </div>
@@ -123,7 +127,11 @@ export function PocketCard({ compact }: { compact?: boolean }) {
   );
 }
 
-/** One-time registration of the ML-DSA key (the key account pays about 0.06 QOR). Needed before the Pocket can first be used. */
+/** Smallest key-account balance that lets "Register my key" run: the registration fee plus a little gas. One number for the copy and the button (P3). */
+export const KEY_ACCOUNT_MIN_WEI = REGISTRATION_FEE_WEI + 10_000_000_000_000_000n;
+
+/** One-time registration of the ML-DSA key, paid from the key account (not the Pocket). Needed before the Pocket can first be used.
+ *  A claimer with no QOR gets everything needed to get some: the qor1 address the faucet asks for, the 0x address, a QR and the faucet link (P1). */
 export function ActivationCard({ children }: { children?: ReactNode }) {
   const a = useAccount();
   const k = useKeyAccount();
@@ -131,8 +139,13 @@ export function ActivationCard({ children }: { children?: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [hash, setHash] = useState<string | null>(null);
+  const btn = useRef<HTMLDivElement>(null);
+  const enough = (k.balance ?? 0n) >= KEY_ACCOUNT_MIN_WEI;
+  // when the funds arrive, bring the Register button into view above the phone tab bar (P6)
+  useEffect(() => { if (enough && !k.ready) btn.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, [enough, k.ready]);
   if (!a.acct) return null;
-  const enough = (k.balance ?? 0n) >= REGISTRATION_FEE_WEI + 10_000_000_000_000_000n;
+  const qor1 = cosmosAddressOf(a.acct.evm);
+  const need = fmtQor(KEY_ACCOUNT_MIN_WEI);
   async function register() {
     setBusy(true); setErr(null);
     try {
@@ -144,14 +157,34 @@ export function ActivationCard({ children }: { children?: ReactNode }) {
   if (k.ready) return <div data-testid="key-ready" className="flex items-center gap-2 text-sm text-emerald-900"><Check className="h-4 w-4" aria-hidden />Your quantum-safe key is registered.{hash && <TxLink hash={hash} />}</div>;
   return (
     <div className="space-y-3" data-testid="activation">
-      <p className="text-sm leading-relaxed text-zinc-700">Before your Pocket can act, your quantum-safe key is registered on-chain once (a proof of possession, about 0.06 QOR in network fees). It is paid from your <b>key account</b>, not from the Pocket.</p>
-      <div className="rounded-2xl border border-zinc-200 bg-white/70 p-3 text-xs">
-        <div className="text-zinc-500">Key account (send at least 0.1 QOR here, once)</div>
-        <span data-testid="key-address" data-address={a.acct.evm}><Mono>{a.acct.evm}</Mono></span>
-        <div className="mt-1 text-zinc-600">Balance: <span data-testid="key-balance" data-wei={k.balance?.toString() ?? ''}>{k.balance !== undefined ? fmtQor(k.balance) : '…'}</span> QOR</div>
-        <div className="mt-2"><CopyButton text={a.acct.evm} label="Copy key account" testId="copy-key-address" /></div>
+      <p className="text-sm leading-relaxed text-zinc-700" data-testid="activation-note">
+        <b>One-time setup: your key account needs at least {need} QOR</b> (0.1 is a safe round amount). It pays about {fmtQor(REGISTRATION_FEE_WEI)} QOR in network fees to register your quantum-safe key on-chain, once. This is separate from your Pocket: the Pocket holds your money, the key account only pays this fee.
+      </p>
+      <div className="rounded-2xl border border-zinc-200 bg-white/70 p-3 text-xs" data-testid="key-funding">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+          <Qr text={qor1} alt="QR code of your key account (qor1 address)" testId="key-qr" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <div>
+              <div className="text-zinc-500">Key account, for the faucet and Cosmos wallets</div>
+              <span data-testid="key-address-qor1" data-address={qor1} className="block break-all"><Mono>{qor1}</Mono></span>
+            </div>
+            <div>
+              <div className="text-zinc-500">Same account, for EVM wallets</div>
+              <span data-testid="key-address" data-address={a.acct.evm} className="block break-all"><Mono>{a.acct.evm}</Mono></span>
+            </div>
+            <div className="text-zinc-600">Balance: <span data-testid="key-balance" data-wei={k.balance?.toString() ?? ''}>{k.balance !== undefined ? fmtQor(k.balance) : '…'}</span> QOR <span className="text-zinc-500">(updates by itself)</span></div>
+            <div className="flex flex-wrap gap-2">
+              <CopyButton text={qor1} label="Copy qor1 address" testId="copy-key-qor1" />
+              <CopyButton text={a.acct.evm} label="Copy 0x address" testId="copy-key-address" />
+              <a href={FAUCET_URL} target="_blank" rel="noopener noreferrer" data-testid="key-faucet" className="inline-flex min-h-[40px] items-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-stoneCard">Get free testnet QOR</a>
+            </div>
+          </div>
+        </div>
       </div>
-      <Button block busy={busy} disabled={!enough} onClick={() => void register()} data-testid="register-key">Register my key{!enough && ' (needs 0.1 QOR first)'}</Button>
+      <div ref={btn} className="scroll-mb-32">
+        <Button block busy={busy} disabled={!enough} onClick={() => void register()} data-testid="register-key">Register my key</Button>
+        {!enough && <p className="mt-2 text-xs text-zinc-600" data-testid="register-reason">Waiting for at least {need} QOR on the key account (now {k.balance !== undefined ? fmtQor(k.balance) : '…'} QOR). Send it from the faucet or any wallet; the button turns on when it arrives.</p>}
+      </div>
       {err && <Notice tone="error">{err}</Notice>}
       {children}
     </div>
