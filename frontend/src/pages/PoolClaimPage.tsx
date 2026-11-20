@@ -12,6 +12,7 @@ import { fmtQor, pub } from '../lib/chain';
 import { addrUrl } from '../lib/config';
 import { parseClaimFragment } from '../lib/protocol';
 import { useBalance } from '../lib/queries';
+import { useSponsorStatus } from '../lib/sponsor';
 
 /** /pool/:id#k=…  A Drop Pool slot goes to a distinct proof-of-possession ACCOUNT, not a person. The claimer needs a registered key. */
 export default function PoolClaimPage() {
@@ -29,6 +30,7 @@ export default function PoolClaimPage() {
   const [err, setErr] = useState<string | null>(null);
   const [tx, setTx] = useState<string | null>(null);
   const qc = useQueryClient();
+  const { data: sponsor } = useSponsorStatus();
   // the slot is paid into the Pocket this key uses in the app (a custom or recovered one), else its default Pocket (P5)
   useEffect(() => {
     let live = true; setPocket(null);
@@ -77,14 +79,16 @@ export default function PoolClaimPage() {
         {!a.root && open && (
           <div className="space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
             <h1 className="font-serif text-3xl text-zinc-900">Take a slot</h1>
-            <p className="text-sm text-zinc-600">A quantum-safe key is created in this browser and your slot is paid into Your Pocket. Pools pay no setup fee, so before the slot you register your key once: that needs about {fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR, free from the testnet faucet (the next step shows the address and a QR).</p>
+            <p className="text-sm text-zinc-600">A quantum-safe key is created in this browser and your slot is paid into Your Pocket. Before the slot you register your key once. {sponsor?.enabled
+              ? <span data-testid="pool-sponsored-note">Pocket Drop covers that one-time fee ({fmtQor(sponsor.amountWei)} QOR) for new accounts, so you need no QOR at all.</span>
+              : <>That needs about {fmtQor(KEY_ACCOUNT_MIN_WEI)} QOR, free from the testnet faucet (the next step shows the address and a QR).</>}</p>
             <Button block onClick={a.createKey} data-testid="pool-start" className="min-h-[52px] text-base">Create my key and Pocket</Button>
           </div>
         )}
         {a.root && open && !took && !tx && (
           <div className="space-y-4 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6">
             <h1 className="font-serif text-3xl text-zinc-900">Take a slot</h1>
-            <ActivationCard />
+            <ActivationCard pool={{ env, id: pid, seed: seed!, payTo: pocket }} />
             {key.ready && <Button block busy={busy} disabled={!pocket} onClick={() => void claim()} data-testid="pool-claim" className="min-h-[52px] text-base">Take my slot ({pool ? fmtQor(pool.perSlot) : ''} QOR)</Button>}
             {err && <Notice tone="error" testId="pool-claim-error">{err}</Notice>}
           </div>
