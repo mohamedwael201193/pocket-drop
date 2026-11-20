@@ -10,13 +10,11 @@ import type { Hex } from 'viem';
 import { bytesToHex, keyHashOf } from './protocol';
 import { pqMessageBytes } from './intents';
 import { formatRoot, newV2Root, parseRoot } from './keyderive';
+import { vaultDel, vaultGet, vaultSet } from './vault';
 
 const ROOT_KEY = 'pd.root.v4';
-const store = {
-  get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
-  set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
-  del: (k: string) => { try { localStorage.removeItem(k); } catch { /* ignore */ } },
-};
+// Every key below is wrapped at rest with a non-extractable WebCrypto key (vault.ts); reads come from the unlocked cache.
+const store = { get: vaultGet, set: vaultSet, del: vaultDel };
 
 /** Event fired on window whenever this tab changes the stored root, so the account context can follow. */
 export const ROOT_EVENT = 'pd-root-changed';
