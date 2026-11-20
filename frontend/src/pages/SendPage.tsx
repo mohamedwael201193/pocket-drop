@@ -161,7 +161,7 @@ export default function SendPage() {
         </StepCard>
 
         <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="pool-card">
-          <div className="mb-3 flex items-center gap-3"><Users className="h-5 w-5 text-zinc-700" aria-hidden /><h2 className="font-serif text-2xl text-zinc-900">Drop Pool</h2><Pill>one link, many slots</Pill></div>
+          <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1"><Users className="h-5 w-5 text-zinc-700" aria-hidden /><h2 className="whitespace-nowrap font-serif text-2xl text-zinc-900">Drop Pool</h2><Pill>one link, many slots</Pill></div>
           <p className="text-sm leading-relaxed text-zinc-700">One link, N slots of a small amount each. Each slot goes to a <b>distinct proof-of-possession account, not a person</b>: one person can hold several accounts, so a pool is a way to share a little QOR, not a way to count people. It is <b>self-funded</b>: the slots come from your Pocket and the unclaimed part returns when you close it.</p>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <label className="text-sm font-semibold text-zinc-900">Slots<input value={slots} onChange={(e) => setSlots(e.target.value)} inputMode="numeric" data-testid="pool-slots" disabled={!ready} aria-invalid={ready && !!slotsProblem} aria-describedby="pool-slots-error" className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono" />
