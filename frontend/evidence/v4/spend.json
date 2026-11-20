@@ -1,5 +1,5 @@
 {
- "totalQor": 12.315,
+ "totalQor": 14.1,
  "entries": [
   {
    "qor": 2,
@@ -536,9 +536,10 @@
    "at": "2026-11-20T03:31:23.559Z"
   },
   {
-   "qor": 0,
+   "qor": 1.785,
    "note": "retest 20 Nov: relayer paid 1.7849 QOR gas for 35 relayed txs (5.3589 -> 3.5740 QOR); deployer net 0.9499 QOR (7.1799 -> 6.2299)",
-   "at": "2026-11-20T03:35:00.000Z"
+   "at": "2026-11-20T03:35:00.000Z",
+   "hash": "n/a (balance delta of 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD)"
   }
  ]
 }
