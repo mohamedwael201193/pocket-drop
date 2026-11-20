@@ -27,9 +27,9 @@ export function ConnectChoices() {
       <p className="text-xs leading-relaxed text-zinc-600">A quantum-safe key is created inside this tab and stays here. It owns your Pocket. Back it up on the Pocket page; guardians can recover it for you.</p>
       <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4">
         <summary className="cursor-pointer text-sm font-medium text-zinc-900">Restore from a backup key</summary>
-        <label htmlFor="restore-input" className="mt-3 block text-xs font-medium text-zinc-700">Backup key (64 characters)</label>
+        <label htmlFor="restore-input" className="mt-3 block text-xs font-medium text-zinc-700">Backup key (starts with pd2:, or 64 characters for an older key)</label>
         <div className="mt-1 flex gap-2">
-          <input id="restore-input" value={restore} onChange={(e) => { setRestore(e.target.value); setErr(null); }} placeholder="64-character backup key" autoComplete="off" spellCheck={false} data-testid="restore-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+          <input id="restore-input" value={restore} onChange={(e) => { setRestore(e.target.value); setErr(null); }} placeholder="pd2:… backup key" autoComplete="off" spellCheck={false} data-testid="restore-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
           <Button variant="secondary" data-testid="restore-key" onClick={() => { try { a.restoreKey(restore); setErr(null); } catch (e) { setErr((e as Error).message); } }}>Restore</Button>
         </div>
         {err && <div className="mt-2"><Notice tone="error">{err}</Notice></div>}
@@ -236,7 +236,7 @@ export function BackupCard() {
   if (!a.root) return null;
   return (
     <div className="space-y-2" data-testid="backup-card">
-      <p className="text-sm text-zinc-700">This 64-character key is your whole account. Anyone who has it controls your Pocket. Guardians (below) can replace it if you lose it.</p>
+      <p className="text-sm text-zinc-700">This backup key is your whole account. Anyone who has it controls your Pocket. Guardians (below) can replace it if you lose it.</p>
       <div className="flex gap-2">
         <Button variant="secondary" onClick={() => setShow((s) => !s)} data-testid="toggle-backup">{show ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}{show ? 'Hide' : 'Show'} backup key</Button>
         {show && <CopyButton text={a.root} label="Copy" testId="copy-backup" />}

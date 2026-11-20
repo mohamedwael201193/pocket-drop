@@ -1,10 +1,15 @@
 // The browser key path: one random 32-byte root per person, kept in this browser (and exportable as a backup string).
-//   secp256k1 key = root        -> the "key account" that owns the Pocket and pays the one-time PQ registration fee
-//   ML-DSA-87 key = sha256(root | "|mldsa87")   -> signs every Pocket intent
+// New roots are v2 ("pd2:<64 hex>", a master seed): the secp256k1 key and the ML-DSA-87 secret are two independent
+// one-way hashes of it (see keyderive.ts), so a stolen or quantum-recovered classical key does not give the ML-DSA key.
+// Legacy roots (bare 64 hex, before 20 Nov 2026) still load: there the secp key IS the root, which is why the Pocket
+// page offers to move a legacy Pocket to a new v2 key.
+//   secp256k1 key  -> the "key account" that owns the Pocket and pays the one-time PQ registration fee
+//   ML-DSA-87 key  -> signs every Pocket intent
 // The Pocket itself (where the money lives) is a counterfactual ERC-1271 vault owned by that key account.
 import type { Hex } from 'viem';
-import { bytesToHex, hexToBytes, keyHashOf } from './protocol';
+import { bytesToHex, keyHashOf } from './protocol';
 import { pqMessageBytes } from './intents';
+import { formatRoot, newV2Root, parseRoot } from './keyderive';
 
 const ROOT_KEY = 'pd.root.v4';
 const store = {
@@ -19,22 +24,24 @@ const announce = () => { try { window.dispatchEvent(new Event(ROOT_EVENT)); } ca
 
 export const loadRoot = (): string | null => {
   const v = store.get(ROOT_KEY);
-  return v && /^[0-9a-f]{64}$/.test(v) ? v : null;
+  const p = v ? parseRoot(v) : null;
+  return p ? formatRoot(p) : null;
 };
 /** The key of this browser: returns the stored root, and creates one only when none exists.
  *  It never replaces an existing root: that root may own a funded Pocket (a claim or pool page may have created it). */
 export function createRoot(): string {
   const existing = loadRoot();
   if (existing) return existing;
-  const r = bytesToHex(crypto.getRandomValues(new Uint8Array(32))).slice(2);
+  const r = newV2Root();
   store.set(ROOT_KEY, r);
   announce();
   return r;
 }
 
 export function importRoot(raw: string, opts: { replace?: boolean } = {}): string {
-  const v = raw.trim().replace(/^0x/, '').toLowerCase();
-  if (!/^[0-9a-f]{64}$/.test(v)) throw new Error('A backup key is 64 hex characters.');
+  const p = parseRoot(raw);
+  if (!p) throw new Error('A backup key is "pd2:" followed by 64 hex characters (older backups: 64 hex characters).');
+  const v = formatRoot(p);
   const existing = loadRoot();
   if (existing && existing !== v && !opts.replace) throw new Error('This browser already holds a different key. Back it up first, then confirm the replacement.');
   store.set(ROOT_KEY, v);
@@ -42,6 +49,27 @@ export function importRoot(raw: string, opts: { replace?: boolean } = {}): strin
   return v;
 }
 export const forgetRoot = () => { store.del(ROOT_KEY); announce(); };
+
+/* Legacy-key upgrade bookkeeping. The new v2 root is stored BEFORE any money moves to it, so a closed tab never strands
+   funds; the old root is kept after the switch so the user can still open the legacy Pocket. */
+const NEXT_KEY = 'pd.root.next.v5';
+const LEGACY_LIST = 'pd.root.legacy.v4';
+export const pendingUpgradeRoot = (): string => {
+  const cur = store.get(NEXT_KEY); const p = cur ? parseRoot(cur) : null;
+  if (p && p.version === 2) return formatRoot(p);
+  const r = newV2Root(); store.set(NEXT_KEY, r); return r;
+};
+export const legacyRoots = (): string[] => { try { return JSON.parse(store.get(LEGACY_LIST) || '[]'); } catch { return []; } };
+/** Switch this browser to the pending v2 root, remembering the legacy one. */
+export function finishUpgrade(legacy: string): string {
+  const next = pendingUpgradeRoot();
+  const list = [...new Set([...legacyRoots(), legacy])];
+  store.set(LEGACY_LIST, JSON.stringify(list));
+  store.set(ROOT_KEY, next);
+  store.del(NEXT_KEY);
+  announce();
+  return next;
+}
 export const ROOT_STORAGE_KEY = ROOT_KEY;
 
 export type KeyAccount = Awaited<ReturnType<(typeof import('./recipient'))['deriveRecipient']>>;
@@ -49,7 +77,7 @@ const cache = new Map<string, Promise<KeyAccount>>();
 /** Derive the secp + ML-DSA account from a root (loads the QoreChain SDK on first use). */
 export function deriveAccount(root: string): Promise<KeyAccount> {
   let p = cache.get(root);
-  if (!p) { p = import('./recipient').then((m) => m.deriveRecipient(hexToBytes(root))); cache.set(root, p); }
+  if (!p) { p = import('./recipient').then((m) => m.deriveFromRoot(root)); cache.set(root, p); }
   return p;
 }
 

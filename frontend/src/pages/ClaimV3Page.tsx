@@ -10,7 +10,8 @@ import { explainError, fetchLink, postBind, postClaim, type ApiLink } from '../l
 import { fmtQor } from '../lib/chain';
 import { modeLine } from '../lib/copy';
 import { useBalance, useLink } from '../lib/queries';
-import { bytesToHex, fingerprint, hexToBytes, parseClaimFragment } from '../lib/protocol';
+import { fingerprint, parseClaimFragment } from '../lib/protocol';
+import { newV2Root } from '../lib/keyderive';
 import type { Hex } from 'viem';
 
 type StepId = 'key' | 'bind' | 'register' | 'window' | 'verify' | 'claim';
@@ -65,11 +66,11 @@ export default function ClaimV3Page() {
     };
     try {
       const rec = await import('../lib/recipient');
-      const saved = loadSaved(id) ?? { root: bytesToHex(crypto.getRandomValues(new Uint8Array(32))).slice(2), tx: {} };
+      const saved = loadSaved(id) ?? { root: newV2Root(), tx: {} };
       persist(id, saved);
 
       mark('key', 'running');
-      const acct = await rec.deriveRecipient(hexToBytes(saved.root));
+      const acct = await rec.deriveFromRoot(saved.root);
       const me = acct.evm as Hex;
       setAddress(me); mark('key', 'done');
 
@@ -100,14 +101,8 @@ export default function ClaimV3Page() {
       if (st.registered && st.possessionProven) mark('register', 'done', { hash: saved.tx.register, note: 'Key already registered.' });
       else { const h = await rec.registerKey(acct); saved.tx.register = h; persist(id, saved); mark('register', 'done', { hash: h }); }
 
-      // ---- scoped window (optional for claiming)
-      mark('window', 'running');
-      try {
-        if (await rec.windowLive(acct)) mark('window', 'done', { hash: saved.tx.window, note: 'Window already open.' });
-        else { const h = await rec.openScopedWindow(acct); saved.tx.window = h; persist(id, saved); mark('window', 'done', { hash: h }); }
-      } catch (e) {
-        mark('window', 'skipped', { note: `Not needed to claim. Skipped: ${(e as Error).message.slice(0, 160)}` });
-      }
+      // ---- no EVM window: claiming is relayed, and a live window would let the classical key alone send inside its scope
+      mark('window', 'skipped', { note: 'Not opened: claiming does not need one, and an open window would let the classical key alone send within its scope.' });
 
       // ---- sender check
       l = await fetchLink(id);

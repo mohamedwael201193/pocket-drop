@@ -1,13 +1,14 @@
 // Recipient side, all in the browser tab. Mirrors the proven phone spike (spike/page/src/main.ts): keygen, PoP registration
 // through the key-less proxy, hybrid scoped EVM window, ML-DSA signing. Lazy-loaded: it pulls the heavy QoreChain SDK.
-import { unifiedAccountFromSeed, getNetwork, EthNativeSigner, openEvmWindowMsg, buildRegisterPqcKeyMsg, signProofOfPossession } from '@qorechain/sdk';
-import { evmWindowCost, evmWindowStatus } from '@qorechain/evm';
+import { unifiedAccountFromSeed, getNetwork, EthNativeSigner, buildRegisterPqcKeyMsg, signProofOfPossession } from '@qorechain/sdk';
+import { evmWindowStatus } from '@qorechain/evm';
 import { mldsa } from '@qorechain/pqc';
 import { StargateClient } from '@cosmjs/stargate';
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
 import { COSMOS_REST, COSMOS_RPC, POCKETDROP_ADDRESS, COSMOS_CHAIN_ID } from './config';
 import { pub } from './chain';
 import { bindMessage, bytesToHex, claimMessage, hexToBytes, keyHashOf } from './protocol';
+import { keyMaterial, parseRoot } from './keyderive';
 
 const net = getNetwork('testnet');
 if (net.chainId !== COSMOS_CHAIN_ID) throw new Error('testnet only');
@@ -20,11 +21,20 @@ async function sha256(b: Uint8Array): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.digest('SHA-256', b as unknown as BufferSource));
 }
 
-/** One random 32-byte root per link per browser: secp seed = root, ML-DSA secret = sha256(root | "|mldsa87"). */
+/** LEGACY (v1) derivation, kept for roots created before 20 Nov 2026: secp key = root, ML-DSA secret = sha256(root | "|mldsa87").
+ *  The ML-DSA secret is computable from the classical key, so never use this for a new account. */
 export async function deriveRecipient(root: Uint8Array): Promise<RecipientAccount> {
   const tag = new TextEncoder().encode('|mldsa87');
   const pqcSecret = await sha256(new Uint8Array([...root, ...tag]));
   return unifiedAccountFromSeed(root, { pqcSecret });
+}
+
+/** Account for a stored root string: v2 ("pd2:…", independent one-way keys) or a legacy 64-hex root. */
+export async function deriveFromRoot(root: string): Promise<RecipientAccount> {
+  const p = parseRoot(root);
+  if (!p) throw new Error('Not a valid browser key.');
+  const { secp, pqcSecret } = keyMaterial(p);
+  return unifiedAccountFromSeed(secp, { pqcSecret });
 }
 
 async function seqOf(addr: string) {
@@ -73,29 +83,8 @@ export async function windowState(acct: RecipientAccount) {
 }
 export async function windowLive(acct: RecipientAccount): Promise<boolean> { return (await windowState(acct)).live; }
 
-/** Hybrid-signed EVM window scoped to the PocketDrop contract only. `valueUqor` is the value (plus per-tx fees) it may move. */
-export async function openScopedWindow(acct: RecipientAccount, o: { maxTxs?: number; blocks?: number; valueUqor?: bigint } = {}): Promise<string> {
-  const maxTxs = o.maxTxs ?? 6;
-  const gp = ((await pub.getGasPrice()) * 13n) / 10n;
-  const perTx = evmWindowCost({ gas: 1_000_000n, maxFeePerGas: gp });
-  const maxValue = o.valueUqor !== undefined ? perTx * BigInt(maxTxs) + o.valueUqor : (perTx * 6n) / 2n + 100_000n;
-  return cosmosTx(acct, 'hybrid', [openEvmWindowMsg({ sender: acct.cosmos, blocks: o.blocks ?? 6000, maxTxs, maxValue, allowedTargets: [POCKETDROP_ADDRESS] })], '100000', '800000');
-}
-
-/** Sender activation: QoreChain requires a registered ML-DSA key AND an open window for every EVM tx. */
-export async function activateSender(seed: Uint8Array, balanceWei: bigint, onStep: (s: string) => void): Promise<{ register?: string; window: string }> {
-  const acct = await deriveRecipient(seed);
-  const out: { register?: string; window: string } = { window: '' };
-  const st = await keyStatus(acct.evm as Hex);
-  if (!(st.registered && st.possessionProven)) { onStep('Registering your quantum-safe key'); out.register = await registerKey(acct); }
-  onStep('Opening your authorisation window');
-  // Activation itself costs about 0.16 QOR in fees; everything else in the account may be moved through the window.
-  const reserve = 170_000_000_000_000_000n;
-  const spendable = balanceWei > reserve ? balanceWei - reserve : 0n;
-  out.window = await openScopedWindow(acct, { maxTxs: 30, blocks: 17000, valueUqor: spendable / 10n ** 12n });
-  return out;
-}
-export async function senderWindow(seed: Uint8Array) { return windowState(await deriveRecipient(seed)); }
+// No browser flow opens an EVM window any more (20 Nov 2026): every action goes through the relayer, and while a window
+// is live the classical key alone can send EVM txs inside its scope. windowState stays for read-only checks.
 
 /** Link-key signature authorising exactly this (link, recipient, recipient key) binding. */
 export function signBind(seed: Uint8Array, linkId: bigint, recipient: Hex, recipientKeyHash: Hex) {
