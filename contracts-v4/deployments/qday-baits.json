@@ -1,0 +1,255 @@
+{
+  "note": "Q-Day drill bait Pockets. TEAM-RUN accounts on Diana testnet; QOR has no value. ML-DSA secrets are independent random entropy and are not published.",
+  "network": "qorechain-diana / EVM 9800",
+  "instance": "v4 PROD",
+  "baits": [
+    {
+      "id": "B1",
+      "description": "Plain: no guardians, daily limit 0.05 QOR",
+      "keyAccount": "0xf2a37748aFf0Dc12E0C5abC1C3566A0c6D12121f",
+      "keyAccountCosmos": "qor1723hwj907rwp9cx940qux4n2p3k3yyslpjj4tw",
+      "pocket": "0xCE272e8c261202C4c4e38479763c8892C64C2B1F",
+      "deployed": true,
+      "config": {
+        "owner": "0xf2a37748aFf0Dc12E0C5abC1C3566A0c6D12121f",
+        "guardians": [],
+        "threshold": 0,
+        "dailyLimitWei": "50000000000000000",
+        "userSalt": "0x4a3a34063271e2e7b520c5311eb67d2f87d408eb1ec5ccf916a8c2d67cce2e76"
+      },
+      "ownerKeyHash": "0x09860b78b70ce83bb3d69fe096740344e2caf0bc09256e11e7561fe6eba5e00e",
+      "planned": null
+    },
+    {
+      "id": "B2",
+      "description": "Guarded: 2 team guardians, threshold 2, daily limit 0.05 QOR",
+      "keyAccount": "0x17d3D6A9ddb1Da525D4A3a1a26ED9Fb369EBc754",
+      "keyAccountCosmos": "qor1zlfad2wak8d9yh228gdzdmvlkd57h365vfk985",
+      "pocket": "0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE",
+      "deployed": true,
+      "config": {
+        "owner": "0x17d3D6A9ddb1Da525D4A3a1a26ED9Fb369EBc754",
+        "guardians": [
+          "0x41c008d14EF532f976Be20fE9410134b2C4a75b9",
+          "0x8460ed916F357ECdf0B59F4e8D89Cea5Ae775254"
+        ],
+        "threshold": 2,
+        "dailyLimitWei": "50000000000000000",
+        "userSalt": "0x36df9d90f1b3a88019847905afeb2506459773530ce7d75e3a130765cc6e69a4"
+      },
+      "ownerKeyHash": "0x635e5240b6d63fb731f0b70800de40a04ee0de6f282263c512bc649ddf6a1ac2",
+      "planned": null
+    },
+    {
+      "id": "B3",
+      "description": "Queued: the owner queued a 0.1 QOR spend to a team address (24 h timelock); nobody else can veto, redirect or add one",
+      "keyAccount": "0xbDfE6C1030712554Ce0f466BD4A3f377e966bE34",
+      "keyAccountCosmos": "qor1hhlxcypswyj4fns0ge4afglnwl5kd0356u5ujn",
+      "pocket": "0x5e08A3308f60b512d6958A46629E1EE3FEC8Bd06",
+      "deployed": true,
+      "config": {
+        "owner": "0xbDfE6C1030712554Ce0f466BD4A3f377e966bE34",
+        "guardians": [],
+        "threshold": 0,
+        "dailyLimitWei": "50000000000000000",
+        "userSalt": "0x00fd601ed0e2b5e97f10d4e60bde98e6b7dba0e128c09748a85735e23c3dc6a5"
+      },
+      "ownerKeyHash": "0x1689f82c3ff2b7b05c1cbd2a4bf45e1bf5470d41d07f6ec82d7d149c80e13809",
+      "planned": {
+        "queuedSpend": {
+          "id": 1,
+          "to": "0xF7bA1fbA4Bf4F48eCA666083b799f618997b072F",
+          "amountWei": "100000000000000000"
+        }
+      }
+    },
+    {
+      "id": "B4",
+      "description": "Recipient: bound and confirmed recipient of a 0.1 QOR Confirmed drop; only its ML-DSA key can claim it",
+      "keyAccount": "0x1991ab25891f7B1c475bA8e85Ccd685f0FC6d045",
+      "keyAccountCosmos": "qor1rxg6kfvfraa3c36m4r59entgtu8ud5z9jyxsau",
+      "pocket": "0xb5056dC92734cdA2162D76E74Aaba3D338E6C28F",
+      "deployed": true,
+      "config": {
+        "owner": "0x1991ab25891f7B1c475bA8e85Ccd685f0FC6d045",
+        "guardians": [],
+        "threshold": 0,
+        "dailyLimitWei": "50000000000000000",
+        "userSalt": "0x148dd69fc8b26c7f50271ff76ad98306fc6c483256416728ad3ab1ea4a782b07"
+      },
+      "ownerKeyHash": "0x58ca7ac0d5d703b552c10e19c3439fd2bbc5299ff50ad48fb796bba6f30a49b9",
+      "planned": {
+        "drop": {
+          "linkId": "23",
+          "sender": "0x94974f4D977005B1D4F4623D4Fe9C647801c0151",
+          "recipientKeyHash": "0x58ca7ac0d5d703b552c10e19c3439fd2bbc5299ff50ad48fb796bba6f30a49b9"
+        }
+      }
+    },
+    {
+      "id": "B5",
+      "description": "Counterfactual: not deployed yet, 0.2 QOR waits at the predicted address; deploying it pins the real registered key",
+      "keyAccount": "0xaD127D5b5e7013038428ccdB4c5Dc1C6eDeB8464",
+      "keyAccountCosmos": "qor145f86k67wqfs8ppgend5chwpcmk7hpryjm8qqr",
+      "pocket": "0xa5BFb1edE77C41d91450a0a918D3d5775a178f24",
+      "deployed": false,
+      "config": {
+        "owner": "0xaD127D5b5e7013038428ccdB4c5Dc1C6eDeB8464",
+        "guardians": [],
+        "threshold": 0,
+        "dailyLimitWei": "50000000000000000",
+        "userSalt": "0x71c72ee31f8b9c1c73b6d498e9992ef92d06a47c7cf93dc8e22097f07fff3ce3"
+      },
+      "ownerKeyHash": "0xb669a98741a941c2fef475b622d7d40acbd42cc21376919ded1ed3b61e6dec46",
+      "planned": null
+    }
+  ],
+  "txs": [
+    {
+      "step": "fund 5 bait key accounts 0.09 QOR each + submitter X 1.4 QOR (main, one hybrid tx)",
+      "hash": "EF24E9E0409C131C1BC0910635AE43B1ECCB6238F66072EA268A43B8AE995430",
+      "lane": "cosmos",
+      "height": 10413145
+    },
+    {
+      "step": "B1 registers its ML-DSA-87 key with PoP (classical, one-time)",
+      "hash": "24EF8BEFFA5AF6682973A1F05102F69EFD2B7DFCDD73D038F0804E4CC4AA30D5",
+      "lane": "cosmos",
+      "height": 10413146
+    },
+    {
+      "step": "B2 registers its ML-DSA-87 key with PoP (classical, one-time)",
+      "hash": "8B1336FAEC8276827BBF1EF3A6EF314C392AC0580301BDD4D529854A595C15AE",
+      "lane": "cosmos",
+      "height": 10413147
+    },
+    {
+      "step": "B3 registers its ML-DSA-87 key with PoP (classical, one-time)",
+      "hash": "32E53A20E18045EE1AED762DB98E900DF47B1E792B6246968D60AEAFD9C28FF1",
+      "lane": "cosmos",
+      "height": 10413148
+    },
+    {
+      "step": "B4 registers its ML-DSA-87 key with PoP (classical, one-time)",
+      "hash": "2A50DD5D2A03CFE0D8A7A835FC18E2C1E20B81E2BE610B638A334F1DC68E58C8",
+      "lane": "cosmos",
+      "height": 10413150
+    },
+    {
+      "step": "B5 registers its ML-DSA-87 key with PoP (classical, one-time)",
+      "hash": "3C6BF59195D2DF08F825EFAFE5985E6FE7428776F433573CB1DEDC5F0F33AE24",
+      "lane": "cosmos",
+      "height": 10413152
+    },
+    {
+      "step": "B1 Pocket deployed through the prod router (submitter X)",
+      "hash": "0x81dfba87bf9cc1403ba845cfe857f1fb831f472a3718896dc84a908e71187016",
+      "status": "success",
+      "gasUsed": "212800"
+    },
+    {
+      "step": "B1 Pocket funded 0.2 QOR",
+      "hash": "0x32dbb7207328c8c7e7633f7507e0b644328d53abd7fcf0df584fcf56ab737df9",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B2 Pocket deployed through the prod router (submitter X)",
+      "hash": "0xecd3e8aed1f1e49a24847cf1aca70e4880f55924d1d5d1eb8d6613c3686df61d",
+      "status": "success",
+      "gasUsed": "300550"
+    },
+    {
+      "step": "B2 Pocket funded 0.2 QOR",
+      "hash": "0x24673ec6a930d8d6ae82e438867ecbb78c09c35b3bbebf8b2b4e4be382ba3d52",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B3 Pocket deployed through the prod router (submitter X)",
+      "hash": "0x90a6d0fd004381dd3595456f197dbde78f00669d457ea86927426658a41d104d",
+      "status": "success",
+      "gasUsed": "212788"
+    },
+    {
+      "step": "B3 Pocket funded 0.2 QOR",
+      "hash": "0xe064409b3e2dcc7f965982810bfb90da18730f4c90c7a94c490f567ececa6670",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B4 Pocket deployed through the prod router (submitter X)",
+      "hash": "0x8fd1ff57a5e0ffb1d52d5515504ad9d06c8bd54ff56690cd51bd6a5152c0e149",
+      "status": "success",
+      "gasUsed": "212800"
+    },
+    {
+      "step": "B4 Pocket funded 0.2 QOR",
+      "hash": "0xb890602970d339a9d21af42e1b5f05f6fdf568d4ae87533b8495c843fbeccaf9",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B5 Pocket funded 0.2 QOR",
+      "hash": "0x18f96df60cd530922d45875376d04586aaf77c776887b685be8f295914368a03",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B3 owner queues a 0.1 QOR spend to team address X (ML-DSA intent; 24 h timelock)",
+      "hash": "0x7bb07d1ea414e4e42088821fb5fa0c37f9bd0db43b889bb4313bd1cc0c525169",
+      "status": "success",
+      "gasUsed": "374164"
+    },
+    {
+      "step": "team sender S key account funded 0.08 QOR (registration fee)",
+      "hash": "0x2683af1402425fc4a371e07ca789e228fccbee409f79a8d752d879f35ba2c549",
+      "status": "success",
+      "gasUsed": "21000"
+    },
+    {
+      "step": "team sender S registers its ML-DSA-87 key with PoP",
+      "hash": "F43D60090BB7C5C2F19F062DD7DC58AEB06A7D84E13064C1BCBF5F647A9D35A3",
+      "lane": "cosmos",
+      "height": 10413184
+    },
+    {
+      "step": "team sender Pocket S deployed (limit 1 QOR)",
+      "hash": "0x39456e7629dfb4bc31f625d89b4bad74e4b0515d9753bd23d17f66078c5231bb",
+      "status": "success",
+      "gasUsed": "212812"
+    },
+    {
+      "step": "team sender Pocket S funded 0.12 QOR",
+      "hash": "0xf050f576455a19d4d79cbc2d7b4eb356f4a091e9c07f3043d76d4f5dbfa5f5bd",
+      "status": "success",
+      "gasUsed": "30000"
+    },
+    {
+      "step": "B4 setup: team sender Pocket S creates a 0.1 QOR Confirmed drop (ML-DSA intent)",
+      "hash": "0x4b3b4439dd48a6b95a75ea44ed887b1e2e48b7643eedbb499d2d288577fc22ad",
+      "status": "success",
+      "gasUsed": "420363"
+    },
+    {
+      "step": "B4 setup: link key binds B4 as recipient of drop p23 (payTo = B4 Pocket)",
+      "hash": "0xe5f5586b8d75cdd4cef27e99b26cf97605e5dcabb30d4bd16769523f3f1fdec6",
+      "status": "success",
+      "gasUsed": "354107"
+    },
+    {
+      "step": "B4 setup: sender Pocket S confirms B4's key for drop p23",
+      "hash": "0x78be4db118a0b0bb6eed9c31a3cc50f159a4bcaaabd9929320cf3b0847f11671",
+      "status": "success",
+      "gasUsed": "276620"
+    }
+  ],
+  "teamAccounts": {
+    "submitterX": "0xF7bA1fbA4Bf4F48eCA666083b799f618997b072F",
+    "senderPocketS": "0x94974f4D977005B1D4F4623D4Fe9C647801c0151",
+    "senderKeyAccountS": "0xFA45699C3F1F4A3D0C9cD117F2faEB06e80f9db7",
+    "guardianG1": "0x41c008d14EF532f976Be20fE9410134b2C4a75b9",
+    "guardianG2": "0x8460ed916F357ECdf0B59F4e8D89Cea5Ae775254"
+  },
+  "createdAt": "2026-11-20T04:38:26.146Z"
+}
