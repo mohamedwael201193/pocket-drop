@@ -32,6 +32,32 @@ export interface EnvStats {
   recent: { kind: string; id: string; tx: Hex; block: bigint; who: string; own: boolean; at?: number }[];
   /** every pool slot claim: which account took it, where it was paid, own or external, and the tx (P4) */
   claimers: { pool: string; recipient: string; payTo: string; own: boolean; tx: Hex; block: bigint }[];
+  /** legacy-key telemetry (item 10): deployed Pockets by deploy block against the v2 key release */
+  keyEras: KeyEras;
+}
+
+/** First Diana block after the v2 browser key derivation went live in production (2026-11-20 04:24:18 UTC). Same constant as backend/src/statsv4.ts. */
+export const V2_RELEASE_BLOCK = 10412597n;
+export interface KeyEras { v1Era: Split & { total: number; stillHoldingQor: number; stillHoldingExternal: number }; v2Era: Split & { total: number } }
+export async function keyEras(deployed: { args: Record<string, unknown>; blockNumber: bigint }[], balance: (a: Hex) => Promise<bigint>): Promise<KeyEras> {
+  const v1 = deployed.filter((d) => d.blockNumber < V2_RELEASE_BLOCK);
+  const v2 = deployed.filter((d) => d.blockNumber >= V2_RELEASE_BLOCK);
+  const bal = await Promise.all(v1.map((d) => balance(String(d.args.pocket) as Hex).catch(() => 0n)));
+  const split = (xs: typeof deployed): Split => { const o = xs.filter((d) => isOwnAddress(String(d.args.owner))).length; return { own: o, external: xs.length - o }; };
+  const holding = v1.filter((_, k) => bal[k] > 0n);
+  return { v1Era: { total: v1.length, ...split(v1), stillHoldingQor: holding.length, stillHoldingExternal: holding.filter((d) => !isOwnAddress(String(d.args.owner))).length }, v2Era: { total: v2.length, ...split(v2) } };
+}
+
+/** /api/stats v4 must agree with what this page counts from the chain. Returns the fields that differ (empty = agree). */
+export function compareWithApi(mine: EnvStats, api: { pockets?: number; drops?: { created?: number; claimed?: number }; pools?: { created?: number }; pocketsOwn?: Split } | undefined): string[] {
+  if (!api) return ['missing'];
+  const d: string[] = [];
+  if (api.pockets !== mine.pockets) d.push('pockets');
+  if (api.drops?.created !== mine.drops.created) d.push('drops created');
+  if (api.drops?.claimed !== mine.drops.claimed) d.push('drops claimed');
+  if (api.pools?.created !== mine.pools.created) d.push('pools created');
+  if (api.pocketsOwn?.external !== mine.pocketsOwn.external) d.push('external Pocket owners');
+  return d;
 }
 
 const bump = (s: Split, a: string) => { if (isOwnAddress(a)) s.own++; else s.external++; };
@@ -75,7 +101,9 @@ export async function envStats(env: Env): Promise<EnvStats> {
   const claimers: EnvStats['claimers'] = poolClaims.map((c) => ({
     pool: idOf(pre, c.args.poolId), recipient: String(c.args.recipient), payTo: String(c.args.payTo ?? ''), own: isOwnAddress(String(c.args.recipient)), tx: c.transactionHash, block: c.blockNumber,
   })).sort((a, b) => (a.block < b.block ? 1 : -1));
+  const eras = await keyEras(deployed, (a) => pub.getBalance({ address: a }));
   return {
+    keyEras: eras,
     env, pockets: deployed.length, pocketsOwn,
     drops: { created: created.length, bound: bound.length, confirmed: confirmed.length, claimed: claimed.length, cancelled: cancelled.length },
     dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent, claimers,

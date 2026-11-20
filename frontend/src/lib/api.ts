@@ -67,6 +67,8 @@ export const statsSchema = z.object({
     byRole: z.record(z.object({ own: z.number(), external: z.number() })).optional(),
   }),
   recent: z.array(z.object({ name: z.string(), kind: z.string(), linkId: z.string().nullable(), txHash: z.string(), blockNumber: z.string().optional(), amount: z.string().optional() })),
+  /** v4 instances, counted by the API the same way /radar counts them (absent on older deployments) */
+  v4: z.record(z.unknown()).optional(),
 });
 export type Stats = z.infer<typeof statsSchema>;
 

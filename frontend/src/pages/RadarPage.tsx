@@ -4,10 +4,11 @@ import { Notice, SourceBadge, TxLink, cx } from '../components/ui';
 import { Dash, Reveal } from '../components/bits';
 import { Stage } from '../components/stage';
 import { CountUp } from '../components/alive';
-import { envStats, pqSample, type EnvStats, type Split } from '../lib/radar';
+import { compareWithApi, envStats, pqSample, V2_RELEASE_BLOCK, type EnvStats, type Split } from '../lib/radar';
 import { addrUrl } from '../lib/config';
 import { INST, type Env } from '../lib/v4';
 import { useHealth } from '../lib/queries';
+import { fetchStats } from '../lib/api';
 import { PHONE } from '../data/proofs';
 
 const card = 'rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm';
@@ -94,6 +95,10 @@ export default function RadarPage() {
   const { data: h } = useHealth();
   const ext = (s?: EnvStats) => (s ? s.pocketsOwn.external + s.dropSenders.external + s.dropRecipients.external + s.poolHosts.external + s.poolClaimers.external : 0);
   const extTotal = ext(prod.data) + ext(lab.data);
+  const api = useQuery({ queryKey: ['api-stats'], queryFn: fetchStats, refetchInterval: 120_000, retry: 1 });
+  const apiV4 = api.data?.v4 as Record<string, any> | undefined;
+  const diffs = prod.data && lab.data && apiV4 ? [...compareWithApi(prod.data, apiV4.prod).map((d) => `prod ${d}`), ...compareWithApi(lab.data, apiV4.lab).map((d) => `lab ${d}`)] : null;
+  const eras = prod.data?.keyEras;
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8" data-testid="radar">
@@ -108,6 +113,28 @@ export default function RadarPage() {
         <div className={cx(card, 'mt-5')} data-testid="external-usage">
           <h2 className="font-serif text-2xl text-zinc-900">Outside use</h2>
           <p className="mt-1 text-sm text-zinc-700"><span className="font-mono text-2xl" data-testid="external-total">{prod.data && lab.data ? extTotal : '…'}</span> external account roles across both instances. {prod.data && lab.data && extTotal === 0 && 'No outside account has used Pocket Drop yet. The team accounts are the only users so far, and this page says so on purpose.'}</p>
+        </div>
+      </Reveal>
+
+      <Reveal>
+        <div className={cx(card, 'mt-5')} data-testid="key-eras">
+          <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Legacy keys still on chain</h2><SourceBadge kind="LIVE" title="PocketDeployed logs and Pocket balances read just now" /></div>
+          {eras ? (
+            <>
+              <p className="mt-2 text-lg text-zinc-900" data-testid="key-eras-line"><b className="font-mono">{eras.v1Era.total}</b> production Pockets were deployed before the v2 key release, <b className="font-mono">{eras.v1Era.stillHoldingQor}</b> of them still hold QOR ({eras.v1Era.stillHoldingExternal} external). <b className="font-mono">{eras.v2Era.total}</b> were deployed after it.</p>
+              <div className="mt-3 space-y-3">
+                <Bar label={`Before v2 (own ${eras.v1Era.own}, external ${eras.v1Era.external})`} value={eras.v1Era.total} max={Math.max(1, eras.v1Era.total + eras.v2Era.total)} tone="bg-amber-600" />
+                <Bar label="Before v2 and still holding QOR" value={eras.v1Era.stillHoldingQor} max={Math.max(1, eras.v1Era.total + eras.v2Era.total)} tone="bg-red-700" />
+                <Bar label={`After v2 (own ${eras.v2Era.own}, external ${eras.v2Era.external})`} value={eras.v2Era.total} max={Math.max(1, eras.v1Era.total + eras.v2Era.total)} tone="bg-emerald-600" />
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-zinc-600">Classified by the block each Pocket was deployed in, against block {V2_RELEASE_BLOCK.toString()}, the first block after the v2 key derivation went live. The chain cannot show how a key was derived: Pockets the app made before that block use v1 keys (the ML-DSA key follows from the classical key, so they are not quantum-safe); team scripts may use independent keys; a v1 browser can still deploy a Pocket later, so &quot;after v2&quot; means made after v2 shipped, not proof of v2. Pockets that were never deployed are not visible. Legacy users see a banner with a one-tap move to a new key.</p>
+            </>
+          ) : <p className="mt-2 text-sm text-zinc-500">Reading Pocket deployments… <Dash /></p>}
+          <p className="mt-3 border-t border-zinc-100 pt-3 text-xs text-zinc-700" data-testid="api-agrees">
+            {diffs === null ? (api.error ? <>/api/stats could not be read: {(api.error as Error).message}</> : <>Checking that <code className="font-mono">/api/stats</code> counts the same… <Dash /></>)
+              : diffs.length === 0 ? <><b className="text-emerald-800">/api/stats agrees</b> with this page for both instances (Pockets, drops created and claimed, pools, external Pocket owners). The API reports v3 and v4 separately.</>
+              : <><b className="text-amber-800">/api/stats differs</b> on {diffs.join(', ')}. The API caches for 30 s, so a new event can show here first.</>}
+          </p>
         </div>
       </Reveal>
 
