@@ -1,0 +1,86 @@
+{
+ "note": "Public addresses created by the live retest after the QA fix round of 20 Nov 2026 (keys and Pockets). All are own accounts; /api/stats and /radar must not count them as external.",
+ "run": "2026-11-20-retest",
+ "accounts": [
+  {
+   "label": "qa-20nov-retest-a-confirmed-sender-pocket",
+   "address": "0x33e1DbCdEc09c8Ab24c704923C1F02685D93813b"
+  },
+  {
+   "label": "qa-20nov-retest-a-confirmed-sender-acct",
+   "address": "0x24B29C10195316AF261fdcaC1b0B2181c4CA975B"
+  },
+  {
+   "label": "qa-20nov-retest-a-confirmed-recipient-pocket",
+   "address": "0x564B31b57F452CB67326788D0305C324d74dC8fD"
+  },
+  {
+   "label": "qa-20nov-retest-b-giveaway-sender-pocket",
+   "address": "0xBD859b2F924b70bE2DB75c93C8ecdD091D1ba9F2"
+  },
+  {
+   "label": "qa-20nov-retest-b-giveaway-sender-acct",
+   "address": "0x30879a5BcF1C8be940f64b1C0C102E1B6D547477"
+  },
+  {
+   "label": "qa-20nov-retest-b-giveaway-recipient-pocket",
+   "address": "0x4bf3cf8c0a194C224aC2F4B45916B533037dBee7"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-host-pocket",
+   "address": "0xa236261516760486cD513e41121559E7860400E1"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-host-acct",
+   "address": "0x953cb497eB98DFF5695bD296aE507419FF1fcc67"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-claimer1-acct",
+   "address": "0xBA171bCEE7EBe2Ea940003697fb9ef0d3C2BE854"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-claimer2-acct",
+   "address": "0xAE357A40b055fBBD05a633f41d15aa648e9da742"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-guardian1",
+   "address": "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-guardian2",
+   "address": "0xc8379F3839E350da12E9FFacA978365801176AEF"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-guardian3",
+   "address": "0xa0D6ACbb2135a09c2266A3f92b1543594124b338"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-owner-pocket",
+   "address": "0x3eC04d31c1769796CaD463fAD331BaF7473E6D7c"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-owner-acct",
+   "address": "0x0386f15570b8F76136745cf4405DC4247639e9fB"
+  },
+  {
+   "label": "qa-20nov-retest-d-pocket-lab-newowner-acct",
+   "address": "0x096804D9d584088208FE705754d291EcF7D9e705"
+  },
+  {
+   "label": "qa-20nov-retest-e-cancel-sender-pocket",
+   "address": "0x5da4a726494b378C2Dd3C0Da000B8C779fdd2756"
+  },
+  {
+   "label": "qa-20nov-retest-e-cancel-sender-acct",
+   "address": "0xD2C10B5d86a8B36d25bE218eb3AC8116DFCd3Da5"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-claimer1-pocket",
+   "address": "0x99887327B8fC07Ffd5456d494c473505A886346A"
+  },
+  {
+   "label": "qa-20nov-retest-c-pool-claimer2-pocket",
+   "address": "0x7cd882cC9BC92FD900320793c3159A5e212c33e3"
+  }
+ ]
+}
