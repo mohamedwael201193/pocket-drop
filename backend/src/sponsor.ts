@@ -103,8 +103,8 @@ export function poolLinkDigest(pool: Hex, id: bigint, recipient: Hex, payTo: Hex
     ['POCKET_POOL_LINK_V1', BigInt(EVM_CHAIN_ID), pool, id, recipient, payTo],
   ));
 }
-/** PqcLib.pqMessage: the 66 ASCII bytes "0x" + lowercase hex of the digest. */
-export const pqMessage = (digest: Hex) => new TextEncoder().encode(digest.toLowerCase());
+/** PqcLib.pqMessage: "qorechain-msg-v1|qorechain-diana|" + "0x" + lowercase hex of the digest (the QoreX framing). */
+export const pqMessage = (digest: Hex) => new TextEncoder().encode(`qorechain-msg-v1|qorechain-diana|${digest.toLowerCase()}`);
 
 export const utcDayStart = (t: number) => { const d = new Date(t); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); };
 
