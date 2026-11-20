@@ -109,7 +109,7 @@ export default function PocketPage() {
             </Section>
 
             <Section title="Daily limit" testId="limit-section" badge={<SourceBadge kind="LIVE" />}>
-              <p className="text-sm text-zinc-700">Limit <b data-testid="daily-limit">{pv.deployed ? fmtQor(pv.dailyLimit) : fmtQor(a.cfg?.limit ?? 0n)}</b> QOR per day, <b data-testid="allowance-left">{pv.deployed ? fmtQor(pv.allowanceLeft) : fmtQor(a.cfg?.limit ?? 0n)}</b> QOR left today. Anything above it waits {dur(inst.timelockSec)} and can be vetoed. Raising the limit also waits {dur(inst.timelockSec)}; lowering it is immediate.</p>
+              <p className="text-sm text-zinc-700">Limit <b data-testid="daily-limit">{pv.deployed ? fmtQor(pv.dailyLimit) : fmtQor(a.cfg?.limit ?? 0n)}</b> QOR per day, <b data-testid="allowance-left">{pv.deployed ? fmtQor(pv.allowanceLeft) : fmtQor(a.cfg?.limit ?? 0n)}</b> QOR left today (a spend that already waited out the delay below does not use today&apos;s limit). Anything above it waits {dur(inst.timelockSec)} and can be vetoed. Raising the limit also waits {dur(inst.timelockSec)}; lowering it is immediate.</p>
               {pv.pendingLimitAt > 0 && (
                 <div className="mt-3"><Notice tone="warn" testId="pending-limit">A raise to {fmtQor(pv.pendingLimit)} QOR is pending: ready {pv.pendingLimitAt > t ? `in ${dur(pv.pendingLimitAt - t)}` : 'now'}.
                   <div className="mt-2 flex gap-2"><Button variant="secondary" disabled={pv.pendingLimitAt > t || !!pv.recovery} busy={limitAct.busy === 'apply'} onClick={() => void limitAct.run('apply limit', () => applyLimit(a.env, pv.address))} data-testid="apply-limit">Apply now</Button>
