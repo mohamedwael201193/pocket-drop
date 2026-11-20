@@ -1,5 +1,5 @@
 {
- "totalQor": 22.25,
+ "totalQor": 24.595,
  "entries": [
   {
    "qor": 2,
@@ -618,6 +618,258 @@
    "note": "relayer top-up back to 6.0 QOR after the sponsor run, main -> 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
    "hash": "9DBBD2F46066698B586978C1852B8F7CDDF2748D2770C8E0269AE806B529A72E",
    "at": "2026-11-20T05:00:28Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa a-confirmed sender key",
+   "hash": "0x0963c7cf974f1e593f2136e9dcee0465b474a0e56a7bb88e540d20819d7f35d2",
+   "at": "2026-11-20T05:57:49.911Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "qa a-confirmed sender pocket",
+   "hash": "0x4fdb2db75a08016265455f709a98d16441a43f4cb0bbf67c4d5eafa30da42cec",
+   "at": "2026-11-20T05:57:50.811Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: qa a-confirmed recipient sweep",
+   "hash": "0x5c7bba25b415b7f384a078204d6d704ea1227293be2be2bba0a00ba3c3a55d98",
+   "at": "2026-11-20T05:58:51.302Z"
+  },
+  {
+   "qor": -0.24,
+   "note": "recovered: qa a-confirmed sender sweep",
+   "hash": "0x987d6716bba502f7f06493ae8e9825e9cd5089b0b608ef37ef8b2bf4c3b32771",
+   "at": "2026-11-20T05:58:55.916Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa b-giveaway sender key",
+   "hash": "0x0687d5c93aa4404c586ea76fcdadc354286f15a344b67c0b0345ff6e2af998e4",
+   "at": "2026-11-20T05:59:02.482Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "qa b-giveaway sender pocket",
+   "hash": "0x4556662a81be57165da81b630c39e089692303889732de458d13ab4287f7f6e0",
+   "at": "2026-11-20T05:59:04.216Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: qa b-giveaway recipient sweep",
+   "hash": "0x86e8bef9c7f10b024613e7c099e2962eb3a72619ae5bfb2c2695e9ca53f402a0",
+   "at": "2026-11-20T05:59:52.438Z"
+  },
+  {
+   "qor": -0.24,
+   "note": "recovered: qa b-giveaway sender sweep",
+   "hash": "0x57dc3c72dde79a5506bdc739c05bfae10e32f7ffa1b4d49b6588f753442b3153",
+   "at": "2026-11-20T05:59:58.378Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool host key",
+   "hash": "0xd01f63a2079b9e5884562a533f4c06b6c14f3816a74ca237800266a97de4dba3",
+   "at": "2026-11-20T06:00:04.954Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa c-pool host pocket",
+   "hash": "0x38f776a7a1a42aa3c17850b364d6aa9bf62c44d094ad02a267fa8df6786a6df5",
+   "at": "2026-11-20T06:00:06.636Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer1",
+   "hash": "0xb6c457843f796bd4b843edb504c5cbb248c0c836524f3e8c3ebcd097cc29ba10",
+   "at": "2026-11-20T06:00:38.921Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool host key",
+   "hash": "0xe91dbe888f4342cc164ef25b8acfd1326c3bf20cc2e31cf8f150b9b7bbfcc857",
+   "at": "2026-11-20T06:06:55.076Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa c-pool host pocket",
+   "hash": "0x190628c3059405cf23a96b45c5c2f1751c481e882f9cdc0ee033f799ba6d7c92",
+   "at": "2026-11-20T06:06:56.772Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool host key",
+   "hash": "0x11e2db1a808c4b24bb54f0e0fbd5678cb36c83b55594bb3f7de128c1337aa219",
+   "at": "2026-11-20T06:07:13.836Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa c-pool host pocket",
+   "hash": "0xb6a3e0b2a45f9ff3b59847b3fdbe8499ac6f650a3346edb8b8790461a21b6eea",
+   "at": "2026-11-20T06:07:15.548Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer1",
+   "hash": "0x7dab7aae6f3a2c0637f382da976848a8658bdef4315d4d084c050a05d9b97465",
+   "at": "2026-11-20T06:07:33.787Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer2",
+   "hash": "0x5b33cbe8a59091b1e97b1b23eb1058becdf7d3c240119fca7bce4ee5b0a3ad7d",
+   "at": "2026-11-20T06:07:51.477Z"
+  },
+  {
+   "qor": -0.36,
+   "note": "recovered: qa c-pool host sweep",
+   "hash": "0xc902a74df8a519cb0029f0e963f8731d0ceee722e161bd23a803b5c6f6ddd57d",
+   "at": "2026-11-20T06:09:34.404Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa d-pocket-lab owner key",
+   "hash": "0xf9c5403fd8ef21bf67fc30f9ba5edd7a7a031cb4a357ffb50b6f0b61af0f2947",
+   "at": "2026-11-20T06:09:41.565Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "qa d-pocket-lab owner pocket",
+   "hash": "0x7e580bcc8c39d9f7b7a9710e498133619b5e6ee39b6be900f64bd308aed9f062",
+   "at": "2026-11-20T06:09:43.232Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 17 old key",
+   "hash": "0x44d73674c1a77f6a789e63b73b34373fbe5319f2f04c0b5bc365d0678c51218f",
+   "at": "2026-11-20T06:17:28.954Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: persona 99 run 2 sender sweep",
+   "hash": "0x3c21f0e10c51008437ffd271daf9bf85de85a4bfb468642b1e7956da298e585a",
+   "at": "2026-11-20T06:21:42.021Z"
+  },
+  {
+   "qor": -0.53,
+   "note": "recovered: persona 98 flow d r1 LAB owner sweep",
+   "hash": "0xe859fd8a0c11d609ed510fbb53366d67841ca3c049d6bea65204586c024c3406",
+   "at": "2026-11-20T06:26:05.056Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 5 sender key",
+   "hash": "0x5f6dc73371fcbac69783605792c1b2de49faadf8caffd643c28df19bf7987f11",
+   "at": "2026-11-20T06:32:21.340Z"
+  },
+  {
+   "qor": 0.6,
+   "note": "persona 5 sender pocket",
+   "hash": "0x842915812d716d0566d614a1817a09449b3a0b806d80e47a3f0f7d6e346c2e4a",
+   "at": "2026-11-20T06:32:26.712Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: persona 1 recipient sweep",
+   "hash": "0x1dfdf2728955736eced3da8d0ebc117affc438ce790b85fb16dec25fe1751482",
+   "at": "2026-11-20T06:35:02.011Z"
+  },
+  {
+   "qor": 0.1,
+   "note": "persona 5 sender pocket top-up",
+   "hash": "0x3783aeee787c2bb1753959147c7063954cfb0524990f0725e3a4dab122aa8b8e",
+   "at": "2026-11-20T06:37:56.452Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: persona 8 winner sweep",
+   "hash": "0x1fd811a9c0bc953569741967b37740ab59a547c7d2f858375d18da042f50e136",
+   "at": "2026-11-20T06:38:39.647Z"
+  },
+  {
+   "qor": 0.43,
+   "note": "persona 12 sender pocket top-up",
+   "hash": "0x1d0ba7c0674faab86a1f97638563a326d63619293b53f8c1426e2bec1b4dde23",
+   "at": "2026-11-20T06:38:43.156Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 4 claimer key",
+   "hash": "0x61006aabb0f535a649d504404d8987aa9925314f1d1f2064e5f01e8d114b2724",
+   "at": "2026-11-20T06:39:49.147Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 18 claimer key",
+   "hash": "0x6ba3025e03c93aac6fe6248bbfddecb05258097ae6fca16dd732ef294e3ed914",
+   "at": "2026-11-20T06:40:07.421Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 121 claimer key",
+   "hash": "0xfca4524dae3992f41aa6e62966b60834f18e7c8f75a09036727e8831a8495415",
+   "at": "2026-11-20T06:40:23.874Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 122 claimer key",
+   "hash": "0xa2e05ffc53f7ca836398c92d68049321562f924a91dd50327073cf62a688c61c",
+   "at": "2026-11-20T06:40:38.926Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "persona 6 pocket",
+   "hash": "0xab23a2abef0fb9896cde61588fa7f49d46c7ea12fdf6513059a65bd0522c1e86",
+   "at": "2026-11-20T06:40:59.486Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 6 sender key",
+   "hash": "0xeeb0fd29bcdc21835b3424e8d3c66898eed2e607323a822b4a696ba031f2f62a",
+   "at": "2026-11-20T06:41:01.210Z"
+  },
+  {
+   "qor": -0.4,
+   "note": "recovered: persona 6 sender sweep",
+   "hash": "0x2db1ff32f90dae94fba62d6d660cf77bf5d60e48bb64e07f019784ae09c4d327",
+   "at": "2026-11-20T06:41:27.781Z"
+  },
+  {
+   "qor": 0.15,
+   "note": "persona 17 old pocket",
+   "hash": "0x5b3fb1352bb313143990386a59704d92ff8bb89ab2a3bfd13df19f5c433e34c6",
+   "at": "2026-11-20T06:41:41.252Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "persona 17 old key",
+   "hash": "0x4b2903aa28e8e41cec829e31ed7b77cb0828fd4a03014b3c2e0fb6201a399252",
+   "at": "2026-11-20T06:41:56.765Z"
+  },
+  {
+   "qor": -0.05,
+   "note": "recovered: persona 17 new v2 sweep",
+   "hash": "0x59c49ce2fdcc41b20f414178a5f9fc48f21f03d516ce69de19987f16061d6687",
+   "at": "2026-11-20T06:42:27.012Z"
+  },
+  {
+   "qor": -0.34,
+   "note": "recovered: persona 98 flow c r1 host sweep",
+   "hash": "0x966f6907419d3a666884b901646a856d48b504c67dace873802844f0c5d71c4d",
+   "at": "2026-11-20T06:50:23.626Z"
+  },
+  {
+   "qor": -0.35,
+   "note": "recovered: persona 5 sender sweep",
+   "hash": "0x5b8615de780be11c4a7f84c406e4fa6a73f406ae3cbbb7f9cd526848520d0776",
+   "at": "2026-11-20T06:51:36.787Z"
+  },
+  {
+   "qor": -0.4,
+   "note": "recovered: persona 98 flow c aborted host sweep",
+   "hash": "0xdc08dabf5b23a4266cb8d1f3e4c197ce92db2487e9102b952ea3104786be21af",
+   "at": "2026-11-20T07:06:49.109Z"
   }
  ]
 }

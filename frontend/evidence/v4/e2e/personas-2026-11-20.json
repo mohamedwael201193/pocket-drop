@@ -1,0 +1,544 @@
+{
+ "note": "TEAM-RUN persona campaign, 20 Nov 2026, Diana testnet. No link keys (#k) or roots.",
+ "medianFirstQorS": {
+  "all": 16.133,
+  "receivers": 16.06,
+  "senders": 18.798
+ },
+ "lab": {
+  "10": [
+   "Lost phone, 2 guardians (LAB)",
+   "flow d: guardians 2-of-3 set and applied; recovery veto + finish"
+  ],
+  "11": [
+   "Stolen PQ key: freeze + unanimous (LAB)",
+   "flow d: guardian freeze; unanimous recovery path"
+  ],
+  "14": [
+   "Q-Day Rescue",
+   "flow d: rescue shows the legacy main wallet as unproven"
+  ],
+  "15": [
+   "Daily limit + veto",
+   "flow d: limit lowered to 0.05, spend 0.08 queued, vetoed; 0.06 queued and executed; limit raise queued and applied"
+  ],
+  "16": [
+   "Drill attacker",
+   "/qday in-tab Try it (all paths refused, eth_call) in the free suite x4 projects + hourly qday bot runs"
+  ]
+ },
+ "personas": [
+  {
+   "id": 1,
+   "name": "First-timer, budget Android",
+   "profile": "Chrome Android 390, Arabic locale, CPU throttled 4x",
+   "device": "chromium 390 ar-EG cpu4x",
+   "flow": "claim a Confirmed link, read 4 words to the sender",
+   "startedAt": "2026-11-20T06:34:16.932Z",
+   "firstQorMs": 27744,
+   "steps": [
+    "2.1s link opened: 0.1QOR / Confirmed mode \u00b7 waiting for you to open it \u00b7 +0.1 QOR setup fee included \u00b7 Testnet",
+    "2.5s tapped Receive",
+    "17.8s reads \"direct text illness aware\" to the sender, who sees \"direct text illness aware\"",
+    "27.7s first QOR visible (27.7 s)"
+   ],
+   "txs": {
+    "recipient bind": "0xe88b176920d00519078cc242cb1e45923523b9db32340538c6f454fc688ac8d3",
+    "recipient claim": "0x00fb6a0a1a535fe3a12066bc824938d0c1b6047d1b58c7f91a0bafeb5e615550",
+    "recipient register (drip)": "7A7D4E501463462F15CDE8E51B5DABFDD75489CA158FC3B88752E1E0D6564A10",
+    "sweep recipient Pocket (0.1 QOR)": "0x1dfdf2728955736eced3da8d0ebc117affc438ce790b85fb16dec25fe1751482"
+   },
+   "friction": [
+    "UI language stays English for an Arabic-locale phone (html dir=ltr); amounts and words render correctly."
+   ],
+   "issues": [],
+   "accounts": {
+    "recipient.pocket": "0x07a64F227e6B42B27f196E0D068a9F704d56600C",
+    "recipient.key": "0xf76D0254CDfb4Cbbf0D9E9918dA03E37cec54128"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P01-006-recipient-landing-chromium-390.png",
+    "P01-007-recipient-waiting-confirm-chromium-390.png",
+    "P01-008-recipient-yours-chromium-390.png"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "iPhone Safari user",
+   "profile": "WebKit 390 (iPhone 13 profile)",
+   "device": "webkit iPhone 13",
+   "flow": "Giveaway claim, racing a second browser",
+   "startedAt": "2026-11-20T06:38:02.666Z",
+   "firstQorMs": null,
+   "steps": [
+    "1.1s tapped Receive",
+    "27.6s lost the race; screen says: Pocket Drop \u00b7 p29 LIVE You received 0.1QOR Giveaway \u00b7 claimed \u00b7 +0.1 QOR setup fee included \u00b7 Testnet Opening your Pocket 1/5 Prove the key is yours: Your new key proves on-chain that it is really yours (once), paid from the setup fee. Every step 1. Create your key here Done 0.8 s Account 0xeba7Cc\u20263",
+    "28.1s PASS the second browser gets a clear error, never a success"
+   ],
+   "txs": {},
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": [
+    "P02-002-loser-screen-webkit-390.png"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Private-browsing user",
+   "profile": "Safari private (ephemeral context), claim then reload, then a new private window",
+   "device": "webkit 390",
+   "flow": "pool p12 claim",
+   "startedAt": "2026-11-20T06:38:51.005Z",
+   "firstQorMs": 16060,
+   "steps": [
+    "2.0s pool page: 5 of 5 slots left \u00b7 self-funded by the host \u00b7 Testnet",
+    "3.0s PASS sponsor covers the setup (zero QOR needed)",
+    "16.1s first QOR visible (16.1 s)",
+    "26.8s after reload: yours=1 closed=\"(absent)\"",
+    "33.5s Pocket page mentions backup/private-mode risk: true",
+    "42.8s new private window: create-key shown=1 (the key is gone, as expected for private mode)"
+   ],
+   "txs": {
+    "sponsor -> claimer key 0.06": "A672BD7612DEE70537FF7F6F05F46C1BC044FC7A80B9CB7B8E7A95E44B25B997",
+    "pool tx 1": "0xdf79a168c440b7d27cfc0126fd78eceed68a4171d4677adf2265ca225b5c11a7"
+   },
+   "friction": [
+    "Private mode: closing the window loses the key; the app shows a generic backup prompt but no private-window warning."
+   ],
+   "issues": [],
+   "accounts": {
+    "claimer.key": "0x10707d4bcc4a6DEded0D937a5Abda10B2ECf652b"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P03-003-pool-landing-webkit-390.png",
+    "P03-004-pool-yours-webkit-390.png",
+    "P03-005-pocket-after-reload-webkit-390.png"
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Slow network",
+   "profile": "Chrome 390, 3G: 400 ms RTT, 750 kbit/s down",
+   "device": "chromium 390 slow-3G",
+   "flow": "pool p12 claim",
+   "startedAt": "2026-11-20T06:39:34.137Z",
+   "firstQorMs": 28002,
+   "steps": [
+    "5.2s pool page: ",
+    "24.2s second tap ignored (button busy/disabled)",
+    "28.0s first QOR visible (28.0 s)"
+   ],
+   "txs": {
+    "fund claimer key 0.075": "0x61006aabb0f535a649d504404d8987aa9925314f1d1f2064e5f01e8d114b2724",
+    "pool tx 1": "0xa5eac047c9ef2d77a40c1a09641273b1e4448233939edcae17d4c62b6d3ef553"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "claimer.key": "0xe5D0A337087A9a4014e0A8BA759D6ad0bb68AbB5"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P04-006-pool-landing-chromium-390.png",
+    "P04-007-pool-yours-chromium-390.png"
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Desktop sender",
+   "profile": "Chrome 1440, English",
+   "device": "chromium 1440",
+   "flow": "fund two addresses, create Confirmed drops, confirm or refuse in the inbox",
+   "startedAt": "2026-11-20T06:32:13.755Z",
+   "firstQorMs": 14799,
+   "steps": [
+    "5.4s key and Pocket created in the browser",
+    "13.0s funded two addresses (key gas + Pocket)",
+    "14.8s first QOR visible (14.8 s)",
+    "18.0s D1 p27 created",
+    "131.3s D2 p28 created"
+   ],
+   "txs": {
+    "fund sender key 0.075": "0x5f6dc73371fcbac69783605792c1b2de49faadf8caffd643c28df19bf7987f11",
+    "fund sender Pocket 0.6": "0x842915812d716d0566d614a1817a09449b3a0b806d80e47a3f0f7d6e346c2e4a",
+    "createDrop D1 (Confirmed, intercepted)": "0xef4a872675808508fe6139bc64689fe4a754ce7e7c827db77f309917e26d7efe",
+    "createDrop D2 (Confirmed, for P1)": "0x1da5fd6f87f9a32f05ce4057ca4fdee2f36da79c31547b7f91c9222bd679e2ba",
+    "confirmDrop D2": "0x38b6e9ee344b3a41f9674ea6d47ce84b91ac604dac1d4f11918cbf0c800df941",
+    "top up sender Pocket 0.1": "0x3783aeee787c2bb1753959147c7063954cfb0524990f0725e3a4dab122aa8b8e",
+    "createDrop D3 (Giveaway race)": "0xe58fbd3ece825f83133196427a5143a822058f7389e0c430268c1f04170a0ba3",
+    "sweep sender Pocket (0.35 QOR)": "0x5b8615de780be11c4a7f84c406e4fa6a73f406ae3cbbb7f9cd526848520d0776"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "sender.pocket": "0xc9e30bFbdBC9e23f58cA442f0CF48a943aA8472D",
+    "sender.key": "0xEB0D4556ecFc9DC2adea7E63Beb066EBfe6a3588"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P05-001-sender-funded-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 6,
+   "name": "QoreX-style sender",
+   "profile": "scripted QoreX provider (window.qorex, testnet) whose sends are signed by the team deployer",
+   "device": "chromium 1440 + mock QoreX",
+   "flow": "connect QoreX, top up from QoreX, create drop, cancel before bind",
+   "startedAt": "2026-11-20T06:40:51.223Z",
+   "firstQorMs": 18798,
+   "steps": [
+    "4.8s \"Connect QoreX\" offered: false",
+    "18.8s first QOR visible (18.8 s)",
+    "30.5s cancelled before bind; Pocket +0.26 QOR"
+   ],
+   "txs": {
+    "fund Pocket 0.4": "0xab23a2abef0fb9896cde61588fa7f49d46c7ea12fdf6513059a65bd0522c1e86",
+    "fund sender key 0.075": "0xeeb0fd29bcdc21835b3424e8d3c66898eed2e607323a822b4a696ba031f2f62a",
+    "createDrop": "0x9e985d9d2788f7ef63143449887b3ebedcb84d9e7e0e8ad1c557f490ebc13002",
+    "cancelDrop": "0x0a6e6f3044e8b26dc097456ad5d806a136fcf38d2da940ee44cc37b12183c291",
+    "sweep sender Pocket (0.4 QOR)": "0x2db1ff32f90dae94fba62d6d660cf77bf5d60e48bb64e07f019784ae09c4d327"
+   },
+   "friction": [
+    "No \"Send with QoreX\" control appeared for the Pocket; funded from the script instead."
+   ],
+   "issues": [],
+   "accounts": {
+    "sender.pocket": "0xcf814091860F7ceD508289cD253f9AA4B5f91F3d",
+    "sender.key": "0x57e684675295e985834577753ff68C8aa4aD10F0"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P06-015-qorex-connected-chromium-1440.png",
+    "P06-016-cancelled-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Wrong 4 words",
+   "profile": "two phones: the real friend and the sender compare words",
+   "device": "chromium 390 (friend) + chromium 1440 (sender)",
+   "flow": "sender sees words that differ and cancels",
+   "startedAt": "2026-11-20T06:32:28.785Z",
+   "firstQorMs": null,
+   "steps": [
+    "27.4s real friend opens the same link: start-claim=1 state=\"Pocket Drop \u00b7 p27 LIVE You received 0.1QOR Confirmed mode \u00b7 waiting for the sender to confirm \u00b7 +0.1 QOR setup fee included \u00b7 Testnet Open your Pocket Your money is safe and waiting. One tap makes a quantum-safe key inside this browser and a Pocket for it, and Pocket Drop pays the network fees. No wallet, no extension, no seed phrase. Because the sender wants to be sure it is you, they compare 4 words with you first; you will see them here. Receive 0.1 QOR into my Pocket\" dead=\"(absent)\"",
+    "31.6s sender sees \"uniform decline sketch head\"; interceptor screen \"uniform decline sketch head\"; the friend has no words (link already taken)",
+    "31.6s PASS sender inbox words equal the interceptor words (so the friend cannot match them)",
+    "36.3s sender tapped \"They differ: cancel and refund me\"; chain state Cancelled"
+   ],
+   "txs": {
+    "sender cancel (refund)": "0xf7dc1bf87a86424012662779fb9c352df3cf8edfb1579cac10f1e747555fba81"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": [
+    "P07-003-friend-after-interception-chromium-390.png",
+    "P07-004-sender-sees-differing-words-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Double-claim attempt",
+   "profile": "second browser on the same Giveaway link at the same moment",
+   "device": "chromium 1440",
+   "flow": "both tap Receive; first valid bind wins",
+   "startedAt": "2026-11-20T06:38:02.666Z",
+   "firstQorMs": 12411,
+   "steps": [
+    "1.1s tapped Receive at the same moment",
+    "12.4s first QOR visible (12.4 s)"
+   ],
+   "txs": {
+    "claim": "0xd6fcee6256a4642f12d9c48699d1dd5573ccd1a3a05966f4385308fc48c73a74",
+    "bind": "0x79a7c617cc8f4a7a5f9190af4f7332d02c20e3d414a796bfc5845c2f17ecc541",
+    "register (drip)": "5391554DD442B952D17945CBA9AF56A498AA6E67980CA03AD6C8A4052ED91492",
+    "sweep winner Pocket (0.1 QOR)": "0x1fd811a9c0bc953569741967b37740ab59a547c7d2f858375d18da042f50e136"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "recipient.pocket": "0xE1d12654Ebc3777549365b0DC30d14FE01099142",
+    "recipient.key": "0xa3c776E38b52B4f7fe9F418d54A86F8A38a902B6"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P08-001-winner-yours-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Link interceptor",
+   "profile": "third browser opens a Confirmed link before the friend",
+   "device": "webkit 1440",
+   "flow": "intercepted bind, sender refuses, interceptor gets nothing",
+   "startedAt": "2026-11-20T06:32:28.785Z",
+   "firstQorMs": null,
+   "steps": [
+    "7.1s interceptor tapped Receive first",
+    "102.9s FAIL interceptor sees the link is dead after the cancel",
+    "107.9s interceptor sees: \"(absent)\""
+   ],
+   "txs": {
+    "interceptor bind": "0xebcf55e166fe9102a12564bce9282dea23c91baddb71311c88f91a54fc740339"
+   },
+   "friction": [
+    "The interceptor still receives the drip (0.1 QOR gas money) on its key account: the bounded cost of an intercepted Confirmed link."
+   ],
+   "issues": [
+    "interceptor sees the link is dead after the cancel: expect(locator).toBeVisible() failed | "
+   ],
+   "accounts": {
+    "interceptor.pocket": "0x195908F36Ab5391596F4399bc4750c45A298a9Cf"
+   },
+   "outcome": "passed with issues",
+   "shots": [
+    "P09-002-interceptor-waiting-webkit-1440.png",
+    "P09-005-interceptor-after-cancel-webkit-1440.png"
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Pool crowd",
+   "profile": "5 browsers on a 5-slot pool, a 6th refused",
+   "device": "mixed",
+   "flow": "5 claims, 6th refused, one slot per PoP account",
+   "startedAt": "2026-11-20T06:38:39.826Z",
+   "firstQorMs": null,
+   "steps": [
+    "11.2s pool p12 created",
+    "131.3s chain: taken 5 of 5; 5 UI claims",
+    "131.3s PASS chain shows 5 of 5 taken"
+   ],
+   "txs": {
+    "top up sender Pocket 0.43": "0x1d0ba7c0674faab86a1f97638563a326d63619293b53f8c1426e2bec1b4dde23",
+    "host createPool 5x0.02": "0x0f5e4bcac6905505be06ca98f8b99cc26f4cbb51704e5702b2511b5d8e74d12c"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": []
+  },
+  {
+   "id": 13,
+   "name": "Expired link",
+   "profile": "Chrome 1440 opens a drop link after its expiry",
+   "device": "chromium 1440",
+   "flow": "see expired state; refund to the sender Pocket",
+   "startedAt": "2026-11-20T06:41:27.901Z",
+   "firstQorMs": null,
+   "steps": [
+    "9.2s visitor sees: Pocket Drop \u00b7 p2 LIVE This link holds 0.1QOR Giveaway \u00b7 +0 QOR setup fee included \u00b7 Testnet This link expired Nobody opened it in time, so the money goes back to the sender. Ask them to send a new link. Open my Pocket Paste another link",
+    "9.2s PASS expired state is stated and no Receive button"
+   ],
+   "txs": {},
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": [
+    "P13-017-expired-link-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 17,
+   "name": "Old-derivation migrator",
+   "profile": "fresh v1 root (64 hex) planted in Chrome 390, Pocket 0.15 QOR",
+   "device": "chromium 390",
+   "flow": "banner, register old key, Move, register new key, sweep to main",
+   "startedAt": "2026-11-20T06:41:37.240Z",
+   "firstQorMs": 32700,
+   "steps": [
+    "14.3s PASS site-wide \"not quantum-safe\" strip on /send",
+    "16.9s banner plan: Sends 0.1 QOR to the new key (for its one-time registration) and 0.05 QOR to the new Pocket.",
+    "26.7s old key registered (one-time fee) so it can sign the move",
+    "32.7s first QOR visible (32.7 s)",
+    "40.7s browser now holds a v2 (pd2:) key",
+    "43.7s PASS no legacy banner after the move"
+   ],
+   "txs": {
+    "fund old Pocket 0.15": "0x5b3fb1352bb313143990386a59704d92ff8bb89ab2a3bfd13df19f5c433e34c6",
+    "fund old key 0.075": "0x4b2903aa28e8e41cec829e31ed7b77cb0828fd4a03014b3c2e0fb6201a399252",
+    "move tx 1": "0x5b3e0a9ddb4d2b60ca93e5618a08af7b2debd765d41d854696e17a109688e9b9",
+    "move tx 2": "0xe08554435e386b0ba102b7a2507212e0387b73b00fd6cf89d8019cd3ba84813c",
+    "sweep new v2 Pocket (0.05 QOR)": "0x59c49ce2fdcc41b20f414178a5f9fc48f21f03d516ce69de19987f16061d6687"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "old.key": "0xC3de1F0450B4e52d14230ecF290c833C7c222B61",
+    "old.pocket": "0xF42EFC334d8db70AE4fB89bE5CE55ca4204C40a2",
+    "new.pocket": "0x3Cf06A4BB8086Ca255456c8B61cE302E4a633743",
+    "new.key": "0xD23d08fE73FB00b08A0E8de13C26B2bc700c7131"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P17-018-legacy-strip-chromium-390.png",
+    "P17-019-legacy-banner-chromium-390.png",
+    "P17-020-moved-chromium-390.png"
+   ]
+  },
+  {
+   "id": 18,
+   "name": "Screen-reader / keyboard user",
+   "profile": "Chrome 1440, keyboard only, accessible names checked",
+   "device": "chromium 1440 keyboard",
+   "flow": "pool p12 claim",
+   "startedAt": "2026-11-20T06:40:02.525Z",
+   "firstQorMs": 13522,
+   "steps": [
+    "1.6s pool page: ",
+    "1.7s PASS start button has an accessible name",
+    "1.8s Tab reaches \"Create my key and Pocket\": true",
+    "1.8s focus style on the start button: solid 2px rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0",
+    "6.7s PASS Register has an accessible name",
+    "9.1s PASS \"Take my slot\" has an accessible name",
+    "13.5s first QOR visible (13.5 s)",
+    "13.8s live regions on the result page: 0"
+   ],
+   "txs": {
+    "fund claimer key 0.075": "0x6ba3025e03c93aac6fe6248bbfddecb05258097ae6fca16dd732ef294e3ed914"
+   },
+   "friction": [
+    "No aria-live/role=status region announces \"Slot taken\"; a screen reader user must explore to find the result."
+   ],
+   "issues": [],
+   "accounts": {
+    "claimer.key": "0xa441056bF8A1cb9961FE8AC89c803810193e16b9"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P18-008-pool-landing-chromium-1440.png",
+    "P18-009-pool-yours-chromium-1440.png"
+   ]
+  },
+  {
+   "id": 98,
+   "name": "Stranded-funds recovery (today)",
+   "profile": "pd2 roots restored in Chrome 1440",
+   "device": "chromium 1440",
+   "flow": "close leftover pools, register idle keys, sweep Pockets to main",
+   "startedAt": "2026-11-20T07:05:24.232Z",
+   "firstQorMs": null,
+   "steps": [
+    "2.3s sponsor run 2 recipient: no saved root shows this Pocket, skipped",
+    "4.0s sponsor run 3 recipient: no saved root shows this Pocket, skipped",
+    "6.1s flow c r1 host: owner root found (c-pool/host)",
+    "68.8s flow c aborted host: owner root found (c-pool/host)",
+    "72.4s flow c aborted host: idle key registered",
+    "86.7s flow d r1 LAB owner: owner root found (d-pocket-lab/owner)",
+    "87.1s flow d r1 LAB owner: sweep skipped (0 QOR)"
+   ],
+   "txs": {
+    "sweep flow c aborted host Pocket (0.4 QOR)": "0xdc08dabf5b23a4266cb8d1f3e4c197ce92db2487e9102b952ea3104786be21af"
+   },
+   "friction": [],
+   "issues": [
+    "flow c r1 host: expect(locator).toBeEnabled() failed"
+   ],
+   "accounts": {},
+   "outcome": "passed with issues",
+   "shots": []
+  },
+  {
+   "id": 99,
+   "name": "Stranded-funds recovery (run 2 sender)",
+   "profile": "pd2 root restored in Chrome 1440",
+   "device": "chromium 1440",
+   "flow": "close pool p8, sweep the Pocket to main",
+   "startedAt": "2026-11-20T06:21:35.263Z",
+   "firstQorMs": null,
+   "steps": [
+    "1.3s close-p8 not offered"
+   ],
+   "txs": {
+    "sweep run 2 sender Pocket (0.1 QOR)": "0x3c21f0e10c51008437ffd271daf9bf85de85a4bfb468642b1e7956da298e585a"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": []
+  },
+  {
+   "id": 121,
+   "name": "Pool crowd claimer 4 (reduced motion)",
+   "profile": "WebKit 1440, prefers-reduced-motion",
+   "device": "webkit 1440 reduced-motion",
+   "flow": "pool p12 claim",
+   "startedAt": "2026-11-20T06:40:16.450Z",
+   "firstQorMs": 16206,
+   "steps": [
+    "2.6s pool page: ",
+    "16.2s first QOR visible (16.2 s)"
+   ],
+   "txs": {
+    "fund claimer key 0.075": "0xfca4524dae3992f41aa6e62966b60834f18e7c8f75a09036727e8831a8495415"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "claimer.key": "0x5d052e63F8597F667a547EC789Ea0ce9A5470D1A"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P121-010-pool-landing-webkit-1440.png",
+    "P121-011-pool-yours-webkit-1440.png"
+   ]
+  },
+  {
+   "id": 122,
+   "name": "Pool crowd claimer 5 (dark mode)",
+   "profile": "Chrome 390, prefers-color-scheme dark",
+   "device": "chromium 390 dark",
+   "flow": "pool p12 claim",
+   "startedAt": "2026-11-20T06:40:33.485Z",
+   "firstQorMs": 15543,
+   "steps": [
+    "2.6s pool page: 1 of 5 slots left \u00b7 self-funded by the host \u00b7 Testnet",
+    "15.5s first QOR visible (15.5 s)"
+   ],
+   "txs": {
+    "fund claimer key 0.075": "0xa2e05ffc53f7ca836398c92d68049321562f924a91dd50327073cf62a688c61c",
+    "pool tx 1": "0x4febad2c8435403116abe2d728b91c1cb16a3ba00c4e2f90d32da12a8b1f553c"
+   },
+   "friction": [],
+   "issues": [],
+   "accounts": {
+    "claimer.key": "0xcAB78e8ebad3411a4AfF124c15a8Ec4E132b4800"
+   },
+   "outcome": "passed",
+   "shots": [
+    "P122-012-pool-landing-chromium-390.png",
+    "P122-013-pool-yours-chromium-390.png"
+   ]
+  },
+  {
+   "id": 123,
+   "name": "Pool crowd 6th visitor",
+   "profile": "Chrome 1440 after all slots are taken",
+   "device": "chromium 1440",
+   "flow": "pool p12 refused",
+   "startedAt": "2026-11-20T06:40:49.549Z",
+   "firstQorMs": null,
+   "steps": [
+    "1.4s PASS sixth visitor sees \"Every slot is taken\" and no claim button"
+   ],
+   "txs": {},
+   "friction": [],
+   "issues": [],
+   "accounts": {},
+   "outcome": "passed",
+   "shots": [
+    "P123-014-sixth-refused-chromium-1440.png"
+   ]
+  }
+ ]
+}
