@@ -8,9 +8,9 @@ import { explainError } from '../lib/api';
 
 // "threshold" = the minimum number of guardians the owner chose (for example 2 of 3); "unanimous" = every guardian (UX-6)
 const KINDS: { v: GuardianKind; label: string; help: string }[] = [
-  { v: 'freeze', label: 'Freeze the Pocket (enough guardians sign)', help: 'Stops spending, drops and limit raises for the freeze period. Use it when the owner key may be stolen. "Enough" is the number the owner chose, for example 2 of 3 guardians.' },
-  { v: 'recover', label: 'Move the Pocket to a new key (enough guardians sign)', help: 'Replaces the owner key after a delay. The old key can still say no (veto) during the delay, so a lost phone gets recovered but a few guardians cannot take a Pocket from an owner who still has their key.' },
-  { v: 'recover-unanimous', label: 'Move the Pocket to a new key (every guardian signs)', help: 'Needs every single guardian. After its delay it replaces the key and the old key CANNOT stop it, so it works even when a thief holds the old key.' },
+  { v: 'freeze', label: 'Freeze the Pocket', help: 'Stops spending, drops and limit raises for the freeze period. Use it when the owner key may be stolen. "Enough" is the number the owner chose, for example 2 of 3 guardians.' },
+  { v: 'recover', label: 'New key (owner can veto)', help: 'Replaces the owner key after a delay. The old key can still say no (veto) during the delay, so a lost phone gets recovered but a few guardians cannot take a Pocket from an owner who still has their key.' },
+  { v: 'recover-unanimous', label: 'New key (all guardians, no veto)', help: 'Needs every single guardian. After its delay it replaces the key and the old key CANNOT stop it, so it works even when a thief holds the old key.' },
 ];
 
 /** The guardian flow: one person makes a request, each guardian signs it on their own device, anyone submits the collected shares. */

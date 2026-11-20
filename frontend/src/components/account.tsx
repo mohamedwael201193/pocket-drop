@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { Check, Eye, EyeOff, KeyRound, Wallet } from './icons';
 import QRCode from 'qrcode';
 import { Button, CopyButton, Mono, Notice, Pill, Skel, SourceBadge, TxLink } from './ui';
@@ -21,10 +22,11 @@ export function ConnectChoices() {
   useEffect(() => { if (loadRoot()) ensureKey(); }, [ensureKey]);
   const [restore, setRestore] = useState('');
   const [err, setErr] = useState<string | null>(null);
+  const onPocket = useLocation().pathname.startsWith('/pocket');
   return (
     <div className="space-y-4" data-testid="connect-choices">
       <Button block onClick={a.createKey} data-testid="create-key"><KeyRound className="h-4 w-4" aria-hidden />Use this browser</Button>
-      <p className="text-xs leading-relaxed text-zinc-600">A quantum-safe key is created inside this tab and stays here. It owns your Pocket. Back it up on the Pocket page; guardians can recover it for you.</p>
+      <p className="text-xs leading-relaxed text-zinc-600">A quantum-safe key is created inside this tab and stays here. It owns your Pocket. {onPocket ? 'Back it up below' : 'Back it up on the Pocket page'}; guardians can recover it for you.</p>
       <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4">
         <summary className="cursor-pointer text-sm font-medium text-zinc-900">Restore from a backup key</summary>
         <label htmlFor="restore-input" className="mt-3 block text-xs font-medium text-zinc-700">Backup key (starts with pd2:, or 64 characters for an older key)</label>
