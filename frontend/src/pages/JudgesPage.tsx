@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Check } from '../components/icons';
 import { Mono, PageTitle, Skeleton, SourceBadge, Notice } from '../components/ui';
 import v4 from '../data/v4.json';
@@ -11,6 +12,7 @@ import { useHealth } from '../lib/queries';
 import tests from '../data/tests.json';
 import { SamplePoolCard } from '../components/samplePool';
 import { REQUIREMENTS } from '../data/requirements';
+import { COSTS_NOTE, RELAY_COSTS, deliveryCostUqor, deliveryFeeWei } from '../lib/fees';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
 const CONTRACTS = [['router', 'PocketRouter'], ['factory', 'PocketFactory'], ['vaultImpl', 'PocketVault (clone implementation)'], ['drop', 'PocketDrop'], ['pool', 'DropPool']] as const;
@@ -45,6 +47,9 @@ function Item({ n, title, children, action }: { n: number; title: string; childr
 export default function JudgesPage() {
   const { data: f } = useFacts();
   const { data: h } = useHealth();
+  const { hash } = useLocation();
+  // /judges#costs (linked from Send) lands on that section
+  useEffect(() => { if (hash) requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })); }, [hash]);
   const q = v4.qcai as { stage1: string; stage2: string; report: string | null; auditId?: string | null; score?: string | null; findings?: string | null; publicReport?: string | null; stage2AuditId?: string; stage2Score?: string; stage2PublicReport?: string };
   const t = v4.tests;
   return (
@@ -130,6 +135,29 @@ export default function JudgesPage() {
             </ul>
           )}
         </Item>
+
+        <section id="costs" className="scroll-mt-20 rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid="cost-table">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 className="text-sm font-semibold leading-snug text-zinc-900">What each action costs, and who pays</h2>
+            <SourceBadge kind="RECORDED" title="frontend/src/data/relayCosts.json, built from frontend/evidence/v4/e2e/hybrid-relay*.json by scripts/relay-costs.mjs" />
+          </div>
+          <p className="mt-1.5 text-xs text-zinc-500">{COSTS_NOTE} Users never hold QOR for gas: the relayer pays every network fee. The delivery fee in a drop pays it back for the relays that link needs (bind and claim, plus confirm in Confirmed mode): {fmtQor(deliveryFeeWei('Open'))} QOR Open, {fmtQor(deliveryFeeWei('Confirmed'))} QOR Confirmed (recorded {(deliveryCostUqor('Open') / 1e6).toFixed(3)} / {(deliveryCostUqor('Confirmed') / 1e6).toFixed(3)} QOR, plus 15 %). Everything else is paid from the team&apos;s relayer float on testnet. Each hash opens the checker, which re-reads the transaction from the chain.</p>
+          <p className="mt-1.5 text-xs text-zinc-700" data-testid="cost-float"><SourceBadge kind="LIVE" /> Relayer float now: {h?.relayer?.balance ? <b data-testid="cost-float-qor">{Number(h.relayer.balance).toFixed(3)} QOR</b> : "…"}</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[40rem] border-collapse text-left text-xs">
+              <thead><tr className="border-b border-zinc-200 text-zinc-500"><th className="py-2 pr-3 font-medium">Action</th><th className="py-2 pr-3 font-medium">Asked by</th><th className="py-2 pr-3 font-medium">Paid from</th><th className="py-2 pr-3 text-right font-medium">Network fee (QOR)</th><th className="py-2 font-medium">Recorded tx</th></tr></thead>
+              <tbody>{RELAY_COSTS.map((r) => (
+                <tr key={r.id} className="border-b border-zinc-100 align-top last:border-0" data-testid={`cost-${r.id}`}>
+                  <td className="py-2 pr-3 text-zinc-900">{r.label}</td>
+                  <td className="py-2 pr-3 text-zinc-700">{r.who}</td>
+                  <td className="py-2 pr-3 text-zinc-700">{r.payer}</td>
+                  <td className="py-2 pr-3 text-right font-mono text-zinc-900">{r.minUqor === r.maxUqor ? (r.maxUqor / 1e6).toFixed(3) : `${(r.minUqor / 1e6).toFixed(3)} to ${(r.maxUqor / 1e6).toFixed(3)}`}<span className="block text-[11px] text-zinc-500">{r.n} tx{r.n === 1 ? '' : 's'}</span></td>
+                  <td className="py-2"><Link className="font-mono underline" to={`/check/${r.example}`}>{r.example.slice(0, 8)}…</Link>{r.exampleCode !== 0 && <span className="text-zinc-500"> (refused, code {r.exampleCode})</span>}</td>
+                </tr>))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <Item n={6} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
           <ul className="grid gap-2 sm:grid-cols-3">

@@ -76,3 +76,27 @@ test('/lab: long lists fold on a phone and stay open on a wide screen', async ({
   await page.getByTestId('stolen-fold').locator('summary').click();
   await expect(stolen).toBeVisible();
 });
+
+test('Send: the delivery fee covers the measured relays of the link, and says who pays the rest', async ({ page }) => {
+  await page.goto(`${BASE}/send`);
+  await expect(page.getByTestId('delivery-fee')).toHaveText('0.38 QOR');
+  await expect(page.getByTestId('delivery-line')).toContainText('3 relays this link needs (bind, confirm, claim');
+  await page.getByTestId('mode-Open').click();
+  await expect(page.getByTestId('delivery-fee')).toHaveText('0.26 QOR');
+  await expect(page.getByTestId('delivery-line')).toContainText('2 relays this link needs (bind, claim');
+  await expect(page.getByTestId('who-pays')).toContainText("relayed at the team's cost");
+  await page.getByTestId('who-pays').getByRole('link').click();
+  await expect(page).toHaveURL(/\/judges#costs$/);
+  await expect(page.getByTestId('cost-table')).toBeInViewport({ timeout: 20_000 });
+});
+
+test('/judges: the cost table lists every action with a recorded tx, and the live relayer float', async ({ page }) => {
+  await page.goto(`${BASE}/judges#costs`);
+  const t = page.getByTestId('cost-table');
+  await expect(t).toContainText('What each action costs, and who pays');
+  for (const id of ['create', 'bind', 'confirm', 'claim', 'createPool', 'poolClaim', 'qday']) await expect(t.getByTestId(`cost-${id}`).getByRole('link')).toHaveAttribute('href', /^\/check\/[0-9A-F]{64}$/);
+  await expect(t.getByTestId('cost-bind')).toContainText('0.125');
+  await expect(page.getByTestId('cost-float-qor')).toHaveText(/^\d+\.\d{3} QOR$/, { timeout: 30_000 });
+  await t.getByTestId('cost-claim').getByRole('link').click();
+  await expect(page.getByTestId('check-verdict')).toBeVisible({ timeout: 90_000 });
+});
