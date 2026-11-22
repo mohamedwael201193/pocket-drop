@@ -31,13 +31,14 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 
 | Number | Label | Source |
 |---|---|---|
-| 398 checks passed, 0 failed: 299 EVM and 43 Cosmos transactions re-checked against Diana (status, contract, decoded error) | RECORDED, 22 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| 468 checks passed, 0 failed: 316 EVM and 95 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`) | RECORDED, 22 Nov 2026 | `node frontend/scripts/reverify.mjs` |
 | 167 Foundry tests (unit, fuzz and invariant); 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
-| 83 frontend and 143 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 22 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
+| 130 frontend and 177 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 22 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
 | 103 recorded live steps on the v4 contracts, 31 of them attacks that reverted on chain or were refused by the chain | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
 | QCAI audit: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
-| Relayer balance, EVM window (blocks and txs left, allowed targets), low-balance and window warnings | LIVE | `/judges`, `GET /api/health` |
+| Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
+| Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
 | Drop counts and volume, split into team/test addresses and external addresses | LIVE | `/radar`, `GET /api/stats` |
 | ML-DSA-87 signature size: 4,627 bytes | Constant (FIPS 204) | `backend/src/config.ts` |
 
@@ -50,7 +51,8 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | A claim needs a registered key with proof of possession | Tx [`0x4664a69a…5b5b`](https://explore.qore.network/tx/0x4664a69a207575641d38bcf3af724d9f81753c275dd8312c2a66fb3b18be5b5b) reverted with `PossessionNotProven`. Test `test_claim_key_requirements`. |
 | A mempool thief cannot swap the recipient | Tx [`0xf72a9a09…6318`](https://explore.qore.network/tx/0xf72a9a098d5ea3708302968a6caa712b04e3982870d2c7e34e37c28381996318) reverted with `BadLinkSignature`. Test `test_bind_rejects`. |
 | Guardians can freeze a Pocket whose key was stolen | Freeze [`0xa0042ee4…56cf`](https://explore.qore.network/tx/0xa0042ee4b44a67f65342c8f99aa117229af5d24ca38301dd03b32261b49956cf), then the thief's spend [`0xd4ca2455…f416`](https://explore.qore.network/tx/0xd4ca2455271a6a0a2f16862632dda34da026789985089753ecab209fdd86f416) reverted with `Frozen`. Test `test_stolen_key_scenario_end_to_end`. |
-| The relayer can only call our routers | `GET /api/health`: `window.allowedTargets` lists the two v4 routers and the v3 drop contract. A relayer tx to any other address is refused by the chain at broadcast (`contracts-v4/LIVE_RESULTS.md`, rows marked "refused"). |
+| Every relay carries a post-quantum signature, checked by the chain | `GET /api/health`: `relay.mode` is `hybrid` and `relay.classicalPathOpen` is `false`. Relay [`04AA1783…D445`](https://pocketdrop-app.vercel.app/check/04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445) is a `MsgCrossVMCall` with `pqc_hybrid_verify=verified`; the relayer's ECDSA-only EVM window is closed, so an ECDSA-only relay is refused at broadcast (`contracts-v4/LIVE_RESULTS.md`, "Hybrid relay lane"). |
+| You can re-check a signature without trusting us | Open [`/check`](https://pocketdrop-app.vercel.app/check): it fetches a transaction from Diana and re-verifies its ML-DSA-87 signatures in your browser with `@qorechain/qoresign`, including a [refused Q-Day attack](https://pocketdrop-app.vercel.app/check/FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3). |
 | A QoreX wallet signature can spend a Pocket | Tx [`0xf98daf5e…6d1a`](https://explore.qore.network/tx/0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a) (TEAM-RUN), evidence in `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`. |
 | Every recorded hash is real | Run `cd frontend && npm ci && node scripts/reverify.mjs`. |
 
@@ -62,7 +64,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
   - ERC-1271 `isValidSignature` exposes the same check to other contracts. `PqGuard` lets any dApp require a post-quantum approval.
 - **PocketRouter** relays signed intents and can deploy a Pocket on first use. Funds sent to a Pocket's address before it exists are kept.
 - **PocketDrop** (send by link) and **DropPool** (one link, many claimers). The link key binds one recipient (`pqcVerify`). The claim needs the recipient's registered, proven key (`pqcKeyStatus`) and a signature from it (`pqcVerify`).
-- **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents. It cannot forge any of them.
+- **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents as hybrid-signed `MsgCrossVMCall`s (secp256k1 + ML-DSA-87, both checked by the chain before the EVM runs). It cannot forge any intent.
 
 The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects, with tests) is in [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
 
@@ -88,9 +90,8 @@ Explorer: `https://explore.qore.network/tx/<hash>`. The contracts are frozen: no
 
 - **Users** hold their own keys. A browser user's ML-DSA-87 seed is generated independently of the secp256k1 key and stays in that browser. Users should back it up and add guardians. A QoreX wallet user signs with QoreX.
 - **Relayer custody.** The relayer has two keys, and neither can move user funds:
-  - its secp256k1 key, which pays gas. It is stored as an environment variable of the API deployment and as a GitHub Actions secret;
-  - its ML-DSA-87 seed, which is stored only as a GitHub Actions secret. It is used only by the `renew-window` workflow (every 2 hours) to re-open the relayer's scoped EVM window.
-  The window lets the relayer call only the allow-listed contracts (the two v4 routers and the v3 drop), with transaction and value caps. A malicious relayer can delay or refuse service. It cannot forge an intent, a bind or a claim.
+  - its secp256k1 key (`RELAYER_SECP_KEY`) and its ML-DSA-87 seed (`RELAYER_PQC_SEED`). Since 22 Nov 2026 both are environment variables of the API deployment, so every relay is hybrid-signed; both are also GitHub Actions secrets for the manual `renew-window` workflow.
+  The relayer's EVM window is closed, so it has no ECDSA-only path. If an operator re-opens it by hand, it is scoped to the two v4 routers and the v3 drop, with transaction and value caps. Whoever holds both relayer keys can spend the relayer's gas float or delay and refuse service. They cannot forge an intent, a bind or a claim, and cannot move escrow or Pocket funds (`docs/THREAT_MODEL.md`, T14).
 - **Precompiles.** `pqcVerify` (0x0A01) and `pqcKeyStatus` (0x0A02) are assumed correct. `PqcLib` fails closed on any failed call or malformed data, but it cannot detect a precompile that lies.
 - **Links** are bearer secrets until bound: whoever holds an unbound link can choose the recipient. Confirmed mode adds a sender check of the recipient key fingerprint.
 
@@ -116,7 +117,7 @@ cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on
 | [`contracts-v4/`](contracts-v4/) | v4 contracts, Foundry tests, deploy scripts, [LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md), [KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md), [SECURITY.md](contracts-v4/SECURITY.md) |
 | [`backend/`](backend/) | Relayer API (bind, claim, route, sponsor, stats, health, qday) |
 | [`frontend/`](frontend/) | Web app, e2e and QA specs, evidence, re-verification scripts |
-| [`docs/`](docs/) | [AUDIT.md](docs/AUDIT.md), [THREAT_MODEL.md](docs/THREAT_MODEL.md), [qday/FEASIBILITY.md](docs/qday/FEASIBILITY.md) |
+| [`docs/`](docs/) | [AUDIT.md](docs/AUDIT.md), [THREAT_MODEL.md](docs/THREAT_MODEL.md), [qday/FEASIBILITY.md](docs/qday/FEASIBILITY.md), [cbom/](docs/cbom/README.md) |
 | [`contracts/`](contracts/) | Legacy v3 PocketDrop contract and its results |
 | [`AI_USAGE.md`](AI_USAGE.md), [`llms.txt`](llms.txt) | How AI assistance was used; a plain-text map of the repo |
 
@@ -127,8 +128,10 @@ cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on
 | QoreChain kit: accounts, transactions, PQC key registration | `@qorechain/sdk` | Apache-2.0 |
 | QoreChain kit: ML-DSA-87 keys, signing, proof of possession | `@qorechain/pqc` | Apache-2.0 |
 | QoreChain kit: EVM helpers | `@qorechain/evm` | Apache-2.0 |
+| QoreChain kit: QoreX message format and ML-DSA-87 verification in the browser (`/check`) | `@qorechain/qoresign` | Apache-2.0 |
+| Cryptographic bill of materials ([docs/cbom](docs/cbom/README.md)) | QoreScan Community | QoreChain tool |
 | Wallet connection and signing | QoreX wallet | QoreChain product |
-| Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, scoped EVM window | QoreChain network |
+| Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, hybrid `MsgCrossVMCall`, scoped EVM window (closed) | QoreChain network |
 | Contract audit | QCAI (QoreChain AI audit) | QoreChain service |
 | Cosmos transactions | `@cosmjs/stargate`, `cosmjs-types` | Apache-2.0 |
 | EVM client, ABI encoding | `viem` | MIT |
