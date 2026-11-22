@@ -11,7 +11,7 @@ Vercel project: `pocketdrop-api`. Production alias: https://pocketdrop-api.verce
 | `POST /api/claim` | Relayer submits a user-signed `claim(linkId, recipientSig)`. |
 | `GET /api/link/:id` | Reads `getLink(id)` from chain (state/mode names, amounts as wei strings). |
 | `GET /api/stats` | Counts, volume and distinct addresses indexed from contract events, own vs external. |
-| `GET /api/health` | Relayer address, balance, EVM window status (remaining blocks/txs/value), contract, network. 503 if the contract is unset or the window is not live. |
+| `GET /api/health` | Relayer address, balance, EVM window status (remaining blocks/txs/value), contract, network, and a `warnings` list: `relayer-balance` when the balance is below `relayer.lowBalanceThreshold` (3 QOR by default, env `RELAYER_LOW_BALANCE_QOR`; `relayer.lowBalance` is then true) and `relayer-window` when fewer than 2,000 blocks remain or the window is not live. Warnings do not change the status code. 503 if the contract is unset or the window is not live. |
 | `POST /rpc` | Key-less CORS proxy to the CometBFT RPC. Allowed methods: `status abci_info abci_query broadcast_tx_sync broadcast_tx_async tx tx_search block health`. Max 10 calls per batch. |
 | `GET /rest/*` | Key-less CORS proxy to the REST API. Allowed prefixes: `/cosmos/auth/v1beta1/accounts/`, `/cosmos/bank/v1beta1/balances/`, `/cosmos/tx/v1beta1/txs/`, `/cosmos/upgrade/v1beta1/applied_plan/`, `/cosmos/base/tendermint/v1beta1/`, `/qorechain/pqc/v1/`. Path traversal is rejected. |
 
@@ -59,7 +59,7 @@ Default store is in-memory: on serverless each warm instance has its own counter
 
 ## Renewing the relayer window
 
-Automatic: `.github/workflows/renew-window.yml` runs every 2 hours (and on manual dispatch). It renews to the maximum 17,280 blocks (about 6.9 h at ~1.43 s/block) with 500 txs when fewer than 8,000 blocks remain or the window is not live, then fails the run if `/api/health` is still not live. Every 2 h rather than 4 h: 8,000 blocks is only about 3.2 h, so a 4 h cadence could let the window lapse between runs. `/api/health` adds a `warning` when fewer than 2,000 blocks remain.
+Automatic: `.github/workflows/renew-window.yml` runs every 2 hours (and on manual dispatch). It renews to the maximum 17,280 blocks (about 6.9 h at ~1.43 s/block) with 500 txs when fewer than 8,000 blocks remain or the window is not live, then fails the run if `/api/health` is still not live. Every 2 h rather than 4 h: 8,000 blocks is only about 3.2 h, so a 4 h cadence could let the window lapse between runs. `/api/health` lists a `relayer-window` entry in `warnings` when fewer than 2,000 blocks remain.
 
 Manual: the window expires after a number of blocks or txs. When `/api/health` shows `window.live: false` (or bind/claim return `503 RelayerWindowUnavailable`), run locally (needs `.secrets/pocketdrop-relayer.json`):
 
