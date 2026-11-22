@@ -6,6 +6,8 @@ import { Dash } from '../components/bits';
 import { ChevronDown, ShieldAlert, ShieldCheck, TriangleAlert, KeyRound } from '../components/icons';
 import { addrUrl, SOURCE_URL } from '../lib/config';
 import { fmtQor } from '../lib/chain';
+import { baitShare } from '../lib/share';
+import { SharePanel } from '../components/sharePanel';
 import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, intruderFile, whenLine, type AttemptRow, type QdayState, type LiveBait, type TryRow } from '../lib/qday';
 
 const card = 'rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6';
@@ -158,6 +160,7 @@ export default function QdayPage() {
             className="inline-flex min-h-[40px] items-center rounded-full border border-zinc-300 bg-white px-4 font-medium text-zinc-900 hover:bg-stoneBg">{label}</a>
         ))}
       </nav>
+      <SharePanel spec={baitShare(window.location.origin, s?.baits.length ?? 5)} testId="qday-share" label="Challenge someone to try" />
 
       <section className="mb-5 rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-800" data-testid="qday-self-run">
         <b>Our own drill: self-run and always on.</b> We set it up and run it ourselves. An attacker bot tries every bait once an hour (GitHub Actions, since 20 Nov 2026), and the page re-checks the chain every 30 seconds, through judging and after.{' '}

@@ -4,6 +4,8 @@ import { Gift } from './icons';
 import { Pill, SourceBadge } from './ui';
 import sample from '../data/sample-pool.json';
 import { readPool } from '../lib/claim4';
+import { samplePoolShare } from '../lib/share';
+import { SharePanel } from './sharePanel';
 
 export const SAMPLE_POOL_ID = BigInt(sample.poolId);
 export const isSamplePool = (env: string, id: bigint) => env === 'prod' && id === SAMPLE_POOL_ID;
@@ -25,6 +27,7 @@ export function SamplePoolCard({ compact }: { compact?: boolean }) {
           {pool ? (open ? `${left} of ${pool.slots} slots left` : 'all slots used or the pool has ended') : 'reading the pool…'} <SourceBadge kind="LIVE" />
         </span>
       </div>
+      {open && <SharePanel spec={samplePoolShare(window.location.origin, left)} testId="sample-share" label="Share the sample with someone" />}
       {!compact && <p className="mt-2 text-xs text-zinc-500">Pool p{sample.poolId}, funded {sample.totalQor} QOR, open until {new Date(sample.expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}. Testnet QOR has no monetary value.</p>}
     </section>
   );

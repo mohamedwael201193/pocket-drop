@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { Check, Eye, EyeOff, KeyRound, Wallet } from './icons';
-import QRCode from 'qrcode';
+import { Qr } from './qr';
 import { Button, CopyButton, Mono, Notice, Pill, Skel, SourceBadge, TxLink } from './ui';
 import { useAccount, useKeyAccount, usePocketView, useQorexBalance } from '../lib/account';
 import { fundFromQorex } from '../lib/qorex';
@@ -44,13 +44,6 @@ export function ConnectChoices() {
   );
 }
 
-function Qr({ text, alt = 'QR code of the address', testId = 'address-qr' }: { text: string; alt?: string; testId?: string }) {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => { void QRCode.toDataURL(text, { margin: 1, width: 220, errorCorrectionLevel: 'M' }).then(setUrl).catch(() => setUrl(null)); }, [text]);
-  return url
-    ? <img src={url} alt={alt} width={176} height={176} className="rounded-xl border border-zinc-200 bg-white p-2" data-testid={testId} />
-    : <div className="h-[176px] w-[176px] rounded-xl border border-zinc-200" />;
-}
 
 /** The two ways to fund a Pocket: a QoreX native send (when QoreX runs on testnet) or any wallet / the faucet via address + QR. */
 export function FundOptions({ target, label }: { target: Hex; label: string }) {

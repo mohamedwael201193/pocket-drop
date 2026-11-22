@@ -100,3 +100,27 @@ test('/judges: the cost table lists every action with a recorded tx, and the liv
   await t.getByTestId('cost-claim').getByRole('link').click();
   await expect(page.getByTestId('check-verdict')).toBeVisible({ timeout: 90_000 });
 });
+
+test('one-tap share for the sample pool and the bait challenge: prepared in the app, nothing sent until the visitor picks an app', async ({ page }) => {
+  const posts: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && /wa\.me|share|x\.com|twitter/.test(r.url())) posts.push(r.url()); });
+  await page.goto(`${BASE}/receive`);
+  const sp = page.getByTestId('sample-share');
+  await expect(sp).toBeVisible({ timeout: 30_000 });
+  await sp.getByTestId('sample-share-toggle').click();
+  await expect(sp.getByTestId('sample-share-url')).toHaveText(/\/pool\/p\d+#k=[0-9a-f]{64}$/);
+  await expect(sp.getByTestId('sample-share-whatsapp')).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=.*pool%2Fp\d+%23k%3D/);
+  await expect(sp.getByTestId('sample-share-qr')).toBeVisible();
+  await sp.getByTestId('sample-share-copy').click();
+  await expect(sp.getByTestId('sample-share-copy')).toContainText('Copied');
+
+  await page.goto(`${BASE}/qday`);
+  const q = page.getByTestId('qday-share');
+  await q.getByTestId('qday-share-toggle').click();
+  await expect(q.getByTestId('qday-share-text')).toContainText('ML-DSA-87');
+  await expect(q.getByTestId('qday-share-url')).toHaveText(/\/qday$/);
+  await expect(q.getByTestId('qday-share-qr')).toBeVisible();
+  await expect(q.getByTestId('qday-share-whatsapp')).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=.*%2Fqday$/);
+  await expect(q.getByTestId('qday-share-whatsapp')).toHaveAttribute('target', '_blank');
+  expect(posts).toEqual([]);
+});
