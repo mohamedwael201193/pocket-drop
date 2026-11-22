@@ -50,6 +50,7 @@ export const healthSchema = z.object({
     expiryHeight: z.string().optional(), allowedTargets: z.array(z.string()).optional(),
   }).passthrough(),
   warning: z.object({ level: z.string(), message: z.string() }).optional(),
+  warnings: z.array(z.object({ kind: z.string(), level: z.string(), message: z.string() })).optional(),
 });
 export type Health = z.infer<typeof healthSchema>;
 
