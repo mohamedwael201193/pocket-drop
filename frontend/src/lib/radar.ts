@@ -1,8 +1,8 @@
 // Live v4 statistics straight from chain logs (no backend): Pockets deployed, drops and pools, own vs external accounts,
 // and a live pqcKeyStatus sample of recent senders on Diana.
-import { getAbiItem, type Hex } from 'viem';
+import { createPublicClient, getAbiItem, http, type Hex } from 'viem';
 import { dropAbi, factoryAbi, poolAbi } from './abi4';
-import { pub } from './chain';
+import { dianaChain, EVM_RPC } from './config';
 import { keyStatus } from './claim4';
 import { INST, type Env } from './v4';
 import own from '../data/own.json';
@@ -11,14 +11,26 @@ import { fetchXvm, type XvmEvent } from './api';
 const OWN = new Set(Object.values((own as { accounts: Record<string, string> }).accounts).map((a) => a.toLowerCase()));
 export const isOwnAddress = (a: string) => OWN.has(a.toLowerCase());
 const CHUNK = 9000n;
+// Radar reads many log ranges (the RPC caps a getLogs range at 10,000 blocks). One call per range and contract asks for all
+// of that contract's events at once, and up to 8 ranges run at the same time (JSON-RPC batches are slower on this node:
+// measured 6.4 s for a batch of 16 against 1.9 s for 16 parallel calls).
+const pub = createPublicClient({ chain: dianaChain, transport: http(EVM_RPC, { retryCount: 4, retryDelay: 400, timeout: 30_000 }) });
 
-async function logs(address: Hex, event: ReturnType<typeof getAbiItem>, from: bigint, head: bigint) {
-  const out: { args: Record<string, unknown>; transactionHash: Hex; blockNumber: bigint }[] = [];
-  for (let f = from; f <= head; f += CHUNK) {
-    const t = f + CHUNK - 1n > head ? head : f + CHUNK - 1n;
-    const r = (await pub.getLogs({ address, event: event as never, fromBlock: f, toBlock: t })) as unknown as { transactionHash: Hex; blockNumber: bigint; args?: Record<string, unknown> }[];
-    for (const l of r) out.push({ args: l.args ?? {}, transactionHash: l.transactionHash, blockNumber: l.blockNumber });
-  }
+let active = 0; const waiting: (() => void)[] = [];
+async function limited<T>(f: () => Promise<T>): Promise<T> {
+  if (active >= 8) await new Promise<void>((r) => waiting.push(r));
+  active++;
+  try { return await f(); } finally { active--; waiting.shift()?.(); }
+}
+type Row = { eventName: string; args: Record<string, unknown>; transactionHash: Hex; blockNumber: bigint };
+/** Every log of `events` from `address`, one getLogs per 9,000-block range, grouped by event name. */
+async function logsOf(address: Hex, events: ReturnType<typeof getAbiItem>[], from: bigint, head: bigint): Promise<Record<string, Omit<Row, 'eventName'>[]>> {
+  const ranges: [bigint, bigint][] = [];
+  for (let f = from; f <= head; f += CHUNK) ranges.push([f, f + CHUNK - 1n > head ? head : f + CHUNK - 1n]);
+  const parts = await Promise.all(ranges.map(([f, t]) => limited(() => pub.getLogs({ address, events: events as never, fromBlock: f, toBlock: t }) as unknown as Promise<Row[]>)));
+  const out: Record<string, Omit<Row, 'eventName'>[]> = {};
+  for (const e of events) out[(e as { name: string }).name] = [];
+  for (const l of parts.flat()) out[l.eventName]?.push({ args: l.args ?? {}, transactionHash: l.transactionHash, blockNumber: l.blockNumber });
   return out;
 }
 
@@ -82,17 +94,14 @@ export async function envStats(env: Env): Promise<EnvStats> {
   const i = INST[env];
   const head = await pub.getBlockNumber();
   const ev = (abi: readonly unknown[], name: string) => getAbiItem({ abi: abi as never, name } as never);
-  const [deployed, created, bound, confirmed, claimed, cancelled, poolsMade, poolClaims] = await Promise.all([
-    logs(i.factory, ev(factoryAbi, 'PocketDeployed'), i.dropFromBlock, head),
-    logs(i.drop, ev(dropAbi, 'LinkCreated'), i.dropFromBlock, head),
-    logs(i.drop, ev(dropAbi, 'LinkBound'), i.dropFromBlock, head),
-    logs(i.drop, ev(dropAbi, 'LinkConfirmed'), i.dropFromBlock, head),
-    logs(i.drop, ev(dropAbi, 'LinkClaimed'), i.dropFromBlock, head),
-    logs(i.drop, ev(dropAbi, 'LinkCancelled'), i.dropFromBlock, head),
-    logs(i.pool, ev(poolAbi, 'PoolCreated'), i.poolFromBlock, head),
-    logs(i.pool, ev(poolAbi, 'PoolClaimed'), i.poolFromBlock, head),
+  const hybridP = fetchXvm(env).catch(() => null); // native-lane index, fetched while the logs load
+  const [fac, drp, pol] = await Promise.all([
+    logsOf(i.factory, [ev(factoryAbi, 'PocketDeployed')], i.dropFromBlock, head),
+    logsOf(i.drop, ['LinkCreated', 'LinkBound', 'LinkConfirmed', 'LinkClaimed', 'LinkCancelled'].map((n) => ev(dropAbi, n)), i.dropFromBlock, head),
+    logsOf(i.pool, [ev(poolAbi, 'PoolCreated'), ev(poolAbi, 'PoolClaimed')], i.poolFromBlock, head),
   ]);
-  const hybrid = await fetchXvm(env).catch(() => null);
+  const deployed = fac.PocketDeployed, created = drp.LinkCreated, bound = drp.LinkBound, confirmed = drp.LinkConfirmed, claimed = drp.LinkClaimed, cancelled = drp.LinkCancelled, poolsMade = pol.PoolCreated, poolClaims = pol.PoolClaimed;
+  const hybrid = await hybridP;
   mergeHybrid({ PocketDeployed: deployed, LinkCreated: created, LinkBound: bound, LinkConfirmed: confirmed, LinkClaimed: claimed, LinkCancelled: cancelled, PoolCreated: poolsMade, PoolClaimed: poolClaims }, hybrid ?? []);
   const ownerOf = new Map<string, string>(deployed.map((d) => [String(d.args.pocket).toLowerCase(), String(d.args.owner)]));
   const pocketsOwn: Split = { own: 0, external: 0 };
