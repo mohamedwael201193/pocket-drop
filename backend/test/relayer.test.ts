@@ -47,7 +47,7 @@ describe('createRelayer', () => {
   it('send uses explicit gas, legacy gasPrice x1.3, and waits for receipt', async () => {
     const c = mkClients();
     const r = await createRelayer(cfg(), c).send('0xabcd', 900_000n);
-    expect(r).toEqual({ ok: true, hash: HASH, status: 'success', blockNumber: 5n, gasUsed: 123n });
+    expect(r).toEqual({ ok: true, hash: HASH, lane: 'evm', status: 'success', blockNumber: 5n, gasUsed: 123n });
     expect(c.wallet.sendTransaction).toHaveBeenCalledWith(expect.objectContaining({ gas: 900_000n, gasPrice: 130n, type: 'legacy', to: CONTRACT, data: '0xabcd' }));
   });
   it('send classifies window errors and other failures', async () => {

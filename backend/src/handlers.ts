@@ -5,6 +5,8 @@ import { decodeRevert, extractRevertData } from './errors.js';
 import { log } from './log.js';
 import { RULES, type Limiter, type Rule } from './ratelimit.js';
 import type { Relayer } from './relayer.js';
+import { relayMemo } from './hybridRelayer.js';
+import { sendFields } from './route.js';
 import { bindSchema, claimSchema, formatIssues, linkIdSchema } from './validation.js';
 
 export interface HttpResult { status: number; body: Record<string, unknown>; headers?: Record<string, string> }
@@ -59,16 +61,16 @@ async function submit(action: Action, rawBody: unknown, ip: string, d: Deps): Pr
   }
 
   const gas = action === 'bind' ? d.cfg.gasBind : d.cfg.gasClaim;
-  const sent = await relayer.send(data, gas);
+  const sent = await relayer.send(data, gas, relayMemo(['v3', action, v.linkId.toString()]));
   if (!sent.ok) {
     log('error', `${action}.send_failed`, { linkId: v.linkId.toString(), reason: sent.reason, message: sent.message });
     if (sent.reason === 'window') {
       return reply(503, { ok: false, error: { name: 'RelayerWindowUnavailable', message: 'The relayer EVM authorisation window is closed or exhausted. The operator must renew it (scripts/renew-window.mjs). Nothing was submitted.' } }, { 'retry-after': '60' });
     }
-    return reply(502, { ok: false, error: { name: 'SendFailed', message: sent.message } });
+    return reply(502, { ok: false, error: { name: 'SendFailed', message: sent.message }, ...(sent.hash ? { txHash: sent.hash, explorer: EXPLORER_TX + sent.hash } : {}) });
   }
-  log(sent.status === 'success' ? 'info' : 'error', `${action}.done`, { linkId: v.linkId.toString(), txHash: sent.hash, status: sent.status, gasUsed: sent.gasUsed.toString() });
-  const out = { action, linkId: v.linkId.toString(), txHash: sent.hash, status: sent.status, blockNumber: sent.blockNumber.toString(), gasUsed: sent.gasUsed.toString(), gasLimit: gas.toString(), explorer: EXPLORER_TX + sent.hash.replace(/^0x/, '') };
+  log(sent.status === 'success' ? 'info' : 'error', `${action}.done`, { linkId: v.linkId.toString(), lane: sent.lane, txHash: sent.hash, status: sent.status, gasUsed: sent.gasUsed.toString(), fallback: sent.fallbackReason });
+  const out = { action, linkId: v.linkId.toString(), ...sendFields(sent, gas) };
   return sent.status === 'success'
     ? reply(200, { ok: true, ...out })
     : reply(502, { ok: false, ...out, error: { name: 'Reverted', message: 'Transaction was mined but reverted.' } });

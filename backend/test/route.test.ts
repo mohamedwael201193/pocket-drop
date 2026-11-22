@@ -21,10 +21,10 @@ const pocketCfg = () => ({ owner: ADDR, guardians: [] as string[], threshold: 0,
 
 function mk(over: Partial<Relayer> = {}, c = cfg()): { d: RouteDeps; relayer: Relayer; getRouterRelayer: ReturnType<typeof vi.fn> } {
   const relayer: Relayer = {
-    address: ADDR, contract: CONTRACT as any,
+    mode: 'evm', address: ADDR, contract: CONTRACT as any,
     simulate: vi.fn(async () => ({ ok: true as const })),
     estimate: vi.fn(async () => 400_000n),
-    send: vi.fn(async () => ({ ok: true as const, hash: HASH, status: 'success' as const, blockNumber: 99n, gasUsed: 410_000n })),
+    send: vi.fn(async () => ({ ok: true as const, hash: HASH, lane: 'evm' as const, status: 'success' as const, blockNumber: 99n, gasUsed: 410_000n })),
     ...over,
   };
   const getRouterRelayer = vi.fn(() => relayer);
@@ -84,7 +84,7 @@ describe('POST /api/route', () => {
     expect(r.body.explorer).toBe('https://explore.qore.network/tx/' + 'ef'.repeat(32));
     expect(getRouterRelayer).toHaveBeenCalledWith('prod');
     expect(relayer.simulate).toHaveBeenCalledTimes(1);
-    expect(relayer.send).toHaveBeenCalledWith(expect.stringMatching(/^0x/), 560_000n);
+    expect(relayer.send).toHaveBeenCalledWith(expect.stringMatching(/^0x/), 560_000n, `pd route prod relay ${getAddress(POCKET)}`);
     const sent = (relayer.send as any).mock.calls[0][0];
     expect(sent).toBe(encodeRouterCall({ target: getAddress(POCKET), data: '0x1234' }));
   });
@@ -119,7 +119,7 @@ describe('POST /api/route', () => {
     expect((await handleRoute({ target: POCKET, data: '0x12' }, 'a', win.d)).status).toBe(503);
     const rpc = mk({ send: vi.fn(async () => ({ ok: false as const, reason: 'rpc' as const, message: 'down' })) });
     expect((await handleRoute({ target: POCKET, data: '0x12' }, 'b', rpc.d)).status).toBe(502);
-    const rev = mk({ send: vi.fn(async () => ({ ok: true as const, hash: HASH, status: 'reverted' as const, blockNumber: 1n, gasUsed: 1n })) });
+    const rev = mk({ send: vi.fn(async () => ({ ok: true as const, hash: HASH, lane: 'evm' as const, status: 'reverted' as const, blockNumber: 1n, gasUsed: 1n })) });
     const r = await handleRoute({ target: POCKET, data: '0x12' }, 'c', rev.d);
     expect(r.status).toBe(502);
     expect(r.body).toMatchObject({ ok: false, error: { name: 'Reverted' }, txHash: HASH });

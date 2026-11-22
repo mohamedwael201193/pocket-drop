@@ -13,9 +13,9 @@ setSink(() => {});
 const HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`;
 function mk(over: Partial<Relayer> = {}, c = cfg(), pub: any = { readContract: vi.fn() }): { d: Deps; relayer: Relayer } {
   const relayer: Relayer = {
-    address: ADDR, contract: CONTRACT as any,
+    mode: 'evm', address: ADDR, contract: CONTRACT as any,
     simulate: vi.fn(async () => ({ ok: true as const })),
-    send: vi.fn(async () => ({ ok: true as const, hash: HASH, status: 'success' as const, blockNumber: 12n, gasUsed: 500_000n })),
+    send: vi.fn(async () => ({ ok: true as const, hash: HASH, lane: 'evm' as const, status: 'success' as const, blockNumber: 12n, gasUsed: 500_000n })),
     ...over,
   };
   return { d: { cfg: c, limiter: new MemoryLimiter(), getRelayer: () => relayer, pub }, relayer };
@@ -29,7 +29,8 @@ describe('POST /api/bind', () => {
     expect(r.body).toMatchObject({ ok: true, network: 'diana-testnet', status: 'success', txHash: HASH, gasLimit: '900000', blockNumber: '12' });
     expect(r.body.explorer).toBe('https://explore.qore.network/tx/' + 'cd'.repeat(32));
     expect(relayer.simulate).toHaveBeenCalledTimes(1);
-    expect(relayer.send).toHaveBeenCalledWith(expect.stringMatching(/^0x/), 900_000n);
+    expect(relayer.send).toHaveBeenCalledWith(expect.stringMatching(/^0x/), 900_000n, 'pd v3 bind 7');
+    expect(r.body).toMatchObject({ lane: 'evm', signature: expect.stringMatching(/^secp256k1 \(EVM/) });
     const expected = encodeFunctionData({ abi: pocketDropAbi, functionName: 'bind', args: [7n, ADDR, bindBody().recipientKeyHash, bindBody().linkPk, bindBody().linkSig] });
     expect((relayer.send as any).mock.calls[0][0]).toBe(expected);
   });
@@ -61,7 +62,7 @@ describe('POST /api/bind', () => {
     expect((rw.body.error as any).name).toBe('RelayerWindowUnavailable');
     const x = mk({ send: vi.fn(async () => ({ ok: false as const, reason: 'rpc' as const, message: 'nonce too low' })) });
     expect((await handleBind(bindBody(), 'ip', x.d)).status).toBe(502);
-    const y = mk({ send: vi.fn(async () => ({ ok: true as const, hash: HASH, status: 'reverted' as const, blockNumber: 1n, gasUsed: 1n })) });
+    const y = mk({ send: vi.fn(async () => ({ ok: true as const, hash: HASH, lane: 'evm' as const, status: 'reverted' as const, blockNumber: 1n, gasUsed: 1n })) });
     const ry = await handleBind(bindBody(), 'ip', y.d);
     expect(ry.status).toBe(502);
     expect(ry.body).toMatchObject({ ok: false, status: 'reverted', txHash: HASH });
@@ -92,7 +93,7 @@ describe('POST /api/claim', () => {
     const r = await handleClaim(claimBody(), 'ip', d);
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({ action: 'claim', gasLimit: '800000' });
-    expect(relayer.send).toHaveBeenCalledWith(encodeFunctionData({ abi: pocketDropAbi, functionName: 'claim', args: [7n, claimBody().recipientSig] }), 800_000n);
+    expect(relayer.send).toHaveBeenCalledWith(encodeFunctionData({ abi: pocketDropAbi, functionName: 'claim', args: [7n, claimBody().recipientSig] }), 800_000n, 'pd v3 claim 7');
   });
   it('surfaces BadRecipientSignature from simulation', async () => {
     const revert = decodeRevert(encodeErrorResult({ abi: pocketDropAbi, errorName: 'BadRecipientSignature' }));

@@ -1,9 +1,10 @@
-import { encodeFunctionData, type Address, type Hex } from 'viem';
+import { decodeFunctionData, decodeFunctionResult, encodeFunctionData, parseAbi, type Address, type Hex } from 'viem';
 import { routerAbi } from './abi4.js';
 import { EXPLORER_TX, type Config } from './config.js';
 import { log } from './log.js';
 import { RULES, type Limiter } from './ratelimit.js';
-import type { Relayer } from './relayer.js';
+import type { Relayer, SendResult } from './relayer.js';
+import { relayMemo } from './hybridRelayer.js';
 import { reply, type HttpResult } from './handlers.js';
 import { V4_INSTANCES, type V4Env } from './v4.js';
 import { formatIssues, routeSchema } from './validation.js';
@@ -29,6 +30,17 @@ export function encodeRouterCall(v: EncodeInput): Hex {
     return encodeFunctionData({ abi: routerAbi, functionName: 'deployAndRelay', args: [p.owner, p.guardians, p.threshold, p.dailyLimit, p.userSalt, v.data] });
   }
   return encodeFunctionData({ abi: routerAbi, functionName: 'relay', args: [v.target as Address, v.data] });
+}
+
+/** Response fields shared by every relay endpoint: hash, lane, block, gas and, for the hybrid lane, the chain's PQ check. */
+export function sendFields(sent: Extract<SendResult, { ok: true }>, gasLimit: bigint) {
+  return {
+    txHash: sent.hash, lane: sent.lane, status: sent.status, blockNumber: sent.blockNumber.toString(), gasUsed: sent.gasUsed.toString(), gasLimit: gasLimit.toString(),
+    explorer: EXPLORER_TX + sent.hash.replace(/^0x/, ''),
+    signature: sent.lane === 'hybrid' ? 'secp256k1 + ML-DSA-87 (hybrid MsgCrossVMCall)' : 'secp256k1 (EVM tx inside the relayer window)',
+    ...(sent.lane === 'hybrid' ? { hybridVerified: !!sent.hybridVerified, feeUqor: sent.feeUqor, ...(sent.failure ? { failure: sent.failure } : {}) } : {}),
+    ...(sent.fallbackReason ? { fallbackReason: sent.fallbackReason } : {}),
+  };
 }
 
 /** Gas limit = clamp(estimate * pct, min, max); the cap applies when the node cannot estimate. */
@@ -80,17 +92,48 @@ export async function handleRoute(rawBody: unknown, ip: string, d: RouteDeps): P
 
   const est = relayer.estimate ? await relayer.estimate(data) : null;
   const gas = pickGas(d.cfg, est, !!v.pocket);
-  const sent = await relayer.send(data, gas);
+  const memo = relayMemo(['route', v.env, action, v.pocket ? v.pocket.owner : v.target]);
+  const sent = await relayer.send(data, gas, memo);
   if (!sent.ok) {
     log('error', 'route.send_failed', { env: v.env, action, reason: sent.reason, message: sent.message });
     if (sent.reason === 'window') {
       return reply(503, { ok: false, error: { name: 'RelayerWindowUnavailable', message: 'The relayer EVM authorisation window is closed or exhausted. The operator must renew it (scripts/renew-window.mjs). Nothing was submitted.' } }, { 'retry-after': '60' });
     }
-    return reply(502, { ok: false, error: { name: 'SendFailed', message: sent.message } });
+    return reply(502, { ok: false, error: { name: 'SendFailed', message: sent.message }, ...(sent.hash ? { txHash: sent.hash, explorer: EXPLORER_TX + sent.hash } : {}) });
   }
-  log(sent.status === 'success' ? 'info' : 'error', 'route.done', { env: v.env, action, txHash: sent.hash, status: sent.status, gasUsed: sent.gasUsed.toString() });
-  const out = { action, env: v.env, router, txHash: sent.hash, status: sent.status, blockNumber: sent.blockNumber.toString(), gasUsed: sent.gasUsed.toString(), gasLimit: gas.toString(), explorer: EXPLORER_TX + sent.hash.replace(/^0x/, '') };
+  log(sent.status === 'success' ? 'info' : 'error', 'route.done', { env: v.env, action, lane: sent.lane, txHash: sent.hash, status: sent.status, gasUsed: sent.gasUsed.toString(), fallback: sent.fallbackReason });
+  const out = { action, env: v.env, router, ...sendFields(sent, gas), result: sent.lane === 'hybrid' ? decodeRouteReturn(action, v.data, sent.returnData) : {} };
   return sent.status === 'success'
     ? reply(200, { ok: true, ...out })
     : reply(502, { ok: false, ...out, error: { name: 'Reverted', message: 'Transaction was mined but reverted.' } });
+}
+
+const VAULT_RET = parseAbi([
+  'function createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes) returns (uint256)',
+  'function createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes) returns (uint256)',
+  'function spend(address,uint256,uint256,bytes) returns (uint256)',
+]);
+const RET_KEY: Record<string, 'linkId' | 'poolId' | 'queuedId'> = { createDrop: 'linkId', createPool: 'poolId', spend: 'queuedId' };
+
+/**
+ * Read a hybrid relay's result from the router's return value (a cross-VM call leaves no EVM log, so the new link,
+ * pool or queued-spend id comes from here). `returnData` is PocketRouter.relay's `bytes` or deployAndRelay's `(address, bytes)`.
+ */
+export function decodeRouteReturn(action: 'relay' | 'deployAndRelay', innerData: Hex, returnData: Hex | undefined): Record<string, string> {
+  if (!returnData || returnData === '0x') return {};
+  const out: Record<string, string> = {};
+  let inner: Hex;
+  try {
+    if (action === 'deployAndRelay') {
+      const [pocket, ret] = decodeFunctionResult({ abi: routerAbi, functionName: 'deployAndRelay', data: returnData }) as unknown as [Hex, Hex];
+      out.pocket = pocket; inner = ret;
+    } else inner = decodeFunctionResult({ abi: routerAbi, functionName: 'relay', data: returnData }) as unknown as Hex;
+  } catch { return out; }
+  out.innerReturn = inner;
+  try {
+    const { functionName } = decodeFunctionData({ abi: VAULT_RET, data: innerData });
+    const id = decodeFunctionResult({ abi: VAULT_RET, functionName, data: inner }) as unknown as bigint;
+    out[RET_KEY[functionName]] = id.toString();
+  } catch { /* not an id-returning vault call */ }
+  return out;
 }
