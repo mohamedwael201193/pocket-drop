@@ -10,6 +10,7 @@ import { fmtQor, pub } from '../lib/chain';
 import { useHealth } from '../lib/queries';
 import tests from '../data/tests.json';
 import { SamplePoolCard } from '../components/samplePool';
+import { REQUIREMENTS } from '../data/requirements';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
 const CONTRACTS = [['router', 'PocketRouter'], ['factory', 'PocketFactory'], ['vaultImpl', 'PocketVault (clone implementation)'], ['drop', 'PocketDrop'], ['pool', 'DropPool']] as const;
@@ -59,6 +60,30 @@ export default function JudgesPage() {
           <Link className="inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/qday" data-testid="judges-qday">Open the Q-Day Drill</Link>
         </Item>
 
+        <section className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid="req-table">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h2 className="text-sm font-semibold leading-snug text-zinc-900">Every track requirement: code, live transaction, test</h2>
+            <SourceBadge kind="RECORDED" title="Hashes from contracts-v4/deployments/diana.json and frontend/evidence; reverify.mjs re-checks each one" />
+          </div>
+          <p className="mt-1.5 text-xs text-zinc-500">Each hash opens the explorer. Rows that say reverted are attacks the chain refused. Test names are Foundry tests in <code>contracts-v4/test</code> unless marked.</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[46rem] border-collapse text-left text-xs">
+              <thead><tr className="border-b border-zinc-200 text-zinc-500"><th className="w-[24%] py-2 pr-3 font-medium">Requirement</th><th className="w-[24%] py-2 pr-3 font-medium">Code</th><th className="w-[30%] py-2 pr-3 font-medium">Live on Diana</th><th className="py-2 font-medium">Test</th></tr></thead>
+              <tbody>{REQUIREMENTS.map((r) => (
+                <tr key={r.id} className="border-b border-zinc-100 align-top last:border-0" data-testid={`req-${r.id}`}>
+                  <td className="py-2 pr-3 text-zinc-900">{r.requirement}</td>
+                  <td className="py-2 pr-3"><ul className="space-y-1">{r.code.map((c) => <li key={c.path}><a className="break-words underline" href={blob(c.path)} target="_blank" rel="noopener noreferrer">{c.label}</a></li>)}</ul></td>
+                  <td className="py-2 pr-3"><ul className="space-y-1">
+                    {r.liveHealth && <li data-testid="req-window-live"><SourceBadge kind="LIVE" /> {h ? <>window {h.window.live ? 'live' : 'closed'}, allowed targets {(h.window.allowedTargets ?? []).length ? (h.window.allowedTargets ?? []).map((a) => <Mono key={a}>{a.slice(0, 8)}…</Mono>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, ', ', el] : [el]), []) : '–'}</> : 'reading /api/health…'}</li>}
+                    {r.live.map((t) => <li key={t.label}>{t.hash ? <a className="underline" href={txUrl(t.hash)} target="_blank" rel="noopener noreferrer">{t.label}</a> : <>{t.label}{t.note && <span className="text-zinc-500"> ({t.note})</span>}</>}</li>)}
+                  </ul></td>
+                  <td className="py-2"><ul className="space-y-1 font-mono text-[11px] text-zinc-700">{r.tests.map((t) => <li key={t} className="break-words">{t}</li>)}</ul></td>
+                </tr>))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <Item n={2} title="The v4 contracts are on Diana (two instances: production and a 60 s lab)" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
           <div className="overflow-x-auto rounded-xl bg-stoneBg p-3" data-testid="v4-addresses">
             <table className="w-full min-w-[34rem] text-left font-mono text-xs">
@@ -98,6 +123,7 @@ export default function JudgesPage() {
               <li>EVM window: <strong>{h.window.live ? 'live' : 'closed'}</strong>, {h.window.remainingTxs ?? '–'} txs left, allowed targets: <Mono>{Array.isArray((h.window as { allowedTargets?: string[] }).allowedTargets) ? (h.window as { allowedTargets: string[] }).allowedTargets.join(', ') : '–'}</Mono></li>
               <li>It cannot sign for anyone: <code>POST /api/route</code> simulates each signed intent with eth_call through the router and answers 422 with the decoded error, sending nothing, if it would revert.</li>
               {h.warning && <li className="text-amber-800">{h.warning.message}</li>}
+              {(h.warnings ?? []).map((w) => <li key={w.kind} className="text-amber-800">{w.message}</li>)}
             </ul>
           )}
         </Item>
@@ -140,7 +166,7 @@ export default function JudgesPage() {
               'A thief who holds the owner key can spend up to the daily limit before the guardians freeze the Pocket (the freeze is guardian-signed, so it is only as fast as your guardians).',
               'A Drop Pool slot goes to a distinct proof-of-possession account, not a person: one person can hold many accounts.',
               'The sender can still lose a link: whoever opens it first becomes the recipient (Confirmed mode adds a 4-word check).',
-              'The browser key lives in the browser. Back it up and add guardians; QoreX signing is not used because QoreX is mainnet-only today.',
+              'The browser key lives in the browser. Back it up and add guardians. QoreX can fund a Pocket, and one real QoreX signature has spent a Pocket through the router (TEAM-RUN), but the default flow signs with the browser key.',
               'The drip and relayer fee are paid at first open and cannot be recovered by the sender.',
             ].map((l) => <li key={l} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" aria-hidden />{l}</li>)}
           </ul>
