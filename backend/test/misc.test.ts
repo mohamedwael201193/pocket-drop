@@ -76,6 +76,17 @@ describe('health', () => {
     expect(evm.relay).toMatchObject({ mode: 'evm', fallback: 'none', classicalPathOpen: true });
     expect((await getHealth({ ...hy, relayFallback: false }, pub, rest({ live: false }), {}) as any).relay.fallback).toBe('none');
   });
+  it('hybrid lane: says where the ML-DSA-87 key lives and reads the isolated signer\'s public facts', async () => {
+    const pub = { getBalance: vi.fn(async () => 5n * 10n ** 18n), getBlockNumber: vi.fn(async () => 1n) } as any;
+    const inproc: any = await getHealth(cfg({ relayMode: 'hybrid', relayerPqc: ('0x' + '22'.repeat(32)) as any }), pub, rest({ live: false }), {});
+    expect(inproc.relay.pqSigner).toBe('in-process');
+    expect(inproc.relay.pqSignerFacts).toBeUndefined();
+    const f = vi.fn(async (u: string) => ({ ok: true, status: 200, json: async () => (u.startsWith('https://signer') ? { ok: true, pqPublicKeyKeccak: '0xab', relayer: 'qor1x', signedThisHour: 3 } : { live: false }) })) as any;
+    const iso: any = await getHealth(cfg({ relayMode: 'hybrid', pqSignerUrl: 'https://signer.example/api/pq-sign', pqSignerHmac: 'k'.repeat(40) }), pub, f, {});
+    expect(iso.relay).toMatchObject({ pqSigner: 'isolated', pqSignerFacts: { reachable: true, pqPublicKeyKeccak: '0xab', signedThisHour: 3 } });
+    const down = vi.fn(async (u: string) => { if (u.startsWith('https://signer')) throw new Error('down'); return { ok: true, status: 200, json: async () => ({ live: false }) }; }) as any;
+    expect((await getHealth(cfg({ relayMode: 'hybrid', pqSignerUrl: 'https://signer.example/api/pq-sign', pqSignerHmac: 'k'.repeat(40) }), pub, down, {}) as any).relay.pqSignerFacts).toEqual({ reachable: false });
+  });
   it('window query failures are reported not thrown', async () => {
     expect(await getWindow(cfg(), 'qor1x', rest({}, false))).toMatchObject({ queryable: false, error: 'rest 500' });
     expect(await getWindow(cfg(), 'qor1x', (async () => { throw new Error('net'); }) as any)).toMatchObject({ queryable: false, error: 'net' });

@@ -1,7 +1,7 @@
 // Bundled entry for the hybrid signers (sponsor MsgSend, relayer MsgCrossVMCall). @cosmjs 0.39 require()s ESM-only @noble/@scure packages, which the
 // Vercel Node runtime refuses, so scripts/bundle-signer.mjs bundles this file and its deps into vendor/sponsor-signer.mjs
 // (plain ESM, no runtime require). Rebuild it after changing this file or bumping @qorechain/sdk.
-import { EthNativeSigner, bank, crossvm, getNetwork, unifiedAccountFromSeed } from '@qorechain/sdk';
+import { EthNativeSigner, bank, crossvm, getNetwork, resolveSignBytesVersion, unifiedAccountFromSeed } from '@qorechain/sdk';
 
 const hexBytes = (h: string) => Uint8Array.from(Buffer.from(h.replace(/^0x/, ''), 'hex'));
 
@@ -57,3 +57,13 @@ export async function signCrossVm(i: SignCrossVmIn): Promise<{ from: string; txB
   } as never) as unknown as { txRawBytes: Uint8Array };
   return { from: acct.cosmos, txBytes: Buffer.from(signed.txRawBytes).toString('base64') };
 }
+
+// Split hybrid signing (API half): see pqSplit.ts. Bundled here so the Vercel runtime loads the SDK only from the bundle.
+export { assembleHybrid, crossVmParts } from './pqSplit.js';
+const versions = new Map<string, Promise<'v1' | 'v2'>>();
+/** Hybrid sign-bytes form the chain expects now (cached per instance). */
+export const signBytesVersion = (rest: string): Promise<'v1' | 'v2'> => {
+  let v = versions.get(rest);
+  if (!v) { v = resolveSignBytesVersion({ chainId: getNetwork('testnet').chainId, rest }) as Promise<'v1' | 'v2'>; versions.set(rest, v); v.catch(() => versions.delete(rest)); }
+  return v;
+};

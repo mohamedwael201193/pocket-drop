@@ -18,7 +18,11 @@ export interface Config {
   relayerKey: Hex | null;
   /** The relayer's ML-DSA-87 seed (32 bytes hex). With it, relays go out as hybrid-signed MsgCrossVMCall (no EVM window). */
   relayerPqc: Hex | null;
-  /** 'hybrid' (default when relayerPqc is set) or 'evm' (ECDSA-only EVM tx inside the relayer's EVM window). */
+  /** Isolated ML-DSA-87 signer (a separate function that holds only the PQ seed): URL and the shared HMAC key. When set,
+   *  relays are signed in two halves (secp256k1 here, ML-DSA-87 there) and this API never needs RELAYER_PQC_SEED. */
+  pqSignerUrl: string | null;
+  pqSignerHmac: string | null;
+  /** 'hybrid' (default when relayerPqc or the isolated signer is set) or 'evm' (ECDSA-only EVM tx inside the relayer's EVM window). */
   relayMode: 'hybrid' | 'evm';
   /** Fall back to the EVM window when a hybrid tx cannot be signed or is refused before it executes (default on; RELAY_FALLBACK=none
    *  turns it off). With the window closed the fallback is refused by the chain, so it can never add a classical-only path. */
@@ -45,6 +49,8 @@ const hexKey = (v: string | undefined): Hex | null => {
   return /^0x[0-9a-fA-F]{64}$/.test(k) ? k : null;
 };
 
+const pqUrl = (v: string | undefined): string | null => (v && /^https:\/\/[^\s]+$/.test(v.trim()) ? v.trim().replace(/\/$/, '') : null);
+
 const num = (v: string | undefined, d: bigint): bigint => {
   if (!v || !/^\d+$/.test(v.trim())) return d;
   return BigInt(v.trim());
@@ -58,7 +64,9 @@ export function getConfig(env: Env = process.env): Config {
     contract: contract && /^0x[0-9a-fA-F]{40}$/.test(contract) ? (contract as Hex) : null,
     relayerKey: hexKey(env.RELAYER_SECP_KEY),
     relayerPqc: hexKey(env.RELAYER_PQC_SEED),
-    relayMode: env.RELAY_MODE?.trim().toLowerCase() === 'evm' || !hexKey(env.RELAYER_PQC_SEED) ? 'evm' : 'hybrid',
+    pqSignerUrl: pqUrl(env.PQ_SIGNER_URL),
+    pqSignerHmac: env.PQ_SIGNER_HMAC && env.PQ_SIGNER_HMAC.trim().length >= 32 ? env.PQ_SIGNER_HMAC.trim() : null,
+    relayMode: env.RELAY_MODE?.trim().toLowerCase() === 'evm' || !(hexKey(env.RELAYER_PQC_SEED) || (pqUrl(env.PQ_SIGNER_URL) && (env.PQ_SIGNER_HMAC?.trim().length ?? 0) >= 32)) ? 'evm' : 'hybrid',
     relayFallback: env.RELAY_FALLBACK?.trim().toLowerCase() !== 'none',
     deployBlock: env.POCKETDROP_DEPLOY_BLOCK && /^\d+$/.test(env.POCKETDROP_DEPLOY_BLOCK.trim()) ? BigInt(env.POCKETDROP_DEPLOY_BLOCK.trim()) : null,
     statsLookback: num(env.STATS_LOOKBACK_BLOCKS, 150_000n),

@@ -2,6 +2,17 @@ import { formatEther, parseEther, type PublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { NETWORK, EVM_CHAIN_ID, COSMOS_CHAIN_ID, type Config } from './config.js';
 import { evmToQor } from './relayer.js';
+import { pqSignerKind } from './hybridRelayer.js';
+
+/** Public facts of the isolated ML-DSA-87 signer (GET on it), so /api/health can show which key it holds. */
+export async function pqSignerFacts(cfg: Pick<Config, 'pqSignerUrl'>, f: typeof fetch = fetch): Promise<{ reachable: boolean; pqPublicKeyKeccak?: string; relayer?: string; signedThisHour?: number } | null> {
+  if (!cfg.pqSignerUrl) return null;
+  try {
+    const r = await f(cfg.pqSignerUrl, { signal: AbortSignal.timeout(8_000) });
+    const j = (await r.json()) as { ok?: boolean; pqPublicKeyKeccak?: string; relayer?: string; signedThisHour?: number };
+    return r.ok && j.ok ? { reachable: true, pqPublicKeyKeccak: j.pqPublicKeyKeccak, relayer: j.relayer, signedThisHour: j.signedThisHour } : { reachable: false };
+  } catch { return { reachable: false }; }
+}
 
 export interface WindowStatus {
   queryable: boolean; found?: boolean; live?: boolean; remainingBlocks?: string; remainingTxs?: string; remainingValue?: string;
@@ -54,7 +65,7 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };
   const address = privateKeyToAccount(cfg.relayerKey).address;
   const qor = evmToQor(address);
-  const [bal, head, win] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f)]);
+  const [bal, head, win, pqs] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f)]);
   const balance = bal.status === 'fulfilled' ? bal.value : null;
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
   const threshold = lowBalanceThresholdWei(env);
@@ -83,6 +94,9 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
       fallback: hybrid && cfg.relayFallback ? 'evm-window' : 'none',
       /** true while the chain would accept an ECDSA-only EVM tx from the relayer (its window is live) */
       classicalPathOpen: !!(window as WindowStatus).live,
+      /** where the relayer's ML-DSA-87 key lives: 'isolated' = a separate function with only that key; 'in-process' = this API */
+      pqSigner: hybrid ? pqSignerKind(cfg) : null,
+      ...(hybrid && cfg.pqSignerUrl ? { pqSignerFacts: pqs.status === 'fulfilled' ? pqs.value : { reachable: false } } : {}),
     },
     warnings,
     contractConfigured: !!cfg.contract,
