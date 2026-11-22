@@ -41,7 +41,7 @@ function QdayTeaser() {
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-stone-300">— Q-DAY DRILL</p>
           <h2 className="mt-3 font-serif text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl">We published the classical keys. Try to take the QOR.</h2>
-          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-stone-300">On Q-Day a quantum computer can work out today&apos;s wallet keys. We rehearse it now: five real Pockets on Diana have their classical keys on the page, and only the post-quantum key can move their QOR. You can try from your own browser tab.</p>
+          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-stone-300">On Q-Day a quantum computer can work out today&apos;s wallet keys. We rehearse it now: five real Pockets on Diana have their classical keys on the page, and only the post-quantum key can move their QOR. You can try from your own browser tab. This is our own drill, self-run and always on; it is separate from the organisers&apos; 18 Nov drill.</p>
           <Link to="/qday" className="mt-6 inline-flex items-center gap-2 rounded-full bg-stone-50 px-5 py-3 text-sm font-medium text-zinc-950 transition-all hover:-translate-y-0.5" data-testid="landing-qday-open">Open the Q-Day Drill <ChevronRight className="h-4 w-4" aria-hidden /></Link>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
