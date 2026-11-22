@@ -1,6 +1,6 @@
 // Local operator script (testnet). Opens/renews the relayer EVM authorisation window, scoped to an explicit target
 // list (v4: [PocketRouter prod, PocketRouter lab, PocketDrop v3]) with a value cap. Needs the relayer ML-DSA key from .secrets/ (hybrid-signed MsgOpenEVMWindow); that key never
-// leaves this machine and is never given to the serverless function.
+// stays out of the logs. Since 22 Nov 2026 the API also holds it (hybrid relays) and this script is the manual fallback.
 //
 // Usage: node scripts/renew-window.mjs [--blocks 17280] [--txs 500] [--tx-gas 1000000] [--wait-minutes 0] [--if-below 8000]
 //   --if-below N  only renew when the window is not live or has fewer than N blocks left (used by the scheduled workflow).

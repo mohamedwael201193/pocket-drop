@@ -46,3 +46,18 @@ describe('mergeHybrid (radar)', () => {
     expect(l.LinkBound[0].blockNumber).toBe(12n);
   });
 });
+
+describe('relayerUp', () => {
+  const base = { ok: true, network: 'diana-testnet', headBlock: '1', relayer: null, window: { live: false } } as never;
+  it('hybrid lane: up while the API is healthy, even with the EVM window closed', async () => {
+    const { relayerUp } = await import('../src/lib/api');
+    expect(relayerUp({ ...(base as object), relay: { mode: 'hybrid', signature: '', fallback: '', classicalPathOpen: false } } as never)).toBe(true);
+    expect(relayerUp({ ...(base as object), ok: false, relay: { mode: 'hybrid', signature: '', fallback: '', classicalPathOpen: false } } as never)).toBe(false);
+  });
+  it('EVM lane (or an older API without relay): up only with a live window', async () => {
+    const { relayerUp } = await import('../src/lib/api');
+    expect(relayerUp(base)).toBe(false);
+    expect(relayerUp({ ...(base as object), window: { live: true } } as never)).toBe(true);
+    expect(relayerUp(undefined)).toBe(false);
+  });
+});

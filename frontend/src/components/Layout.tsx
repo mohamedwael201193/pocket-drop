@@ -8,7 +8,7 @@ import { ChevronDown, FlaskConical, Hexagon, Inbox, KeyRound, Radio, RefreshCw, 
 import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
 import { INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';
-import { RELAYER_PAUSED } from '../lib/api';
+import { RELAYER_PAUSED, relayerUp } from '../lib/api';
 import { cx } from './ui';
 import v4 from '../data/v4.json';
 import { titleFor } from '../lib/titles';
@@ -45,12 +45,12 @@ function SyncChip() {
   const qc = useQueryClient();
   const { data: h, isError } = useHealth();
   const fetching = useIsFetching({ queryKey: ['health'] }) + useIsFetching({ queryKey: ['stats'] }) > 0;
-  const label = fetching && !h ? 'Connecting to Diana…' : isError ? 'Diana 9800 · API offline' : h ? (h.window.live ? 'Diana 9800 · live' : 'Diana 9800 · relayer paused') : 'Diana 9800';
+  const label = fetching && !h ? 'Connecting to Diana…' : isError ? 'Diana 9800 · API offline' : h ? (relayerUp(h) ? 'Diana 9800 · live' : 'Diana 9800 · relayer paused') : 'Diana 9800';
   return (
     <button type="button" data-testid="testnet-badge" title="Diana testnet, chain id 9800. Click to re-read the relayer and stats."
       onClick={() => { void qc.invalidateQueries(); }}
       className="inline-flex min-h-[40px] items-center gap-2 rounded-full px-3 py-1.5 text-[13px] font-medium text-invMuted transition-colors hover:text-stone-50">
-      {h?.window.live && !isError ? <span className="live-dot animate-pulseDot" aria-hidden /> : <RefreshCw className={cx('h-3.5 w-3.5', fetching && 'animate-spin')} aria-hidden />}
+      {relayerUp(h) && !isError ? <span className="live-dot animate-pulseDot" aria-hidden /> : <RefreshCw className={cx('h-3.5 w-3.5', fetching && 'animate-spin')} aria-hidden />}
       <span>{label}</span>
     </button>
   );
@@ -58,7 +58,7 @@ function SyncChip() {
 
 function RelayerBanner() {
   const { data: h } = useHealth();
-  if (!h || h.window.live !== false) return null;
+  if (!h || relayerUp(h)) return null;
   return <div role="alert" data-testid="relayer-banner" className="border-b border-amber-300 bg-amber-50 px-4 py-2 text-center text-xs text-amber-950">{RELAYER_PAUSED}</div>;
 }
 

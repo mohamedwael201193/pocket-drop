@@ -43,4 +43,4 @@ npm ci
 node script/deploy.mjs [--check]            # prod (24 h / 48 h / freeze 72 h / unanimous 72 h) and lab instances
 node test/live/run.mjs                      # every success path and lab attack as mined txs
 ```
-The relayer window is renewed with `node ../backend/scripts/renew-window.mjs` (targets: both routers and PocketDrop v3); the scheduled workflow does the same.
+Relays are hybrid-signed `MsgCrossVMCall`s (no EVM window). The relayer's EVM window is closed; `node ../backend/scripts/renew-window.mjs` (targets: both routers and PocketDrop v3) or the manual workflow re-opens it as a fallback.

@@ -226,7 +226,7 @@ export default function LandingPage() {
           </Reveal>
 
           <Reveal delay={0.08} className="flex flex-col justify-between rounded-3xl border border-zinc-200/90 bg-white/90 p-6 text-center shadow-sm md:col-span-3">
-            <div className="font-mono text-xs uppercase tracking-widest text-zinc-500">Relayer Scoped Window</div>
+            <div className="font-mono text-xs uppercase tracking-widest text-zinc-500">{h?.relay?.mode === 'hybrid' ? 'Relayer Hybrid Signature' : 'Relayer Scoped Window'}</div>
             <div className="my-4 flex items-center justify-center">
               <div className="relative flex h-28 w-28 items-center justify-center rounded-full border border-dashed border-zinc-300">
                 <div className="titanium-plaque relative flex h-20 w-20 items-center justify-center rounded-full">
@@ -235,10 +235,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <div className="text-sm font-semibold text-zinc-900">[PocketDrop] Only</div>
-              <div className="mt-0.5 text-xs text-zinc-500">ML-DSA key not on the server</div>
+              <div className="text-sm font-semibold text-zinc-900">{h?.relay?.mode === 'hybrid' ? 'secp256k1 + ML-DSA-87' : '[PocketDrop] Only'}</div>
+              <div className="mt-0.5 text-xs text-zinc-500">{h?.relay?.mode === 'hybrid' ? 'every relay, checked by the chain' : 'ECDSA tx inside a scoped window'}</div>
               <div className="mt-3 border-t border-zinc-100 pt-2 font-mono text-xs text-zinc-400" data-testid="landing-window">
-                {h ? (h.window.live ? `Window live · ${left} blocks left` : 'Window expired · renewing') : 'Reading the relayer window…'} <SourceBadge kind="LIVE" />
+                {h ? (h.relay?.mode === 'hybrid' ? (h.relay.classicalPathOpen ? `ECDSA window still open · ${left} blocks` : 'ECDSA-only path closed') : h.window.live ? `Window live · ${left} blocks left` : 'Window closed') : 'Reading the relayer…'} <SourceBadge kind="LIVE" />
               </div>
             </div>
           </Reveal>

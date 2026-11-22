@@ -114,7 +114,10 @@ export const postRoute = (p: { env: 'prod' | 'lab'; target?: string; data: strin
 export const postBind = (p: { linkId: string; recipient: string; recipientKeyHash: string; linkPk: string; linkSig: string }) => post('/api/bind', p, txOk);
 export const postClaim = (p: { linkId: string; recipientSig: string }) => post('/api/claim', p, txOk);
 
-export const RELAYER_PAUSED = "The relayer's EVM window has expired, so it cannot submit transactions for you right now. Your funds are safe and still in escrow: nothing was sent and nothing was lost. Retry in a few minutes, after the relayer window is renewed.";
+/** Can the relayer submit right now? Hybrid lane: the API is healthy (no EVM window needed). EVM lane: the window is live. */
+export const relayerUp = (h: Health | undefined): boolean => !!h && (h.relay?.mode === 'hybrid' ? h.ok : h.window.live === true);
+
+export const RELAYER_PAUSED = "The relayer cannot submit transactions for you right now. Your funds are safe and still in escrow: nothing was sent and nothing was lost. Retry in a few minutes.";
 
 /** Plain-language text for the contract/relayer errors a person can actually hit. */
 export function explainError(e: unknown): string {
