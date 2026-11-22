@@ -42,10 +42,12 @@ test('receive: the TEAM-HOSTED sample pool is offered and opens with its label',
   await page.screenshot({ path: `${SHOTS}/sample-pool-${page.viewportSize()!.width}.png`, fullPage: true });
 });
 
-test('judges: the Q-Day Drill is step 1, both QCAI stages and the sample pool are listed', async ({ page }) => {
+test('judges: the Q-Day Drill is step 1, the requirement table has every row, both QCAI stages and the sample pool are listed', async ({ page }) => {
   await page.goto(`${BASE}/judges`);
   await expect(page).toHaveTitle('Judges checklist · Pocket Drop');
   await expect(page.getByRole('heading', { level: 2 }).first()).toHaveText('Start here: the Q-Day Drill');
+  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(10);
+  await expect(page.getByTestId('req-pqc-verify')).toContainText('pqcVerify');
   await expect(page.getByTestId('qcai')).toContainText('Stage 2');
   await expect(page.getByTestId('qcai')).toContainText('78');
   await expect(page.getByTestId('test-others')).toContainText(/\d+ frontend and \d+ backend unit tests pass/);
