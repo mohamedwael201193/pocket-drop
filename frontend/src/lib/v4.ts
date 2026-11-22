@@ -22,8 +22,8 @@ const mk = (e: Env) => {
 export const INST = { prod: mk('prod'), lab: mk('lab') } as const;
 export type Inst = (typeof INST)[Env];
 
-/** Drip must cover the newcomer's PQ registration fee (0.06 QOR) with margin; the relayer fee covers the relayer's bind gas. */
-export const DEFAULTS = { drip: parseEther('0.1'), relayerFee: parseEther('0.06'), dailyLimit: parseEther('5'), ttlSeconds: 7 * 86400 } as const;
+/** Drip must cover the newcomer's PQ registration fee (0.06 QOR) with margin. The delivery fee (relayerFee) is per mode, from measured relay costs: lib/fees.ts. */
+export const DEFAULTS = { drip: parseEther('0.1'), dailyLimit: parseEther('5'), ttlSeconds: 7 * 86400 } as const;
 export const REGISTRATION_FEE_WEI = parseEther('0.06');
 export const ZERO_SALT = ('0x' + '00'.repeat(32)) as Hex;
 export const ZERO_ADDR = '0x0000000000000000000000000000000000000000' as Hex;

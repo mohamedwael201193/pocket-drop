@@ -13,6 +13,7 @@ import { createDrop, createPool } from '../lib/actions';
 import { claimUrl4, linkId4 } from '../lib/claim4';
 import { rememberNonce } from '../lib/links4';
 import { DEFAULTS, INST, REGISTRATION_FEE_WEI, createdId } from '../lib/v4';
+import { deliveryFeeWei, deliverySteps } from '../lib/fees';
 import { explainError } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { useSponsorStatus } from '../lib/sponsor';
@@ -49,7 +50,8 @@ export default function SendPage() {
 
   const ready = !!a.acct && key.ready;
   const amt = parseQor(amount);
-  const total = amt !== null ? amt + DEFAULTS.drip + DEFAULTS.relayerFee : null;
+  const fee = deliveryFeeWei(mode);
+  const total = amt !== null ? amt + DEFAULTS.drip + fee : null;
   // why the form is locked, said next to every disabled control (UX-1)
   const lockReason = !a.root ? 'Locked: create your key in step 1 first.'
     : !a.acct ? 'Loading your key…'
@@ -59,7 +61,7 @@ export default function SendPage() {
   const dropProblem = amt === null ? (amountFormatProblem(amount) ?? 'Enter an amount like 0.3.')
     : amt < inst.minEscrow ? `The minimum is ${fmtQor(inst.minEscrow)} QOR.`
     : amt > inst.maxAmount ? `The maximum is ${fmtQor(inst.maxAmount)} QOR.`
-    : pv && total! > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR; this drop needs ${fmtQor(total!)} QOR (amount + ${fmtQor(DEFAULTS.drip)} for the receiver's setup fee + ${fmtQor(DEFAULTS.relayerFee)} relayer fee).`
+    : pv && total! > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR; this drop needs ${fmtQor(total!)} QOR (amount + ${fmtQor(DEFAULTS.drip)} for the receiver's setup fee + ${fmtQor(fee)} delivery fee).`
     : pv && pv.deployed && total! > pv.allowanceLeft ? `Your daily limit has ${fmtQor(pv.allowanceLeft)} QOR left; this drop needs ${fmtQor(total!)} QOR.`
     : pv && !pv.deployed && total! > DEFAULTS.dailyLimit ? `A new Pocket's daily limit is ${fmtQor(DEFAULTS.dailyLimit)} QOR.`
     : pv?.frozen ? 'This Pocket is frozen by its guardians.' : null;
@@ -80,7 +82,7 @@ export default function SendPage() {
     if (!a.actionCtx || !a.root || amt === null) return;
     setBusy('drop'); setErr(null); setMade(null);
     try {
-      const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: DEFAULTS.relayerFee, ttlSeconds: DEFAULTS.ttlSeconds });
+      const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: fee, ttlSeconds: DEFAULTS.ttlSeconds });
       const linkId = await createdId(r.res, 'drop');
       rememberNonce(a.env, 'drop', linkId, r.nonce);
       setMade({ url: claimUrl4(window.location.origin, a.env, linkId, r.seed), id: linkId4(a.env, linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
@@ -144,10 +146,11 @@ export default function SendPage() {
             <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
               <dt>Gift to your friend</dt><dd className="text-right font-mono">{amt !== null ? fmtQor(amt) : '…'} QOR</dd>
               <dt>Setup for your friend: pays the one-time registration of their quantum-safe key (about {fmtQor(REGISTRATION_FEE_WEI)} QOR); anything left over is theirs</dt><dd className="text-right font-mono">{fmtQor(DEFAULTS.drip)} QOR</dd>
-              <dt>Delivery: goes to the relayer toward the network fees of the bind and claim, so your friend needs no QOR</dt><dd className="text-right font-mono">{fmtQor(DEFAULTS.relayerFee)} QOR</dd>
+              <dt data-testid="delivery-line">Delivery: pays the relayer back for the network fees of the {deliverySteps(mode).length} relays this link needs ({deliverySteps(mode).join(', ')}; measured on Diana, plus 15 %), so your friend needs no QOR</dt><dd className="text-right font-mono" data-testid="delivery-fee">{fmtQor(fee)} QOR</dd>
               <dt className="font-semibold text-zinc-900">Total from your Pocket</dt><dd className="text-right font-mono font-semibold text-zinc-900">{total !== null ? fmtQor(total) : '…'} QOR</dd>
             </dl>
             {sponsor?.enabled && <p className="mt-2 text-zinc-600" data-testid="drop-sponsor-note">Our sponsor pays the key setup for new senders and for Drop Pool claimers, not for people who open a drop link, so this setup fee is still needed here. A Drop Pool has no extra fees.</p>}
+            <p className="mt-2 text-zinc-600" data-testid="who-pays">Who pays the rest: creating this link and every other Pocket action are relayed at the team&apos;s cost on testnet. <Link to="/judges#costs" className="underline">Measured cost of every action</Link>.</p>
             <p className="mt-2 text-zinc-600">Cancel before the link is opened and all of it comes back. Gift limits: {fmtQor(inst.minEscrow)} to {fmtQor(inst.maxAmount)} QOR.</p>
           </div>
         </StepCard>
