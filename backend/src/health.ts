@@ -1,4 +1,4 @@
-import { formatEther, type PublicClient } from 'viem';
+import { formatEther, parseEther, type PublicClient } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { NETWORK, EVM_CHAIN_ID, COSMOS_CHAIN_ID, type Config } from './config.js';
 import { evmToQor } from './relayer.js';
@@ -31,7 +31,25 @@ export function windowWarning(w: WindowStatus): { level: 'expired' | 'low' | 'un
   return null;
 }
 
-export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance' | 'getBlockNumber'>, f: typeof fetch = fetch) {
+/** Relayer balance below which /api/health raises a low-balance flag (QOR, testnet). Override with RELAYER_LOW_BALANCE_QOR. */
+export const LOW_BALANCE_QOR_DEFAULT = '3';
+
+export function lowBalanceThresholdWei(env: Record<string, string | undefined> = process.env): bigint {
+  const raw = env.RELAYER_LOW_BALANCE_QOR?.trim();
+  try { if (raw && /^\d+(\.\d+)?$/.test(raw)) return parseEther(raw); } catch { /* fall through to default */ }
+  return parseEther(LOW_BALANCE_QOR_DEFAULT);
+}
+
+/** Operator-facing warning when the relayer balance is unknown or below the threshold. null when healthy. */
+export function balanceWarning(balanceWei: bigint | null, thresholdWei: bigint): { level: 'low' | 'unknown'; message: string } | null {
+  if (balanceWei === null) return { level: 'unknown', message: 'The relayer balance could not be read.' };
+  if (balanceWei < thresholdWei) {
+    return { level: 'low', message: `Relayer balance ${formatEther(balanceWei)} QOR is below ${formatEther(thresholdWei)} QOR. Top it up from the main wallet before relays start failing.` };
+  }
+  return null;
+}
+
+export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance' | 'getBlockNumber'>, f: typeof fetch = fetch, env: Record<string, string | undefined> = process.env) {
   const base = { network: NETWORK, evmChainId: EVM_CHAIN_ID, cosmosChainId: COSMOS_CHAIN_ID, contract: cfg.contract, time: new Date().toISOString() };
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };
   const address = privateKeyToAccount(cfg.relayerKey).address;
@@ -39,12 +57,23 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
   const [bal, head, win] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f)]);
   const balance = bal.status === 'fulfilled' ? bal.value : null;
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
+  const threshold = lowBalanceThresholdWei(env);
+  const balWarn = balanceWarning(balance, threshold);
+  const winWarn = windowWarning(window as WindowStatus);
+  const warnings = [
+    ...(balWarn ? [{ kind: 'relayer-balance', ...balWarn }] : []),
+    ...(winWarn ? [{ kind: 'relayer-window', ...winWarn }] : []),
+  ];
   return {
     ok: bal.status === 'fulfilled' && head.status === 'fulfilled' && !!cfg.contract && !!(window as WindowStatus).live,
     ...base,
     headBlock: head.status === 'fulfilled' ? head.value.toString() : null,
-    relayer: { address, cosmosAddress: qor, balanceWei: balance?.toString() ?? null, balance: balance === null ? null : formatEther(balance), unit: 'QOR' },
+    relayer: {
+      address, cosmosAddress: qor, balanceWei: balance?.toString() ?? null, balance: balance === null ? null : formatEther(balance), unit: 'QOR',
+      lowBalance: balWarn?.level === 'low', lowBalanceThreshold: formatEther(threshold),
+    },
     window,
+    warnings,
     contractConfigured: !!cfg.contract,
   };
 }

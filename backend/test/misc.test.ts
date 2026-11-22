@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getConfig } from '../src/config.js';
-import { getHealth, getWindow, windowWarning } from '../src/health.js';
+import { getHealth, getWindow, windowWarning, balanceWarning, lowBalanceThresholdWei } from '../src/health.js';
 import { CORS, clientIp, gate, send, buildDeps } from '../src/http.js';
 import { log, redact, setSink } from '../src/log.js';
 import { cfg, hexBytes } from './helpers.js';
@@ -112,6 +112,33 @@ describe('http helpers', () => {
     expect(d.cfg).toBeTruthy();
     expect(d.limiter).toBeTruthy();
     expect(() => d.getRelayer()).toThrow(); // no key/contract in test env
+  });
+});
+
+describe('relayer low-balance flag', () => {
+  const rest = (j: any) => vi.fn(async () => ({ ok: true, status: 200, json: async () => j })) as any;
+  const E = 10n ** 18n;
+  it('flags a balance below 3 QOR by default and lists it in warnings', async () => {
+    const pub = { getBalance: vi.fn(async () => 2n * E), getBlockNumber: vi.fn(async () => 9n) } as any;
+    const h: any = await getHealth(cfg(), pub, rest({ found: true, live: true, remaining_blocks: '9000' }), {});
+    expect(h.relayer).toMatchObject({ lowBalance: true, lowBalanceThreshold: '3' });
+    expect(h.warnings).toEqual([expect.objectContaining({ kind: 'relayer-balance', level: 'low' })]);
+    expect(h.ok).toBe(true);
+  });
+  it('stays quiet at or above the threshold, and surfaces a closing window', async () => {
+    const pub = { getBalance: vi.fn(async () => 3n * E), getBlockNumber: vi.fn(async () => 9n) } as any;
+    const h: any = await getHealth(cfg(), pub, rest({ found: true, live: true, remaining_blocks: '100' }), {});
+    expect(h.relayer.lowBalance).toBe(false);
+    expect(h.warnings).toEqual([expect.objectContaining({ kind: 'relayer-window', level: 'low' })]);
+  });
+  it('threshold comes from RELAYER_LOW_BALANCE_QOR when valid', () => {
+    expect(lowBalanceThresholdWei({ RELAYER_LOW_BALANCE_QOR: '1.5' })).toBe(15n * 10n ** 17n);
+    expect(lowBalanceThresholdWei({ RELAYER_LOW_BALANCE_QOR: 'abc' })).toBe(3n * E);
+    expect(lowBalanceThresholdWei({})).toBe(3n * E);
+  });
+  it('unknown balance is a warning, not a crash', () => {
+    expect(balanceWarning(null, E)).toMatchObject({ level: 'unknown' });
+    expect(balanceWarning(E, E)).toBeNull();
   });
 });
 
