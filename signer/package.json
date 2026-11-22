@@ -1,0 +1,7 @@
+{
+  "name": "pocketdrop-pqsigner",
+  "private": true,
+  "type": "module",
+  "description": "Isolated ML-DSA-87 relay signer for Pocket Drop (bundle built from backend/src/pqSignerHandler.ts)",
+  "engines": { "node": ">=20" }
+}
