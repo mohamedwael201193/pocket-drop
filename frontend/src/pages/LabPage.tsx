@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { decodeErrorResult, type Hex } from 'viem';
 import { CheckCircle2, Play, ShieldX, XCircle } from '../components/icons';
@@ -58,15 +58,31 @@ function AttackRow({ r, check }: { r: Row; check?: Check }) {
   );
 }
 
+const wideNow = () => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 640px)').matches;
+
+/** A long list that starts open on a wide screen and folded on a phone, so /lab stays short there. */
+function Fold({ summary, open, onToggle, testId, children }: { summary: ReactNode; open: boolean; onToggle: (v: boolean) => void; testId: string; children: ReactNode }) {
+  return (
+    <details open={open} onToggle={(e) => onToggle((e.currentTarget as HTMLDetailsElement).open)} className="group mt-4" data-testid={testId}>
+      <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-900 sm:hidden [&::-webkit-details-marker]:hidden">
+        <span>{summary}</span><span aria-hidden className="text-zinc-500 transition-transform group-open:rotate-180">⌄</span>
+      </summary>
+      <div className="mt-2 sm:mt-0">{children}</div>
+    </details>
+  );
+}
+
 export default function LabPage() {
   const [checks, setChecks] = useState<Record<string, Check>>({});
   const [busy, setBusy] = useState(false);
   const attacks = useMemo(() => ROWS.filter((r) => isAttack(r) && !inStolen(r)), []);
   const stolen = useMemo(() => ROWS.filter((r) => inStolen(r) && r.status !== 'info'), []);
   const stolenAttacks = stolen.filter(isAttack);
+  const [openStolen, setOpenStolen] = useState(wideNow);
+  const [openList, setOpenList] = useState(wideNow);
 
   async function runAll() {
-    setBusy(true);
+    setBusy(true); setOpenStolen(true); setOpenList(true); // the live checks show inside the rows
     const out: Record<string, Check> = {};
     await Promise.all([...attacks, ...stolenAttacks].filter((r) => r.hash && r.status === 'reverted').map(async (r) => {
       try { out[r.hash!] = await verify(r.hash as Hex); } catch (e) { out[r.hash!] = { error: (e as Error).message }; }
@@ -88,14 +104,18 @@ export default function LabPage() {
         <Card className="mb-6" data-testid="stolen-key">
           <div className="flex flex-wrap items-center gap-2"><ShieldX className="h-5 w-5 text-zinc-700" aria-hidden /><h2 className="font-serif text-2xl text-zinc-900">Stolen key: freeze, then unanimous recovery</h2><SourceBadge kind="RECORDED" /></div>
           <p className="mt-2 text-sm leading-relaxed text-zinc-700">A thief holds the owner key. The thief can spend only inside the daily limit before the guardians act. Then a threshold of guardians freeze the Pocket (the owner key cannot lift it), and all guardians replace the owner by a unanimous recovery that the thief cannot veto. This is the lab (60 s) instance run end to end; the residual risk (what a thief can take before the freeze) is shown honestly in the first step.</p>
-          <ul className="mt-4 space-y-2" data-testid="stolen-rows">{stolen.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+          <Fold open={openStolen} onToggle={setOpenStolen} testId="stolen-fold" summary={`Show all ${stolen.length} steps (${stolenAttacks.length} refused)`}>
+            <ul className="space-y-2" data-testid="stolen-rows">{stolen.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+          </Fold>
         </Card>
       </Reveal>
 
       <Reveal>
         <h2 className="mb-3 font-serif text-2xl text-zinc-900">Everything else it refused</h2>
         <p className="mb-4 text-xs text-zinc-500">Vault signatures, replays, timelocks, recovery, the router and pool rules, and the v3 attacks on the v4 drop. Production and lab instances.</p>
-        <ul className="space-y-2" data-testid="attack-list">{attacks.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+        <Fold open={openList} onToggle={setOpenList} testId="attack-fold" summary={`Show all ${attacks.length} refused attacks`}>
+          <ul className="space-y-2" data-testid="attack-list">{attacks.map((r) => <AttackRow key={r.step} r={r} check={r.hash ? checks[r.hash] : undefined} />)}</ul>
+        </Fold>
       </Reveal>
 
       <Reveal>
