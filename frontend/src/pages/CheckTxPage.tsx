@@ -1,0 +1,115 @@
+// Proof > Check a transaction: paste a Pocket Drop transaction hash; the page fetches it from the chain, decodes the router call
+// and re-runs every ML-DSA-87 signature check in this browser with the keys the chain holds. Our API is not trusted for any of it.
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { Button, CopyButton, Mono, Notice, PageTitle, SourceBadge, TxLink } from '../components/ui';
+import { addrUrl, TESTNET_BADGE } from '../lib/config';
+import { checkTx, normalizeHash, verdict, type Report, type SigCheck } from '../lib/txcheck';
+import { liveDeps } from '../lib/txcheckChain';
+
+const WHO: Record<SigCheck['who'], string> = {
+  owner: "Pocket owner's post-quantum key",
+  guardian: "guardian's post-quantum key",
+  'link key': 'one-time link key (its seed was in the link)',
+  recipient: "recipient's post-quantum key",
+};
+
+function Row({ k, children }: { k: string; children: React.ReactNode }) {
+  return <div className="grid grid-cols-1 gap-0.5 py-1.5 sm:grid-cols-[11rem_1fr] sm:gap-3"><dt className="text-xs text-zinc-500">{k}</dt><dd className="min-w-0 break-words text-sm text-zinc-900 [overflow-wrap:anywhere]">{children}</dd></div>;
+}
+
+function Check({ c, i }: { c: SigCheck; i: number }) {
+  const ok = c.valid && !c.tamperedValid && c.pinned !== false;
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid={`check-sig-${i}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-zinc-900">Signature {i + 1}: {WHO[c.who]}</h3>
+        <span data-testid={`check-sig-${i}-verdict`} className={ok ? 'rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-900' : 'rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-900'}>{ok ? 'valid' : 'did not check out'}</span>
+      </div>
+      <dl className="mt-2 divide-y divide-zinc-100">
+        <Row k="Signer"><a className="font-mono text-xs underline" href={addrUrl(c.signer)} target="_blank" rel="noopener noreferrer">{c.signer}</a></Row>
+        <Row k="Public key">{c.pkBytes ? <>{c.pkBytes.toLocaleString('en-US')} bytes, {c.keySource === 'chain' ? 'read from the chain (PQC precompile 0x…0a02)' : 'carried in the call'}{c.pinned === true && ', and its hash matches the one pinned on chain'}{c.pinned === false && <b className="text-red-800">; its hash does NOT match the one pinned on chain</b>}</> : <b className="text-red-800">no key registered on chain</b>}</Row>
+        <Row k="Signature">{c.sigBytes.toLocaleString('en-US')} bytes, ML-DSA-87 (FIPS 204)</Row>
+        {c.nonce !== undefined && <Row k="Nonce">{c.nonce.toString()} (read from the chain at the block before)</Row>}
+        <Row k="Signed text"><span className="flex flex-col items-start gap-1.5"><Mono className="text-[11px]">{c.message}</Mono><span className="shrink-0"><CopyButton text={c.message} label="Copy signed text" /></span></span></Row>
+        <Row k="Checked in this browser"><span data-testid={`check-sig-${i}-valid`}>{c.valid ? 'Valid for this exact intent.' : 'Not valid for this intent.'}</span></Row>
+        <Row k="Changed intent"><span data-testid={`check-sig-${i}-tampered`}>{c.tamperedValid ? <b className="text-red-800">The same signature also passes a changed intent ({c.tamperedWhat}).</b> : <>Same signature, changed intent ({c.tamperedWhat}): rejected.</>}</span></Row>
+      </dl>
+    </section>
+  );
+}
+
+function ReportView({ r }: { r: Report }) {
+  const v = verdict(r);
+  return (
+    <div className="space-y-3" data-testid="check-report">
+      <Notice tone={v === 'verified' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
+        {v === 'verified' && <>All {r.checks.length} post-quantum signature{r.checks.length > 1 ? 's' : ''} in this transaction verified in your browser, with keys read from the chain. A changed intent fails with the same signature.</>}
+        {v === 'failed' && <>At least one signature did not check out in this browser. Details below.</>}
+        {v === 'none' && <>{r.note ?? 'Nothing to check.'}</>}
+      </Notice>
+      <section className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid="check-tx">
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-semibold text-zinc-900">Transaction</h2><SourceBadge kind="LIVE" title="Fetched from the chain when you pressed Check" /></div>
+        <dl className="mt-2 divide-y divide-zinc-100">
+          <Row k="Hash"><TxLink hash={r.tx.hash} label={`${r.tx.hash.slice(0, 12)}…${r.tx.hash.slice(-6)}`} /></Row>
+          <Row k="Result">{r.tx.ok ? 'succeeded' : 'failed (reverted)'} at block {r.tx.height.toString()}</Row>
+          <Row k="Relayer signature"><span data-testid="check-lane">{r.tx.lane === 'hybrid'
+            ? <>Hybrid: secp256k1 + ML-DSA-87 on a native cross-VM call. The chain's own check: {r.tx.relayerHybridVerified ? <b>pqc_hybrid_verify = verified</b> : 'no pqc_hybrid_verify event'}.</>
+            : <>EVM transaction (secp256k1), sent inside the relayer's scoped window. The relayer only pays gas; the signatures below are what move funds.</>}</span></Row>
+          {r.env && <Row k="Instance">{r.env === 'prod' ? 'production' : 'lab (60 s timers)'}</Row>}
+          <Row k="Call"><Mono className="text-xs">router.{r.action}{r.fn ? ` → ${r.fn}` : ''}</Mono>{r.target && <> on <a className="font-mono text-xs underline" href={addrUrl(r.target)} target="_blank" rel="noopener noreferrer">{r.target.slice(0, 10)}…</a></>}</Row>
+          {r.tx.memo && <Row k="Memo"><Mono className="text-xs">{r.tx.memo}</Mono></Row>}
+        </dl>
+        {Object.keys(r.args).length > 0 && (
+          <details className="mt-2 text-sm"><summary className="cursor-pointer text-xs text-zinc-600">Decoded arguments</summary>
+            <dl className="mt-1 divide-y divide-zinc-100">{Object.entries(r.args).map(([k, val]) => <Row key={k} k={k}><Mono className="text-[11px]">{val}</Mono></Row>)}</dl>
+          </details>
+        )}
+      </section>
+      {r.checks.map((c, i) => <Check key={i} c={c} i={i} />)}
+    </div>
+  );
+}
+
+export default function CheckTxPage() {
+  const { hash: param } = useParams();
+  const nav = useNavigate();
+  const [text, setText] = useState(param ?? '');
+  const m = useMutation({ mutationFn: (h: string) => checkTx(h, liveDeps) });
+  const { mutate } = m;
+  useEffect(() => { if (param && normalizeHash(param)) mutate(param); }, [param, mutate]);
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const h = normalizeHash(text);
+    if (!h) return;
+    if (h === param) mutate(h); else nav(`/check/${h}`);
+  };
+  const bad = text.trim() !== '' && !normalizeHash(text);
+  return (
+    <div className="mx-auto max-w-3xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16" data-testid="check-page">
+      <PageTitle eyebrow="Proof" title="Check a transaction">
+        Paste the hash of any Pocket Drop transaction. This page fetches it from the chain, decodes what it asked for, and re-runs each
+        ML-DSA-87 signature check in your browser with the public keys the chain holds. Our server is not involved. {TESTNET_BADGE}.
+      </PageTitle>
+      <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row" data-testid="check-form">
+        <label className="sr-only" htmlFor="check-hash">Transaction hash</label>
+        <input id="check-hash" data-testid="check-input" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} autoComplete="off"
+          placeholder="0x… (EVM) or 64 hex characters (native)" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-2.5 font-mono text-sm text-zinc-900" />
+        <Button type="submit" busy={m.isPending} disabled={!normalizeHash(text)} data-testid="check-submit">Check</Button>
+      </form>
+      {bad && <p className="mt-2 text-xs text-red-800" data-testid="check-bad">A hash is 64 hex characters, with 0x for an EVM transaction.</p>}
+      {!param && (
+        <p className="mt-3 text-xs text-zinc-500">Transaction results in Send, Receive, Pocket and Radar carry a “check” link that opens this page. Examples recorded on Diana:{' '}
+          <Link className="underline" to="/check/E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8" data-testid="check-example-claim">a claim</Link>,{' '}
+          <Link className="underline" to="/check/0x0c653400b781cf9501a28d76b1ace95dfb6398282b0f053e5d7c61a60e769007" data-testid="check-example-freeze">a 2-of-3 guardian freeze</Link>.
+        </p>
+      )}
+      <div className="mt-5">
+        {m.isPending && <p className="text-sm text-zinc-600" data-testid="check-busy">Fetching the transaction and verifying…</p>}
+        {m.error && <Notice tone="error" testId="check-error">{(m.error as Error).message}</Notice>}
+        {m.data && <ReportView r={m.data} />}
+      </div>
+    </div>
+  );
+}

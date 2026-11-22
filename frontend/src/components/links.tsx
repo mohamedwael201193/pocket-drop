@@ -103,7 +103,7 @@ export function LinkRow({ m, tx, onTx }: { m: MyLink; tx?: { what: string; hash:
       )}
       {share && <div className="mt-3"><ShareCard url={share} id={linkId4(env, c.id)} kind={c.kind} amountText={fmtQor(p?.perSlot ?? c.amountWei)} headline="Your link" /></div>}
       {d && expired && live && <div className="mt-3"><Button variant="secondary" busy={busy === 'refund'} onClick={() => void run('refund', () => refundDrop(env, c.id))}>This link expired: refund it to my Pocket</Button></div>}
-      {tx && <p className="mt-2 font-mono text-xs text-zinc-600">{tx.what} mined: <TxLink hash={tx.hash} testId={`tx-${tx.what}-${linkId4(env, c.id)}`} /></p>}
+      {tx && <p className="mt-2 font-mono text-xs text-zinc-600">{tx.what} mined: <TxLink hash={tx.hash} testId={`tx-${tx.what}-${linkId4(env, c.id)}`} check /></p>}
       {err && <div className="mt-2"><Notice tone="error">{err}</Notice></div>}
     </div>
   );

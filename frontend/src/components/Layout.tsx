@@ -21,12 +21,13 @@ const TABS = [
   { key: 'send', label: 'Send', to: '/send', Icon: Send, match: (p: string) => p === '/' || p.startsWith('/send') },
   { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p: string) => p.startsWith('/receive') || p.startsWith('/c/') || p.startsWith('/pool/') },
   { key: 'pocket', label: 'Pocket', to: '/pocket', Icon: Wallet, match: (p: string) => p.startsWith('/pocket') },
-  { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges', '/qday'].some((x) => p.startsWith(x)) },
+  { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p: string) => ['/proof', '/lab', '/radar', '/judges', '/qday', '/check'].some((x) => p.startsWith(x)) },
 ] as const;
 export const PROOF_ITEMS = [
   { to: '/qday', label: 'Q-Day Drill', sub: 'Public classical keys, live: try to take the QOR', Icon: KeyRound },
   { to: '/lab', label: 'Lab', sub: 'Attacks the chain refused', Icon: FlaskConical },
   { to: '/radar', label: 'Radar', sub: 'Live stats from the chain', Icon: Radio },
+  { to: '/check', label: 'Check a transaction', sub: 'Re-verify its ML-DSA-87 signatures in your browser', Icon: ShieldCheck },
   { to: '/judges', label: 'Judges', sub: '60-second checklist', Icon: Scale },
 ];
 

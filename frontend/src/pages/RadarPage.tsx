@@ -69,7 +69,7 @@ function EnvCard({ s }: { s: EnvStats }) {
             <li key={r.tx + r.kind} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 border-b border-zinc-100 py-1.5 last:border-0">
               <span className="min-w-0 text-zinc-700">{r.kind} {r.kind === 'Pocket deployed' ? <a className="font-mono underline" href={addrUrl(r.id)} target="_blank" rel="noopener noreferrer" title={r.id}>{short(r.id)}</a> : <span className="font-mono">{r.id}</span>}
                 {r.who && <> · <span className={r.own ? 'text-zinc-500' : 'font-semibold text-emerald-800'}>{r.own ? 'own' : 'external'}</span></>}</span>
-              <span className="flex items-center gap-2 text-zinc-500">{r.at ? <time dateTime={new Date(r.at * 1000).toISOString()} title={new Date(r.at * 1000).toLocaleString()}>{ago(r.at)}</time> : <span>block {r.block.toString()}</span>}<TxLink hash={r.tx} /></span>
+              <span className="flex items-center gap-2 text-zinc-500">{r.at ? <time dateTime={new Date(r.at * 1000).toISOString()} title={new Date(r.at * 1000).toLocaleString()}>{ago(r.at)}</time> : <span>block {r.block.toString()}</span>}<TxLink hash={r.tx} check /></span>
             </li>
           ))}</ul>
         </div>

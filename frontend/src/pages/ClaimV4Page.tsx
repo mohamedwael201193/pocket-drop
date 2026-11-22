@@ -249,7 +249,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>
               {acct && <div>Key account: <Mono>{acct.evm}</Mono></div>}
-              {steps.claim.hash && <div>Claim transaction: <TxLink hash={steps.claim.hash} testId="tx-claim" /></div>}
+              {steps.claim.hash && <div>Claim transaction: <TxLink hash={steps.claim.hash} testId="tx-claim" check /></div>}
             </div>
             <div className="mt-4 rounded-2xl border border-emerald-300 bg-white/70 p-3 text-sm text-zinc-800" data-testid="backup-cta">
               <b>Back up and add guardians.</b> Your key lives in this browser only (in a private window it is gone when you close it). Save the backup key and name 2 to 5 guardians who can recover your Pocket if you lose it.
@@ -273,7 +273,7 @@ function StepRow({ id, n, step }: { id: StepId; n: number; step: Step }) {
     <li data-testid={`step-${id}`} data-status={step.status} className={cx('rounded-xl border border-zinc-200 p-3', step.status === 'idle' ? 'bg-white/60 opacity-75' : 'bg-white')}>
       <div className="flex items-center justify-between gap-2"><span className="font-medium">{n}. {title}</span><span className="flex shrink-0 items-center gap-1 font-mono text-xs text-zinc-600">{badge}{icon}</span></div>
       <div className="mt-1 text-xs leading-snug text-zinc-500">{step.note ?? sub}</div>
-      {step.hash && <div className="mt-0.5"><TxLink hash={step.hash} testId={`tx-${id}`} /></div>}
+      {step.hash && <div className="mt-0.5"><TxLink hash={step.hash} testId={`tx-${id}`} check /></div>}
     </li>
   );
 }

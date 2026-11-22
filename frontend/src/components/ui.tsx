@@ -1,5 +1,6 @@
 import { useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useMagnetic } from './alive';
 import { Stage } from './stage';
 import { Check, Copy, ExternalLink, Loader2 } from './icons';
@@ -73,12 +74,21 @@ export function CopyButton({ text, label = 'Copy', className, testId }: { text: 
   );
 }
 
-export function TxLink({ hash, label, testId }: { hash: string; label?: string; testId?: string }) {
-  return (
+export function TxLink({ hash, label, testId, check }: { hash: string; label?: string; testId?: string; check?: boolean }) {
+  const a = (
     <a href={txUrl(hash)} target="_blank" rel="noopener noreferrer" data-testid={testId} data-hash={hash}
       className="inline-flex items-center gap-1 font-mono text-xs text-zinc-700 underline decoration-zinc-300 underline-offset-2 hover:text-black">
       {label ?? shortHash(hash, 6)} <ExternalLink className="h-3 w-3" aria-hidden />
     </a>
+  );
+  if (!check) return a;
+  // "check" opens Proof > Check a transaction, which re-verifies the transaction's ML-DSA-87 signatures in the browser.
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {a}
+      <Link to={`/check/${hash}`} data-testid={testId ? `${testId}-check` : undefined} title="Re-verify its post-quantum signatures in this browser"
+        className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] font-medium text-zinc-700 hover:border-zinc-500 hover:text-black">check</Link>
+    </span>
   );
 }
 

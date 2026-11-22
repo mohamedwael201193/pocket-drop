@@ -156,7 +156,7 @@ export default function SendPage() {
           <Button block busy={busy === 'drop'} disabled={!ready || !!dropProblem || !!busy} onClick={() => void makeDrop()} data-testid="create-drop">Create drop link</Button>
           {(lockReason || (ready && dropProblem)) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-drop-reason">{lockReason ?? `Fix the amount first: ${dropProblem}`}</p>}
           {err?.where === 'drop' && <div className="mt-3"><Notice tone="error" testId="drop-error">{err.text}</Notice></div>}
-          {made?.kind === 'drop' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} amountText={made.amountText} headline="Your link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="create-tx" /> <SourceBadge kind="LIVE" /></p></div>}
+          {made?.kind === 'drop' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} amountText={made.amountText} headline="Your link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="create-tx" check /> <SourceBadge kind="LIVE" /></p></div>}
         </StepCard>
 
         <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="pool-card">
@@ -174,7 +174,7 @@ export default function SendPage() {
           <div className="mt-4"><Button block busy={busy === 'pool'} disabled={!ready || !!poolProblem || !!busy} onClick={() => void makePool()} data-testid="create-pool">Create pool link</Button>
             {(lockReason || (ready && poolProblem)) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-pool-reason">{lockReason ?? `Fix the pool first: ${poolProblem}`}</p>}</div>
           {err?.where === 'pool' && <div className="mt-3"><Notice tone="error" testId="pool-error">{err.text}</Notice></div>}
-          {made?.kind === 'pool' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} kind="pool" amountText={made.amountText} headline="Your pool link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="pool-tx" /> <SourceBadge kind="LIVE" /></p></div>}
+          {made?.kind === 'pool' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} kind="pool" amountText={made.amountText} headline="Your pool link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="pool-tx" check /> <SourceBadge kind="LIVE" /></p></div>}
         </section>
 
         {ready && links.length > 0 && (

@@ -103,7 +103,7 @@ export default function PoolClaimPage() {
             <p className="mt-1 text-xs text-zinc-600">Balance of Your Pocket, read from the chain.</p>
             <div className="mt-3 space-y-1 text-xs text-zinc-700">
               <div>Your Pocket: <a className="underline" href={addrUrl(pocket)} target="_blank" rel="noopener noreferrer"><Mono>{pocket}</Mono></a></div>
-              {tx && <div>Claim transaction: <TxLink hash={tx} testId="tx-pool-claim" /></div>}
+              {tx && <div>Claim transaction: <TxLink hash={tx} testId="tx-pool-claim" check /></div>}
             </div>
             <p className="mt-3 text-sm text-zinc-800" data-testid="pool-backup-cta"><b>Back up your key.</b> It lives in this browser only (in a private window it is gone when you close it). Save the backup key on the Pocket page.</p>
             <Link to="/pocket" className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50">Open my Pocket and back up</Link>

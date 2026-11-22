@@ -121,7 +121,7 @@ export function HelpFriend() {
         <Button busy={sub.busy} disabled={shareCount === 0} onClick={() => void submit()} data-testid="shares-submit">Submit to the chain{shareCount > 0 ? ` (${shareCount} signature${shareCount > 1 ? 's' : ''})` : ''}</Button>
         {shareCount === 0 && <p className="text-xs text-zinc-600" data-testid="shares-reason">Paste at least one signature share first.</p>}
         {sub.err && <Notice tone="error" testId="shares-error">{sub.err}</Notice>}
-        {sub.hash && <Notice tone="ok" testId="shares-ok">Mined: <TxLink hash={sub.hash} testId="shares-tx" /></Notice>}
+        {sub.hash && <Notice tone="ok" testId="shares-ok">Mined: <TxLink hash={sub.hash} testId="shares-tx" check /></Notice>}
         <p className="text-xs text-zinc-500">The chain checks each signature against the guardian&apos;s registered key. Instance: {env === 'prod' ? 'production' : 'lab'} ({INST[env].router.slice(0, 8)}…).</p>
       </div>
     </div>

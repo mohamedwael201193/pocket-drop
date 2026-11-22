@@ -31,7 +31,7 @@ function useAct() {
 const ActResult = ({ act, testId }: { act: ReturnType<typeof useAct>; testId: string }) => (
   <>
     {act.err && <div className="mt-3"><Notice tone="error" testId={`${testId}-error`}>{act.err}</Notice></div>}
-    {act.tx && <p className="mt-3 font-mono text-xs text-zinc-600">{act.tx.what} mined: <TxLink hash={act.tx.hash} testId={`${testId}-tx`} /> <SourceBadge kind="LIVE" /></p>}
+    {act.tx && <p className="mt-3 font-mono text-xs text-zinc-600">{act.tx.what} mined: <TxLink hash={act.tx.hash} testId={`${testId}-tx`} check /> <SourceBadge kind="LIVE" /></p>}
   </>
 );
 
