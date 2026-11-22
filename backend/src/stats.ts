@@ -8,6 +8,8 @@ import { log } from './log.js';
 import { getV4Stats, makeV4Reader } from './statsv4.js';
 import { hybridEventsFor } from './xvmLive.js';
 import { mapLimited, ranges } from './limit.js';
+import { searchRouterTxs } from './xvm.js';
+import { v3HybridLogs, type V3LinkState } from './xvmV3.js';
 
 export type OwnMap = Map<string, string>;
 
@@ -39,7 +41,7 @@ export const kindOf = (name: string): Kind => {
   return 'other';
 };
 
-export interface IndexedEvent { name: string; kind: Kind; linkId: string | null; blockNumber: string; txHash: string; addresses: { role: string; address: string; own: boolean; label?: string }[]; amount?: string }
+export interface IndexedEvent { name: string; kind: Kind; linkId: string | null; blockNumber: string; txHash: string; addresses: { role: string; address: string; own: boolean; label?: string }[]; amount?: string; lane?: 'hybrid' }
 
 type LogsClient = Pick<PublicClient, 'getBlockNumber' | 'getLogs'>;
 
@@ -89,7 +91,7 @@ export function buildStats(logs: Log[], own: OwnMap) {
     }
     const amount = typeof args.amount === 'bigint' ? args.amount : undefined;
     if (amount !== undefined) { if (kind === 'created') createdWei += amount; if (kind === 'claimed') claimedWei += amount; }
-    events.push({ name, kind, linkId: typeof args.linkId === 'bigint' ? args.linkId.toString() : null, blockNumber: (l.blockNumber ?? 0n).toString(), txHash: l.transactionHash ?? '', addresses, amount: amount?.toString() });
+    events.push({ name, kind, linkId: typeof args.linkId === 'bigint' ? args.linkId.toString() : null, blockNumber: (l.blockNumber ?? 0n).toString(), txHash: l.transactionHash ?? '', addresses, amount: amount?.toString(), ...(l.transactionHash && !l.transactionHash.startsWith('0x') ? { lane: 'hybrid' as const } : {}) });
   }
   const split = (set: Set<string>) => { let o = 0; for (const a of set) if (own.has(a)) o++; return { own: o, external: set.size - o }; };
   const byRole: Record<string, { own: number; external: number }> = {};
@@ -111,10 +113,16 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   if (cache && now() - cache.at < ttlMs) return { ok: true as const, value: cache.value };
   const head = await pub.getBlockNumber();
   const from = cfg.deployBlock ?? (head > cfg.statsLookback ? head - cfg.statsLookback : 0n);
-  const [{ logs, scannedTo, truncated }, v4] = await Promise.all([
-    collectLogs(pub, cfg.contract as Address, from, head),
+  const v3 = cfg.contract as Address;
+  const [{ logs: evmLogs, scannedTo, truncated }, v4, v3hy] = await Promise.all([
+    collectLogs(pub, v3, from, head),
     'getBalance' in pub ? getV4Stats(makeV4Reader(pub, 9000n, 'readContract' in pub ? (env) => hybridEventsFor(env, cfg, pub as never) : undefined), own).catch((e) => { log('warn', 'stats.v4_failed', { message: String((e as Error)?.message ?? e) }); return null; }) : Promise.resolve(null),
+    'readContract' in pub
+      ? searchRouterTxs(cfg.rest.replace(/\/$/, ''), v3).then((txs) => v3HybridLogs(txs, v3, readV3Link(pub as never, v3))).catch((e) => { log('warn', 'stats.v3_hybrid_failed', { message: String((e as Error)?.message ?? e) }); return null; })
+      : Promise.resolve([] as Log[]),
   ]);
+  // v3 links bound or claimed through a hybrid relay leave no EVM log: add the events the contract would have logged
+  const logs = [...evmLogs, ...(v3hy ?? [])].sort((a, b) => Number((a.blockNumber ?? 0n) - (b.blockNumber ?? 0n)));
   const value = {
     network: NETWORK, contract: cfg.contract, fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
     truncated, note: truncated ? 'Scan was capped; counts are a lower bound. Set POCKETDROP_DEPLOY_BLOCK to index from deployment.' : undefined,
@@ -122,7 +130,7 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
     // How many addresses the deployed function actually loaded; 0 means the list was not bundled and every address reads as external.
     ownAccountsListed: own.size,
     // v3 (the legacy PocketDrop above) and v4 (Pockets, drops, pools) are reported separately; never summed.
-    v3: { label: 'v3 PocketDrop (legacy)', ...buildStats(logs, own) },
+    v3: { label: 'v3 PocketDrop (legacy)', ...buildStats(logs, own), hybridRelayEvents: v3hy === null ? null : v3hy.length },
     ...buildStats(logs, own),
     v4: v4 ?? { error: 'v4 logs could not be read just now' },
     generatedAt: new Date(now()).toISOString(),
@@ -131,3 +139,14 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   log('info', 'stats.indexed', { logs: logs.length, from: from.toString(), to: scannedTo.toString(), truncated });
   return { ok: true as const, value };
 }
+
+const V3_GET_LINK = [{ type: 'function', name: 'getLink', stateMutability: 'view', inputs: [{ name: 'linkId', type: 'uint256' }], outputs: [{ name: '', type: 'tuple', components: [
+  { name: 'sender', type: 'address' }, { name: 'mode', type: 'uint8' }, { name: 'state', type: 'uint8' }, { name: 'dripPaid', type: 'bool' }, { name: 'expiry', type: 'uint64' },
+  { name: 'amount', type: 'uint96' }, { name: 'drip', type: 'uint96' }, { name: 'bindDeadline', type: 'uint64' }, { name: 'relayerFee', type: 'uint96' }, { name: 'recipient', type: 'address' },
+  { name: 'linkKeyHash', type: 'bytes32' }, { name: 'recipientKeyHash', type: 'bytes32' }] }] }] as const;
+
+/** v3 link state for the hybrid-relay index (recipient, amount, bind deadline). */
+export const readV3Link = (pub: Pick<PublicClient, 'readContract'>, v3: Address) => async (id: bigint): Promise<V3LinkState | null> => {
+  const l = (await pub.readContract({ address: v3, abi: V3_GET_LINK, functionName: 'getLink', args: [id] })) as { recipient: Address; amount: bigint; bindDeadline: bigint };
+  return { recipient: l.recipient, amount: BigInt(l.amount), bindDeadline: BigInt(l.bindDeadline) };
+};
