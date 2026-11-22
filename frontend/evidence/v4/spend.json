@@ -1,5 +1,5 @@
 {
- "totalQor": 26.225,
+ "totalQor": 26.725,
  "entries": [
   {
    "qor": 2,
@@ -942,6 +942,60 @@
    "note": "qa d unanimous new owner key",
    "hash": "0x45345a0405b0b45f8045d8ee5d61b761563a8b01f7921bad713cb4fb6e361ec6",
    "at": "2026-11-20T08:22:09.578Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa a-confirmed sender key",
+   "hash": "0x86c0230221a74749082f907efdfbd059e87cbcb53c19181012de8a34031da06a",
+   "at": "2026-11-22T02:25:06.132Z"
+  },
+  {
+   "qor": 0.5,
+   "note": "qa a-confirmed sender pocket",
+   "hash": "0xf75e8f02c0a267b01af279b10f12ca9f5cdcac8961e1bea19a2c2ddd5c522643",
+   "at": "2026-11-22T02:25:07.218Z"
+  },
+  {
+   "qor": -0.1,
+   "note": "recovered: qa a-confirmed recipient sweep",
+   "hash": "13E0443F28C3E4ABA61F8AF83C1C6EDEB5CA67E59AEA8B07F255154F03D34B94",
+   "at": "2026-11-22T02:26:10.976Z"
+  },
+  {
+   "qor": -0.24,
+   "note": "recovered: qa a-confirmed sender sweep",
+   "hash": "5EB703F52633D2B7C9C44D0574180BEE596EFF485BCD22E85910A48DC060DB96",
+   "at": "2026-11-22T02:26:16.693Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool host key",
+   "hash": "0xdeee6d3e9c568694d79ed83dd6406ded6d517f4323dc936aad8d025d99c0833d",
+   "at": "2026-11-22T02:27:54.338Z"
+  },
+  {
+   "qor": 0.4,
+   "note": "qa c-pool host pocket",
+   "hash": "0x88aa0d756eea893afcb092ac829ea8f6d425dd52fe2a5a64622eb97863fb904d",
+   "at": "2026-11-22T02:27:55.706Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer1",
+   "hash": "0x7d5ad5f3e740a18acb66d99448e6beac59b6e4c0c9944a19008d1d76cf4421bc",
+   "at": "2026-11-22T02:28:07.121Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "qa c-pool claimer2",
+   "hash": "0x2a3c24c626653813d3ce088b59d5a8bbd80b7979ee7c563e45671dc97ea4c875",
+   "at": "2026-11-22T02:28:19.999Z"
+  },
+  {
+   "qor": -0.36,
+   "note": "recovered: qa c-pool host sweep",
+   "hash": "07181F5B28F0FCDAEF3D69E10661B2966E3DD0F62D2D2D4F199E32F93F0E0D7F",
+   "at": "2026-11-22T02:30:02.711Z"
   }
  ]
 }

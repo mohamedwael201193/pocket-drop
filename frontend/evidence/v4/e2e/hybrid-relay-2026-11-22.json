@@ -1,0 +1,174 @@
+{
+ "note": "TEAM-RUN. QA flows a (confirmed drop) and c (pool) driven in Chromium and WebKit at 390 and 1440 against a local build of this commit with RELAY_MODE=hybrid. Every relayed intent went out as a MsgCrossVMCall signed with secp256k1 + ML-DSA-87 by the relayer; the chain records pqc_hybrid_verify=verified for each. The rows were read back from https://api-testnet.qore.host when this file was written.",
+ "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+ "router": "0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209",
+ "flows": [
+  "hybrid-a-confirmed-2026-11-22.json",
+  "hybrid-c-pool-2026-11-22.json"
+ ],
+ "readBackAt": "2026-11-22T02:36:02.220325+00:00",
+ "txs": [
+  {
+   "hash": "600BE0CF0FA16927D9E2C9C08285E504EF028BFE71A5CB6431483639A1E561A8",
+   "height": "10528407",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0xcCC6687c1e6e8D7595C585e3561E57550372BaF4",
+   "gasUsed": "1318103",
+   "gasWanted": "1667606",
+   "fee": "183437uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:25:15Z",
+   "result": {
+    "pocket": "0x8ddCBc9c95a2C58EC5a8e72d15a8EE6F20038B71",
+    "innerReturn": "0x000000000000000000000000000000000000000000000000000000000000001f",
+    "linkId": "31"
+   }
+  },
+  {
+   "hash": "B5C0F87E7DD0CDD87CD4FE6A1B5BF9A37C8964BB23A0F18F47EA9FA879798348",
+   "height": "10528411",
+   "code": 0,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "gasUsed": "971471",
+   "gasWanted": "1234316",
+   "fee": "135775uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:25:21Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "9EC512273BD97B520F3B058BB30AA42E1CE82815FCDA99C16D932DB2422D820B",
+   "height": "10528424",
+   "code": 0,
+   "memo": "pd route prod relay 0x8ddCBc9c95a2C58EC5a8e72d15a8EE6F20038B71",
+   "gasUsed": "774605",
+   "gasWanted": "988177",
+   "fee": "108700uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:25:39Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8",
+   "height": "10528425",
+   "code": 0,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "gasUsed": "764774",
+   "gasWanted": "975982",
+   "fee": "107359uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:25:40Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "13E0443F28C3E4ABA61F8AF83C1C6EDEB5CA67E59AEA8B07F255154F03D34B94",
+   "height": "10528444",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0x909A137D790b08Aaf7C0F6A1FD05B303bBDb1066",
+   "gasUsed": "1118086",
+   "gasWanted": "1417633",
+   "fee": "155940uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:26:08Z",
+   "result": {
+    "pocket": "0xe2C4Ff506D07d1C7f326d0d12CB53FeE1016Aeca",
+    "innerReturn": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "queuedId": "0"
+   }
+  },
+  {
+   "hash": "5EB703F52633D2B7C9C44D0574180BEE596EFF485BCD22E85910A48DC060DB96",
+   "height": "10528448",
+   "code": 0,
+   "memo": "pd route prod relay 0x8ddCBc9c95a2C58EC5a8e72d15a8EE6F20038B71",
+   "gasUsed": "811611",
+   "gasWanted": "1034435",
+   "fee": "113788uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:26:13Z",
+   "result": {
+    "innerReturn": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "queuedId": "0"
+   }
+  },
+  {
+   "hash": "9E14FA096121E642BBC443071A97429A808143D4EBE8E390E6CEF4130F17B8F5",
+   "height": "10528523",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0x25e69E41Cf6675815296E5Ff26e0C366B3eCc956",
+   "gasUsed": "1253736",
+   "gasWanted": "1587065",
+   "fee": "174578uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:28:01Z",
+   "result": {
+    "pocket": "0xb54Fc406ad7fcd7327c37f5a5E1C5b387b33Cc13",
+    "innerReturn": "0x000000000000000000000000000000000000000000000000000000000000000f",
+    "poolId": "15"
+   }
+  },
+  {
+   "hash": "6D7233E6B3C54AAE35A85988F9973DD950EE53FE9A3C50B714DB2C32D7220BD3",
+   "height": "10528531",
+   "code": 0,
+   "memo": "pd route prod relay 0xaA981588E5430E3db9A789A3754E108Cc01e3D00",
+   "gasUsed": "1090383",
+   "gasWanted": "1383080",
+   "fee": "152139uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:28:12Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "1573DD80F41D0D2CBF6671CDBA6A89074A3AD81499342139B4B75B9618E02A70",
+   "height": "10528540",
+   "code": 0,
+   "memo": "pd route prod relay 0xaA981588E5430E3db9A789A3754E108Cc01e3D00",
+   "gasUsed": "1090506",
+   "gasWanted": "1383177",
+   "fee": "152150uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:28:25Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "2DDE4532A369F368D2D9C14BE84102EF84DF5970B66AAE1E80D56934F8671DBB",
+   "height": "10528600",
+   "code": 0,
+   "memo": "pd route prod relay 0xb54Fc406ad7fcd7327c37f5a5E1C5b387b33Cc13",
+   "gasUsed": "846167",
+   "gasWanted": "1077630",
+   "fee": "118540uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:29:51Z",
+   "result": {
+    "innerReturn": "0x"
+   }
+  },
+  {
+   "hash": "07181F5B28F0FCDAEF3D69E10661B2966E3DD0F62D2D2D4F199E32F93F0E0D7F",
+   "height": "10528606",
+   "code": 0,
+   "memo": "pd route prod relay 0xb54Fc406ad7fcd7327c37f5a5E1C5b387b33Cc13",
+   "gasUsed": "811296",
+   "gasWanted": "1034097",
+   "fee": "113751uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:30:00Z",
+   "result": {
+    "innerReturn": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "queuedId": "0"
+   }
+  }
+ ]
+}
