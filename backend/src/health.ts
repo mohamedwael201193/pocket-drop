@@ -59,13 +59,17 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
   const threshold = lowBalanceThresholdWei(env);
   const balWarn = balanceWarning(balance, threshold);
-  const winWarn = windowWarning(window as WindowStatus);
+  const hybrid = cfg.relayMode === 'hybrid';
+  // hybrid lane: a closed window is the goal (no ECDSA-only path); an open one is only the fallback, said plainly
+  const winWarn = hybrid
+    ? ((window as WindowStatus).live ? { level: 'open' as const, message: 'Relays are hybrid-signed, but the relayer EVM window is still open, so an ECDSA-only fallback path exists until it expires.' } : null)
+    : windowWarning(window as WindowStatus);
   const warnings = [
     ...(balWarn ? [{ kind: 'relayer-balance', ...balWarn }] : []),
     ...(winWarn ? [{ kind: 'relayer-window', ...winWarn }] : []),
   ];
   return {
-    ok: bal.status === 'fulfilled' && head.status === 'fulfilled' && !!cfg.contract && !!(window as WindowStatus).live,
+    ok: bal.status === 'fulfilled' && head.status === 'fulfilled' && !!cfg.contract && (hybrid || !!(window as WindowStatus).live),
     ...base,
     headBlock: head.status === 'fulfilled' ? head.value.toString() : null,
     relayer: {
@@ -73,6 +77,13 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
       lowBalance: balWarn?.level === 'low', lowBalanceThreshold: formatEther(threshold),
     },
     window,
+    relay: {
+      mode: cfg.relayMode,
+      signature: hybrid ? 'secp256k1 + ML-DSA-87 (hybrid MsgCrossVMCall, verified by the chain)' : 'secp256k1 only (EVM tx inside the scoped window)',
+      fallback: hybrid && cfg.relayFallback ? 'evm-window' : 'none',
+      /** true while the chain would accept an ECDSA-only EVM tx from the relayer (its window is live) */
+      classicalPathOpen: !!(window as WindowStatus).live,
+    },
     warnings,
     contractConfigured: !!cfg.contract,
   };

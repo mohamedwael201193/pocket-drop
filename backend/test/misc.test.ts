@@ -64,6 +64,18 @@ describe('health', () => {
     expect(h).toMatchObject({ ok: false, headBlock: null, relayer: { balance: null } });
     expect(await getHealth(cfg({ relayerKey: null }), pub, rest({}))).toMatchObject({ ok: false, relayer: null });
   });
+  it('hybrid lane: healthy with the window closed, and an open window is reported as the classical fallback', async () => {
+    const pub = { getBalance: vi.fn(async () => 5n * 10n ** 18n), getBlockNumber: vi.fn(async () => 1n) } as any;
+    const hy = cfg({ relayMode: 'hybrid', relayerPqc: ('0x' + '22'.repeat(32)) as any });
+    const closed: any = await getHealth(hy, pub, rest({ found: false, live: false }), {});
+    expect(closed).toMatchObject({ ok: true, relay: { mode: 'hybrid', fallback: 'evm-window', classicalPathOpen: false, signature: expect.stringContaining('ML-DSA-87') }, warnings: [] });
+    const open: any = await getHealth(hy, pub, rest({ found: true, live: true, remaining_blocks: '10' }), {});
+    expect(open.relay.classicalPathOpen).toBe(true);
+    expect(open.warnings).toEqual([expect.objectContaining({ kind: 'relayer-window', level: 'open' })]);
+    const evm: any = await getHealth(cfg(), pub, rest({ found: true, live: true, remaining_blocks: '9000' }), {});
+    expect(evm.relay).toMatchObject({ mode: 'evm', fallback: 'none', classicalPathOpen: true });
+    expect((await getHealth({ ...hy, relayFallback: false }, pub, rest({ live: false }), {}) as any).relay.fallback).toBe('none');
+  });
   it('window query failures are reported not thrown', async () => {
     expect(await getWindow(cfg(), 'qor1x', rest({}, false))).toMatchObject({ queryable: false, error: 'rest 500' });
     expect(await getWindow(cfg(), 'qor1x', (async () => { throw new Error('net'); }) as any)).toMatchObject({ queryable: false, error: 'net' });
