@@ -75,7 +75,7 @@ function IntruderFile({ s }: { s: QdayState | undefined }) {
   const f = s ? intruderFile(s) : null;
   const shown = f ? (all ? f.rows : f.rows.slice(0, 8)) : [];
   return (
-    <section className={cx(card, 'mt-5')} data-testid="qday-intruders">
+    <section id="qday-intruders" className={cx(card, 'mt-5 scroll-mt-20')} data-testid="qday-intruders">
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Refused attempts</h2><SourceBadge kind="LIVE" title="Read from the chain and the API on each page load" /></div>
       <p className="mt-1 text-sm text-zinc-700">Every attempt on a bait that was stopped, newest first: what it tried, who sent it, and the check that refused it. Open any row in the checker to see the transaction decoded.</p>
       {!f ? <p className="mt-3 text-sm text-zinc-500">Loading the list…</p> : (
@@ -120,7 +120,7 @@ function TryIt({ baits }: { baits: LiveBait[] }) {
     setMined((m) => ({ ...m, [r.id]: out.ok ? `mined, ${out.status} (${out.expectedRevert}) ${out.txHash}` : out.error?.message ?? 'refused' }));
   }
   return (
-    <section className={cx(card, 'md:mt-5')} data-testid="qday-try">
+    <section id="qday-try" className={cx(card, 'scroll-mt-20 md:mt-5')} data-testid="qday-try">
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Try it in this tab</h2><SourceBadge kind="LIVE" title="eth_call against Diana from your browser" /></div>
       <p className="mt-1 text-sm text-zinc-700">Pick a bait. We sign every attack with the classical key <b>inside this browser tab</b> and ask the chain what would happen (eth_call, nothing is sent). The key is never sent to our server. Your own ML-DSA key is generated fresh for each run, exactly what an attacker with a quantum computer would have.</p>
       <div className="mt-3 flex flex-wrap items-end gap-2">
@@ -152,6 +152,12 @@ export default function QdayPage() {
     <Page testId="qday-page">
       <PageTitle eyebrow={<>Proof · Q-Day Drill <SourceBadge kind="LIVE" /></>} title="Q-Day Drill">Our own, always-on drill. We published the classical keys of five Pockets. Assume a quantum computer already broke them. Take the money if you can.</PageTitle>
       <TestnetBanner />
+      <nav aria-label="On this page" className="-mt-2 mb-5 flex flex-wrap gap-2 text-sm" data-testid="qday-jump">
+        {([['qday-try', 'Try it now'], ['qday-intruders', 'Refused attempts'], ['qday-script', 'Attack from a terminal']] as const).map(([id, label]) => (
+          <a key={id} href={`#${id}`} onClick={(e) => { e.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+            className="inline-flex min-h-[40px] items-center rounded-full border border-zinc-300 bg-white px-4 font-medium text-zinc-900 hover:bg-stoneBg">{label}</a>
+        ))}
+      </nav>
 
       <section className="mb-5 rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-800" data-testid="qday-self-run">
         <b>Our own drill: self-run and always on.</b> We set it up and run it ourselves. An attacker bot tries every bait once an hour (GitHub Actions, since 20 Nov 2026), and the page re-checks the chain every 30 seconds, through judging and after.{' '}
@@ -191,7 +197,7 @@ export default function QdayPage() {
         <div className="order-1 mb-5 md:order-2 md:mb-0"><TryIt baits={s?.baits ?? []} /></div>
       </div>
 
-      <section className={cx(card, 'mt-5')} data-testid="qday-script">
+      <section id="qday-script" className={cx(card, 'mt-5 scroll-mt-20')} data-testid="qday-script">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Or attack from your terminal</h2>
           <select className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm" value={scriptBait} onChange={(e) => setScriptBait(e.target.value)} aria-label="Bait for the script">{QDAY.baits.map((b) => <option key={b.id}>{b.id}</option>)}</select></div>
         <pre tabIndex={0} aria-label="Attack script" className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>

@@ -61,3 +61,11 @@ test('Refused attempts: one list, each row says what stopped it and opens in the
   await link.click();
   await expect(page.getByTestId('check-verdict')).toContainText('Refused attempt', { timeout: 60_000 });
 });
+
+test('the jump links take a phone straight to Try it and to the refused list', async ({ page }) => {
+  await page.goto(`${BASE}/qday`);
+  await page.getByTestId('qday-jump').getByRole('link', { name: 'Try it now' }).click();
+  await expect(page.getByTestId('qday-try')).toBeInViewport({ timeout: 10_000 });
+  await page.getByTestId('qday-jump').getByRole('link', { name: 'Refused attempts' }).click();
+  await expect(page.getByTestId('qday-intruders')).toBeInViewport({ timeout: 10_000 });
+});

@@ -47,8 +47,23 @@ export const REQUIREMENTS: Requirement[] = [
     tests: ['e2e v4.spec.ts "a. Confirmed drop … claim into the recipient Pocket"', 'reverify.mjs check 8 (Cosmos hashes, code 0)'],
   },
   {
+    id: 'hybrid-relay',
+    requirement: 'Hybrid-signed relays: every relay is a MsgCrossVMCall signed secp256k1 + ML-DSA-87 and checked by the chain; no ECDSA-only path is open',
+    code: [
+      { label: 'createHybridRelayer (sign, dry run, broadcast once)', path: 'backend/src/hybridRelayer.ts' },
+      { label: 'cosmos tx reader (pqc_hybrid_verify, EVM result)', path: 'backend/src/cosmos.ts' },
+    ],
+    live: [
+      { label: 'v4 createDrop relayed hybrid: code 0, pqc_hybrid_verify=verified', hash: '04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445' },
+      { label: 'v3 claim relayed hybrid: code 0, verified', hash: 'CAFECB9ABD82E5715DAE1EB721D8332E10631370F62A15F26384825EAB98F71C' },
+      { label: 'Q-Day attempt with a published classical key: the relay signature verified, the Pocket refused the call (code 14)', hash: 'FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3' },
+    ],
+    liveHealth: true,
+    tests: ['backend test/hybrid.test.ts "createHybridRelayer"', 'reverify.mjs section 9 (every recorded hybrid relay: code and pqc_hybrid_verify)'],
+  },
+  {
     id: 'scoped-window',
-    requirement: 'Scoped EVM window: the relayer can only call the two routers (and the v3 drop), with tx and value caps',
+    requirement: 'Scoped EVM window (the fallback, closed while relays are hybrid): when open, the relayer can only call the two routers (and the v3 drop), with tx and value caps',
     code: [
       { label: 'renew-window.mjs (hybrid-signed MsgOpenEVMWindow, allowed_targets)', path: 'backend/scripts/renew-window.mjs#L37-L39' },
       { label: 'renew-window.yml (every 2 h)', path: '.github/workflows/renew-window.yml' },
@@ -56,7 +71,6 @@ export const REQUIREMENTS: Requirement[] = [
     live: [
       { label: 'relayer tx to the drop contract directly: refused by the chain at broadcast (not an allowed recipient)', note: 'refused before inclusion, so there is no hash; see contracts-v4/LIVE_RESULTS.md' },
     ],
-    liveHealth: true,
     tests: ['backend test/misc.test.ts "health" and "windowWarning"', 'test_relay_refuses_non_pocket_targets'],
   },
   {

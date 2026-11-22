@@ -6,6 +6,10 @@ import v4 from '../src/data/v4.json';
 
 const repo = path.resolve(__dirname, '..', '..');
 const qorex = fs.readFileSync(path.join(repo, 'frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json'), 'utf8').toLowerCase();
+const hybrid = new Map<string, { code: number }>(
+  fs.readdirSync(path.join(repo, 'frontend/evidence/v4/e2e')).filter((f) => /^hybrid-relay.*\.json$/.test(f))
+    .flatMap((f) => (JSON.parse(fs.readFileSync(path.join(repo, 'frontend/evidence/v4/e2e', f), 'utf8')).txs as { hash: string; code: number }[]).map((t) => [t.hash.toLowerCase(), t] as const)),
+);
 const recorded = new Map(v4.liveRows.filter((r) => r.hash).map((r) => [r.hash!.toLowerCase(), r]));
 const testNames = new Set(
   fs.readdirSync(path.join(repo, 'contracts-v4/test')).filter((f) => f.endsWith('.t.sol'))
@@ -17,6 +21,8 @@ describe('/judges requirement table', () => {
     for (const r of REQUIREMENTS) for (const t of r.live) {
       if (!t.hash) { expect(t.note, `${r.id}: a row without a hash says why`).toBeTruthy(); continue; }
       const h = t.hash.toLowerCase();
+      const hy = hybrid.get(h);
+      if (hy) { expect(hy.code !== 0, `${r.id}: ${t.label}`).toBe(/refused/i.test(t.label)); continue; }
       const row = recorded.get(h);
       if (!row) { expect(qorex, `${r.id}: ${t.hash} is in the evidence`).toContain(h); continue; }
       const claimsRevert = /reverted/i.test(t.label);

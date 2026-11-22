@@ -11,6 +11,7 @@ import v4 from '../data/v4.json';
 import tests from '../data/tests.json';
 import { fetchQday } from '../lib/qday';
 import { useHealth, useLatestDrop } from '../lib/queries';
+import { LAB_REFUSED } from '../lib/labcount';
 import { fmtQor } from '../lib/chain';
 import { fingerprint, shortHash } from '../lib/protocol';
 import { txUrl } from '../lib/config';
@@ -47,7 +48,7 @@ function QdayTeaser() {
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
           <div className="flex items-center justify-between text-sm text-stone-300"><span>Pockets still holding</span><SourceBadge kind="LIVE" /></div>
           <div className="mt-2 font-money text-6xl leading-none text-white" data-testid="landing-qday-holding">{q ? `${holding} of ${q.baits.length}` : <Dash />}</div>
-          <p className="mt-2 text-sm text-stone-300">{q ? (q.alarm.raised ? 'Breach alarm raised: see the page.' : (() => { const n = q.log.onChain.rows.filter((r) => r.failed).length; return `No breach. ${n} ${n === 1 ? 'attempt' : 'attempts'} mined and reverted so far.`; })()) : 'Reading the drill…'}</p>
+          <p className="mt-2 text-sm text-stone-300">{q ? (q.alarm.raised ? 'Breach alarm raised: see the page.' : (() => { const n = q.log.onChain.rows.filter((r) => r.failed).length; return `No breach. ${n} ${n === 1 ? 'attempt' : 'attempts'} refused on-chain so far.`; })()) : 'Reading the drill…'}</p>
         </div>
       </Reveal>
     </div>
@@ -100,7 +101,7 @@ export default function LandingPage() {
             <img src="/hero-sculptures.webp" width={1344} height={756} alt="Sculptural dialogue bridging legacy to post-quantum Web3" className="sculptures-blend h-auto w-full max-w-[1060px] select-none object-contain" />
           </div>
 
-          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-xs uppercase tracking-widest text-zinc-600">
+          <div className="relative z-20 mb-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-2xl bg-stone-50/85 px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-zinc-700 shadow-sm backdrop-blur-sm" data-testid="hero-facts">
             <span className="inline-flex items-center gap-1"><MessageCircle className="h-3 w-3 text-emerald-600" /> Any chat app</span>
             <span className="inline-flex items-center gap-1"><Globe className="h-3 w-3" /> Diana testnet</span>
             <Link to="/judges" className="inline-flex items-center gap-1 hover:text-zinc-900" data-testid="hero-tests" title={`RECORDED: ${v4.tests.verifiedBy}; vitest counts from ${tests.command} on ${tests.recordedAt.slice(0, 10)}`}>
@@ -245,7 +246,7 @@ export default function LandingPage() {
 
           <Reveal delay={0.16} className="flex flex-col justify-between rounded-3xl border border-zinc-200/90 bg-white/90 p-6 shadow-sm md:col-span-3">
             <div>
-              <h3 className="mb-4 font-serif text-xl text-zinc-900">/lab · 6 Mined Diana Reverts</h3>
+              <h3 className="mb-4 font-serif text-xl text-zinc-900">/lab · Attacks the chain refused</h3>
               <div className="space-y-2.5">
                 {[[1, 'bg-rose-100 text-rose-800'], [3, 'bg-amber-100 text-amber-800'], [4, 'bg-zinc-200 text-zinc-800']].map(([n, tone]) => {
                   const t = attackTx(n as number); const a = ATTACKS[(n as number) - 1];
@@ -258,7 +259,7 @@ export default function LandingPage() {
                 })}
               </div>
             </div>
-            <Link to="/lab" className="mt-4 text-left font-mono text-xs text-zinc-800 underline">Inspect all {ATTACKS.length} explorer txs → <span className="no-underline"><SourceBadge kind="RECORDED" title={`deployments/diana.json, main contract ${REC.main.address}`} /></span></Link>
+            <Link to="/lab" className="mt-4 text-left font-mono text-xs text-zinc-800 underline">All {LAB_REFUSED} v4 attacks and the {ATTACKS.length} v3 ones → <span className="no-underline"><SourceBadge kind="RECORDED" title={`deployments/diana.json, main contract ${REC.main.address}`} /></span></Link>
           </Reveal>
         </div>
       </div>

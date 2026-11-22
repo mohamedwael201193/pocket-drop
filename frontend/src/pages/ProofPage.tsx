@@ -6,7 +6,7 @@ import { INST } from '../lib/v4';
 import { SOURCE_URL, addrUrl } from '../lib/config';
 import { useHealth } from '../lib/queries';
 
-const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday': 'LIVE', '/radar': 'LIVE', '/judges': 'RECORDED' };
+const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday': 'LIVE', '/radar': 'LIVE', '/judges': 'RECORDED', '/check': 'LIVE' };
 
 const CONTRACTS = [['Pocket router', 'router'], ['Pocket factory', 'factory'], ['Drop links', 'drop'], ['Drop pools', 'pool']] as const;
 

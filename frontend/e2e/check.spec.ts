@@ -86,3 +86,24 @@ test('a malformed hash in the URL explains the format and still offers the examp
   await page.getByTestId('check-example-refused').click();
   await expect(page.getByTestId('check-verdict')).toContainText('Refused attempt', { timeout: 60_000 });
 });
+
+test('every entry on /proof carries a filled LIVE or RECORDED label', async ({ page }) => {
+  await page.goto(`${BASE}/proof`);
+  for (const id of ['qday', 'lab', 'radar', 'check', 'judges']) await expect(page.getByTestId(`proof-card-${id}`)).toContainText(/LIVE|RECORDED/);
+  await expect(page.getByTestId('proof-card-check')).toContainText('LIVE');
+});
+
+test('/judges: the relayer item reads the live relay lane, the table has the hybrid-relay row, and the checker is linked', async ({ page }) => {
+  await page.goto(`${BASE}/judges`);
+  await expect(page.getByTestId('judges-relay-mode')).toContainText(/hybrid|EVM window/, { timeout: 60_000 });
+  await expect(page.getByTestId('req-hybrid-relay')).toContainText('code 14');
+  await expect(page.getByTestId('judges-check').getByRole('link', { name: /Check a transaction/ })).toHaveAttribute('href', '/check');
+  await noSideScroll(page);
+});
+
+test('the landing card and /lab agree on how many v4 attacks the chain refused', async ({ page }) => {
+  await page.goto(`${BASE}/lab`);
+  const n = (await page.getByRole('heading', { level: 1 }).textContent())!.match(/(\d+) attacks/)![1];
+  await page.goto(`${BASE}/`);
+  await expect(page.getByRole('link', { name: new RegExp(`All ${n} v4 attacks`) })).toBeVisible();
+});

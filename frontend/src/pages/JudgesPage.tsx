@@ -55,7 +55,7 @@ export default function JudgesPage() {
 
       <div className="space-y-3">
         <Item n={1} title="Start here: the Q-Day Drill" action={<SourceBadge kind="LIVE" />}>
-          <p>Five real Pockets on Diana have their classical (secp256k1) keys published on the page, as if a quantum computer had already broken them. Each Pocket holds a little QOR. Try to take it, from your own tab: the chain refuses, because only the post-quantum key can move funds. The page lists the attempts that were mined and reverted, and a live breach check.</p>
+          <p>Five real Pockets on Diana have their classical (secp256k1) keys published on the page, as if a quantum computer had already broken them. Each Pocket holds a little QOR. Try to take it, from your own tab: the chain refuses, because only the post-quantum key can move funds. The page lists every attempt the chain refused (EVM reverts and hybrid relays that failed), and a live breach check.</p>
           <p className="text-xs text-zinc-500">The drill also found a bug in our own key derivation (the PQ key could be derived from the classical key) and the fix is part of this build. Details on the page.</p>
           <Link className="inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/qday" data-testid="judges-qday">Open the Q-Day Drill</Link>
         </Item>
@@ -74,7 +74,7 @@ export default function JudgesPage() {
                   <td className="py-2 pr-3 text-zinc-900">{r.requirement}</td>
                   <td className="py-2 pr-3"><ul className="space-y-1">{r.code.map((c) => <li key={c.path}><a className="break-words underline" href={blob(c.path)} target="_blank" rel="noopener noreferrer">{c.label}</a></li>)}</ul></td>
                   <td className="py-2 pr-3"><ul className="space-y-1">
-                    {r.liveHealth && <li data-testid="req-window-live"><SourceBadge kind="LIVE" /> {h ? <>window {h.window.live ? 'live' : 'closed'}, allowed targets {(h.window.allowedTargets ?? []).length ? (h.window.allowedTargets ?? []).map((a) => <Mono key={a}>{a.slice(0, 8)}…</Mono>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, ', ', el] : [el]), []) : '–'}</> : 'reading /api/health…'}</li>}
+                    {r.liveHealth && <li data-testid="req-window-live"><SourceBadge kind="LIVE" /> {h ? <>{h.relay ? <>relays {h.relay.mode}, ECDSA-only path {h.relay.classicalPathOpen ? 'open' : 'closed'}; </> : null}window {h.window.live ? 'live' : 'closed'}, allowed targets {(h.window.allowedTargets ?? []).length ? (h.window.allowedTargets ?? []).map((a) => <Mono key={a}>{a.slice(0, 8)}…</Mono>).reduce<React.ReactNode[]>((acc, el, i) => (i ? [...acc, ', ', el] : [el]), []) : '–'}</> : 'reading /api/health…'}</li>}
                     {r.live.map((t) => <li key={t.label}>{t.hash ? <a className="underline" href={txUrl(t.hash)} target="_blank" rel="noopener noreferrer">{t.label}</a> : <>{t.label}{t.note && <span className="text-zinc-500"> ({t.note})</span>}</>}</li>)}
                   </ul></td>
                   <td className="py-2"><ul className="space-y-1 font-mono text-[11px] text-zinc-700">{r.tests.map((t) => <li key={t} className="break-words">{t}</li>)}</ul></td>
@@ -103,7 +103,7 @@ export default function JudgesPage() {
               <dt className="text-zinc-500">timelock / recovery / freeze / unanimous</dt><dd>{Number(v4.instances.prod.readBack.TIMELOCK) / 3600} h / {Number(v4.instances.prod.readBack.RECOVERY_DELAY) / 3600} h / {Number(v4.instances.prod.readBack.FREEZE_PERIOD) / 3600} h / {Number(v4.instances.prod.readBack.UNANIMOUS_RECOVERY_DELAY) / 3600} h</dd>
             </dl>
           )}
-          <p className="text-xs text-zinc-500">No owner, no admin, no upgradeability. The relayer window is scoped to the two routers, so the relayer cannot reach a Pocket or the drop contract directly.</p>
+          <p className="text-xs text-zinc-500">No owner, no admin, no upgradeability. The relayer only ever calls the two routers (hybrid cross-VM calls; the fallback EVM window is scoped to the same targets), so it cannot reach a Pocket or the drop contract directly.</p>
         </Item>
 
         <Item n={3} title="The attacks, including a stolen key, are refused on-chain" action={<SourceBadge kind="RECORDED" />}>
@@ -114,13 +114,16 @@ export default function JudgesPage() {
         <Item n={4} title="Every sensitive action is a post-quantum intent, checked on-chain" >
           <p>An owner or guardian signs an ML-DSA-87 intent over <code>&quot;qorechain-msg-v1|qorechain-diana|0x&quot; + lowercase hex(digest)</code>. The vault verifies it with <code>pqcVerify</code> (0x0A01) against the key from <code>pqcKeyStatus</code> (0x0A02), failing closed unless the key is registered, ML-DSA-87 and possession-proven. The relayer only pays gas; <code>PocketRouter</code> forwards only to factory Pockets, <code>PocketDrop</code> and <code>DropPool</code>.</p>
           <p className="text-xs text-zinc-500">The digests this app signs are tested against the contract view functions by eth_call (frontend/test/digests4.live.test.ts).</p>
+          <p data-testid="judges-check">Do not take our word for a signature: <Link className="underline" to="/check">Proof &gt; Check a transaction</Link> fetches any recorded transaction from the chain and re-verifies its ML-DSA-87 signatures in your browser with <code>@qorechain/qoresign</code>, including a refused Q-Day attack.</p>
         </Item>
 
-        <Item n={5} title="The relayer holds no user secret and has a scoped window" action={<SourceBadge kind="LIVE" />}>
+        <Item n={5} title="The relayer holds no user secret, and every relay carries a post-quantum signature" action={<SourceBadge kind="LIVE" />}>
           {!h ? <Skeleton className="h-10 w-full" /> : (
-            <ul className="list-disc space-y-1 pl-5">
+            <ul className="list-disc space-y-1 pl-5" data-testid="judges-relayer">
               <li>Relayer <Mono>{h.relayer?.address}</Mono> holds {h.relayer?.balance ?? '–'} QOR.</li>
-              <li>EVM window: <strong>{h.window.live ? 'live' : 'closed'}</strong>, {h.window.remainingTxs ?? '–'} txs left, allowed targets: <Mono>{Array.isArray((h.window as { allowedTargets?: string[] }).allowedTargets) ? (h.window as { allowedTargets: string[] }).allowedTargets.join(', ') : '–'}</Mono></li>
+              {h.relay?.mode === 'hybrid'
+                ? <li data-testid="judges-relay-mode">Relays: <strong>hybrid</strong>. Each one is a <code>MsgCrossVMCall</code> signed with secp256k1 + ML-DSA-87; the chain checks both before the EVM runs. ECDSA-only path: <strong>{h.relay.classicalPathOpen ? 'open' : 'closed'}</strong>{h.relay.classicalPathOpen ? ` (EVM window, ${h.window.remainingBlocks ?? '–'} blocks left)` : ''}. <Link className="underline" to="/check/04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445">Re-verify one relay in your browser</Link>.</li>
+                : <li data-testid="judges-relay-mode">Relays: EVM window <strong>{h.window.live ? 'live' : 'closed'}</strong>, {h.window.remainingTxs ?? '–'} txs left, allowed targets: <Mono>{Array.isArray((h.window as { allowedTargets?: string[] }).allowedTargets) ? (h.window as { allowedTargets: string[] }).allowedTargets.join(', ') : '–'}</Mono></li>}
               <li>It cannot sign for anyone: <code>POST /api/route</code> simulates each signed intent with eth_call through the router and answers 422 with the decoded error, sending nothing, if it would revert.</li>
               {h.warning && <li className="text-amber-800">{h.warning.message}</li>}
               {(h.warnings ?? []).map((w) => <li key={w.kind} className="text-amber-800">{w.message}</li>)}

@@ -11,6 +11,7 @@ import { errorsAbi } from '../lib/abi4';
 import { pocketDropAbi } from '../lib/abi';
 import { pub } from '../lib/chain';
 import { addrUrl } from '../lib/config';
+import { LAB_REFUSED } from '../lib/labcount';
 
 interface Row { section: string; step: string; status: string; outcome: string; url: string | null; hash: string | null }
 const ROWS = v4.liveRows as Row[];
@@ -76,7 +77,7 @@ export default function LabPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8" data-testid="lab">
-      <Stage eyebrow={<span className="break-words">Lab · v4 · prod router <a className="underline" href={addrUrl(inst.prod.router.address)} target="_blank" rel="noopener noreferrer">{inst.prod.router.address.slice(0, 8)}…</a> · lab router <a className="underline" href={addrUrl(inst.lab.router.address)} target="_blank" rel="noopener noreferrer">{inst.lab.router.address.slice(0, 8)}…</a> <SourceBadge kind="RECORDED" /></span>} title={<>{attacks.length + stolenAttacks.length} attacks the chain refused</>} action={<Button onClick={() => void runAll()} busy={busy} data-testid="verify-all"><Play className="h-4 w-4" aria-hidden />Verify live</Button>}>Each row below is a real transaction on Diana testnet. A &quot;reverted&quot; attack was decoded with eth_call first, then mined with an explicit gas limit so the revert itself is on-chain. Source: <code className="font-mono text-xs">contracts-v4/LIVE_RESULTS.md</code>, recorded when the live suite ran. The button re-checks them against the chain right now.</Stage>
+      <Stage eyebrow={<span className="break-words">Lab · v4 · prod router <a className="underline" href={addrUrl(inst.prod.router.address)} target="_blank" rel="noopener noreferrer">{inst.prod.router.address.slice(0, 8)}…</a> · lab router <a className="underline" href={addrUrl(inst.lab.router.address)} target="_blank" rel="noopener noreferrer">{inst.lab.router.address.slice(0, 8)}…</a> <SourceBadge kind="RECORDED" /></span>} title={<>{LAB_REFUSED} attacks the chain refused</>} action={<Button onClick={() => void runAll()} busy={busy} data-testid="verify-all"><Play className="h-4 w-4" aria-hidden />Verify live</Button>}>Each row below is a real transaction on Diana testnet. A &quot;reverted&quot; attack was decoded with eth_call first, then mined with an explicit gas limit so the revert itself is on-chain. Source: <code className="font-mono text-xs">contracts-v4/LIVE_RESULTS.md</code>, recorded when the live suite ran. The button re-checks them against the chain right now.</Stage>
 
       <Link to="/qday" data-testid="lab-qday-link" className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-3xl border-2 border-zinc-900 bg-white p-5 shadow-sm hover:bg-stoneBg">
         <span><span className="block font-serif text-2xl text-zinc-900">Q-Day Drill</span><span className="block text-sm text-zinc-700">Five Pockets with published classical keys. Try every attack yourself, live.</span></span>
