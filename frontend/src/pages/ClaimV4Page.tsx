@@ -157,8 +157,9 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
 
   if (link === null) return <DeadEnd title="Link not found" testId="link-error">There is no link {label} on this instance. Check that you opened the whole link the sender shared, or ask them for a new one.</DeadEnd>;
   if (linkErr && !link) return <DeadEnd title="Could not read this link" testId="link-error">{explainError(linkErr)} Reload the page to try again.</DeadEnd>;
-  if (!seed && !started && !(() => { try { return localStorage.getItem(startedKey(env, id)) === '1'; } catch { return false; } })()) {
-    if (link && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state)) return <DeadEnd title={`This link is already ${link.state.toLowerCase()}`} testId="link-dead" tone="warn">It held {fmtQor(link.amount)} QOR and cannot be claimed again. Ask the sender for a new link if you expected it.</DeadEnd>;
+  // a finished link shows the same "already claimed" screen with or without its key (the key cannot change the outcome)
+  const finished = !!link && ['Claimed', 'Cancelled', 'Refunded'].includes(link.state);
+  if (!seed && !started && !finished && !(() => { try { return localStorage.getItem(startedKey(env, id)) === '1'; } catch { return false; } })()) {
     return <DeadEnd title="This link is incomplete" testId="no-key">The link is missing its key: the long part after the # is required. Open the full link exactly as the sender shared it.</DeadEnd>;
   }
 
