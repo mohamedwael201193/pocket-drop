@@ -37,8 +37,8 @@ describe('cosmos tx result reader', () => {
 });
 
 describe('gas, fee, memo', () => {
-  it('uses the dry run plus 25% and 20k, else overhead + 1.5x EVM gas, capped', () => {
-    expect(hybridGas(511_277n, 350_000n)).toBe(659_096n);
+  it('uses the dry run plus 15% and 20k, else overhead + 1.5x EVM gas, capped', () => {
+    expect(hybridGas(511_277n, 350_000n)).toBe(607_968n);
     expect(hybridGas(null, 350_000n)).toBe(975_000n);
     expect(hybridGas(10_000_000n, 1n)).toBe(HYBRID_GAS_CAP);
     expect(feeFor(600_000n)).toBe(66_000n); // the fee the real tx paid
@@ -79,9 +79,9 @@ describe('createHybridRelayer', () => {
     expect(r.mode).toBe('hybrid');
     expect(r.cosmosAddress).toBe(evmToQor(r.address));
     const s = await r.send('0xabcd', 350_000n, 'pd route prod relay 0xV');
-    expect(s).toMatchObject({ ok: true, lane: 'hybrid', status: 'success', hash: OK.txhash, blockNumber: 10527710n, hybridVerified: true, feeUqor: String(feeFor(645_000n)) });
+    expect(s).toMatchObject({ ok: true, lane: 'hybrid', status: 'success', hash: OK.txhash, blockNumber: 10527710n, hybridVerified: true, feeUqor: String(feeFor(595_000n)) });
     expect(c.signCrossVm).toHaveBeenCalledTimes(2);
-    expect(c.signCrossVm.mock.calls[1][0]).toMatchObject({ gas: '645000', memo: 'pd route prod relay 0xV', contract: CONTRACT, data: '0xabcd', secp: KEY, pqc: PQC });
+    expect(c.signCrossVm.mock.calls[1][0]).toMatchObject({ gas: '595000', memo: 'pd route prod relay 0xV', contract: CONTRACT, data: '0xabcd', secp: KEY, pqc: PQC });
     expect(c.calls.filter((x) => x === 'POST /cosmos/tx/v1beta1/txs')).toHaveLength(1);
   });
   it('re-reads the sequence and re-signs on code 32', async () => {

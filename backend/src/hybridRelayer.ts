@@ -17,9 +17,9 @@ export const GAS_PRICE_UQOR = 0.11;
 export const HYBRID_OVERHEAD_GAS = 450_000n;
 export const HYBRID_GAS_CAP = 4_000_000n;
 
-/** Native gas for a hybrid relay: the dry run plus 25% and 20k, or overhead + 1.5x the EVM limit when the dry run fails; capped. */
+/** Native gas for a hybrid relay: the dry run plus 15% and 20k (unused native gas is not refunded, so the margin is kept small), or overhead + 1.5x the EVM limit when the dry run fails; capped. */
 export function hybridGas(simulated: bigint | null, evmGasLimit: bigint): bigint {
-  const g = simulated !== null ? (simulated * 125n) / 100n + 20_000n : HYBRID_OVERHEAD_GAS + (evmGasLimit * 3n) / 2n;
+  const g = simulated !== null ? (simulated * 115n) / 100n + 20_000n : HYBRID_OVERHEAD_GAS + (evmGasLimit * 3n) / 2n;
   return g > HYBRID_GAS_CAP ? HYBRID_GAS_CAP : g;
 }
 export const feeFor = (gas: bigint): bigint => BigInt(Math.ceil(Number(gas) * GAS_PRICE_UQOR));
