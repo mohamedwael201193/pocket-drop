@@ -57,16 +57,18 @@ const auditFile = path.resolve(here, '..', '..', 'docs', 'AUDIT.md');
 if (fs.existsSync(auditFile)) {
   const t = fs.readFileSync(auditFile, 'utf8');
   const g = (re) => (re.exec(t) ?? [])[1] ?? null;
-  const s2 = t.split(/^## Stage 2/m)[1] ?? '';
-  const g2 = (re) => (re.exec(s2) ?? [])[1] ?? null;
-  const stage2Done = /### Stage 2 run/.test(t) && !!g2(/Audit ID \| `([^`]+)`/);
+  // docs/AUDIT.md section 1 has one row per stage: | stage | date | `audit id` | score / risk | ...
+  const row = (n) => new RegExp(`^\\| ${n} \\| [^|]+\\| \x60([^\x60]+)\x60 \\| ([^|]+)\\|`, 'm').exec(t) ?? [];
+  const [, id1, score1] = row(1);
+  const [, id2, score2] = row(2);
+  const stage2Done = !!id2;
   qcai = {
     stage1: 'complete', stage2: stage2Done ? 'complete' : 'pending',
-    report: 'docs/AUDIT.md', auditId: g(/Audit ID \| `([^`]+)`/), score: g(/Score \/ risk \| ([^|]+)\|/)?.trim() ?? null,
-    findings: g(/Counts: (\d+ findings[^.]*)\./), publicReport: g(/Public report \| (https:\/\/\S+)/),
-    stage2AuditId: stage2Done ? g2(/Audit ID \| `([^`]+)`/) : null,
-    stage2Score: stage2Done ? (g2(/Score \/ risk \| \**([^|*]+)\**/)?.trim() ?? null) : null,
-    stage2PublicReport: stage2Done ? g2(/Public report \| (https:\/\/\S+)/) : null,
+    report: 'docs/AUDIT.md', auditId: id1 ?? null, score: score1?.trim() ?? null,
+    findings: g(/Counts: (\d+ findings[^.]*)\./), publicReport: g(/^- Stage 1: (https:\/\/\S+)/m),
+    stage2AuditId: stage2Done ? id2 : null,
+    stage2Score: stage2Done ? (score2?.trim() ?? null) : null,
+    stage2PublicReport: stage2Done ? g(/^- Stage 2: (https:\/\/\S+)/m) : null,
   };
 }
 
