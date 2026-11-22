@@ -1,6 +1,6 @@
 # Pocket Drop threat model (v4, Diana testnet)
 
-Status: 20 Nov 2026. Scope: PocketDrop v4, DropPool, PocketVault / PocketFactory / PocketRouter (contracts-v4, frozen), the relayer API, the browser app. Testnet only: nothing here holds real value.
+Status: 22 Nov 2026 (relayer moved to the hybrid lane, EVM window closed). Scope: PocketDrop v4, DropPool, PocketVault / PocketFactory / PocketRouter (contracts-v4, frozen), the relayer API, the browser app. Testnet only: nothing here holds real value.
 Related: [contracts-v4/KNOWN_ISSUES.md](../contracts-v4/KNOWN_ISSUES.md), [contracts-v4/SECURITY.md](../contracts-v4/SECURITY.md), [docs/AUDIT.md](AUDIT.md), [live results](../contracts-v4/LIVE_RESULTS.md).
 
 ## 1. What we protect
@@ -25,6 +25,7 @@ Related: [contracts-v4/KNOWN_ISSUES.md](../contracts-v4/KNOWN_ISSUES.md), [contr
 2. ML-DSA-87 is not broken.
 3. A user's ML-DSA secret is **independent** of their secp256k1 key (see T3: this was false for browser keys until 20 Nov 2026).
 4. The relayer is liveness-only: it can delay or censor, never forge.
+5. Since 22 Nov 2026 the relayer signs every relay as a native `MsgCrossVMCall` with secp256k1 + ML-DSA-87, and the chain checks both (`pqc_hybrid_verify`). Its EVM window is closed, so its classical key alone cannot send.
 
 ## 4. Threats and mitigations
 | # | Threat | Mitigation | Evidence | Residual |
@@ -38,11 +39,11 @@ Related: [contracts-v4/KNOWN_ISSUES.md](../contracts-v4/KNOWN_ISSUES.md), [contr
 | T7 | Guardians collude | threshold recovery has a delay and owner veto; unanimous recovery needs all guardians | KNOWN_ISSUES §3 | a full guardian set can take the Pocket (deliberate) |
 | T8 | Early execution of a queued spend | timelock | `0x48ab…` reverted | none |
 | T9 | Double pool claim | per-key and per-link claimed flags | `0xbd41…` reverted | sybil keys limited by link proofs |
-| **T10** | **Live EVM window lets the classical key alone send** (FEASIBILITY O2) | opening a window needs the hybrid signature, so a Q-Day attacker cannot open one. **No browser flow opens a window** (since `43cc149`; the v3 claim's window step was removed). All browser actions go through the relayer as ML-DSA intents | O1–O4; code: `frontend/src/lib/recipient.ts` has no window code; `grep -r openEvmWindow frontend/src` is empty | QoreX users who open a window themselves; the relayer's own window (scoped to the routers + v3, value-capped) |
-| T11 | Exhausting the relayer window tx budget | renewal workflow every 2 h, health check; per-IP and daily API caps | `renew-window.yml`, `/api/health` | a determined spammer can delay service for hours |
+| **T10** | **Live EVM window lets the classical key alone send** (FEASIBILITY O2) | opening a window needs the hybrid signature, so a Q-Day attacker cannot open one. **No browser flow opens a window** (since `43cc149`; the v3 claim's window step was removed). All browser actions go through the relayer as ML-DSA intents | O1–O4; code: `frontend/src/lib/recipient.ts` has no window code; `grep -r openEvmWindow frontend/src` is empty | QoreX users who open a window themselves. **The relayer's own window is closed** (22 Nov 2026: replaced by a 10-block window, `0373ACC4…C3A6`, which expired at height 10529379; an ECDSA-only relay from the relayer was then refused by the chain at broadcast, "EVM authorisation window exhausted", attempted hash `0xf2dbd9f5…d540`, see LIVE_RESULTS). Re-opening it needs the hybrid signature (operator workflow, manual only) |
+| T11 | Draining the relayer's gas float (a hybrid relay costs about 0.10 to 0.17 QOR of native gas, more than the 0.08 of an EVM relay) | every relay is simulated first and never sent if it would revert; gas = dry run + 15%; per-IP and daily API caps; `/api/health` flags a balance under 3 QOR | `backend/test/hybrid.test.ts`, `/api/health` | a determined spammer can spend the float down to the daily cap; the bind relayer fee (0.06 QOR) does not cover a hybrid relay |
 | T12 | XSS / malicious script or a storage scraper reads the browser root | React escaping, no `dangerouslySetInnerHTML`; **strict CSP** (`script-src 'self' 'wasm-unsafe-eval'`, no inline script or style, `connect-src` = self, `evm-testnet.qore.host`, `pocketdrop-api.vercel.app` only, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`), X-Frame-Options DENY, Permissions-Policy, HSTS, nosniff, no-referrer; **the root is sealed at rest** with a non-extractable AES-256-GCM key kept in IndexedDB (`frontend/src/lib/vault.ts`), plaintext pd2 and legacy roots migrate on load | `e2e/qa/security.spec.ts` (headers + no CSP violation on 15 routes + sealed-key check), `test/vault.test.ts` | the seal stops storage scraping (disk images, backups, profile sync, tools that read localStorage files); it does **not** stop code running in this origin, which can still ask the browser to decrypt. A new key is written in plaintext for a few milliseconds before it is sealed, so a closed tab never loses it. If IndexedDB is unavailable (some private modes) the root stays in plaintext. Extensions with page access are out of reach of any web defence |
 | T13 | Lost browser storage | backup card (pd2: key), guardians | UI | users who never back up and never add guardians lose funds |
-| T14 | Relayer PQ seed leak (GitHub secret) | targets are fixed in workflow config; window value cap | KNOWN_ISSUES §2 | whoever holds the seed can open any window for the relayer account and drain its gas float (not escrow) |
+| T14 | Relayer PQ seed leak (GitHub secret, and since 22 Nov 2026 a Vercel production env var `RELAYER_PQC_SEED` so the API can hybrid-sign) | the relayer holds no user funds and every relay carries the user's own ML-DSA intent; small float; health alarm on low balance; the window stays closed and its renewal is manual | KNOWN_ISSUES §2 | whoever holds both relayer keys (one Vercel env compromise now gives both) can spend the gas float, open a window for the relayer account, or censor relays; never move escrow or Pocket funds |
 | T15 | Sponsor abuse | link proof / funded Pocket proof, per-IP, per-link and daily caps, kill switch | backend sponsor tests | sponsor float can be drained to its daily cap |
 | T16 | Stale cached app serves old (legacy) derivation | Vercel immutable assets + fresh index; one-time reload on a missing chunk | live bundle contains `pocketdrop/key/v2` | none known |
 | T17 | Key rotation of an owner account | Pocket pins the key hash; rotation requires guardian recovery | KNOWN_ISSUES §4 | deliberate trade-off |
@@ -52,6 +53,7 @@ Related: [contracts-v4/KNOWN_ISSUES.md](../contracts-v4/KNOWN_ISSUES.md), [contr
 - Done 20 Nov 2026: CSP + `frame-ancestors 'none'` and the sealed root (T12). Residual: same-origin code can still use the key.
 - If IndexedDB is wiped but localStorage is kept, a sealed root cannot be opened; the app keeps the ciphertext aside under `<key>.undecryptable` and never overwrites it silently. The backup card (pd2: key) is the recovery path.
 - Proof of a mined QoreX `signArbitrary` intent (KNOWN_ISSUES §5).
+- The relayer now keeps both of its keys in the serverless environment (T14). A split signer (an HSM or a separate signing service for the ML-DSA half) would remove that single point; not done on testnet.
 
 ## 6. Live proof of the fix (20 Nov 2026, team-run test accounts, not users)
 Run `frontend/evidence/v4/e2e/v2-key-claim-proof.json` (Playwright `e2e/v4.spec.ts` "b. Giveaway", the recipient browser creates its key in the app). The test asserts the stored root is `pd2:`, the bound recipient address equals the v2 secp key's address, and the bound `recipientKeyHash` equals keccak of the ML-DSA key from the independent v2 secret.

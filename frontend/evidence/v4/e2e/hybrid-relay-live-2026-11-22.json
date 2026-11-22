@@ -1,12 +1,31 @@
 {
- "note": "TEAM-RUN. QA flow a (confirmed drop) in Chromium and WebKit at 390 and 1440 against the deployed app https://pocketdrop-app.vercel.app and API https://pocketdrop-api.vercel.app after the hybrid lane went live (RELAY_MODE=hybrid). Every relay is a MsgCrossVMCall signed by the relayer with secp256k1 + ML-DSA-87; the chain records pqc_hybrid_verify=verified. Read back from https://api-testnet.qore.host.",
+ "note": "TEAM-RUN. QA flows a (confirmed drop) and c (pool) in Chromium and WebKit at 390 and 1440 against the deployed app https://pocketdrop-app.vercel.app and API https://pocketdrop-api.vercel.app with RELAY_MODE=hybrid. Flow c ran after the relayer EVM window was closed. Every relay is a MsgCrossVMCall signed by the relayer with secp256k1 + ML-DSA-87; the chain records pqc_hybrid_verify=verified. Read back from https://api-testnet.qore.host.",
  "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+ "windowClose": {
+  "step": "relayer replaces its EVM window with a 10-block, 1-tx window scoped to the prod router (hybrid-signed MsgOpenEVMWindow); it expired at height 10529379",
+  "hash": "0373ACC4860EB877DEE1AE45B2EF0B7F9E7A9B683EA843623FC41A0FB1F4C3A6",
+  "height": "10529369",
+  "code": 0,
+  "refusedAfter": {
+   "what": "ECDSA-only EVM tx from the relayer 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD to the prod router (relay -> executeQueued), sent with eth_sendRawTransaction after expiry",
+   "attemptedHash": "0xf2dbd9f5d6bc42c68f3546ad127b463677e8024af30d705580c53315f41ad540",
+   "at": "2026-11-22T02:48:54.854Z",
+   "answer": "failed to broadcast transaction: the EVM authorisation window for qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl does not admit this transaction (remaining: 0 blocks, 1 transactions, 1646250 uqor; this transaction needs 43875 uqor): EVM authorisation window exhausted"
+  }
+ },
+ "relayerTopUp": {
+  "what": "main wallet sends 2 QOR to the relayer (hybrid MsgSend; moves team QOR, not spent)",
+  "hash": "D1A2C4CDA911F75C2A2BF37D25167CF522CA5AFEE0354801A3F6ED2E3F376AA5"
+ },
  "flows": [
-  "hybrid-a-confirmed-live-2026-11-22.json"
+  "hybrid-a-confirmed-live-2026-11-22.json",
+  "hybrid-c-pool-live-2026-11-22.json"
  ],
- "readBackAt": "2026-11-22T02:47:02.257153+00:00",
+ "readBackAt": "2026-11-22T02:53:33.094317+00:00",
  "txs": [
   {
+   "step": "sender createDrop",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445",
    "height": "10529216",
    "code": 0,
@@ -18,6 +37,8 @@
    "time": "2026-11-22T02:44:32Z"
   },
   {
+   "step": "recipient bind",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "F2550467C360F9E040640A8241E1636F1C1C87848AAE6E5F96329DD2358BF745",
    "height": "10529222",
    "code": 0,
@@ -29,6 +50,8 @@
    "time": "2026-11-22T02:44:40Z"
   },
   {
+   "step": "sender confirmDrop",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "3ABD34F23BDCA59D0A7818AFB92F61578B6495E3008B203595297B97ADC8CC2B",
    "height": "10529237",
    "code": 0,
@@ -40,6 +63,8 @@
    "time": "2026-11-22T02:45:02Z"
   },
   {
+   "step": "recipient claim",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "32FB6769EB94FEB411CC9482EA90782603ABC1C846DC750F71519DC0FC45B682",
    "height": "10529241",
    "code": 0,
@@ -51,6 +76,8 @@
    "time": "2026-11-22T02:45:07Z"
   },
   {
+   "step": "sweep recipient Pocket to deployer",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "B610EE0D59B9EB75BD72C0D71D969CB128236051F1EE0EB3812233991B62E15A",
    "height": "10529261",
    "code": 0,
@@ -62,6 +89,8 @@
    "time": "2026-11-22T02:45:36Z"
   },
   {
+   "step": "sweep sender Pocket to deployer",
+   "flow": "hybrid-a-confirmed-live-2026-11-22.json",
    "hash": "370E35B65EE3D60BFE9FC63AD0458032616517EEFC0D715D2284AAAFC90BCA16",
    "height": "10529265",
    "code": 0,
@@ -71,6 +100,71 @@
    "fee": "104851uqor",
    "pqc_hybrid_verify": "verified",
    "time": "2026-11-22T02:45:42Z"
+  },
+  {
+   "step": "host createPool 3x0.02",
+   "flow": "hybrid-c-pool-live-2026-11-22.json",
+   "hash": "AEA2C44E337A9EBE5FEB9898D8192891AD0E609F07EFED67AD3C996DBC84CDD5",
+   "height": "10529456",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0xa32FF6A44F65B7b4637B83974fF559BFBE6dAF76",
+   "gasUsed": "1253835",
+   "gasWanted": "1461855",
+   "fee": "160805uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:50:15Z"
+  },
+  {
+   "step": "claimer1 takes slot",
+   "flow": "hybrid-c-pool-live-2026-11-22.json",
+   "hash": "9B191BEC461B751FE562E15CD91D0ED149B688F700AA0041C4D503DBD18E4445",
+   "height": "10529469",
+   "code": 0,
+   "memo": "pd route prod relay 0xaA981588E5430E3db9A789A3754E108Cc01e3D00",
+   "gasUsed": "1090677",
+   "gasWanted": "1274275",
+   "fee": "140171uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:50:33Z"
+  },
+  {
+   "step": "claimer2 takes slot",
+   "flow": "hybrid-c-pool-live-2026-11-22.json",
+   "hash": "A12839ABEA58FBE03E99C59D0FF0576A5B2D6761A157AF55645EDEE49A343390",
+   "height": "10529481",
+   "code": 0,
+   "memo": "pd route prod relay 0xaA981588E5430E3db9A789A3754E108Cc01e3D00",
+   "gasUsed": "1090485",
+   "gasWanted": "1274054",
+   "fee": "140146uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:50:51Z"
+  },
+  {
+   "step": "host closePool",
+   "flow": "hybrid-c-pool-live-2026-11-22.json",
+   "hash": "71C3E330A808205FE1C9698978DE2CAEE6C4425E4CB3AD586E31E048D579F835",
+   "height": "10529543",
+   "code": 0,
+   "memo": "pd route prod relay 0x6c94E3Bef01d314ae348ee3c4270D96B28055133",
+   "gasUsed": "845780",
+   "gasWanted": "992722",
+   "fee": "109200uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:52:19Z"
+  },
+  {
+   "step": "sweep host Pocket to deployer",
+   "flow": "hybrid-c-pool-live-2026-11-22.json",
+   "hash": "18F05139AE0C842E84AAD5CC55FE56EE012414C62CA5246A0D098B1F893ABA47",
+   "height": "10529552",
+   "code": 0,
+   "memo": "pd route prod relay 0x6c94E3Bef01d314ae348ee3c4270D96B28055133",
+   "gasUsed": "811416",
+   "gasWanted": "953152",
+   "fee": "104847uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:52:32Z"
   }
  ]
 }

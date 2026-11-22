@@ -12,7 +12,8 @@
 //      the spend ledger: every EVM hash mined with status 1
 //   8. every Cosmos tx hash in the evidence (registrations, funding, sponsor sends) has code 0 via the Cosmos REST API
 //   9. hybrid relays (evidence/v4/e2e/hybrid-relay-*.json): each is a MsgCrossVMCall from the relayer to a recorded v4
-//      router, code 0, and the chain's own pqc_hybrid_verify event says verified (secp256k1 + ML-DSA-87)
+//      router, code 0, and the chain's own pqc_hybrid_verify event says verified (secp256k1 + ML-DSA-87); the relayer's
+//      EVM window is closed now (LIVE), so its classical key alone cannot relay
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -218,6 +219,14 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^hybrid-rela
         `hybrid ${row.hash.slice(0, 12)}… code ${t.code}, ${m ? 'cross-VM call to ' + String(m.target_contract).slice(0, 10) + '…' : 'no MsgCrossVMCall'}, pqc_hybrid_verify ${hy ?? 'missing'}: ${row.memo.slice(0, 50)}`);
     } catch (e) { check(false, `hybrid ${row.hash.slice(0, 12)}… not readable (${e.message})`); }
   });
+}
+const closed = fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^hybrid-relay-.*\.json$/.test(f)).map((f) => JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'))).find((H) => H.windowClose);
+if (closed) {
+  await cosmosCheck(closed.windowClose.hash, 'relayer replaces its EVM window with a 10-block one (window close)', closed.windowClose.height); hybridN++;
+  try {
+    const w = await (await fetch(`${REST}/qorechain/pqc/v1/evm_window/${closed.relayer}`, { headers: { 'user-agent': 'curl/8' } })).json();
+    check(w.live === false, `LIVE: relayer EVM window is ${w.live ? 'OPEN' : 'closed'} (expiry height ${w.expiry_height}), so an ECDSA-only relay cannot be sent`);
+  } catch (e) { check(false, `relayer window not readable (${e.message})`); }
 }
 tally['hybrid relays'] = { evm: 0, cosmos: hybridN };
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);

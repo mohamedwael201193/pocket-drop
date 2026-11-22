@@ -7,9 +7,11 @@ Written before QCAI Stage 1. After Stage 1 edits are allowed only for findings.
 - The contracts are unaudited. No owner/admin/upgrade path exists in the contracts, which also means a bug cannot be patched in place (redeploy).
 
 ## 2. The relayer
-- One relayer key submits all intents through `PocketRouter`. Its EVM window is scoped to `[PocketRouter prod, PocketRouter lab, PocketDrop v3]`, so the chain refuses any other target at broadcast (shown in `LIVE_RESULTS.md`).
+- One relayer account submits all intents through `PocketRouter`. Since 22 Nov 2026 every relay is a native `MsgCrossVMCall` signed with secp256k1 + ML-DSA-87 (`backend/src/hybridRelayer.ts`); the chain checks both signatures (`pqc_hybrid_verify`). A cross-VM call leaves no EVM log, so `/api/xvm` rebuilds those events from the native lane and `/api/stats` adds them in.
+- The relayer's EVM window is closed (it was scoped to `[PocketRouter prod, PocketRouter lab, PocketDrop v3]`). An ECDSA-only relay is refused by the chain at broadcast (`LIVE_RESULTS.md`, "Hybrid relay lane"). The API still has an EVM fallback before broadcast, which only works if an operator re-opens the window by hand (`renew-window.yml`, manual only) and sets `RELAY_MODE=evm` if needed.
 - The relayer holds no user secret. It can censor (not submit), delay, or reorder intents; it cannot forge one, and an unsubmitted intent stays valid until its deadline. A relayer outage stops new actions; funds stay put and Pockets stay recoverable by guardians (the guardians need a submitter too: anyone can call the router).
-- The relayer window must be renewed (17,280 blocks max, ~6.9 h). The GitHub Actions renewer (`.github/workflows/renew-window.yml`) does it; its key (a GitHub secret) can only open windows for the listed targets and move the relayer's own gas money.
+- Both relayer keys now sit in the API's production environment (`RELAYER_SECP_KEY`, `RELAYER_PQC_SEED`) and in GitHub secrets for the manual window workflow. Whoever holds both can spend the relayer's gas float or open a window for it; never user funds.
+- A hybrid relay costs about 0.10 to 0.17 QOR of native gas (gas = dry run + 15%; unused native gas is not refunded), against about 0.08 QOR for the old EVM relay. The bind `relayerFee` (0.06 QOR) no longer covers the relayer's costs; the float is topped up from the team's main wallet.
 - The relayer collects `relayerFee` from the first bind. That is its only income and it is capped by the sender at link creation.
 - Front-running: anyone may submit someone else's signed intent or bind. That is safe by design (the submitter gains nothing: payout addresses and amounts are signed), but it means the intended submitter's tx can fail with a nonce/state error if somebody else was first.
 

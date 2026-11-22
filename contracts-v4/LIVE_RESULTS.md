@@ -243,3 +243,27 @@ This step used the QoreX extension 0.4.3 itself, running headless with a team te
 | QoreX hybrid send 0.001 QOR to main | `22AD39137B19A8D541AD30160E3A4A9A491955190239D7855DF3A33F012C2BF4` | cosmos code 0 |
 | main funds the counterfactual Pocket `0x088e8f3240523d73E5d6b14C48B3996685e5eD22` 0.05 | `809127BDA39D9CEC9B2BE698EA0F64D56C7E8AD4742B69DB65A93D4F753AB8F2` | cosmos code 0 |
 | QoreX-signed intent: deploy Pocket + spend 0.02 to main | `0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a` | success (503,790 gas) |
+
+## Hybrid relay lane, 22 Nov 2026 (TEAM-RUN, Diana testnet, prod instance)
+The relayer stopped sending ECDSA-only EVM transactions. Each relay is now a native `MsgCrossVMCall` (`@qorechain/sdk` `crossvm.crossVmCall`) to the PocketRouter, signed with secp256k1 + ML-DSA-87. The chain checks both signatures and records `pqc_hybrid_verify status=verified` in the transaction. The deployed contracts did not change. A cross-VM call leaves no EVM log: `/api/xvm` rebuilds the drop and pool events from the native lane, and `/api/stats` adds them in. Evidence: `frontend/evidence/v4/e2e/hybrid-relay-2026-11-22.json` (local build, 11 relays) and `hybrid-relay-live-2026-11-22.json` (deployed app, 11 relays). `reverify.mjs` section 9 re-checks every row and the closed window.
+
+First probe (04:08 Cairo): `router.relay(V, executeQueued(1))` as a hybrid cross-VM call, `93FC5B4B3704CF84F6C587FB4B543294793A0FDC4CC95F8D4EA0843C5345C192`, code 0, height 10527710; V's queued spend #1 went from Pending to Executed. A probe that reverts inside the EVM (`B05749E6C1CAED0CB2605B420D959B6D9984581F804F15A7BD077E7019B16B70`) fails with code 14 and still pays its fee, so the API always runs a dry run first.
+
+Deployed app, flow a (confirmed drop) and flow c (pool), Chromium and WebKit at 390 and 1440:
+
+| Step | Native tx | Height | Result |
+|---|---|---|---|
+| sender createDrop (lazy-deploys the Pocket) | `04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445` | 10529216 | code 0, pqc_hybrid_verify verified |
+| recipient bind (link-key signature) | `F2550467C360F9E040640A8241E1636F1C1C87848AAE6E5F96329DD2358BF745` | 10529222 | code 0, verified |
+| sender confirmDrop | `3ABD34F23BDCA59D0A7818AFB92F61578B6495E3008B203595297B97ADC8CC2B` | 10529237 | code 0, verified |
+| recipient claim | `32FB6769EB94FEB411CC9482EA90782603ABC1C846DC750F71519DC0FC45B682` | 10529241 | code 0, verified |
+| relayer window replaced by a 10-block, 1-tx window (hybrid MsgOpenEVMWindow) | `0373ACC4860EB877DEE1AE45B2EF0B7F9E7A9B683EA843623FC41A0FB1F4C3A6` | 10529369 | code 0; window expired at 10529379 |
+| ECDSA-only relay from the relayer to the prod router, after expiry | attempted `0xf2dbd9f5d6bc42c68f3546ad127b463677e8024af30d705580c53315f41ad540` | none | **refused at broadcast**: "EVM authorisation window exhausted" |
+| host createPool 3 x 0.02 (window closed) | `AEA2C44E337A9EBE5FEB9898D8192891AD0E609F07EFED67AD3C996DBC84CDD5` | 10529456 | code 0, verified |
+| claimer 1 takes a slot | `9B191BEC461B751FE562E15CD91D0ED149B688F700AA0041C4D503DBD18E4445` | 10529469 | code 0, verified |
+| claimer 2 takes a slot | `A12839ABEA58FBE03E99C59D0FF0576A5B2D6761A157AF55645EDEE49A343390` | 10529481 | code 0, verified |
+| host closePool | `71C3E330A808205FE1C9698978DE2CAEE6C4425E4CB3AD586E31E048D579F835` | 10529543 | code 0, verified |
+
+Cost: a hybrid relay used 0.099 to 0.169 QOR of native gas in these runs (gas = dry run + 15%), against about 0.08 QOR for an EVM relay. The relayer was topped up with 2 QOR from the main wallet (`D1A2C4CDA911F75C2A2BF37D25167CF522CA5AFEE0354801A3F6ED2E3F376AA5`).
+
+Anyone can re-check any of these in the app: Proof > Check a transaction fetches the transaction from the chain and re-verifies each ML-DSA-87 signature in the browser, with the keys read from the chain.
