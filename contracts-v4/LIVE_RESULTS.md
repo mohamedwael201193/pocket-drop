@@ -312,3 +312,19 @@ Q-Day drill attempts through `POST /api/qday` (the Try it button). Each is a hyb
 The relayer was topped up again with 2.5 QOR from the main wallet (`8478BC95B90616353FE4E2B635D6F4CFD74BE2C046CC6EAAEDC0920302F5ABA3`), and the deployer with 1 QOR (`5570A3AF3DEF4C97AB38BB8CF852EFB04A8950F7DFF092D0B46F13A00533FB7B`); both move team QOR and are not spending.
 
 Anyone can re-check any of these in the app: Proof > Check a transaction fetches the transaction from the chain and re-verifies each ML-DSA-87 signature in the browser, with the keys read from the chain.
+
+### Isolated ML-DSA-87 signer, 22 Nov 2026 (TEAM-RUN, Diana testnet, prod instance)
+
+The relayer's ML-DSA-87 seed moved to a separate Vercel project (`signer/`, `https://pocketdrop-pqsigner.vercel.app/api/pq-sign`). The API keeps the secp256k1 key, builds the relay, asks the signer for the ML-DSA half over HMAC, and broadcasts. The signer signs only a policy-checked relay (one `MsgCrossVMCall` from the relayer, allowlisted target and selector, no funds, memo `pd `, fee at most 0.6 QOR, gas at most 4,000,000, 600 an hour). `/api/health` reports `relay.pqSigner: isolated`; `reverify.mjs` checks that the signer and the API name the same PQ key.
+
+Flow a (Confirmed drop) on the deployed app, WebKit 390, `e2e/v4.spec.ts`. Evidence: `frontend/evidence/v4/e2e/hybrid-relay-isolated-signer.json`, `webkit-390-a-confirmed.json`.
+
+| Step | Native tx | Height | Result |
+|---|---|---|---|
+| sender Pocket createDrop (intent, lazy-deploys the Pocket) | `38257E288ECC14DA4E5A360A90087B34B23090295F7E39FE31A05B3C918CBA3E` | 10537160 | code 0, pqc_hybrid_verify verified, fee 0.169 QOR |
+| recipient bind (link-key signature, relayed) | `C3A70D8453724E4F0A72A52B79C2D7E8E84CC40FE141F234F9074B8100379862` | 10537165 | code 0, pqc_hybrid_verify verified, fee 0.125 QOR |
+| sender Pocket confirmDrop (one-tap intent) | `6B0E1224511795221E81B00B4DA824886FA061F57581C021BF6494979A5850DA` | 10537180 | code 0, pqc_hybrid_verify verified, fee 0.100 QOR |
+| recipient claim (ML-DSA signature, relayed) | `16AA55F18251363D4CC0CFFA9BA64A491DA51EC65DF7AF82E1BD15DA45A30CC6` | 10537183 | code 0, pqc_hybrid_verify verified, fee 0.099 QOR |
+| sweep sender Pocket back to the deployer | `5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE` | 10537189 | code 0, pqc_hybrid_verify verified, fee 0.105 QOR |
+
+The link's `relayerFee` read back from the chain was 0.38 QOR (the new delivery fee for a Confirmed link); its three relays after creation cost 0.324 QOR. Wallet balances before and after: deployer 1.4782204725 relayer 4.29370440875 2026-11-22T05:51:21.867Z / deployer 0.8170779725 relayer 4.07570540875 2026-11-22T05:54:43.236Z (deployer funds 0.1 QOR went to the team QA recipient Pocket; 0.22 QOR swept back).

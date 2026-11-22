@@ -1,0 +1,66 @@
+{
+ "signer": "https://pocketdrop-pqsigner.vercel.app/api/pq-sign (separate Vercel project; holds RELAYER_PQC_SEED only)",
+ "api": "https://pocketdrop-api.vercel.app (health: relay.pqSigner = isolated); holds the secp256k1 relayer key, asks the signer for the ML-DSA-87 half over HMAC",
+ "flow": "frontend/evidence/v4/e2e/webkit-390-a-confirmed.json (e2e/v4.spec.ts \"a. Confirmed\", webkit-390, against prod)",
+ "other": [
+  {
+   "hash": "16E1370B5AF356DA32899B7DBD7DF46EBEFE9EDA393409E65563E2737EC8109F",
+   "height": 10537168,
+   "step": "recipient PQ key registration (paid from the drip)",
+   "code": 0
+  }
+ ],
+ "allRelaysVerified": true,
+ "deliveryFee": {
+  "chargedWei": "380000000000000000",
+  "afterCreateRelaysUqor": 324169
+ },
+ "balances": {
+  "before": "deployer 1.4782204725 relayer 4.29370440875 2026-11-22T05:51:21.867Z",
+  "after": "deployer 0.8170779725 relayer 4.07570540875 2026-11-22T05:54:43.236Z"
+ },
+ "note": "isolated ML-DSA relay signer, live verification (RECORDED)",
+ "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+ "txs": [
+  {
+   "hash": "38257E288ECC14DA4E5A360A90087B34B23090295F7E39FE31A05B3C918CBA3E",
+   "height": 10537160,
+   "memo": "pd route prod deployAndRelay 0xfff383D7F73c91E36b9697d60C05d47EF2805453",
+   "step": "sender Pocket createDrop (intent, lazy-deploys the Pocket)",
+   "time": "2026-11-22T05:53:41Z",
+   "feeUqor": 168978
+  },
+  {
+   "hash": "C3A70D8453724E4F0A72A52B79C2D7E8E84CC40FE141F234F9074B8100379862",
+   "height": 10537165,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "step": "recipient bind (link-key signature, relayed)",
+   "time": "2026-11-22T05:53:48Z",
+   "feeUqor": 125045
+  },
+  {
+   "hash": "6B0E1224511795221E81B00B4DA824886FA061F57581C021BF6494979A5850DA",
+   "height": 10537180,
+   "memo": "pd route prod relay 0x42284Ae871f3CDEb0721238D567Fc3026D093803",
+   "step": "sender Pocket confirmDrop (one-tap intent)",
+   "time": "2026-11-22T05:54:10Z",
+   "feeUqor": 100200
+  },
+  {
+   "hash": "16AA55F18251363D4CC0CFFA9BA64A491DA51EC65DF7AF82E1BD15DA45A30CC6",
+   "height": 10537183,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "step": "recipient claim (ML-DSA signature, relayed)",
+   "time": "2026-11-22T05:54:14Z",
+   "feeUqor": 98924
+  },
+  {
+   "hash": "5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE",
+   "height": 10537189,
+   "memo": "pd route prod relay 0x42284Ae871f3CDEb0721238D567Fc3026D093803",
+   "step": "sweep sender Pocket back to the deployer",
+   "time": "2026-11-22T05:54:23Z",
+   "feeUqor": 104852
+  }
+ ]
+}

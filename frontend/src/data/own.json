@@ -333,6 +333,10 @@
     "TEAM-RUN hybrid QA (hybrid-relay-2026-11-22.json) 35": "0x909A137D790b08Aaf7C0F6A1FD05B303bBDb1066",
     "TEAM-RUN hybrid QA (hybrid-relay-live-2026-11-22.json) 36": "0xcC598c5EB92d62eAFe907dC09Afa48509eF2849e",
     "TEAM-RUN hybrid QA (hybrid-relay-live-2026-11-22.json) 37": "0xf2dbd9f5d6bc42c68f3546ad127b463677e8024a",
-    "TEAM-RUN hybrid QA (hybrid-relay-v3-live-2026-11-22.json) 38": "0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd"
+    "TEAM-RUN hybrid QA (hybrid-relay-v3-live-2026-11-22.json) 38": "0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd",
+    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 332": "0x42284Ae871f3CDEb0721238D567Fc3026D093803",
+    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 333": "0xbc13b9EE91f31eD56932abDb796693515C351f00",
+    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 334": "0xfff383D7F73c91E36b9697d60C05d47EF2805453",
+    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 335": "0x6645B49FF192A11F9a18b702A88CFc7A03626275"
   }
 }

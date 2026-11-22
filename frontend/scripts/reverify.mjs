@@ -234,6 +234,16 @@ if (closed) {
     check(w.live === false, `LIVE: relayer EVM window is ${w.live ? 'OPEN' : 'closed'} (expiry height ${w.expiry_height}), so an ECDSA-only relay cannot be sent`);
   } catch (e) { check(false, `relayer window not readable (${e.message})`); }
 }
+// the ML-DSA half of every relay is signed by an isolated function: the API says so, and both report the same PQ key
+try {
+  const h = await (await fetch(`${API}/api/health`)).json();
+  const f = h.relay?.pqSignerFacts;
+  check(h.relay?.pqSigner === 'isolated' && f?.reachable === true, `LIVE: /api/health relay.pqSigner = ${h.relay?.pqSigner}, signer ${f?.reachable ? 'reachable' : 'NOT reachable'}`);
+  const SIGNER = process.env.PD_PQ_SIGNER_URL ?? 'https://pocketdrop-pqsigner.vercel.app/api/pq-sign';
+  const g = await (await fetch(SIGNER)).json();
+  check(!!g && g.relayer === f?.relayer && /^0x[0-9a-f]{64}$/.test(g.pqPublicKeyKeccak ?? '') && g.pqPublicKeyKeccak === f.pqPublicKeyKeccak,
+    `LIVE: isolated signer ${SIGNER} signs for ${g?.relayer ?? '?'} with PQ key ${String(g?.pqPublicKeyKeccak).slice(0, 12)}…, the key the API expects`);
+} catch (e) { check(false, `isolated signer not readable (${e.message})`); }
 tally['hybrid relays'] = { evm: 0, cosmos: hybridN };
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
