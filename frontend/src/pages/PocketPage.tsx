@@ -1,3 +1,4 @@
+import { PowerMap } from '../components/powers';
 import { useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAddress, type Hex } from 'viem';
@@ -185,6 +186,13 @@ export default function PocketPage() {
               </div>
               <ActResult act={recAct} testId="recovery" />
             </Section>
+
+            {pv.deployed && (
+              <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4" data-testid="powers-details">
+                <summary className="cursor-pointer text-sm font-medium text-zinc-900">Who can do what with this Pocket</summary>
+                <div className="mt-3"><PowerMap env={a.env} address={pv.address} /></div>
+              </details>
+            )}
           </>
         )}
 

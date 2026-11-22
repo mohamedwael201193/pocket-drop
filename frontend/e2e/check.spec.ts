@@ -45,3 +45,34 @@ test('the Proof menu links to the checker; /proof says how the relayer signs; /r
     if (await item.isVisible()) { await item.click(); await expect(page.getByTestId('check-page')).toBeVisible(); }
   }
 });
+
+test('a LAB Pocket address shows who can do what, with the delays read from the vault', async ({ page }) => {
+  await page.goto(`${BASE}/check/0xD162356fBb0fc52a8C326f9635E2c1F61964f5D5`);
+  const delays = page.getByTestId('power-delays');
+  await expect(delays).toBeVisible({ timeout: 90_000 });
+  await expect(delays).toHaveAttribute('data-timelock', '60');
+  await expect(delays).toHaveAttribute('data-recovery', '60');
+  await expect(delays).toHaveAttribute('data-freeze', '120');
+  await expect(delays).toHaveAttribute('data-unanimous', '180');
+  await expect(page.getByTestId('power-map')).toContainText('lab instance');
+  await expect(page.getByTestId('power-freeze')).toContainText('2 of 3 guardians');
+  await expect(page.getByTestId('power-classical-state')).toHaveText('not possible');
+  await noSideScroll(page);
+});
+
+test('a guarded prod Q-Day bait from the examples; a non-Pocket address is explained', async ({ page }) => {
+  await page.goto(`${BASE}/check`);
+  await page.getByTestId('check-example-pocket').click();
+  await expect(page.getByTestId('power-delays')).toHaveAttribute('data-timelock', '86400', { timeout: 90_000 });
+  await expect(page.getByTestId('power-map')).toContainText('production instance');
+  await page.getByTestId('check-input').fill('0x392f50b1955a827458A320205e19acf7C664f116');
+  await page.getByTestId('check-submit').click();
+  await expect(page.getByTestId('check-not-pocket')).toBeVisible({ timeout: 60_000 });
+});
+
+test('with the EVM window closed and hybrid relays, the app shows the relayer as live (no paused banner)', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await expect(page.getByTestId('landing-window')).toContainText(/ECDSA-only path closed|ECDSA window still open|Window live/, { timeout: 90_000 });
+  await expect(page.getByText('Diana 9800 · live').first()).toBeVisible();
+  await expect(page.getByTestId('relayer-banner')).toHaveCount(0);
+});

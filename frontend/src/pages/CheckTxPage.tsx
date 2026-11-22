@@ -7,6 +7,19 @@ import { Button, CopyButton, Mono, Notice, PageTitle, SourceBadge, TxLink } from
 import { addrUrl, TESTNET_BADGE } from '../lib/config';
 import { checkTx, normalizeHash, verdict, type Report, type SigCheck } from '../lib/txcheck';
 import { liveDeps } from '../lib/txcheckChain';
+import { PowerMap, pocketEnv } from '../components/powers';
+import { useQuery } from '@tanstack/react-query';
+import type { Hex } from 'viem';
+
+const isAddr = (s: string) => /^0x[0-9a-fA-F]{40}$/.test(s.trim());
+
+function PocketView({ address }: { address: Hex }) {
+  const q = useQuery({ queryKey: ['pocket-env', address], queryFn: () => pocketEnv(address) });
+  if (q.isLoading) return <p className="text-sm text-zinc-600" data-testid="check-busy">Looking the address up in both Pocket factories…</p>;
+  if (q.error) return <Notice tone="error" testId="check-error">{(q.error as Error).message}</Notice>;
+  if (!q.data) return <Notice tone="info" testId="check-not-pocket">Neither Pocket factory deployed this address, so it is not a Pocket (or not deployed yet: a Pocket is deployed by its first drop or spend).</Notice>;
+  return <PowerMap env={q.data} address={address} />;
+}
 
 const WHO: Record<SigCheck['who'], string> = {
   owner: "Pocket owner's post-quantum key",
@@ -78,37 +91,41 @@ export default function CheckTxPage() {
   const [text, setText] = useState(param ?? '');
   const m = useMutation({ mutationFn: (h: string) => checkTx(h, liveDeps) });
   const { mutate } = m;
+  const paramAddr = param && isAddr(param) ? (param as Hex) : null;
   useEffect(() => { if (param && normalizeHash(param)) mutate(param); }, [param, mutate]);
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isAddr(text)) { nav(`/check/${text.trim()}`); return; }
     const h = normalizeHash(text);
     if (!h) return;
     if (h === param) mutate(h); else nav(`/check/${h}`);
   };
-  const bad = text.trim() !== '' && !normalizeHash(text);
+  const bad = text.trim() !== '' && !normalizeHash(text) && !isAddr(text);
   return (
     <div className="mx-auto max-w-3xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16" data-testid="check-page">
       <PageTitle eyebrow="Proof" title="Check a transaction">
         Paste the hash of any Pocket Drop transaction. This page fetches it from the chain, decodes what it asked for, and re-runs each
-        ML-DSA-87 signature check in your browser with the public keys the chain holds. Our server is not involved. {TESTNET_BADGE}.
+        ML-DSA-87 signature check in your browser with the public keys the chain holds. Our server is not involved. Paste a Pocket
+        address instead to see who can do what with it. {TESTNET_BADGE}.
       </PageTitle>
       <form onSubmit={submit} className="flex flex-col gap-2 sm:flex-row" data-testid="check-form">
         <label className="sr-only" htmlFor="check-hash">Transaction hash</label>
         <input id="check-hash" data-testid="check-input" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} autoComplete="off"
-          placeholder="0x… (EVM) or 64 hex characters (native)" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-2.5 font-mono text-sm text-zinc-900" />
-        <Button type="submit" busy={m.isPending} disabled={!normalizeHash(text)} data-testid="check-submit">Check</Button>
+          placeholder="tx hash (0x… or 64 hex) or a Pocket address" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-2.5 font-mono text-sm text-zinc-900" />
+        <Button type="submit" busy={m.isPending} disabled={!normalizeHash(text) && !isAddr(text)} data-testid="check-submit">Check</Button>
       </form>
-      {bad && <p className="mt-2 text-xs text-red-800" data-testid="check-bad">A hash is 64 hex characters, with 0x for an EVM transaction.</p>}
+      {bad && <p className="mt-2 text-xs text-red-800" data-testid="check-bad">A hash is 64 hex characters (with 0x for an EVM transaction); an address is 0x + 40 hex characters.</p>}
       {!param && (
         <p className="mt-3 text-xs text-zinc-500">Transaction results in Send, Receive, Pocket and Radar carry a “check” link that opens this page. Examples recorded on Diana:{' '}
           <Link className="underline" to="/check/E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8" data-testid="check-example-claim">a claim</Link>,{' '}
-          <Link className="underline" to="/check/0x0c653400b781cf9501a28d76b1ace95dfb6398282b0f053e5d7c61a60e769007" data-testid="check-example-freeze">a 2-of-3 guardian freeze</Link>.
+          <Link className="underline" to="/check/0x0c653400b781cf9501a28d76b1ace95dfb6398282b0f053e5d7c61a60e769007" data-testid="check-example-freeze">a 2-of-3 guardian freeze</Link>,{' '}
+          <Link className="underline" to="/check/0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE" data-testid="check-example-pocket">a guarded Q-Day bait Pocket</Link>.
         </p>
       )}
       <div className="mt-5">
-        {m.isPending && <p className="text-sm text-zinc-600" data-testid="check-busy">Fetching the transaction and verifying…</p>}
-        {m.error && <Notice tone="error" testId="check-error">{(m.error as Error).message}</Notice>}
-        {m.data && <ReportView r={m.data} />}
+        {!paramAddr && m.isPending && <p className="text-sm text-zinc-600" data-testid="check-busy">Fetching the transaction and verifying…</p>}
+        {!paramAddr && m.error && <Notice tone="error" testId="check-error">{(m.error as Error).message}</Notice>}
+        {paramAddr ? <PocketView address={paramAddr} /> : m.data && <ReportView r={m.data} />}
       </div>
     </div>
   );
