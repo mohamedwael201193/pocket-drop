@@ -9,6 +9,8 @@ test('The Q-Day Drill shows the testnet warning, five live baits, the alarm and 
   await page.goto(`${BASE}/qday`);
   await expect(page.getByTestId('qday-testnet-banner')).toContainText('TESTNET');
   await expect(page.getByTestId('qday-never-real')).toContainText('never send real funds');
+  await expect(page.getByTestId('qday-self-run')).toContainText('self-run and always on');
+  await expect(page.getByTestId('qday-not-official')).toContainText('not the organisers');
   await expect(page.getByTestId('qday-alarm')).toContainText(/No breach|Breach alarm/, { timeout: 60_000 });
   // on a phone the five cards are collapsed under "Try it"; open them
   const toggle = page.getByTestId('qday-baits-toggle');

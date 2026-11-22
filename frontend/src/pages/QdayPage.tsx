@@ -119,8 +119,13 @@ export default function QdayPage() {
   const [baitsOpen, setBaitsOpen] = useState(() => typeof window === 'undefined' || typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 768px)').matches);
   return (
     <Page testId="qday-page">
-      <PageTitle eyebrow={<>Proof · Q-Day Drill <SourceBadge kind="LIVE" /></>} title="Q-Day Drill">We published the classical keys of five Pockets. Assume a quantum computer already broke them. Take the money if you can.</PageTitle>
+      <PageTitle eyebrow={<>Proof · Q-Day Drill <SourceBadge kind="LIVE" /></>} title="Q-Day Drill">Our own, always-on drill. We published the classical keys of five Pockets. Assume a quantum computer already broke them. Take the money if you can.</PageTitle>
       <TestnetBanner />
+
+      <section className="mb-5 rounded-2xl border border-zinc-300 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-800" data-testid="qday-self-run">
+        <b>Our own drill: self-run and always on.</b> We set it up and run it ourselves. An attacker bot tries every bait once an hour (GitHub Actions, since 20 Nov 2026), and the page re-checks the chain every 30 seconds, through judging and after.{' '}
+        <b data-testid="qday-not-official">It is not the organisers&apos; official Q-Day Drill of 18 Nov 2026. Pocket Drop did not take part in that one.</b>
+      </section>
 
       <section className={cx(card, 'mb-5')} data-testid="qday-proves">
         <h2 className="font-serif text-2xl text-zinc-900">What this proves</h2>
