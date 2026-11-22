@@ -223,7 +223,10 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
 }
 
 /** Overall verdict for the page header. */
-export function verdict(r: Report): 'verified' | 'failed' | 'none' {
+export function verdict(r: Report): 'verified' | 'failed' | 'refused' | 'none' {
   if (!r.checks.length) return 'none';
-  return r.checks.every((c) => c.valid && !c.tamperedValid && c.pinned !== false && (c.qoresign === null || (c.qoresign.sameText && c.qoresign.valid))) ? 'verified' : 'failed';
+  const ok = r.checks.every((c) => c.valid && !c.tamperedValid && c.pinned !== false && (c.qoresign === null || (c.qoresign.sameText && c.qoresign.valid)));
+  if (ok) return 'verified';
+  // A reverted transaction whose signature does not verify is an attempt the contract refused, for the reason shown here.
+  return r.tx.ok ? 'failed' : 'refused';
 }

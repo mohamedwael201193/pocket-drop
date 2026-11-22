@@ -6,7 +6,7 @@ import { Dash } from '../components/bits';
 import { ChevronDown, ShieldAlert, ShieldCheck, TriangleAlert, KeyRound } from '../components/icons';
 import { addrUrl, SOURCE_URL } from '../lib/config';
 import { fmtQor } from '../lib/chain';
-import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, type AttemptRow, type LiveBait, type TryRow } from '../lib/qday';
+import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, intruderFile, type AttemptRow, type QdayState, type LiveBait, type TryRow } from '../lib/qday';
 
 const card = 'rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6';
 const short = (a: string) => `${a.slice(0, 8)}…${a.slice(-6)}`;
@@ -66,6 +66,37 @@ function LogCol({ title, label, rows, testId, empty, children }: { title: string
         ))}</ul>
       )}
     </div>
+  );
+}
+
+/** The intruder file: every refused attempt on one list, what it tried and which check stopped it. */
+function IntruderFile({ s }: { s: QdayState | undefined }) {
+  const [all, setAll] = useState(false);
+  const f = s ? intruderFile(s) : null;
+  const shown = f ? (all ? f.rows : f.rows.slice(0, 8)) : [];
+  return (
+    <section className={cx(card, 'mt-5')} data-testid="qday-intruders">
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Refused attempts</h2><SourceBadge kind="LIVE" title="Read from the chain and the API on each page load" /></div>
+      <p className="mt-1 text-sm text-zinc-700">Every attempt on a bait that was stopped, newest first: what it tried, who sent it, and the check that refused it. Open any row in the checker to see the transaction decoded.</p>
+      {!f ? <p className="mt-3 text-sm text-zinc-500">Loading the list…</p> : (
+        <>
+          <p className="mt-3 text-sm" data-testid="qday-intruders-count"><b className="text-emerald-800">{f.refused} refused</b> · <b className={f.succeeded ? 'text-red-700' : 'text-zinc-900'}>{f.succeeded} succeeded</b></p>
+          {f.rows.length === 0 ? <p className="mt-2 text-sm text-zinc-500">No refused attempt yet. Use Try it above to make the first one.</p> : (
+            <ol className="mt-3 space-y-2" data-testid="qday-intruders-rows">{shown.map((r) => (
+              <li key={r.key} className="rounded-xl border border-zinc-200 bg-white p-3 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm text-zinc-900"><b>{r.bait}</b> · <Mono>{r.call}</Mono> <span className="text-zinc-500">by {r.who}</span></span>
+                  <span className="text-zinc-500">{r.when ? `${new Date(r.when).toLocaleDateString([], { day: 'numeric', month: 'short' })} ${at(r.when)}` : r.height ? `block ${r.height.toLocaleString()}` : ''}</span>
+                </div>
+                <p className="mt-1 text-zinc-700"><span className="font-semibold text-emerald-800">{r.where === 'refused before sending' ? 'Refused before sending' : 'Reverted'}</span>{r.where !== 'refused before sending' && <> {r.where.replace('on chain ', '')}</>}: {r.defence}</p>
+                {r.tx && <div className="mt-1.5"><TxLink hash={r.tx} check /></div>}
+              </li>
+            ))}</ol>
+          )}
+          {f.rows.length > 8 && <button type="button" className="mt-3 text-sm font-semibold underline" onClick={() => setAll((v) => !v)} data-testid="qday-intruders-more">{all ? 'Show fewer' : `Show all ${f.rows.length}`}</button>}
+        </>
+      )}
+    </section>
   );
 }
 
@@ -166,6 +197,8 @@ export default function QdayPage() {
         <pre tabIndex={0} aria-label="Attack script" className="mt-3 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs leading-relaxed text-zinc-100"><code>{attackScript(scriptBait)}</code></pre>
         <div className="mt-2 flex flex-wrap items-center gap-2"><CopyButton text={attackScript(scriptBait)} label="Copy script" testId="qday-copy-script" /><a className="text-xs underline" href={`${SOURCE_URL}/tree/main/contracts-v4/script/qday`} target="_blank" rel="noopener noreferrer">Read the script</a></div>
       </section>
+
+      <IntruderFile s={s} />
 
       <section className="mt-5" data-testid="qday-log">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Every attempt</h2><SourceBadge kind="LIVE" /></div>

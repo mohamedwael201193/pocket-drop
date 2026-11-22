@@ -50,3 +50,14 @@ test('The Q-Day Drill is under Proof, not a new tab', async ({ page }) => {
   await expect(page.getByTestId('lab-qday-link')).toBeVisible();
   await expect(page.locator('[data-testid=nav-qday], [data-testid=tab-qday]')).toHaveCount(0);
 });
+
+test('Refused attempts: one list, each row says what stopped it and opens in the checker as a refused attempt', async ({ page }) => {
+  await page.goto(`${BASE}/qday`);
+  await expect(page.getByTestId('qday-intruders-count')).toContainText(/\d+ refused · 0 succeeded/, { timeout: 60_000 });
+  const rows = page.getByTestId('qday-intruders-rows').locator('li');
+  await expect(rows.first()).toContainText(/Reverted|Refused before sending/);
+  await expect(rows.first()).toContainText(/ML-DSA-87/);
+  const link = rows.filter({ hasText: 'spend' }).filter({ has: page.locator('a[href^="/check/"]') }).first().locator('a[href^="/check/"]');
+  await link.click();
+  await expect(page.getByTestId('check-verdict')).toContainText('Refused attempt', { timeout: 60_000 });
+});

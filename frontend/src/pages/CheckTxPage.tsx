@@ -58,9 +58,10 @@ function ReportView({ r }: { r: Report }) {
   const v = verdict(r);
   return (
     <div className="space-y-3" data-testid="check-report">
-      <Notice tone={v === 'verified' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
+      <Notice tone={v === 'verified' || v === 'refused' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
         {v === 'verified' && <>All {r.checks.length} post-quantum signature{r.checks.length > 1 ? 's' : ''} in this transaction verified in your browser, with keys read from the chain. A changed intent fails with the same signature.</>}
         {v === 'failed' && <>At least one signature did not check out in this browser. Details below.</>}
+        {v === 'refused' && <>Refused attempt: this transaction reverted, and the signature it carried is not a valid ML-DSA-87 signature from the key on chain. The contract refused it for the reason shown below.</>}
         {v === 'none' && <>{r.note ?? 'Nothing to check.'}</>}
       </Notice>
       <section className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid="check-tx">

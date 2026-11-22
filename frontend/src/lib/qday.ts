@@ -21,7 +21,30 @@ export interface LiveBait {
   id: string; description: string; keyAccount: Hex; pocket: Hex; deployed: boolean; classicalKey: Hex | null; pocketWei: string; keyAccountWei: string;
   ownerKeyHash: Hex; liveKeyHash: Hex | null; keyUnchanged: boolean; windowLive: boolean | null; events: { name: string; tx: string; planned: boolean }[]; alarm: string[];
 }
-export interface AttemptRow { tx: string; height: number; from: string; bait: string; call: string; failed: boolean; error: string | null; source: string; explorer: string }
+export interface AttemptRow { tx: string; height: number; from: string; bait: string; call: string; failed: boolean; error: string | null; source: string; explorer: string; lane?: 'evm' | 'hybrid'; hybridVerified?: boolean; time?: string }
+
+/** The defence that stops a classical-key attacker for each call, in plain words (from the v4 contracts). */
+export function defenceFor(call: string): string {
+  if (call === 'fund' || call === 'deploy') return 'Harmless: anyone may fund or deploy a Pocket; it moves nothing out.';
+  if (call === 'executeQueued') return 'Only pays out a spend the owner queued with an ML-DSA-87 signature, after its timelock.';
+  if (call === 'finalizeRecovery' || call === 'finalizeRecoveryUnanimous') return 'Only finishes a recovery the guardians proposed, after the recovery delay.';
+  if (call === 'proposeRecovery' || call === 'proposeRecoveryUnanimous' || call === 'guardianFreeze') return 'Needs ML-DSA-87 signatures from the guardians; the bait owner key is not a guardian.';
+  if (call.startsWith('drop.')) return 'The drop link pays only the recipient bound with the link\'s and the recipient\'s ML-DSA-87 keys.';
+  return 'The Pocket accepts this only with a 4,627-byte ML-DSA-87 signature from the owner\'s registered key; the classical key cannot make one.';
+}
+const SRC: Record<string, string> = { 'try-it': 'a visitor (Try it)', 'team-bot': 'our attacker bot', anyone: 'anyone', 'team-setup': 'team setup' };
+export interface IntruderRow { key: string; when: string | null; height: number | null; bait: string; call: string; who: string; where: 'on chain (EVM)' | 'on chain (hybrid lane)' | 'refused before sending'; result: string; defence: string; tx: string | null }
+/** Every refused attempt on one list (the intruder file): mined reverts from any source plus relayer refusals, newest first. */
+export function intruderFile(s: Pick<QdayState, 'log'>): { rows: IntruderRow[]; refused: number; succeeded: number } {
+  const mined = [...s.log.onChain.rows, ...s.log.teamBot.rows].filter((r) => r.source !== 'team-setup');
+  const rows: IntruderRow[] = [
+    ...mined.filter((r) => r.failed).map((r): IntruderRow => ({ key: r.tx, when: r.time ?? null, height: r.height, bait: r.bait, call: r.call, who: SRC[r.source] ?? r.source, where: r.lane === 'hybrid' ? 'on chain (hybrid lane)' : 'on chain (EVM)', result: r.error ?? 'reverted', defence: defenceFor(r.call), tx: r.tx })),
+    ...s.log.relayerRefused.rows.filter((r) => !/WOULD SUCCEED/.test(r.error)).map((r): IntruderRow => ({ key: `${r.at}-${r.bait}-${r.call}`, when: r.at, height: null, bait: r.bait, call: r.call, who: r.via === 'qday' ? 'a visitor (Try it)' : 'a relay request', where: 'refused before sending', result: r.error, defence: defenceFor(r.call), tx: null })),
+  ];
+  rows.sort((a, b) => (b.height ?? Infinity) - (a.height ?? Infinity) || String(b.when).localeCompare(String(a.when)));
+  const succeeded = mined.filter((r) => !r.failed && r.call !== 'fund' && r.call !== 'deploy').length + s.log.relayerRefused.rows.filter((r) => /WOULD SUCCEED/.test(r.error)).length;
+  return { rows, refused: rows.length, succeeded };
+}
 export interface QdayState {
   ok: true; label: string; network: string; keysPublished: boolean; baits: LiveBait[]; alarm: { raised: boolean; reasons: string[] };
   log: {

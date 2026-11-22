@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { encodeFunctionData, getAddress, parseAbi, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { routerAbi } from '../src/abi4.js';
-import { classify, getQday, handleAttempt, listRefusals, loadQdayConfig, markerOf, MARKERS, noteRouteRefusal, publishedKeys, resetQdayCache, type Chain } from '../src/qday.js';
+import { classify, getQday, hybridAttempts, handleAttempt, listRefusals, loadQdayConfig, markerOf, MARKERS, noteRouteRefusal, publishedKeys, resetQdayCache, type Chain } from '../src/qday.js';
 import { MemoryLimiter } from '../src/ratelimit.js';
 import { setSink } from '../src/log.js';
 import type { Relayer } from '../src/relayer.js';
@@ -163,5 +163,33 @@ describe('getQday', () => {
     expect(s.log.teamBot.rows).toHaveLength(1);
     expect(s.log.onChain.rows).toHaveLength(0);
     expect(s.alarm.reasons.join()).not.toMatch(/SUCCEEDED/);
+  });
+  it('finds bait attempts relayed on the hybrid lane (no EVM tx), failed ones included, and sorts them by marker', async () => {
+    resetQdayCache();
+    const nat = (hash: string, data: Hex, code: number, height = qcfg.fromBlock + 20) => ({
+      txhash: hash, height: String(height), code, raw_log: code ? 'failed to execute message; message index: 0: execution reverted: EVM contract execution failed' : '', timestamp: '2026-11-22T03:40:00Z',
+      tx: { body: { memo: 'pd qday', messages: [{ '@type': '/qorechain.crossvm.v1.MsgCrossVMCall', sender: 'qor1relayer', target_contract: qcfg.router.toLowerCase(), payload: Buffer.from(data.slice(2), 'hex').toString('base64') }] } },
+      events: [{ type: 'pqc_hybrid_verify', attributes: [{ key: 'status', value: 'verified' }] }],
+    });
+    const txs = [
+      nat('AA'.repeat(32), (relayData + MARKERS.bot.slice(2)) as Hex, 14),
+      nat('BB'.repeat(32), (relayData + MARKERS.try.slice(2)) as Hex, 14, qcfg.fromBlock + 30),
+      nat('CC'.repeat(32), encodeFunctionData({ abi: routerAbi, functionName: 'relay', args: [ADDR, spendData] }), 0), // not a bait
+      nat('DD'.repeat(32), relayData, 14, qcfg.fromBlock - 5), // before the drill
+    ];
+    const rows = hybridAttempts(txs as never, qcfg);
+    expect(rows.map((r) => [r.tx.slice(0, 4), r.source, r.failed, r.lane, r.hybridVerified, r.error])).toEqual([
+      ['AAAA', 'team-bot', true, 'hybrid', true, 'execution reverted'], ['BBBB', 'try-it', true, 'hybrid', true, 'execution reverted'],
+    ]);
+    const s: any = await getQday(chain({ relayerNativeTxs: async () => txs as never }), {}, qcfg, 5);
+    expect(s.log.teamBot.rows[0]).toMatchObject({ tx: 'AA'.repeat(32), lane: 'hybrid', bait: 'B1', call: 'spend' });
+    expect(s.log.onChain.rows[0]).toMatchObject({ tx: 'BB'.repeat(32), source: 'try-it', failed: true });
+    expect(s.alarm.raised).toBe(false);
+  });
+  it('a hybrid-lane attempt by a stranger that succeeded raises the alarm', async () => {
+    resetQdayCache();
+    const t = { txhash: 'EE'.repeat(32), height: String(qcfg.fromBlock + 9), code: 0, tx: { body: { messages: [{ '@type': '/qorechain.crossvm.v1.MsgCrossVMCall', sender: 'qor1x', target_contract: qcfg.router, payload: Buffer.from(relayData.slice(2), 'hex').toString('base64') }] } } };
+    const s: any = await getQday(chain({ relayerNativeTxs: async () => [t] as never }), {}, qcfg, 6);
+    expect(s.alarm.reasons.join()).toMatch(/SUCCEEDED/);
   });
 });

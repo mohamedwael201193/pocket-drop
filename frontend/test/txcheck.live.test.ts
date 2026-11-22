@@ -47,3 +47,13 @@ describe('checkTx on recorded hybrid relays', () => {
     expect(verdict(r)).toBe('verified');
   }, 60_000);
 });
+
+describe('checkTx on a refused attack', () => {
+  it('a Q-Day bot spend on bait B2 (EVM lane) reverted and its signature does not verify: refused', async () => {
+    const r = await checkTx('0x3a646b71d493e40717492f2c1db3711d6e0cce5e32234b64dd645e610639f488', await withQoresign(liveDeps));
+    expect(r.tx.ok).toBe(false);
+    expect(r.fn).toBe('spend');
+    expect(r.checks[0]).toMatchObject({ who: 'owner', valid: false });
+    expect(verdict(r)).toBe('refused');
+  }, 60_000);
+});

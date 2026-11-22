@@ -11,7 +11,7 @@ import { routerAbi } from './abi4.js';
 import { EXPLORER_TX, type Config } from './config.js';
 import { log } from './log.js';
 import type { Limiter, Rule } from './ratelimit.js';
-import type { Relayer } from './relayer.js';
+import { evmToQor, type Relayer } from './relayer.js';
 import { reply, type HttpResult } from './handlers.js';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -110,6 +110,8 @@ export interface Chain {
   readNonce(pocket: Address): Promise<bigint>;
   windowLive(cosmos: string): Promise<boolean | null>;
   txSearch(query: string, perPage: number): Promise<{ height: string; events: { type: string; attributes: { key: string; value: string }[] }[] }[]>;
+  /** Native-lane txs paid by our relayer (tx.fee_payer search; failed txs included), newest first. Hybrid relays leave no EVM tx. */
+  relayerNativeTxs?(): Promise<NativeTx[]>;
   botRuns(): Promise<{ id: number; status: string; conclusion: string | null; createdAt: string; url: string }[]>;
 }
 
@@ -159,7 +161,30 @@ export async function baitState(b: Bait, ch: Chain, cfg: QdayConfig, keys: Recor
   };
 }
 
-export interface Attempt { tx: string; height: number; from: string; bait: string; call: string; failed: boolean; error: string | null; source: 'anyone' | 'try-it' | 'team-bot' | 'team-setup'; explorer: string }
+export interface Attempt { tx: string; height: number; from: string; bait: string; call: string; failed: boolean; error: string | null; source: 'anyone' | 'try-it' | 'team-bot' | 'team-setup'; explorer: string; lane?: 'evm' | 'hybrid'; hybridVerified?: boolean; time?: string }
+export interface NativeTx { txhash: string; height: string; code: number; raw_log?: string; timestamp?: string; tx?: { body?: { messages?: Record<string, unknown>[]; memo?: string } }; events?: { type: string; attributes: { key: string; value: string }[] }[] }
+
+/** Bait attempts our relayer put on the native lane as hybrid MsgCrossVMCall (a revert there is a mined tx with code 14 and no EVM tx). */
+export function hybridAttempts(txs: NativeTx[], cfg: QdayConfig): Attempt[] {
+  const out: Attempt[] = [];
+  for (const t of txs) {
+    const m = (t.tx?.body?.messages ?? []).find((x) => x['@type'] === '/qorechain.crossvm.v1.MsgCrossVMCall' && String(x.target_contract ?? '').toLowerCase() === cfg.router.toLowerCase());
+    if (!m || Number(t.height) < cfg.fromBlock) continue;
+    const input = `0x${Buffer.from(String(m.payload ?? ''), 'base64').toString('hex')}` as Hex;
+    const c = classify(cfg.router, input, cfg);
+    if (!c) continue;
+    const mk = markerOf(input);
+    const failed = t.code !== 0;
+    const verified = (t.events ?? []).some((e) => e.type === 'pqc_hybrid_verify' && e.attributes.some((a) => a.key === 'status' && a.value === 'verified'));
+    out.push({
+      tx: t.txhash.toUpperCase(), height: Number(t.height), from: String(m.sender ?? ''), bait: c.bait, call: c.call, failed,
+      error: failed ? (/execution reverted/i.test(t.raw_log ?? '') ? 'execution reverted' : (t.raw_log ?? `code ${t.code}`).slice(0, 160)) : null,
+      source: mk === 'bot' ? 'team-bot' : mk === 'try' ? 'try-it' : 'anyone', explorer: EXPLORER_TX + t.txhash.toUpperCase(),
+      lane: 'hybrid', hybridVerified: verified, time: t.timestamp,
+    });
+  }
+  return out;
+}
 
 export async function onChainAttempts(ch: Chain, cfg: QdayConfig): Promise<Attempt[]> {
   const team = new Set(Object.values(cfg.teamAccounts).map((a) => a.toLowerCase()));
@@ -188,9 +213,13 @@ export async function onChainAttempts(ch: Chain, cfg: QdayConfig): Promise<Attem
     const source: Attempt['source'] = plannedTx.has(hash) || team.has(tx.from.toLowerCase()) ? 'team-setup' : m === 'bot' ? 'team-bot' : m === 'try' ? 'try-it' : 'anyone';
     let failed = s.failed, error = s.error;
     if (!failed && source !== 'team-setup' && ch.receiptOk) { const ok = await ch.receiptOk(hash as Hex).catch(() => null); if (ok === false) { failed = true; error = error ?? 'execution reverted'; } }
-    out.push({ tx: hash, height: s.height, from: tx.from, bait: c.bait, call: c.call, failed, error, source, explorer: EXPLORER_TX + hash.replace(/^0x/, '') });
+    out.push({ tx: hash, height: s.height, from: tx.from, bait: c.bait, call: c.call, failed, error, source, explorer: EXPLORER_TX + hash.replace(/^0x/, ''), lane: 'evm' });
   }
-  return out;
+  if (ch.relayerNativeTxs) {
+    const native = await ch.relayerNativeTxs().catch(() => null);
+    if (native) out.push(...hybridAttempts(native, cfg));
+  }
+  return out.sort((a, b) => b.height - a.height);
 }
 
 let cache: { at: number; body: Record<string, unknown> } | null = null;
@@ -249,7 +278,7 @@ export async function handleAttempt(raw: unknown, ip: string, d: AttemptDeps): P
   }
   const marked = (data + (isBot ? MARKERS.bot : MARKERS.try).slice(2)) as Hex;
   const gas = c.call.startsWith('propose') || c.call === 'guardianFreeze' ? 1_100_000n : c.call === 'deploy' ? 900_000n : 450_000n;
-  const sent = await d.relayer.send(marked, gas);
+  const sent = await d.relayer.send(marked, gas, `pd qday ${isBot ? 'bot' : 'try'} ${c.bait} ${c.call}`);
   if (!sent.ok) return reply(502, { ok: false, error: { name: 'SendFailed', message: sent.message } });
   log('info', 'qday.attempt_mined', { bait: c.bait, call: c.call, tx: sent.hash, status: sent.status, bot: isBot });
   resetQdayCache();
@@ -276,6 +305,14 @@ export function makeChain(pub: any, cfg: Config, opts: { comet?: string; repo?: 
       const r = await f(comet, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tx_search', params: { query, prove: false, page: '1', per_page: String(perPage), order_by: 'desc' } }) });
       const j = await r.json() as any; if (j.error) throw new Error(j.error.message ?? 'tx_search failed');
       return (j.result?.txs ?? []).map((t: any) => ({ height: t.height, events: t.tx_result?.events ?? [] }));
+    },
+    relayerNativeTxs: async () => {
+      if (!cfg.relayerKey) return [];
+      const qor = evmToQor(privateKeyToAccount(cfg.relayerKey).address);
+      const q = encodeURIComponent(`tx.fee_payer='${qor}'`);
+      const r = await f(`${cfg.rest.replace(/\/$/, '')}/cosmos/tx/v1beta1/txs?query=${q}&order_by=ORDER_BY_DESC&limit=100`, { headers: { 'user-agent': 'pocketdrop-api' }, signal: AbortSignal.timeout(15_000) });
+      if (!r.ok) throw new Error(`tx search HTTP ${r.status}`);
+      return (((await r.json()) as { tx_responses?: NativeTx[] }).tx_responses ?? []);
     },
     botRuns: async () => {
       if (runsCache && Date.now() - runsCache.at < 300_000) return runsCache.v;
