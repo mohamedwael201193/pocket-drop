@@ -118,7 +118,8 @@ export const REQUIREMENTS: Requirement[] = [
     id: 'qorex',
     requirement: 'QoreX: a QoreX wallet signature spends a Pocket (TEAM-RUN), and the app can fund a Pocket from QoreX',
     code: [
-      { label: 'QoreX connect and fund (signAndBroadcast)', path: 'frontend/src/lib/qorex.ts#L65-L101' },
+      { label: 'QoreX connect and fund (signAndBroadcast)', path: 'frontend/src/lib/qorex.ts#L65-L114' },
+      { label: 'official @qorechain/qorex-types: provider types, testnet ids, capability and chain-error checks', path: 'frontend/test/qorex.test.ts' },
       { label: 'evidence: signArbitrary response relayed as the owner signature', path: 'frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json' },
     ],
     live: [
