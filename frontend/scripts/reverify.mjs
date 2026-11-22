@@ -12,6 +12,7 @@
 //      the spend ledger: every EVM hash mined with status 1
 //   8. every Cosmos tx hash in the evidence (registrations, funding, sponsor sends) has code 0 via the Cosmos REST API
 //   9. hybrid relays (evidence/v4/e2e/hybrid-relay-*.json): each is a MsgCrossVMCall from the relayer to a recorded v4
+//      (code 0, or code 14 where the row records expectCode 14: a Q-Day attack the bait Pocket reverted on purpose)
 //      router, code 0, and the chain's own pqc_hybrid_verify event says verified (secp256k1 + ML-DSA-87); the relayer's
 //      EVM window is closed now (LIVE), so its classical key alone cannot relay
 import fs from 'node:fs';
@@ -108,7 +109,7 @@ async function receiptCheck(hash, want, label) {
     check(!!rc && st === want, `tx ${hash.slice(0, 12)}… is ${st ?? 'missing'} (recorded ${want}): ${label.slice(0, 70)}`);
   } catch { check(false, `tx ${hash.slice(0, 12)}… not found: ${label.slice(0, 70)}`); }
 }
-async function cosmosCheck(hash, label, height) {
+async function cosmosCheck(hash, label, height, expectCode = 0) {
   cosmosTxs++; seenHash.add(hash.toLowerCase());
   try {
     const j = await retry(async () => {
@@ -119,7 +120,7 @@ async function cosmosCheck(hash, label, height) {
     });
     const t = j?.tx_response;
     const okH = height == null || String(t?.height) === String(height);
-    check(!!t && t.code === 0 && okH, `cosmos ${hash.slice(0, 12)}… code ${t ? t.code : 'missing'}${height != null ? ` at height ${t?.height ?? '?'} (recorded ${height})` : ''}: ${label.slice(0, 70)}`);
+    check(!!t && t.code === expectCode && okH, `cosmos ${hash.slice(0, 12)}… code ${t ? t.code : 'missing'}${height != null ? ` at height ${t?.height ?? '?'} (recorded ${height})` : ''}: ${label.slice(0, 70)}`);
   } catch (e) { check(false, `cosmos ${hash.slice(0, 12)}… not readable (${e.message}): ${label.slice(0, 70)}`); }
 }
 /** Run checks a few at a time so the public RPC is not hammered; output order stays the input order. */
@@ -179,7 +180,10 @@ if (live) {
   const rows = [...(live.log?.onChain?.rows ?? []), ...(live.log?.teamBot?.rows ?? [])].filter((r) => r.source !== 'team-setup');
   for (const r of rows) if (!attempts.has(r.tx.toLowerCase())) attempts.set(r.tx.toLowerCase(), { ...r, liveOnly: true });
 }
-await inBatches([...attempts.values()], (a) => receiptCheck(a.tx, 'reverted', `${a.source} attempt on ${a.bait}: ${a.call}${a.liveOnly ? ' (live log, newer than the snapshot)' : ''}`));
+// a hybrid-lane attempt (relayed as a MsgCrossVMCall after the relayer's EVM window closed) is a Cosmos tx that the Pocket reverted: code 14
+await inBatches([...attempts.values()], (a) => (isCosmosHash(a.tx)
+  ? cosmosCheck(a.tx, `${a.source} attempt on ${a.bait}: ${a.call}, hybrid lane, reverted (code 14)${a.liveOnly ? ' (live log)' : ''}`, a.height, 14)
+  : receiptCheck(a.tx, 'reverted', `${a.source} attempt on ${a.bait}: ${a.call}${a.liveOnly ? ' (live log, newer than the snapshot)' : ''}`)));
 mark('Q-Day attack attempts', b);
 
 // ---- 7/8. personas, sponsor runs, spend ledger ----
@@ -215,7 +219,7 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^hybrid-rela
       })).tx_response;
       const m = (t.tx?.body?.messages ?? []).find((x) => x['@type'] === '/qorechain.crossvm.v1.MsgCrossVMCall');
       const hy = (t.events ?? []).filter((e) => e.type === 'pqc_hybrid_verify').flatMap((e) => e.attributes).find((a) => a.key === 'status')?.value;
-      check(t.code === 0 && !!m && routers.has(String(m.target_contract).toLowerCase()) && m.sender === H.relayer && hy === 'verified' && String(t.height) === String(row.height),
+      check(t.code === (row.expectCode ?? 0) && !!m && routers.has(String(m.target_contract).toLowerCase()) && m.sender === H.relayer && hy === 'verified' && String(t.height) === String(row.height),
         `hybrid ${row.hash.slice(0, 12)}… code ${t.code}, ${m ? 'cross-VM call to ' + String(m.target_contract).slice(0, 10) + '…' : 'no MsgCrossVMCall'}, pqc_hybrid_verify ${hy ?? 'missing'}: ${row.memo.slice(0, 50)}`);
     } catch (e) { check(false, `hybrid ${row.hash.slice(0, 12)}… not readable (${e.message})`); }
   });

@@ -1,5 +1,5 @@
 {
- "totalQor": 27.225,
+ "totalQor": 27.59625,
  "entries": [
   {
    "qor": 2,
@@ -1050,6 +1050,24 @@
    "note": "recovered: qa c-pool host sweep",
    "hash": "18F05139AE0C842E84AAD5CC55FE56EE012414C62CA5246A0D098B1F893ABA47",
    "at": "2026-11-22T02:52:35.169Z"
+  },
+  {
+   "qor": 0.12375,
+   "note": "relayer fee: Q-Day try-it attempt (hybrid, reverted on purpose)",
+   "hash": "BC011B9E894932C8BCDF97D7AA1DCCAD87EB4D4FD72568741C5E19F3953E2621",
+   "at": "2026-11-22T03:34:14.000Z"
+  },
+  {
+   "qor": 0.12375,
+   "note": "relayer fee: Q-Day try-it attempt (hybrid, reverted on purpose)",
+   "hash": "BB29C5D702311A1666613C66F52F68F3C54DAA454BCDEC5B2D46C92E0340BFED",
+   "at": "2026-11-22T03:34:33.000Z"
+  },
+  {
+   "qor": 0.12375,
+   "note": "relayer fee: Q-Day try-it attempt (hybrid, reverted on purpose)",
+   "hash": "FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3",
+   "at": "2026-11-22T03:34:46.000Z"
   }
  ]
 }

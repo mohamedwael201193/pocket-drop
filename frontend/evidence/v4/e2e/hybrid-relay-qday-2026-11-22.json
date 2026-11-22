@@ -1,0 +1,46 @@
+{
+  "note": "TEAM-RUN. Q-Day drill attempts put on chain through the deployed API (POST /api/qday, the Try it button) after the relayer EVM window closed. The relayer sends each as a hybrid-signed MsgCrossVMCall (secp256k1 + ML-DSA-87, pqc_hybrid_verify=verified); the bait Pocket reverts it, so each is a mined tx with code 14 and no EVM tx. /api/qday finds them by fee payer and lists them on /qday under Refused attempts. Read back from https://api-testnet.qore.host.",
+  "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+  "readBackAt": "2026-11-22T03:36:42.804210+00:00",
+  "txs": [
+    {
+      "step": "Q-Day attempt via POST /api/qday",
+      "hash": "BC011B9E894932C8BCDF97D7AA1DCCAD87EB4D4FD72568741C5E19F3953E2621",
+      "height": "10531305",
+      "code": 14,
+      "expectCode": 14,
+      "memo": "pd qday try B2 spend",
+      "expectedRevert": "Expired (replay of a recorded bot attempt with its old deadline)",
+      "gasUsed": "478678",
+      "fee": "123750uqor",
+      "pqc_hybrid_verify": "verified",
+      "time": "2026-11-22T03:34:14Z"
+    },
+    {
+      "step": "Q-Day attempt via POST /api/qday",
+      "hash": "BB29C5D702311A1666613C66F52F68F3C54DAA454BCDEC5B2D46C92E0340BFED",
+      "height": "10531318",
+      "code": 14,
+      "expectCode": 14,
+      "memo": "pd qday try B1 spend",
+      "expectedRevert": "BadSignature (in-tab attack E1: spend signed with the attacker's own ML-DSA key)",
+      "gasUsed": "650532",
+      "fee": "123750uqor",
+      "pqc_hybrid_verify": "verified",
+      "time": "2026-11-22T03:34:33Z"
+    },
+    {
+      "step": "Q-Day attempt via POST /api/qday",
+      "hash": "FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3",
+      "height": "10531327",
+      "code": 14,
+      "expectCode": 14,
+      "memo": "pd qday try B1 spend",
+      "expectedRevert": "BadSignature (in-tab attack E1: spend signed with the attacker's own ML-DSA key)",
+      "gasUsed": "650634",
+      "fee": "123750uqor",
+      "pqc_hybrid_verify": "verified",
+      "time": "2026-11-22T03:34:46Z"
+    }
+  ]
+}
