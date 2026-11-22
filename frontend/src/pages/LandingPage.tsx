@@ -64,9 +64,9 @@ export default function LandingPage() {
   const [stack, setStack] = useState(0);
 
   const STACK = [
-    { badge: 'STEP 01 · LINK OPENED', title: d.amount ? `Link Pass · ${d.amount} QOR` : 'Link Pass', desc: 'Browser generates ML-DSA-87 keypair & calls POST /api/bind' },
-    { badge: 'STEP 02 · 4-WORD SEAL', title: d.words ? d.words.join(' · ').toUpperCase() : '4 words from your key', desc: 'Sender confirms recipientKeyHash on-chain via confirmRecipient()' },
-    { badge: 'STEP 03 · PoP SETTLED', title: 'PoP Account Born', desc: '0x0A02 + 0x0A01 verify recipient signature & release escrow' },
+    { badge: 'STEP 01 · LINK OPENED', title: d.amount ? `Link Pass · ${d.amount} QOR` : 'Link Pass', desc: 'Your browser makes an ML-DSA-87 key and proves it holds it; POST /api/route relays PocketDrop.bind, hybrid-signed' },
+    { badge: 'STEP 02 · 4-WORD SEAL', title: d.words ? d.words.join(' · ').toUpperCase() : '4 words from your key', desc: 'The sender\'s Pocket signs; PocketDrop.confirmRecipient pins your key hash' },
+    { badge: 'STEP 03 · CLAIMED', title: 'Paid into the Pocket', desc: 'PocketDrop.claim: 0x0A02 checks your key, 0x0A01 checks your signature' },
   ];
   const s = STACK[stack % 3];
   const left = h?.window.remainingBlocks;
@@ -191,7 +191,7 @@ export default function LandingPage() {
               <div className="mt-2 max-w-[260px] text-center">
                 <span className="mb-1.5 inline-block rounded-full bg-zinc-900 px-2.5 py-0.5 font-mono text-xs text-white" data-testid="stack-badge">{s.badge}</span>
                 <div className="font-serif text-2xl text-zinc-900" data-testid="stack-title">{s.title}</div>
-                <div className="mt-0.5 text-xs text-zinc-600">{s.desc}</div>
+                <div className="mt-0.5 text-xs text-zinc-600" data-testid="stack-desc">{s.desc}</div>
                 <div className="mt-1.5 text-xs text-zinc-400">Example taken from the latest claimed drop{d.id ? ` (#${d.id})` : ''} <SourceBadge kind="LIVE" /></div>
               </div>
             </div>
