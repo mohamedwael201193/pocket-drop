@@ -1,11 +1,9 @@
 name: renew-window
-# Keeps the relayer EVM authorisation window alive (QoreChain Diana testnet).
-# Runs every 2 hours: a full window (17,280 blocks) lasts about 6.9 h at ~1.43 s/block, so a 4 h cadence with an
-# 8,000-block threshold could miss the window (8,001 blocks left now, 10,000 blocks pass before the next run).
-# Every 2 h, the worst case is 8,000 - ~5,000 = ~3,000 blocks of margin.
+# Manual only since 2026-11-22. Relays now go out as hybrid-signed MsgCrossVMCall (secp256k1 + ML-DSA-87), which need no
+# EVM window, so the window was left to close and the classical (ECDSA-only) relay path is shut by the chain itself.
+# This workflow stays as the operator fallback: run it by hand to re-open the scoped window (prod router, lab router,
+# v3 PocketDrop) if the hybrid lane ever has to be switched off (RELAY_MODE=evm on the API).
 on:
-  schedule:
-    - cron: '17 */2 * * *'
   workflow_dispatch:
     inputs:
       force:

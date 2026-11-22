@@ -1,0 +1,76 @@
+{
+ "note": "TEAM-RUN. QA flow a (confirmed drop) in Chromium and WebKit at 390 and 1440 against the deployed app https://pocketdrop-app.vercel.app and API https://pocketdrop-api.vercel.app after the hybrid lane went live (RELAY_MODE=hybrid). Every relay is a MsgCrossVMCall signed by the relayer with secp256k1 + ML-DSA-87; the chain records pqc_hybrid_verify=verified. Read back from https://api-testnet.qore.host.",
+ "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+ "flows": [
+  "hybrid-a-confirmed-live-2026-11-22.json"
+ ],
+ "readBackAt": "2026-11-22T02:47:02.257153+00:00",
+ "txs": [
+  {
+   "hash": "04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445",
+   "height": "10529216",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0x8a723c098f4Bc4F284e58d441710429217532DB3",
+   "gasUsed": "1318010",
+   "gasWanted": "1535639",
+   "fee": "168921uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:44:32Z"
+  },
+  {
+   "hash": "F2550467C360F9E040640A8241E1636F1C1C87848AAE6E5F96329DD2358BF745",
+   "height": "10529222",
+   "code": 0,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "gasUsed": "971363",
+   "gasWanted": "1137064",
+   "fee": "125078uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:44:40Z"
+  },
+  {
+   "hash": "3ABD34F23BDCA59D0A7818AFB92F61578B6495E3008B203595297B97ADC8CC2B",
+   "height": "10529237",
+   "code": 0,
+   "memo": "pd route prod relay 0xd73016D0E2264b247d84FA5b1107eEbca6297feb",
+   "gasUsed": "774620",
+   "gasWanted": "910785",
+   "fee": "100187uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:45:02Z"
+  },
+  {
+   "hash": "32FB6769EB94FEB411CC9482EA90782603ABC1C846DC750F71519DC0FC45B682",
+   "height": "10529241",
+   "code": 0,
+   "memo": "pd route prod relay 0xbc13b9EE91f31eD56932abDb796693515C351f00",
+   "gasUsed": "764482",
+   "gasWanted": "899196",
+   "fee": "98912uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:45:07Z"
+  },
+  {
+   "hash": "B610EE0D59B9EB75BD72C0D71D969CB128236051F1EE0EB3812233991B62E15A",
+   "height": "10529261",
+   "code": 0,
+   "memo": "pd route prod deployAndRelay 0xcC598c5EB92d62eAFe907dC09Afa48509eF2849e",
+   "gasUsed": "1117882",
+   "gasWanted": "1305574",
+   "fee": "143614uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:45:36Z"
+  },
+  {
+   "hash": "370E35B65EE3D60BFE9FC63AD0458032616517EEFC0D715D2284AAAFC90BCA16",
+   "height": "10529265",
+   "code": 0,
+   "memo": "pd route prod relay 0xd73016D0E2264b247d84FA5b1107eEbca6297feb",
+   "gasUsed": "811473",
+   "gasWanted": "953190",
+   "fee": "104851uqor",
+   "pqc_hybrid_verify": "verified",
+   "time": "2026-11-22T02:45:42Z"
+  }
+ ]
+}
