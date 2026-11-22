@@ -11,6 +11,8 @@
 //   7. persona campaign, sponsored onboarding runs, LAB flow d rerun, the QoreX-format intent, the old-key drain and
 //      the spend ledger: every EVM hash mined with status 1
 //   8. every Cosmos tx hash in the evidence (registrations, funding, sponsor sends) has code 0 via the Cosmos REST API
+//   9. hybrid relays (evidence/v4/e2e/hybrid-relay-*.json): each is a MsgCrossVMCall from the relayer to a recorded v4
+//      router, code 0, and the chain's own pqc_hybrid_verify event says verified (secp256k1 + ML-DSA-87)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -190,12 +192,34 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^sponsor-liv
   const S = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
   evidenceSets.push([`sponsored onboarding run (${f})`, Object.entries(S.txs ?? {}).map(([k, h]) => [h, `sponsor run: ${k}`])]);
 }
-for (const [dir, re] of [['e2e', /^(flow-d-|qorex-).*\.json$/], ['.', /^oldkey-drain-.*\.json$/]]) {
+for (const [dir, re] of [['e2e', /^(flow-d-|qorex-|hybrid-[ac]-).*\.json$/], ['.', /^oldkey-drain-.*\.json$/]]) {
   for (const f of fs.readdirSync(path.join(ev, dir)).filter((f) => re.test(f)).sort()) {
     const J = JSON.parse(fs.readFileSync(path.join(ev, dir, f), 'utf8'));
     evidenceSets.push([`team run (${f})`, Object.entries(J.txs ?? {}).map(([k, h]) => [h, `${f.replace(/-2026.*$/, '')}: ${k}`])]);
   }
 }
+// ---- 9. hybrid relays: MsgCrossVMCall into a v4 router, code 0, pqc_hybrid_verify = verified ----
+const routers = new Set(Object.values(v4.instances).map((i) => i.router.address.toLowerCase()));
+let hybridN = 0;
+for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^hybrid-relay-.*\.json$/.test(f)).sort()) {
+  const H = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
+  section(`hybrid relays (${f})`);
+  await inBatches(H.txs, async (row) => {
+    cosmosTxs++; hybridN++; seenHash.add(row.hash.toLowerCase());
+    try {
+      const t = (await retry(async () => {
+        const r = await fetch(`${REST}/cosmos/tx/v1beta1/txs/${row.hash}`, { headers: { 'user-agent': 'curl/8' } });
+        if (!r.ok) throw new Error(`REST ${r.status}`);
+        return r.json();
+      })).tx_response;
+      const m = (t.tx?.body?.messages ?? []).find((x) => x['@type'] === '/qorechain.crossvm.v1.MsgCrossVMCall');
+      const hy = (t.events ?? []).filter((e) => e.type === 'pqc_hybrid_verify').flatMap((e) => e.attributes).find((a) => a.key === 'status')?.value;
+      check(t.code === 0 && !!m && routers.has(String(m.target_contract).toLowerCase()) && m.sender === H.relayer && hy === 'verified' && String(t.height) === String(row.height),
+        `hybrid ${row.hash.slice(0, 12)}… code ${t.code}, ${m ? 'cross-VM call to ' + String(m.target_contract).slice(0, 10) + '…' : 'no MsgCrossVMCall'}, pqc_hybrid_verify ${hy ?? 'missing'}: ${row.memo.slice(0, 50)}`);
+    } catch (e) { check(false, `hybrid ${row.hash.slice(0, 12)}… not readable (${e.message})`); }
+  });
+}
+tally['hybrid relays'] = { evm: 0, cosmos: hybridN };
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
   section(name);
