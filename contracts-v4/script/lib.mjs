@@ -19,7 +19,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 export const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(HERE, '..'); // pocketdrop/contracts
 export const SECRET_FILE = 'D:/route/QORE/.secrets/pocketdrop-deployer.json';
-export const ENV_FILE = 'D:/route/QORE/.env';
+export const ENV_FILE = process.env.QORE_ENV_FILE || 'D:/route/QORE/.env';
 export const DEPLOYMENTS = path.join(ROOT, 'deployments', 'diana.json');
 export const EXPL = 'https://explore.qore.network/tx/';
 

@@ -37,6 +37,8 @@ test('an EVM-lane 2-of-3 guardian freeze from the examples, then a bad hash', as
 test('the Proof menu links to the checker; /proof says how the relayer signs; /radar notes hybrid relays', async ({ page }) => {
   await page.goto(`${BASE}/proof`);
   await expect(page.getByTestId('proof-relayer-why')).toContainText(/ML-DSA-87|ECDSA/, { timeout: 90_000 });
+  await expect(page.getByTestId('proof-cbom')).toContainText('X25519MLKEM768');
+  await expect(page.getByTestId('proof-cbom-json')).toHaveAttribute('href', /docs\/cbom\/cbom\.json$/);
   await page.goto(`${BASE}/radar`);
   await expect(page.getByTestId('prod-hybrid-note')).toContainText(/hybrid/i, { timeout: 90_000 });
   const menu = page.getByRole('button', { name: /Proof/ }).first();

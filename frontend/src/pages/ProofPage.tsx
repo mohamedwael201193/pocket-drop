@@ -10,6 +10,16 @@ const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday':
 
 const CONTRACTS = [['Pocket router', 'router'], ['Pocket factory', 'factory'], ['Drop links', 'drop'], ['Drop pools', 'pool']] as const;
 
+/** From docs/cbom/cbom.json (QoreScan 0.1.0, 22 Nov 2026). */
+const CBOM_ROWS: [string, string, string][] = [
+  ['ML-DSA-87 (FIPS 204)', 'post-quantum', 'Every Pocket action, bind, claim, freeze and recovery; the relayer\'s second signature'],
+  ['X25519MLKEM768', 'hybrid', 'TLS key exchange of the app, the API and the EVM RPC'],
+  ['ECDSA secp256k1', 'quantum-vulnerable', 'The classical half of hybrid signatures; never accepted alone for a Pocket action'],
+  ['RSA, ECDSA P-256/P-384', 'quantum-vulnerable', 'Web certificates of the endpoints (outside our control)'],
+  ['Ed25519', 'quantum-vulnerable', 'Validator consensus keys (chain, outside our control)'],
+  ['Keccak-256, SHA-256, AES-128-GCM', 'symmetric', 'Digests in the contracts, TLS'],
+];
+
 export default function ProofPage() {
   const { data: h } = useHealth();
   return (
@@ -48,6 +58,25 @@ export default function ProofPage() {
           ? <>signs every relay with <b>secp256k1 + ML-DSA-87</b> (checked by the chain) · ECDSA-only path {h.relay.classicalPathOpen ? <>still open until its window ends, {h.window.remainingBlocks} blocks left</> : <b>closed</b>}</>
           : <>signing window {h.window.live ? <>open, {h.window.remainingBlocks} blocks left</> : 'closed'}</>}</> : 'Reading the relayer…'}</p>
         {h?.relay?.mode === 'hybrid' && <p className="text-xs text-zinc-600" data-testid="proof-relayer-why">A quantum computer that recovers the relayer&apos;s secp256k1 key from its public key still cannot send anything as the relayer: each relay is a cross-VM call that also needs the relayer&apos;s ML-DSA-87 signature, and with no EVM window open the chain refuses an ECDSA-only transaction from it.</p>}
+      </section>
+
+      <section className="mt-5 space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-cbom">
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Every algorithm we depend on</h2><SourceBadge kind="RECORDED" title="QoreScan Community 0.1.0 run on 22 Nov 2026; re-run it with docs/cbom/scan.sh" /></div>
+        <p className="text-sm text-zinc-700">A cryptographic bill of materials (CycloneDX 1.6) written by the official QoreScan from the live chain state, our contracts and our three endpoints. It is an inventory, not an audit.</p>
+        <ul className="divide-y divide-zinc-100 text-sm">
+          {CBOM_ROWS.map(([alg, cls, where]) => (
+            <li key={alg} className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-baseline sm:gap-3">
+              <span className="font-medium text-zinc-900 sm:w-52 sm:shrink-0">{alg}</span>
+              <span className={cls === 'post-quantum' || cls === 'hybrid' ? 'text-emerald-800 sm:w-36 sm:shrink-0' : cls === 'symmetric' ? 'text-zinc-600 sm:w-36 sm:shrink-0' : 'text-amber-800 sm:w-36 sm:shrink-0'}>{cls}</span>
+              <span className="text-zinc-700">{where}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <a className="underline" href={`${SOURCE_URL}/blob/main/docs/cbom/README.md`} target="_blank" rel="noopener noreferrer" data-testid="proof-cbom-readme">What each finding means</a>
+          <a className="underline" href={`${SOURCE_URL}/blob/main/docs/cbom/cbom.json`} target="_blank" rel="noopener noreferrer" data-testid="proof-cbom-json">cbom.json</a>
+          <a className="underline" href={`${SOURCE_URL}/blob/main/docs/cbom/agility.md`} target="_blank" rel="noopener noreferrer">Crypto-agility notes</a>
+        </p>
       </section>
 
       <section className="mt-5 space-y-2 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-self-check">
