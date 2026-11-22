@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiError, RELAYER_PAUSED, explainError, fetchHealth } from '../src/lib/api';
 import { parseClaimInput } from '../src/pages/ReceivePage';
 
-describe('relayer window expiry message', () => {
-  it('says the window expired and that funds are safe and still in escrow', () => {
+describe('relayer outage message', () => {
+  it('says the relayer cannot submit now and that funds are safe and still in escrow', () => {
     const m = explainError(new ApiError('RelayerWindowUnavailable', 'closed', 503));
     expect(m).toBe(RELAYER_PAUSED);
-    expect(m).toMatch(/window has expired/i);
+    expect(m).toMatch(/cannot submit transactions for you right now/i);
     expect(m).toMatch(/safe and still in escrow/i);
     expect(m).toMatch(/retry/i);
   });
