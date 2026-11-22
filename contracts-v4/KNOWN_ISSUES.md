@@ -65,3 +65,6 @@ Other facts that stay true:
 - Intents carry a deadline but cannot be revoked other than by consuming the nonce with another intent.
 - The ML-DSA signature (4,627 bytes) makes intents large: a relayed spend is ~4.8 KB of calldata, a recovery proposal with two guardians ~9.5 KB. The public EVM gateway rejects raw txs of 64 KB and above (spike result), far above anything here.
 - The deployed bytecode was compiled with solc 0.8.28, optimizer 200 runs, `bytecode_hash = none`; `node script/deploy.mjs --check` compares the on-chain runtime code with a local build (modulo immutables). The explorer has no source verification yet.
+
+## Kit packages not used
+- `@qorechain/wallet-adapter` adds the ML-DSA-87 layer to transactions signed by Cosmos wallets such as Keplr or Leap. Pocket Drop has no Keplr or Leap path (users sign in the browser or with QoreX, and QoreX's `signAndBroadcast` adds its own hybrid layer), so importing it would be decoration. The app uses `@qorechain/qorex-types` for the QoreX connection that ships.

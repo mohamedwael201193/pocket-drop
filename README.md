@@ -131,6 +131,7 @@ cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on
 | QoreChain kit: QoreX message format and ML-DSA-87 verification in the browser (`/check`) | `@qorechain/qoresign` | Apache-2.0 |
 | Cryptographic bill of materials ([docs/cbom](docs/cbom/README.md)) | QoreScan Community | QoreChain tool |
 | Wallet connection and signing | QoreX wallet | QoreChain product |
+| QoreX provider types, testnet ids, capability and chain-error checks (`frontend/src/lib/qorex.ts`) | `@qorechain/qorex-types` | Apache-2.0 |
 | Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, hybrid `MsgCrossVMCall`, scoped EVM window (closed) | QoreChain network |
 | Contract audit | QCAI (QoreChain AI audit) | QoreChain service |
 | Cosmos transactions | `@cosmjs/stargate`, `cosmjs-types` | Apache-2.0 |
