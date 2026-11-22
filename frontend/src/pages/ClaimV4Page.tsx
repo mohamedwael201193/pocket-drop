@@ -224,9 +224,9 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
 
         {!dead && (state === 'opening' || state === 'waiting' || state === 'yours') && (
           <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
-            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount}/{ORDER.length}</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{fatal && state === 'opening' ? 'Stopped' : state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount}/{ORDER.length}</span></div>
             <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : 'bg-zinc-200')} />)}</div>
-            {state === 'opening' && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
+            {state === 'opening' && !fatal && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
             <details className="mt-3 text-sm" open><summary className="cursor-pointer text-zinc-600">Every step</summary>
               <ol className="mt-3 space-y-2 text-xs" data-testid="steps">{ORDER.map((k, i) => <StepRow key={k} id={k} n={i + 1} step={steps[k]} />)}</ol>
             </details>

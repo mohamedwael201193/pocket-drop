@@ -51,11 +51,11 @@ export function PowerMap({ env, address }: { env: Env; address: Hex }) {
               <li key={p.id} className="rounded-xl border border-zinc-100 bg-stoneBg/60 p-3" data-testid={`power-${p.id}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <span className="text-sm font-medium text-zinc-900">{p.power}</span>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${TONE[p.state]}`} data-testid={`power-${p.id}-state`} data-state={p.state}>{LABEL[p.state]}</span>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${TONE[p.state]}`} data-testid={`power-${p.id}-state`} data-state={p.state}>{LABEL[p.state]}</span>
                 </div>
                 <dl className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-0.5 text-xs text-zinc-700 sm:grid-cols-[7rem_1fr]">
                   <dt className="text-zinc-500">Needs</dt><dd>{p.who}</dd>
-                  <dt className="text-zinc-500">Checked by</dt><dd className="font-mono text-[11px] [overflow-wrap:anywhere]">{p.check}</dd>
+                  <dt className="text-zinc-500">Checked by</dt><dd className="font-mono text-xs [overflow-wrap:anywhere]">{p.check}</dd>
                   <dt className="text-zinc-500">Delay</dt><dd>{p.delay}</dd>
                   <dt className="text-zinc-500">Undo</dt><dd>{p.undo}</dd>
                   {p.why && <><dt className="text-zinc-500">Now</dt><dd>{p.why}</dd></>}

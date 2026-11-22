@@ -1,5 +1,5 @@
 {
- "totalQor": 27.84125,
+ "totalQor": 28.08125,
  "entries": [
   {
    "qor": 2,
@@ -1098,6 +1098,12 @@
    "note": "qa d unanimous new owner key",
    "hash": "0x6d50e92f234651bd08a83c465295703a8d6bd365f04caf8d599ef81ecc819414",
    "at": "2026-11-22T03:46:40.969Z"
+  },
+  {
+   "qor": 0.24,
+   "note": "v3 hybrid check: create Giveaway link #29",
+   "hash": "0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd7a5854eb121522211a29d5a7",
+   "at": "2026-11-22T03:54:24.466Z"
   }
  ]
 }

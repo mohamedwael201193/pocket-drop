@@ -205,6 +205,8 @@ for (const [dir, re] of [['e2e', /^(flow-d-|qorex-|hybrid-[acd]-).*\.json$/], ['
 }
 // ---- 9. hybrid relays: MsgCrossVMCall into a v4 router, code 0, pqc_hybrid_verify = verified ----
 const routers = new Set(Object.values(v4.instances).map((i) => i.router.address.toLowerCase()));
+// v3 bind/claim are relayed the same way, into the v3 PocketDrop (contracts/deployments/diana.json)
+for (const c of Object.values(readJson('contracts', 'deployments', 'diana.json').contracts)) routers.add(String(c.address).toLowerCase());
 let hybridN = 0;
 for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^hybrid-relay-.*\.json$/.test(f)).sort()) {
   const H = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));

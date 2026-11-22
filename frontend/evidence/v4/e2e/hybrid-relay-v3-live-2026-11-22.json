@@ -1,0 +1,40 @@
+{
+  "note": "TEAM-RUN. A v3 Giveaway link (#29 on the v3 PocketDrop 0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97, created by the team deployer with an EVM tx) claimed in WebKit 390 on the deployed app https://pocketdrop-app.vercel.app. POST /api/bind and POST /api/claim were relayed as MsgCrossVMCall into the v3 contract, signed by the relayer with secp256k1 + ML-DSA-87 (pqc_hybrid_verify=verified), after the relayer EVM window closed. The recipient registered its own ML-DSA-87 key (proof of possession) from the drip. Read back from https://api-testnet.qore.host.",
+  "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+  "v3Contract": "0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97",
+  "linkId": "29",
+  "createTx": "0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd7a5854eb121522211a29d5a7",
+  "registerTx": {
+    "hash": "44CF7B7CC0812FC87B9580E89E43500DA0BB1F3E31710264FD8E788181D39E09",
+    "height": "10532173",
+    "type": "/qorechain.pqc.v1.MsgRegisterPQCKeyV2"
+  },
+  "finalRecipientWei": "120000000000000000",
+  "readBackAt": "2026-11-22T03:58:17.091353+00:00",
+  "txs": [
+    {
+      "step": "recipient bind",
+      "hash": "1806B21CC3DC90474BCF634880797598611122606695E012214A0259413E6F24",
+      "height": "10532170",
+      "code": 0,
+      "memo": "pd v3 bind 29",
+      "target": "0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97",
+      "gasUsed": "859146",
+      "fee": "110874uqor",
+      "pqc_hybrid_verify": "verified",
+      "time": "2026-11-22T03:54:48Z"
+    },
+    {
+      "step": "recipient claim",
+      "hash": "CAFECB9ABD82E5715DAE1EB721D8332E10631370F62A15F26384825EAB98F71C",
+      "height": "10532177",
+      "code": 0,
+      "memo": "pd v3 claim 29",
+      "target": "0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97",
+      "gasUsed": "687542",
+      "fee": "89182uqor",
+      "pqc_hybrid_verify": "verified",
+      "time": "2026-11-22T03:54:58Z"
+    }
+  ]
+}

@@ -101,7 +101,7 @@ export default function LabPage() {
         <details className="mt-8 rounded-3xl border border-zinc-200 bg-white/80 p-5">
           <summary className="cursor-pointer font-serif text-xl text-zinc-900">The six v3 attacks (v3 contract, still deployed)</summary>
           <ul className="mt-3 space-y-2">{ATTACKS.map((a) => (
-            <li key={a.n} className="rounded-2xl border border-zinc-200 bg-white p-3 text-sm"><div className="flex items-center justify-between gap-2"><span className="font-medium text-zinc-900">{a.n}. {a.title}</span><span className="flex items-center gap-2"><Pill tone="warn">{a.error}</Pill><SourceBadge kind="RECORDED" /></span></div><div className="mt-1 text-xs text-zinc-600">{a.plain}</div><div className="mt-1"><TxLink hash={attackTx(a.n).hash} /></div></li>
+            <li key={a.n} className="rounded-2xl border border-zinc-200 bg-white p-3 text-sm"><div className="flex flex-wrap items-center justify-between gap-2"><span className="min-w-0 font-medium text-zinc-900">{a.n}. {a.title}</span><span className="flex min-w-0 flex-wrap items-center gap-2"><Pill tone="warn">{a.error}</Pill><SourceBadge kind="RECORDED" /></span></div><div className="mt-1 text-xs text-zinc-600">{a.plain}</div><div className="mt-1"><TxLink hash={attackTx(a.n).hash} /></div></li>
           ))}</ul>
           <p className="mt-2 text-xs text-zinc-500">v3 decoded against its own ABI ({pocketDropAbi.filter((x) => x.type === 'error').length} custom errors).</p>
         </details>

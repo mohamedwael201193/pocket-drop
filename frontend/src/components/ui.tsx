@@ -87,7 +87,7 @@ export function TxLink({ hash, label, testId, check }: { hash: string; label?: s
     <span className="inline-flex flex-wrap items-center gap-2">
       {a}
       <Link to={`/check/${hash}`} data-testid={testId ? `${testId}-check` : undefined} title="Re-verify its post-quantum signatures in this browser"
-        className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] font-medium text-zinc-700 hover:border-zinc-500 hover:text-black">check</Link>
+        className="rounded-full border border-zinc-300 px-2 py-0.5 text-xs font-medium text-zinc-700 hover:border-zinc-500 hover:text-black">check</Link>
     </span>
   );
 }

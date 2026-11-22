@@ -45,7 +45,7 @@ function Check({ c, i }: { c: SigCheck; i: number }) {
         <Row k="Public key">{c.pkBytes ? <>{c.pkBytes.toLocaleString('en-US')} bytes, {c.keySource === 'chain' ? 'read from the chain (PQC precompile 0x…0a02)' : 'carried in the call'}{c.pinned === true && ', and its hash matches the one pinned on chain'}{c.pinned === false && <b className="text-red-800">; its hash does NOT match the one pinned on chain</b>}</> : <b className="text-red-800">no key registered on chain</b>}</Row>
         <Row k="Signature">{c.sigBytes.toLocaleString('en-US')} bytes, ML-DSA-87 (FIPS 204)</Row>
         {c.nonce !== undefined && <Row k="Nonce">{c.nonce.toString()} (read from the chain at the block before)</Row>}
-        <Row k="Signed text"><span className="flex flex-col items-start gap-1.5"><Mono className="text-[11px]">{c.message}</Mono><span className="shrink-0"><CopyButton text={c.message} label="Copy signed text" /></span></span></Row>
+        <Row k="Signed text"><span className="flex flex-col items-start gap-1.5"><Mono className="text-xs">{c.message}</Mono><span className="shrink-0"><CopyButton text={c.message} label="Copy signed text" /></span></span></Row>
         <Row k="Checked in this browser"><span data-testid={`check-sig-${i}-valid`}>{c.valid ? 'Valid for this exact intent.' : 'Not valid for this intent.'}</span></Row>
         {c.qoresign && <Row k="Second library"><span data-testid={`check-sig-${i}-qoresign`}>@qorechain/qoresign (the message format QoreX signs) builds {c.qoresign.sameText ? 'the same signed text' : <b className="text-red-800">a different signed text</b>} and finds the signature {c.qoresign.valid ? 'valid' : <b className="text-red-800">not valid</b>}.</span></Row>}
         <Row k="Changed intent"><span data-testid={`check-sig-${i}-tampered`}>{c.tamperedValid ? <b className="text-red-800">The same signature also passes a changed intent ({c.tamperedWhat}).</b> : <>Same signature, changed intent ({c.tamperedWhat}): rejected.</>}</span></Row>
@@ -78,7 +78,7 @@ function ReportView({ r }: { r: Report }) {
         </dl>
         {Object.keys(r.args).length > 0 && (
           <details className="mt-2 text-sm"><summary className="cursor-pointer text-xs text-zinc-600">Decoded arguments</summary>
-            <dl className="mt-1 divide-y divide-zinc-100">{Object.entries(r.args).map(([k, val]) => <Row key={k} k={k}><Mono className="text-[11px]">{val}</Mono></Row>)}</dl>
+            <dl className="mt-1 divide-y divide-zinc-100">{Object.entries(r.args).map(([k, val]) => <Row key={k} k={k}><Mono className="text-xs">{val}</Mono></Row>)}</dl>
           </details>
         )}
       </section>

@@ -166,7 +166,7 @@ export default function ClaimV3Page() {
       <div data-done={done ? '1' : '0'} data-state={state} className="space-y-5" data-testid="claim-state">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
           <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Pocket Drop · link #{id}</span><SourceBadge kind="LIVE" /></div>
-          <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : 'You received'}</div>
+          <div className="mt-3 text-sm text-stone-300">{state === 'yours' ? 'It is yours' : dead ? 'This link held' : expired ? 'This link holds' : 'You received'}</div>
           <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="incoming-amount">{amount ?? '…'}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
           <div className="mt-2 font-mono text-xs text-stone-400">{link ? `${modeLine(link.mode, link.state)}${drip ? ` · +${drip} QOR gas drip included` : ''} · Testnet` : 'Reading the link…'}</div>
         </div>
@@ -199,9 +199,9 @@ export default function ClaimV3Page() {
 
         {(state === 'opening' || state === 'waiting' || state === 'yours') && (
           <div className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="progress">
-            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount} of {ORDER.length}</span></div>
+            <div className="flex items-center justify-between text-sm"><span className="font-medium text-zinc-900">{fatal && state === 'opening' ? 'Stopped' : state === 'opening' ? 'Opening your Pocket' : state === 'waiting' ? 'Your Pocket is open' : 'Pocket open and paid'}</span><span className="font-mono text-xs text-zinc-500">{doneCount} of {ORDER.length}</span></div>
             <div className="mt-3 flex gap-1.5" aria-hidden>{ORDER.map((k) => <span key={k} className={cx('h-1.5 flex-1 rounded-full', steps[k].status === 'done' || steps[k].status === 'skipped' ? 'bg-emerald-600' : steps[k].status === 'running' ? 'animate-pulseDot bg-zinc-900' : steps[k].status === 'error' ? 'bg-red-600' : 'bg-zinc-200')} />)}</div>
-            {state === 'opening' && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
+            {state === 'opening' && !fatal && currentId && <p className="mt-2 text-sm text-zinc-600" data-testid="current-step">{LABELS[currentId][0]}: {steps[currentId].note ?? LABELS[currentId][1]}</p>}
             <details className="mt-3 text-sm"><summary className="cursor-pointer text-zinc-600">Show every step</summary>
               <ol className="mt-3 space-y-2 text-xs" data-testid="steps">{ORDER.map((k, i) => <StepRow key={k} id={k} n={i + 1} step={steps[k]} started={started} />)}</ol>
             </details>
