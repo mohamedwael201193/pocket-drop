@@ -24,6 +24,8 @@ export interface EvLog { args: Record<string, unknown>; blockNumber: bigint; tra
 
 export interface V4Reader {
   head(): Promise<bigint>;
+  /** Events rebuilt from hybrid relays (a MsgCrossVMCall leaves no EVM log; see xvm.ts). Optional: older readers have none. */
+  hybrid?(env: V4Env): Promise<(EvLog & { eventName: string })[]>;
   events(address: Address, name: EvName, from: bigint, to: bigint): Promise<EvLog[]>;
   balance(a: Address): Promise<bigint>;
 }
@@ -74,13 +76,29 @@ export async function getV4Stats(r: V4Reader, own: OwnMap) {
     ];
     const res = await Promise.all(names.map(([a, n, from]) => r.events(a, n, from, head)));
     const l = Object.fromEntries(names.map(([, n], k) => [n, res[k]])) as Record<EvName, EvLog[]>;
-    out[env] = { ...buildV4Env(env, l, own), keyEras: await keyEras(l.PocketDeployed, own, r.balance) };
+    const hy = r.hybrid ? await r.hybrid(env).catch(() => null) : [];
+    const merged = mergeHybrid(l, hy ?? []);
+    out[env] = { ...buildV4Env(env, merged, own), keyEras: await keyEras(merged.PocketDeployed, own, r.balance), hybridRelayEvents: hy === null ? null : hy.length };
   }
-  return { headBlock: head.toString(), ...out, note: 'Same method as /radar: v4 factory, drop and pool logs since deployment; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
+  return { headBlock: head.toString(), ...out, note: 'Same method as /radar: v4 factory, drop and pool logs since deployment, plus the events of hybrid relays (MsgCrossVMCall, which leaves no EVM log) rebuilt from the native lane; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
 }
 
-export function makeV4Reader(pub: any, chunk = 9000n): V4Reader {
+/** Add hybrid-relay events to the log lists. A PocketDeployed for a Pocket already in the logs is dropped (never counted twice). */
+export function mergeHybrid(l: Record<EvName, EvLog[]>, hy: (EvLog & { eventName: string })[]): Record<EvName, EvLog[]> {
+  const out = Object.fromEntries(Object.entries(l).map(([k, v]) => [k, [...v]])) as Record<EvName, EvLog[]>;
+  const deployed = new Set(l.PocketDeployed.map((d) => String(d.args.pocket).toLowerCase()));
+  for (const e of hy) {
+    const list = out[e.eventName as EvName];
+    if (!list) continue;
+    if (e.eventName === 'PocketDeployed') { const k = String(e.args.pocket).toLowerCase(); if (deployed.has(k)) continue; deployed.add(k); }
+    list.push({ args: e.args, blockNumber: e.blockNumber, transactionHash: e.transactionHash });
+  }
+  return out;
+}
+
+export function makeV4Reader(pub: any, chunk = 9000n, hybrid?: V4Reader['hybrid']): V4Reader {
   return {
+    ...(hybrid ? { hybrid } : {}),
     head: () => pub.getBlockNumber(),
     balance: (a) => pub.getBalance({ address: a }),
     async events(address, name, from, to) {

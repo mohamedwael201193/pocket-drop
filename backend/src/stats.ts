@@ -6,6 +6,7 @@ import { pocketDropAbi } from './abi.js';
 import { NETWORK, type Config } from './config.js';
 import { log } from './log.js';
 import { getV4Stats, makeV4Reader } from './statsv4.js';
+import { hybridEventsFor } from './xvmLive.js';
 
 export type OwnMap = Map<string, string>;
 
@@ -112,7 +113,7 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   const from = cfg.deployBlock ?? (head > cfg.statsLookback ? head - cfg.statsLookback : 0n);
   const [{ logs, scannedTo, truncated }, v4] = await Promise.all([
     collectLogs(pub, cfg.contract as Address, from, head),
-    'getBalance' in pub ? getV4Stats(makeV4Reader(pub), own).catch((e) => { log('warn', 'stats.v4_failed', { message: String((e as Error)?.message ?? e) }); return null; }) : Promise.resolve(null),
+    'getBalance' in pub ? getV4Stats(makeV4Reader(pub, 9000n, 'readContract' in pub ? (env) => hybridEventsFor(env, cfg, pub as never) : undefined), own).catch((e) => { log('warn', 'stats.v4_failed', { message: String((e as Error)?.message ?? e) }); return null; }) : Promise.resolve(null),
   ]);
   const value = {
     network: NETWORK, contract: cfg.contract, fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
