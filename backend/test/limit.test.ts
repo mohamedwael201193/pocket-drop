@@ -58,7 +58,7 @@ describe('makeV4Reader', () => {
 
 describe('/api/stats cache headers', () => {
   it('lets the CDN serve a stale copy while it re-reads, never the browser', () => {
-    expect(STATS_CACHE['vercel-cdn-cache-control']).toMatch(/max-age=30, stale-while-revalidate=300/);
+    expect(STATS_CACHE['vercel-cdn-cache-control']).toMatch(/max-age=60, stale-while-revalidate=3600/);
     expect(STATS_CACHE['cache-control']).toMatch(/max-age=0/);
   });
 });

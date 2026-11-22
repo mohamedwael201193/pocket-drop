@@ -5,9 +5,9 @@ import { RULES } from '../src/ratelimit.js';
 import { getStats, loadOwnAccounts } from '../src/stats.js';
 import { log } from '../src/log.js';
 
-/** Same answer for everyone: the CDN keeps it 30 s and serves the last copy while it re-reads the chain (up to 5 min),
- *  so a visitor never waits for a cold log scan. Browsers still revalidate every time. */
-export const STATS_CACHE = { 'cache-control': 'public, max-age=0, must-revalidate', 'vercel-cdn-cache-control': 'max-age=30, stale-while-revalidate=300' };
+/** Same answer for everyone: the CDN keeps it 60 s and serves the last copy while it re-reads the chain (up to 1 h; the
+ *  warm-stats workflow reads it every 10 min), so a visitor never waits for a cold log scan. Browsers revalidate every time. */
+export const STATS_CACHE = { 'cache-control': 'public, max-age=0, must-revalidate', 'vercel-cdn-cache-control': 'max-age=60, stale-while-revalidate=3600' };
 
 export default async function handler(req: Req, res: ServerResponse) {
   if (gate(req, res, 'GET')) return;

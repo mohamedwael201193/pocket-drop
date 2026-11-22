@@ -1,0 +1,25 @@
+name: warm-stats
+# Keeps the slow on-chain reads warm on the CDN. /api/stats scans Diana logs and the native tx index (about 10 s cold);
+# it is served from the edge for 60 s, then stale for up to an hour while the edge refreshes it in the background.
+# This job reads it every 10 minutes, so a first visitor does not wait for a cold scan. Read-only: no keys, no writes.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: warm-stats
+  cancel-in-progress: true
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read the slow endpoints
+        run: |
+          for u in https://pocketdrop-api.vercel.app/api/stats https://pocketdrop-api.vercel.app/api/qday https://pocketdrop-api.vercel.app/api/health; do
+            s=$(date +%s%N)
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 90 "$u" || echo 000)
+            echo "$u -> $code in $(( ($(date +%s%N) - s) / 1000000 )) ms"
+          done
