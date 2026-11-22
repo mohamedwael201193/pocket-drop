@@ -79,3 +79,10 @@ test('with the EVM window closed and hybrid relays, the app shows the relayer as
   await expect(page.getByText('Diana 9800 · live').first()).toBeVisible();
   await expect(page.getByTestId('relayer-banner')).toHaveCount(0);
 });
+
+test('a malformed hash in the URL explains the format and still offers the examples, including a refused attack', async ({ page }) => {
+  await page.goto(`${BASE}/check/0x1234`);
+  await expect(page.getByTestId('check-bad')).toBeVisible();
+  await page.getByTestId('check-example-refused').click();
+  await expect(page.getByTestId('check-verdict')).toContainText('Refused attempt', { timeout: 60_000 });
+});

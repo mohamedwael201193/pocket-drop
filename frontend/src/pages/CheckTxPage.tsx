@@ -117,10 +117,11 @@ export default function CheckTxPage() {
         <Button type="submit" busy={m.isPending} disabled={!normalizeHash(text) && !isAddr(text)} data-testid="check-submit">Check</Button>
       </form>
       {bad && <p className="mt-2 text-xs text-red-800" data-testid="check-bad">A hash is 64 hex characters (with 0x for an EVM transaction); an address is 0x + 40 hex characters.</p>}
-      {!param && (
-        <p className="mt-3 text-xs text-zinc-500">Transaction results in Send, Receive, Pocket and Radar carry a “check” link that opens this page. Examples recorded on Diana:{' '}
+      {(!param || (!normalizeHash(param) && !isAddr(param))) && (
+        <p className="mt-3 text-sm text-zinc-600" data-testid="check-examples">Transaction results in Send, Receive, Pocket and Radar carry a “check” link that opens this page. Examples recorded on Diana:{' '}
           <Link className="underline" to="/check/E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8" data-testid="check-example-claim">a claim</Link>,{' '}
           <Link className="underline" to="/check/0x0c653400b781cf9501a28d76b1ace95dfb6398282b0f053e5d7c61a60e769007" data-testid="check-example-freeze">a 2-of-3 guardian freeze</Link>,{' '}
+          <Link className="underline" to="/check/FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3" data-testid="check-example-refused">a refused Q-Day attack</Link>,{' '}
           <Link className="underline" to="/check/0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE" data-testid="check-example-pocket">a guarded Q-Day bait Pocket</Link>.
         </p>
       )}

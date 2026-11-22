@@ -144,7 +144,7 @@ export default function SendPage() {
             <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
               <dt>Gift to your friend</dt><dd className="text-right font-mono">{amt !== null ? fmtQor(amt) : '…'} QOR</dd>
               <dt>Setup for your friend: pays the one-time registration of their quantum-safe key (about {fmtQor(REGISTRATION_FEE_WEI)} QOR); anything left over is theirs</dt><dd className="text-right font-mono">{fmtQor(DEFAULTS.drip)} QOR</dd>
-              <dt>Delivery: pays the network fees, so your friend needs no QOR</dt><dd className="text-right font-mono">{fmtQor(DEFAULTS.relayerFee)} QOR</dd>
+              <dt>Delivery: goes to the relayer toward the network fees of the bind and claim, so your friend needs no QOR</dt><dd className="text-right font-mono">{fmtQor(DEFAULTS.relayerFee)} QOR</dd>
               <dt className="font-semibold text-zinc-900">Total from your Pocket</dt><dd className="text-right font-mono font-semibold text-zinc-900">{total !== null ? fmtQor(total) : '…'} QOR</dd>
             </dl>
             {sponsor?.enabled && <p className="mt-2 text-zinc-600" data-testid="drop-sponsor-note">Our sponsor pays the key setup for new senders and for Drop Pool claimers, not for people who open a drop link, so this setup fee is still needed here. A Drop Pool has no extra fees.</p>}

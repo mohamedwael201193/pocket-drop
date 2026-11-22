@@ -1,16 +1,16 @@
 {
- "recordedAt": "2026-11-22T03:13:33.801Z",
+ "recordedAt": "2026-11-22T04:39:54.015Z",
  "command": "node frontend/scripts/count-tests.mjs (npx vitest run in frontend/ and backend/)",
  "frontend": {
-  "passed": 123,
+  "passed": 129,
   "failed": 0,
   "skipped": 0,
-  "total": 123
+  "total": 129
  },
  "backend": {
-  "passed": 169,
+  "passed": 171,
   "failed": 0,
   "skipped": 9,
-  "total": 178
+  "total": 180
  }
 }

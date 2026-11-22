@@ -157,7 +157,7 @@ export default function LandingPage() {
             ))}
           </ol>
           <p className="mt-5 text-sm leading-relaxed text-zinc-600" data-testid="phone-timing">
-            On real phones the three on-chain steps (register key, open window, claim) took {PHONE.androidLabel} on Android Chrome and {PHONE.iphoneLabel} on iPhone Safari. <SourceBadge kind="RECORDED" title={`Source: ${PHONE.source}`} />
+            On real phones the three on-chain steps of the earlier v3 claim (register key, open window, claim) took {PHONE.androidLabel} on Android Chrome and {PHONE.iphoneLabel} on iPhone Safari. <SourceBadge kind="RECORDED" title={`Source: ${PHONE.source}`} /> Claims no longer open a window: the relayer carries them as hybrid-signed cross-VM calls.
           </p>
 
           <details className="group mt-8 rounded-3xl border border-zinc-200 bg-white/90 p-5 sm:p-6" data-testid="landing-tech">
