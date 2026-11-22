@@ -7,6 +7,7 @@ import { pub } from './chain';
 import { linkSeed } from './actions';
 import { INST, type Env } from './v4';
 import { bytesToHex } from './protocol';
+import { fetchXvm, type XvmEvent } from './api';
 
 const CHUNK = 9000n; // the RPC allows at most 10,000 blocks per getLogs
 const evDrop = getAbiItem({ abi: dropAbi, name: 'LinkCreated' });
@@ -40,7 +41,26 @@ export async function scanCreated(env: Env, pocket: Hex): Promise<Created[]> {
   await scan(env, 'drop', pocket, drops, head); drops.upTo = head;
   await scan(env, 'pool', pocket, pools, head); pools.upTo = head;
   cache.set(`d:${key}`, drops); cache.set(`p:${key}`, pools);
-  return [...drops.items.values(), ...pools.items.values()].sort((x, y) => (x.id === y.id ? 0 : x.id < y.id ? 1 : -1));
+  const hybrid = hybridCreated(await fetchXvm(env).catch(() => [] as XvmEvent[]), pocket);
+  const all = new Map<string, Created>([...drops.items, ...pools.items]);
+  for (const c of hybrid) if (!all.has(`${c.kind}:${c.id}`)) all.set(`${c.kind}:${c.id}`, c);
+  return [...all.values()].sort((x, y) => (x.id === y.id ? 0 : x.id < y.id ? 1 : -1));
+}
+
+/** Drops and pools this Pocket created through hybrid relays (no EVM log), from the API's native-lane index. */
+export function hybridCreated(events: XvmEvent[], pocket: Hex): Created[] {
+  const me = pocket.toLowerCase();
+  const out: Created[] = [];
+  for (const e of events) {
+    const a = e.args;
+    if (e.eventName === 'LinkCreated' && String(a.sender).toLowerCase() === me) {
+      out.push({ kind: 'drop', id: BigInt(String(a.linkId)), txHash: e.transactionHash as Hex, linkKeyHash: a.linkKeyHash as Hex, amountWei: BigInt(String(a.amount)), mode: Number(a.mode) === 0 ? 'Confirmed' : 'Open' });
+    } else if (e.eventName === 'PoolCreated' && String(a.host).toLowerCase() === me) {
+      const slots = Number(a.slots), perSlot = BigInt(String(a.perSlot));
+      out.push({ kind: 'pool', id: BigInt(String(a.poolId)), txHash: e.transactionHash as Hex, linkKeyHash: a.linkKeyHash as Hex, amountWei: BigInt(slots) * perSlot, slots, perSlot });
+    }
+  }
+  return out;
 }
 
 const nonceKey = (env: Env, kind: string, id: bigint) => `pd.l4n.${env}.${kind}.${id}`;

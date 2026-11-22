@@ -44,7 +44,10 @@ export default function ProofPage() {
       <section className="mt-5 space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-relayer">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">The relayer, right now</h2><SourceBadge kind="LIVE" /></div>
         <p className="text-sm text-zinc-700">The relayer pays gas for receivers, so it holds a little QOR. It can only submit what a Pocket key signed; it cannot move anyone&apos;s money.</p>
-        <p className="text-sm text-zinc-800" data-testid="proof-relayer-line">{h ? <>Balance <b className="font-mono">{h.relayer?.balance ? Number(h.relayer.balance).toFixed(2) : 'unknown'}</b> QOR · signing window {h.window.live ? <>open, {h.window.remainingBlocks} blocks left</> : 'renewing'}</> : 'Reading the relayer…'}</p>
+        <p className="text-sm text-zinc-800" data-testid="proof-relayer-line">{h ? <>Balance <b className="font-mono">{h.relayer?.balance ? Number(h.relayer.balance).toFixed(2) : 'unknown'}</b> QOR · {h.relay?.mode === 'hybrid'
+          ? <>signs every relay with <b>secp256k1 + ML-DSA-87</b> (checked by the chain) · ECDSA-only path {h.relay.classicalPathOpen ? <>still open until its window ends, {h.window.remainingBlocks} blocks left</> : <b>closed</b>}</>
+          : <>signing window {h.window.live ? <>open, {h.window.remainingBlocks} blocks left</> : 'renewing'}</>}</> : 'Reading the relayer…'}</p>
+        {h?.relay?.mode === 'hybrid' && <p className="text-xs text-zinc-600" data-testid="proof-relayer-why">A quantum computer that recovers the relayer&apos;s secp256k1 key from its public key still cannot send anything as the relayer: each relay is a cross-VM call that also needs the relayer&apos;s ML-DSA-87 signature, and with no EVM window open the chain refuses an ECDSA-only transaction from it.</p>}
       </section>
 
       <section className="mt-5 space-y-2 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-self-check">

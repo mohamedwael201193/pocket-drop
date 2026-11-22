@@ -6,6 +6,7 @@ import { pub } from './chain';
 import { keyStatus } from './claim4';
 import { INST, type Env } from './v4';
 import own from '../data/own.json';
+import { fetchXvm, type XvmEvent } from './api';
 
 const OWN = new Set(Object.values((own as { accounts: Record<string, string> }).accounts).map((a) => a.toLowerCase()));
 export const isOwnAddress = (a: string) => OWN.has(a.toLowerCase());
@@ -32,6 +33,8 @@ export interface EnvStats {
   recent: { kind: string; id: string; tx: Hex; block: bigint; who: string; own: boolean; at?: number }[];
   /** every pool slot claim: which account took it, where it was paid, own or external, and the tx (P4) */
   claimers: { pool: string; recipient: string; payTo: string; own: boolean; tx: Hex; block: bigint }[];
+  /** events rebuilt from hybrid relays and merged in (null = the API index could not be read) */
+  hybridEvents?: number | null;
   /** legacy-key telemetry (item 10): deployed Pockets by deploy block against the v2 key release */
   keyEras: KeyEras;
 }
@@ -60,6 +63,19 @@ export function compareWithApi(mine: EnvStats, api: { pockets?: number; drops?: 
   return d;
 }
 
+type Ev = { args: Record<string, unknown>; transactionHash: Hex; blockNumber: bigint };
+/** Add the events of hybrid relays (a MsgCrossVMCall leaves no EVM log) to the log lists, in place. A Pocket already seen in
+ *  PocketDeployed logs is never counted twice. Same rule as the API's /api/stats (backend statsv4.mergeHybrid). */
+export function mergeHybrid(l: Record<string, Ev[]>, hy: XvmEvent[]): void {
+  const deployed = new Set(l.PocketDeployed.map((d) => String(d.args.pocket).toLowerCase()));
+  for (const e of hy) {
+    const list = l[e.eventName];
+    if (!list) continue;
+    if (e.eventName === 'PocketDeployed') { const k = String(e.args.pocket).toLowerCase(); if (deployed.has(k)) continue; deployed.add(k); }
+    list.push({ args: e.args, transactionHash: e.transactionHash as Hex, blockNumber: BigInt(e.blockNumber) });
+  }
+}
+
 const bump = (s: Split, a: string) => { if (isOwnAddress(a)) s.own++; else s.external++; };
 
 export async function envStats(env: Env): Promise<EnvStats> {
@@ -76,6 +92,8 @@ export async function envStats(env: Env): Promise<EnvStats> {
     logs(i.pool, ev(poolAbi, 'PoolCreated'), i.poolFromBlock, head),
     logs(i.pool, ev(poolAbi, 'PoolClaimed'), i.poolFromBlock, head),
   ]);
+  const hybrid = await fetchXvm(env).catch(() => null);
+  mergeHybrid({ PocketDeployed: deployed, LinkCreated: created, LinkBound: bound, LinkConfirmed: confirmed, LinkClaimed: claimed, LinkCancelled: cancelled, PoolCreated: poolsMade, PoolClaimed: poolClaims }, hybrid ?? []);
   const ownerOf = new Map<string, string>(deployed.map((d) => [String(d.args.pocket).toLowerCase(), String(d.args.owner)]));
   const pocketsOwn: Split = { own: 0, external: 0 };
   for (const d of deployed) bump(pocketsOwn, String(d.args.owner));
@@ -107,6 +125,7 @@ export async function envStats(env: Env): Promise<EnvStats> {
     env, pockets: deployed.length, pocketsOwn,
     drops: { created: created.length, bound: bound.length, confirmed: confirmed.length, claimed: claimed.length, cancelled: cancelled.length },
     dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent, claimers,
+    hybridEvents: hybrid === null ? null : hybrid.length,
   };
 }
 

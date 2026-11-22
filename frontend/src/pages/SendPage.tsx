@@ -12,7 +12,7 @@ import { useMyLinks } from '../lib/hooks4';
 import { createDrop, createPool } from '../lib/actions';
 import { claimUrl4, linkId4 } from '../lib/claim4';
 import { rememberNonce } from '../lib/links4';
-import { DEFAULTS, INST, REGISTRATION_FEE_WEI, receiptEvents } from '../lib/v4';
+import { DEFAULTS, INST, REGISTRATION_FEE_WEI, createdId } from '../lib/v4';
 import { explainError } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { useSponsorStatus } from '../lib/sponsor';
@@ -81,10 +81,9 @@ export default function SendPage() {
     setBusy('drop'); setErr(null); setMade(null);
     try {
       const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: DEFAULTS.relayerFee, ttlSeconds: DEFAULTS.ttlSeconds });
-      const ev = (await receiptEvents(r.res.txHash)).drop.find((e) => e.eventName === 'LinkCreated') as { args: { linkId: bigint } } | undefined;
-      if (!ev) throw new Error('The drop was created but its LinkCreated event was not found.');
-      rememberNonce(a.env, 'drop', ev.args.linkId, r.nonce);
-      setMade({ url: claimUrl4(window.location.origin, a.env, ev.args.linkId, r.seed), id: linkId4(a.env, ev.args.linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
+      const linkId = await createdId(r.res, 'drop');
+      rememberNonce(a.env, 'drop', linkId, r.nonce);
+      setMade({ url: claimUrl4(window.location.origin, a.env, linkId, r.seed), id: linkId4(a.env, linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
       await qc.invalidateQueries();
     } catch (e) { setErr({ where: 'drop', text: explainError(e) }); } finally { setBusy(null); }
   }
@@ -93,10 +92,9 @@ export default function SendPage() {
     setBusy('pool'); setErr(null); setMade(null);
     try {
       const r = await createPool(a.actionCtx, a.root, ns, per, DEFAULTS.ttlSeconds);
-      const ev = (await receiptEvents(r.res.txHash)).pool.find((e) => e.eventName === 'PoolCreated') as { args: { poolId: bigint } } | undefined;
-      if (!ev) throw new Error('The pool was created but its PoolCreated event was not found.');
-      rememberNonce(a.env, 'pool', ev.args.poolId, r.nonce);
-      setMade({ url: claimUrl4(window.location.origin, a.env, ev.args.poolId, r.seed, 'pool'), id: linkId4(a.env, ev.args.poolId), kind: 'pool', amountText: fmtQor(per), hash: r.res.txHash });
+      const poolId = await createdId(r.res, 'pool');
+      rememberNonce(a.env, 'pool', poolId, r.nonce);
+      setMade({ url: claimUrl4(window.location.origin, a.env, poolId, r.seed, 'pool'), id: linkId4(a.env, poolId), kind: 'pool', amountText: fmtQor(per), hash: r.res.txHash });
       await qc.invalidateQueries();
     } catch (e) { setErr({ where: 'pool', text: explainError(e) }); } finally { setBusy(null); }
   }

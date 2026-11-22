@@ -39,6 +39,9 @@ function EnvCard({ s }: { s: EnvStats }) {
     <div className={card} data-testid={`radar-${s.env}`}>
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">{s.env === 'prod' ? 'Production instance' : 'Lab instance (60 s delays)'}</h2><SourceBadge kind="LIVE" title="Read from chain logs just now" /></div>
       <p className="mt-1 font-mono text-xs text-zinc-500">router <a className="underline" href={addrUrl(i.router)} target="_blank" rel="noopener noreferrer">{i.router.slice(0, 10)}…</a> · factory <a className="underline" href={addrUrl(i.factory)} target="_blank" rel="noopener noreferrer">{i.factory.slice(0, 10)}…</a></p>
+      <p className="mt-1 text-xs text-zinc-600" data-testid={`${s.env}-hybrid-note`}>{s.hybridEvents === null || s.hybridEvents === undefined
+        ? 'Hybrid relays could not be read from the native lane just now; the counts below are from EVM logs only.'
+        : <>Includes <b>{s.hybridEvents}</b> event{s.hybridEvents === 1 ? '' : 's'} from hybrid-signed relays (secp256k1 + ML-DSA-87). Those run as cross-VM calls, which leave no EVM log, so they are read from the native lane.</>}</p>
       <div className="mt-4 grid grid-cols-3 gap-3 text-center">
         {([['Pockets deployed', s.pockets, 'pockets-deployed'], ['Drops created', s.drops.created, 'drops-created'], ['Pools created', s.pools.created, 'pools-created']] as const).map(([l, v, t]) => (
           <div key={l} className="rounded-2xl bg-stoneCard p-3"><div className="font-money text-4xl leading-none text-zinc-900" data-testid={`${s.env}-${t}`}><CountUp value={v} /></div><div className="text-xs text-zinc-600">{l}</div></div>

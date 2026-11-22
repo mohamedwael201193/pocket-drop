@@ -50,6 +50,8 @@ export const healthSchema = z.object({
     expiryHeight: z.string().optional(), allowedTargets: z.array(z.string()).optional(),
   }).passthrough(),
   warning: z.object({ level: z.string(), message: z.string() }).optional(),
+  /** how relays reach the chain (absent on older API deployments) */
+  relay: z.object({ mode: z.enum(['hybrid', 'evm']), signature: z.string(), fallback: z.string(), classicalPathOpen: z.boolean() }).optional(),
   warnings: z.array(z.object({ kind: z.string(), level: z.string(), message: z.string() })).optional(),
 });
 export type Health = z.infer<typeof healthSchema>;
@@ -95,8 +97,17 @@ async function post<T>(path: string, body: unknown, schema: z.ZodType<T>): Promi
   }
   return schema.parse(j);
 }
-export interface RouteResult { txHash: Hex; status: string; explorer?: string; gasUsed?: string; env: string; action: string }
-const routeOk = z.object({ ok: z.literal(true), txHash: z.string(), status: z.string(), explorer: z.string().optional(), gasUsed: z.string().optional(), env: z.string(), action: z.string() }).passthrough();
+/** `lane`: 'hybrid' = MsgCrossVMCall signed by the relayer with secp256k1 + ML-DSA-87 (txHash is a native-lane hash, no 0x);
+ *  'evm' = an EVM tx inside the relayer's window (txHash 0x…). `result` carries ids from the router's return value (hybrid only). */
+export interface RouteResult {
+  txHash: Hex; status: string; explorer?: string; gasUsed?: string; env: string; action: string;
+  lane?: 'hybrid' | 'evm'; hybridVerified?: boolean; result?: { linkId?: string; poolId?: string; queuedId?: string; pocket?: string };
+}
+const routeOk = z.object({
+  ok: z.literal(true), txHash: z.string(), status: z.string(), explorer: z.string().optional(), gasUsed: z.string().optional(), env: z.string(), action: z.string(),
+  lane: z.enum(['hybrid', 'evm']).optional(), hybridVerified: z.boolean().optional(),
+  result: z.object({ linkId: z.string().optional(), poolId: z.string().optional(), queuedId: z.string().optional(), pocket: z.string().optional() }).passthrough().optional(),
+}).passthrough();
 /** v4: relay a user-signed intent through PocketRouter. 422 means the simulation reverted (nothing was sent). */
 export const postRoute = (p: { env: 'prod' | 'lab'; target?: string; data: string; pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string } }): Promise<RouteResult> =>
   post('/api/route', p, routeOk).then((r) => ({ ...r, txHash: r.txHash as Hex }));
@@ -142,3 +153,12 @@ export function explainError(e: unknown): string {
   }
   return e instanceof Error ? e.message : String(e);
 }
+
+/** One event rebuilt from a hybrid relay (a MsgCrossVMCall leaves no EVM log). Numbers arrive as decimal strings. */
+export interface XvmEvent { eventName: string; args: Record<string, unknown>; blockNumber: string; transactionHash: string; lane: 'hybrid' }
+const xvmSchema = z.object({
+  ok: z.literal(true), env: z.string(), count: z.number(),
+  events: z.array(z.object({ eventName: z.string(), args: z.record(z.unknown()), blockNumber: z.string(), transactionHash: z.string(), lane: z.literal('hybrid') })),
+}).passthrough();
+/** GET /api/xvm: hybrid relays into the PocketRouter of `env`, decoded into the events they stand for. */
+export const fetchXvm = (env: 'prod' | 'lab') => getJson(`/api/xvm?env=${env}`, xvmSchema).then((r) => r.events as XvmEvent[]);

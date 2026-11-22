@@ -112,6 +112,22 @@ export async function relayToPocket(env: Env, cfg: PocketCfg, pocket: Hex, data:
 }
 export const relayTo = (env: Env, target: Hex, data: Hex): Promise<RouteResult> => postRoute({ env, target, data });
 
+/**
+ * The id a create returned: from the router's return value for a hybrid relay (it leaves no EVM log), else from the
+ * LinkCreated / PoolCreated log of the EVM receipt.
+ */
+export async function createdId(res: RouteResult, kind: 'drop' | 'pool'): Promise<bigint> {
+  const fromReturn = kind === 'drop' ? res.result?.linkId : res.result?.poolId;
+  if (fromReturn && /^\d+$/.test(fromReturn)) return BigInt(fromReturn);
+  if (!/^0x[0-9a-fA-F]{64}$/.test(res.txHash)) throw new Error(`The ${kind} was created but its id was not returned.`);
+  const ev = await receiptEvents(res.txHash);
+  const hit = kind === 'drop'
+    ? (ev.drop.find((e) => e.eventName === 'LinkCreated') as { args: { linkId: bigint } } | undefined)?.args.linkId
+    : (ev.pool.find((e) => e.eventName === 'PoolCreated') as { args: { poolId: bigint } } | undefined)?.args.poolId;
+  if (hit === undefined) throw new Error(`The ${kind} was created but its ${kind === 'drop' ? 'LinkCreated' : 'PoolCreated'} event was not found.`);
+  return hit;
+}
+
 /** Receipt logs of a relayed tx, decoded with the v4 ABIs. */
 export async function receiptEvents(hash: Hex) {
   const rc = await pub.getTransactionReceipt({ hash });
