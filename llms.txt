@@ -1,0 +1,32 @@
+# Pocket Drop
+
+> Send QOR by link to someone with no wallet. Their browser creates a Pocket: a smart account on QoreChain that only an ML-DSA-87 (post-quantum) key can move. Diana testnet only (EVM chain id 9800); QOR there has no monetary value. MIT license.
+
+Live app: https://pocketdrop-app.vercel.app (Send, Receive, Pocket, Proof)
+Relayer API: https://pocketdrop-api.vercel.app (/api/health, /api/stats, /api/qday)
+Judge path: /qday (published classical keys of five bait Pockets, attacked hourly by our own bot), then /receive, then /judges.
+
+## Docs
+
+- [README](README.md): story, 60-second judge path, labelled numbers, claim checks, addresses, custody, credits
+- [Audit](docs/AUDIT.md): QCAI Stage 1 (82) and Stage 2 (78), each finding mapped to tests, every pqcVerify/pqcKeyStatus call site
+- [Threat model](docs/THREAT_MODEL.md): assets, adversaries, mitigations, residual risk
+- [Live results](contracts-v4/LIVE_RESULTS.md): every live step and attack on Diana, with tx hashes
+- [Known issues](contracts-v4/KNOWN_ISSUES.md): limits we know about
+- [Q-Day feasibility](docs/qday/FEASIBILITY.md): why a Pocket survives a leaked classical key
+- [AI usage](AI_USAGE.md): what people did and what was AI-assisted
+
+## Code
+
+- [contracts-v4/src](contracts-v4/src): PocketVault, PocketFactory, PocketRouter, PocketDrop, DropPool, PqcLib (precompile wrappers), PqGuard
+- [contracts-v4/test](contracts-v4/test): Foundry unit, fuzz and invariant tests
+- [contracts-v4/deployments/diana.json](contracts-v4/deployments/diana.json): deployed addresses and recorded runs
+- [backend](backend): relayer API (Vercel functions)
+- [frontend](frontend): React app, Playwright specs, evidence, scripts/reverify.mjs
+
+## Key facts
+
+- Precompiles: pqcVerify at 0x0A01, pqcKeyStatus at 0x0A02
+- PROD PocketRouter 0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209, PocketFactory 0x74b604e8f1bb729a6e43dcd893f01747688e3e8f, PocketDrop 0xbc13b9ee91f31ed56932abdb796693515c351f00, DropPool 0xaa981588e5430e3db9a789a3754e108cc01e3d00
+- Relayer 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD (qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl): pays gas only, limited by a scoped EVM window
+- Explorer: https://explore.qore.network/tx/<hash>
