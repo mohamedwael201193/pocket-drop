@@ -3,6 +3,7 @@
 import { parseAbi, type Address, type Hex } from 'viem';
 import { V4_INSTANCES, type V4Env } from './v4.js';
 import type { OwnMap } from './stats.js';
+import { ranges } from './limit.js';
 
 /** First Diana block at or after the moment the v2 browser derivation went live in production
  *  (frontend deployment dpl_ELW885X5Vs2sNUwyzQwp1guDVtwR, ready 2026-11-20 04:24:18 UTC, commit 0643538 contains 43cc149). */
@@ -68,19 +69,20 @@ export async function keyEras(deployed: EvLog[], own: OwnMap, balance: (a: Addre
 export async function getV4Stats(r: V4Reader, own: OwnMap) {
   const head = await r.head();
   const out: Record<string, unknown> = {};
-  for (const env of ['prod', 'lab'] as V4Env[]) {
+  await Promise.all((['prod', 'lab'] as V4Env[]).map(async (env) => {
     const i = V4_INSTANCES[env]; const f = V4_FROM[env];
     const names: [Address, EvName, bigint][] = [
       [i.factory, 'PocketDeployed', f.drop], [i.drop, 'LinkCreated', f.drop], [i.drop, 'LinkBound', f.drop], [i.drop, 'LinkConfirmed', f.drop],
       [i.drop, 'LinkClaimed', f.drop], [i.drop, 'LinkCancelled', f.drop], [i.pool, 'PoolCreated', f.pool], [i.pool, 'PoolClaimed', f.pool],
     ];
+    const hyP = r.hybrid ? r.hybrid(env).catch(() => null) : Promise.resolve([]);
     const res = await Promise.all(names.map(([a, n, from]) => r.events(a, n, from, head)));
     const l = Object.fromEntries(names.map(([, n], k) => [n, res[k]])) as Record<EvName, EvLog[]>;
-    const hy = r.hybrid ? await r.hybrid(env).catch(() => null) : [];
+    const hy = await hyP;
     const merged = mergeHybrid(l, hy ?? []);
     out[env] = { ...buildV4Env(env, merged, own), keyEras: await keyEras(merged.PocketDeployed, own, r.balance), hybridRelayEvents: hy === null ? null : hy.length };
-  }
-  return { headBlock: head.toString(), ...out, note: 'Same method as /radar: v4 factory, drop and pool logs since deployment, plus the events of hybrid relays (MsgCrossVMCall, which leaves no EVM log) rebuilt from the native lane; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
+  }));
+  return { headBlock: head.toString(), prod: out.prod, lab: out.lab, note: 'Same method as /radar: v4 factory, drop and pool logs since deployment, plus the events of hybrid relays (MsgCrossVMCall, which leaves no EVM log) rebuilt from the native lane; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
 }
 
 /** Add hybrid-relay events to the log lists. A PocketDeployed for a Pocket already in the logs is dropped (never counted twice). */
@@ -96,20 +98,33 @@ export function mergeHybrid(l: Record<EvName, EvLog[]>, hy: (EvLog & { eventName
   return out;
 }
 
-export function makeV4Reader(pub: any, chunk = 9000n, hybrid?: V4Reader['hybrid']): V4Reader {
+/** Reads logs the fast way for Diana: one getLogs per range for ALL v4 events of a contract (memoised, so the 5 drop events
+ *  cost one scan), ranges fetched in parallel with at most `concurrency` calls in flight across the whole reader. */
+export function makeV4Reader(pub: any, chunk = 9000n, hybrid?: V4Reader['hybrid'], concurrency = 8): V4Reader {
+  let inFlight = 0; const queue: (() => void)[] = [];
+  const slot = async <T>(fn: () => Promise<T>): Promise<T> => {
+    if (inFlight >= concurrency) await new Promise<void>((r) => queue.push(r));
+    inFlight++;
+    try { return await fn(); } finally { inFlight--; queue.shift()?.(); }
+  };
+  const scans = new Map<string, Promise<(EvLog & { eventName: string })[]>>();
+  const scan = (address: Address, from: bigint, to: bigint) => {
+    const k = `${address.toLowerCase()}:${from}:${to}`;
+    let p = scans.get(k);
+    if (!p) {
+      p = Promise.all(ranges(from, to, chunk).map(([f, t]) => slot(() => pub.getLogs({ address, events: V4_EVENTS, fromBlock: f, toBlock: t }) as Promise<any[]>)))
+        .then((parts) => parts.flat().map((x: any) => ({ eventName: x.eventName as string, args: x.args ?? {}, blockNumber: x.blockNumber, transactionHash: x.transactionHash })));
+      p.catch(() => scans.delete(k));
+      scans.set(k, p);
+    }
+    return p;
+  };
   return {
     ...(hybrid ? { hybrid } : {}),
     head: () => pub.getBlockNumber(),
-    balance: (a) => pub.getBalance({ address: a }),
+    balance: (a) => slot(() => pub.getBalance({ address: a })),
     async events(address, name, from, to) {
-      const event = V4_EVENTS.find((e) => e.name === name)!;
-      const out: EvLog[] = [];
-      for (let f = from; f <= to; f += chunk) {
-        const t = f + chunk - 1n > to ? to : f + chunk - 1n;
-        const r = await pub.getLogs({ address, event, fromBlock: f, toBlock: t });
-        for (const x of r) out.push({ args: x.args ?? {}, blockNumber: x.blockNumber, transactionHash: x.transactionHash });
-      }
-      return out;
+      return (await scan(address, from, to)).filter((e) => e.eventName === name).map(({ args, blockNumber, transactionHash }) => ({ args, blockNumber, transactionHash }));
     },
   };
 }

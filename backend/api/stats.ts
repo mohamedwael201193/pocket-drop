@@ -5,6 +5,10 @@ import { RULES } from '../src/ratelimit.js';
 import { getStats, loadOwnAccounts } from '../src/stats.js';
 import { log } from '../src/log.js';
 
+/** Same answer for everyone: the CDN keeps it 30 s and serves the last copy while it re-reads the chain (up to 5 min),
+ *  so a visitor never waits for a cold log scan. Browsers still revalidate every time. */
+export const STATS_CACHE = { 'cache-control': 'public, max-age=0, must-revalidate', 'vercel-cdn-cache-control': 'max-age=30, stale-while-revalidate=300' };
+
 export default async function handler(req: Req, res: ServerResponse) {
   if (gate(req, res, 'GET')) return;
   const d = buildDeps();
@@ -13,7 +17,7 @@ export default async function handler(req: Req, res: ServerResponse) {
   try {
     const r = await getStats(d.pub as any, d.cfg, loadOwnAccounts());
     if (!r.ok) return send(res, reply(r.status, { ok: false, error: { name: 'NotConfigured', message: r.error } }));
-    send(res, { status: 200, body: { ok: true, ...(r.value as object) } });
+    send(res, { status: 200, body: { ok: true, ...(r.value as object) }, headers: STATS_CACHE });
   } catch (e) {
     log('error', 'stats.failed', { message: e instanceof Error ? e.message : String(e) });
     send(res, reply(502, { ok: false, error: { name: 'IndexFailed', message: 'Could not read chain logs.' } }));

@@ -7,6 +7,7 @@ import { NETWORK, type Config } from './config.js';
 import { log } from './log.js';
 import { getV4Stats, makeV4Reader } from './statsv4.js';
 import { hybridEventsFor } from './xvmLive.js';
+import { mapLimited, ranges } from './limit.js';
 
 export type OwnMap = Map<string, string>;
 
@@ -42,26 +43,25 @@ export interface IndexedEvent { name: string; kind: Kind; linkId: string | null;
 
 type LogsClient = Pick<PublicClient, 'getBlockNumber' | 'getLogs'>;
 
-export interface StatsOptions { chunk?: bigint; maxChunks?: number }
+export interface StatsOptions { chunk?: bigint; maxChunks?: number; concurrency?: number }
 
+/** All logs of `address` in [from, to]: ranges of `chunk` blocks fetched in parallel (bounded), in block order. A range
+ *  the RPC refuses is halved until 250 blocks, then the error is thrown. More than `maxChunks` ranges -> truncated. */
 export async function collectLogs(pub: LogsClient, address: Address, from: bigint, to: bigint, opts: StatsOptions = {}) {
-  let chunk = opts.chunk ?? 5000n;
+  const chunk = opts.chunk ?? 5000n;
   const maxChunks = opts.maxChunks ?? 40;
-  const out: Log[] = [];
-  let cursor = from, calls = 0, truncated = false;
-  while (cursor <= to) {
-    if (calls >= maxChunks) { truncated = true; break; }
-    const end = cursor + chunk - 1n > to ? to : cursor + chunk - 1n;
-    try {
-      out.push(...(await pub.getLogs({ address, fromBlock: cursor, toBlock: end })));
-      cursor = end + 1n;
-      calls++;
-    } catch (e) {
-      if (chunk > 250n) { chunk = chunk / 2n; continue; } // RPC range limit: shrink and retry
-      throw e;
+  const all = ranges(from, to, chunk);
+  const truncated = all.length > maxChunks;
+  const use = all.slice(0, maxChunks);
+  const fetchRange = async (f: bigint, t: bigint): Promise<Log[]> => {
+    try { return await pub.getLogs({ address, fromBlock: f, toBlock: t }); } catch (e) {
+      if (t - f + 1n <= 250n) throw e; // RPC range limit: halve and retry, down to a floor
+      const mid = f + (t - f) / 2n;
+      return [...await fetchRange(f, mid), ...await fetchRange(mid + 1n, t)];
     }
-  }
-  return { logs: out, scannedTo: cursor - 1n, truncated };
+  };
+  const parts = await mapLimited(use, opts.concurrency ?? 8, ([f, t]) => fetchRange(f, t));
+  return { logs: parts.flat(), scannedTo: use.length ? use[use.length - 1][1] : from - 1n, truncated };
 }
 
 export function buildStats(logs: Log[], own: OwnMap) {
