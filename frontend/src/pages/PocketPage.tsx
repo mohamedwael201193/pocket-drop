@@ -15,6 +15,9 @@ import { explainError, type RouteResult } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { addrUrl } from '../lib/config';
 import { useBalance } from '../lib/queries';
+import { checkRecipient, recentRecipients, rememberRecipient } from '../lib/recipientCheck';
+import { pocketEnv } from '../components/powers';
+import { pub } from '../lib/chain';
 
 /** busy / error / last tx for one action button. */
 function useAct() {
@@ -59,12 +62,28 @@ export default function PocketPage() {
   const canAct = !!ctx && key.ready && (!pv?.deployed || owned);
 
   const spendAct = useAct(); const limitAct = useAct(); const guardAct = useAct(); const queueAct = useAct(); const recAct = useAct();
-  const [to, setTo] = useState(''); const [amt, setAmt] = useState('');
+  const [to, setTo] = useState(''); const [amt, setAmt] = useState(''); const [ack, setAck] = useState('');
   const [newLimit, setNewLimit] = useState('');
   const [gText, setGText] = useState(''); const [gThr, setGThr] = useState('2');
 
   const spendAmt = parseQor(amt);
-  const spendProblem = !isAddress(to) ? 'Enter the 0x address to send to.' : spendAmt === null || spendAmt === 0n ? 'Enter an amount like 0.1.' : pv && spendAmt > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR.` : null;
+  const toOk = /^0x[0-9a-fA-F]{40}$/.test(to.trim()) && isAddress(to.trim());
+  const { data: toCode } = useQuery({
+    queryKey: ['to-code', to.trim().toLowerCase()], enabled: toOk, staleTime: 60_000,
+    queryFn: async () => {
+      const code = await pub.getCode({ address: to.trim() as Hex });
+      const isContract = !!code && code !== '0x';
+      return { isContract, isPocket: isContract && (await pocketEnv(to.trim() as Hex)) !== null };
+    },
+  });
+  const rc = checkRecipient(to, {
+    pocket: pv?.address ?? null, keyAccount: (a.acct?.evm as Hex | undefined) ?? null,
+    known: [...(pv?.guardians ?? []), ...(pv?.queue.map((q) => q.to) ?? []), ...recentRecipients()],
+    protocol: Object.fromEntries((['prod', 'lab'] as Env[]).flatMap((e) => [[INST[e].drop.toLowerCase(), 'PocketDrop'], [INST[e].pool.toLowerCase(), 'DropPool'], [INST[e].router.toLowerCase(), 'PocketRouter'], [INST[e].factory.toLowerCase(), 'PocketFactory']])),
+    code: toOk ? (toCode ?? null) : null,
+  });
+  const needAck = !!rc.confirm && ack !== to.trim().toLowerCase();
+  const spendProblem = rc.block ? rc.block : spendAmt === null || spendAmt === 0n ? 'Enter an amount like 0.1.' : pv && spendAmt > pv.balance ? `Your Pocket holds ${fmtQor(pv.balance)} QOR.` : null;
   const queuedWarn = pv?.deployed && spendAmt !== null && spendAmt > pv.allowanceLeft ? `Above the ${fmtQor(pv.allowanceLeft)} QOR left today: it will wait ${dur(inst.timelockSec)} before going out, and you can cancel it (veto) until then.` : null;
   const gList = gText.split(/[\s,;]+/).filter(Boolean);
   const gProblem = gList.length < 2 || gList.length > 5 ? 'Add 2 to 5 guardian addresses.' : gList.some((g) => !isAddress(g)) ? 'Every guardian must be a 0x address.'
@@ -106,8 +125,13 @@ export default function PocketPage() {
                 <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
               </div>
               {spendProblem && to + amt !== '' && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
+              {rc.confirm && !rc.block && (
+                <div className="mt-2"><Notice tone="warn" testId="spend-recipient-warning">{rc.confirm}
+                  <label className="mt-2 flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={!needAck} onChange={(e) => setAck(e.target.checked ? to.trim().toLowerCase() : '')} data-testid="spend-recipient-ack" /> I checked the address</label></Notice></div>
+              )}
+              {rc.info.length > 0 && !rc.block && <p className="mt-2 text-xs text-zinc-600" data-testid="spend-recipient-info">{rc.info.join(' ')}</p>}
               {queuedWarn && <div className="mt-2"><Notice tone="warn" testId="spend-queue-warning">{queuedWarn}</Notice></div>}
-              <div className="mt-3"><Button block busy={spendAct.busy === 'spend'} disabled={!canAct || !!spendProblem || pv.frozen} onClick={() => void spendAct.run('spend', () => spend(ctx!, to as Hex, spendAmt!))} data-testid="spend-send">Sign and send</Button></div>
+              <div className="mt-3"><Button block busy={spendAct.busy === 'spend'} disabled={!canAct || !!spendProblem || needAck || pv.frozen} onClick={() => void spendAct.run('spend', async () => { const r = await spend(ctx!, to.trim() as Hex, spendAmt!); rememberRecipient(to.trim() as Hex); return r; })} data-testid="spend-send">Sign and send</Button></div>
               {pv.frozen && <p className="mt-2 text-xs text-red-800">Frozen by guardians: spending is paused.</p>}
               <ActResult act={spendAct} testId="spend" />
             </Section>
