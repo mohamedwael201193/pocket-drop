@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defenceFor, intruderFile, type AttemptRow, type QdayState } from '../src/lib/qday';
+import { defenceFor, intruderFile, whenLine, type AttemptRow, type QdayState } from '../src/lib/qday';
 
 const row = (o: Partial<AttemptRow>): AttemptRow => ({ tx: '0x' + 'ab'.repeat(32), height: 100, from: '0x1', bait: 'B1', call: 'spend', failed: true, error: 'execution reverted', source: 'try-it', explorer: '', ...o });
 const state = (on: AttemptRow[], bot: AttemptRow[], refused: QdayState['log']['relayerRefused']['rows'] = []): Pick<QdayState, 'log'> => ({
@@ -34,4 +34,11 @@ describe('intruder file', () => {
     expect(defenceFor('guardianFreeze')).toMatch(/guardians/);
     expect(defenceFor('drop.bind')).toMatch(/recipient/);
   });
+});
+
+describe('whenLine', () => {
+  const fmt = (t: string | number) => `T(${t})`;
+  it('shows time and block on a mined row', () => expect(whenLine({ when: '2026-11-22T05:00:00Z', height: 10532170 }, fmt)).toBe('T(2026-11-22T05:00:00Z) · block 10,532,170'));
+  it('says a row refused before sending was never mined', () => expect(whenLine({ when: '2026-11-22T05:00:00Z', height: null }, fmt)).toBe('T(2026-11-22T05:00:00Z) · not mined'));
+  it('never leaves the slot empty', () => expect(whenLine({ when: null, height: 5 }, fmt)).toBe('time not recorded · block 5'));
 });

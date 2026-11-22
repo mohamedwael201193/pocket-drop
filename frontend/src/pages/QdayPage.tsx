@@ -6,7 +6,7 @@ import { Dash } from '../components/bits';
 import { ChevronDown, ShieldAlert, ShieldCheck, TriangleAlert, KeyRound } from '../components/icons';
 import { addrUrl, SOURCE_URL } from '../lib/config';
 import { fmtQor } from '../lib/chain';
-import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, intruderFile, type AttemptRow, type QdayState, type LiveBait, type TryRow } from '../lib/qday';
+import { attackScript, fetchQday, normKey, putOnChain, QDAY, tryBait, intruderFile, whenLine, type AttemptRow, type QdayState, type LiveBait, type TryRow } from '../lib/qday';
 
 const card = 'rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6';
 const short = (a: string) => `${a.slice(0, 8)}…${a.slice(-6)}`;
@@ -86,7 +86,7 @@ function IntruderFile({ s }: { s: QdayState | undefined }) {
               <li key={r.key} className="rounded-xl border border-zinc-200 bg-white p-3 text-xs">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm text-zinc-900"><b>{r.bait}</b> · <Mono>{r.call}</Mono> <span className="text-zinc-500">by {r.who}</span></span>
-                  <span className="text-zinc-500">{r.when ? `${new Date(r.when).toLocaleDateString([], { day: 'numeric', month: 'short' })} ${at(r.when)}` : r.height ? `block ${r.height.toLocaleString()}` : ''}</span>
+                  <span className="font-mono text-zinc-500" data-testid="qday-row-when">{whenLine(r, (t) => `${new Date(t).toLocaleDateString([], { day: 'numeric', month: 'short' })} ${at(t)}`)}</span>
                 </div>
                 <p className="mt-1 text-zinc-700"><span className="font-semibold text-emerald-800">{r.where === 'refused before sending' ? 'Refused before sending' : 'Reverted'}</span>{r.where !== 'refused before sending' && <> {r.where.replace('on chain ', '')}</>}: {r.defence}</p>
                 {r.tx && <div className="mt-1.5"><TxLink hash={r.tx} check /></div>}

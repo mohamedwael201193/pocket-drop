@@ -35,6 +35,12 @@ export function defenceFor(call: string): string {
 const SRC: Record<string, string> = { 'try-it': 'a visitor (Try it)', 'team-bot': 'our attacker bot', anyone: 'anyone', 'team-setup': 'team setup' };
 export interface IntruderRow { key: string; when: string | null; height: number | null; bait: string; call: string; who: string; where: 'on chain (EVM)' | 'on chain (hybrid lane)' | 'refused before sending'; result: string; defence: string; tx: string | null }
 /** Every refused attempt on one list (the intruder file): mined reverts from any source plus relayer refusals, newest first. */
+/** Time and block of one refused row, the same shape on every row: mined rows have both, rows refused before sending were never mined. */
+export function whenLine(r: Pick<IntruderRow, 'when' | 'height'>, fmt: (t: string | number) => string): string {
+  const t = r.when ? fmt(r.when) : 'time not recorded';
+  return `${t} · ${r.height ? `block ${r.height.toLocaleString('en-US')}` : 'not mined'}`;
+}
+
 export function intruderFile(s: Pick<QdayState, 'log'>): { rows: IntruderRow[]; refused: number; succeeded: number } {
   const mined = [...s.log.onChain.rows, ...s.log.teamBot.rows].filter((r) => r.source !== 'team-setup');
   const rows: IntruderRow[] = [

@@ -164,6 +164,17 @@ describe('getQday', () => {
     expect(s.log.onChain.rows).toHaveLength(0);
     expect(s.alarm.reasons.join()).not.toMatch(/SUCCEEDED/);
   });
+  it('gives EVM rows the time of their block, so every refused row shows time and block', async () => {
+    resetQdayCache();
+    const asked: number[] = [];
+    const s: any = await getQday(chain({
+      txSearch: async (q) => (q.includes(getAddress(qcfg.router)) ? [{ height: String(qcfg.fromBlock + 10), events: [{ type: 'ethereum_tx', attributes: [{ key: 'ethereumTxHash', value: HASH }, { key: 'recipient', value: qcfg.router }, { key: 'ethereumTxFailed', value: 'execution reverted' }] }] }] : []),
+      getTx: async () => ({ input: (relayData + MARKERS.bot.slice(2)) as Hex, from: ADDR as any, to: qcfg.router }),
+      blockTime: async (h) => { asked.push(h); return '2026-11-22T05:00:00.000Z'; },
+    }), {}, qcfg, 4);
+    expect(s.log.teamBot.rows[0]).toMatchObject({ height: qcfg.fromBlock + 10, time: '2026-11-22T05:00:00.000Z' });
+    expect(asked).toEqual([qcfg.fromBlock + 10]);
+  });
   it('finds bait attempts relayed on the hybrid lane (no EVM tx), failed ones included, and sorts them by marker', async () => {
     resetQdayCache();
     const nat = (hash: string, data: Hex, code: number, height = qcfg.fromBlock + 20) => ({

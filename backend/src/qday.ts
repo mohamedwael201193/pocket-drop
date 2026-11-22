@@ -14,6 +14,7 @@ import type { Limiter, Rule } from './ratelimit.js';
 import { evmToQor, type Relayer } from './relayer.js';
 import { reply, type HttpResult } from './handlers.js';
 import { privateKeyToAccount } from 'viem/accounts';
+import { mapLimited } from './limit.js';
 
 export interface Bait {
   id: string; description: string; keyAccount: Address; keyAccountCosmos: string; pocket: Address; deployed: boolean;
@@ -111,6 +112,8 @@ export interface Chain {
   windowLive(cosmos: string): Promise<boolean | null>;
   txSearch(query: string, perPage: number): Promise<{ height: string; events: { type: string; attributes: { key: string; value: string }[] }[] }[]>;
   /** Native-lane txs paid by our relayer (tx.fee_payer search; failed txs included), newest first. Hybrid relays leave no EVM tx. */
+  /** ISO time of an EVM block (rows found by tx_search carry only the height). */
+  blockTime?(height: number): Promise<string | null>;
   relayerNativeTxs?(): Promise<NativeTx[]>;
   botRuns(): Promise<{ id: number; status: string; conclusion: string | null; createdAt: string; url: string }[]>;
 }
@@ -219,7 +222,21 @@ export async function onChainAttempts(ch: Chain, cfg: QdayConfig): Promise<Attem
     const native = await ch.relayerNativeTxs().catch(() => null);
     if (native) out.push(...hybridAttempts(native, cfg));
   }
+  // every row shows time and block: EVM rows only have the height, so read their block times (memoized per height)
+  if (ch.blockTime) {
+    const heights = [...new Set(out.filter((a) => !a.time).map((a) => a.height))];
+    const times = new Map(await mapLimited(heights, 8, async (h) => [h, await blockTimeMemo(ch, h)] as const));
+    for (const a of out) if (!a.time) { const t = times.get(a.height); if (t) a.time = t; }
+  }
   return out.sort((a, b) => b.height - a.height);
+}
+
+const blockTimes = new Map<number, string>();
+async function blockTimeMemo(ch: Chain, h: number): Promise<string | null> {
+  const hit = blockTimes.get(h); if (hit) return hit;
+  const t = await ch.blockTime!(h).catch(() => null);
+  if (t) blockTimes.set(h, t);
+  return t;
 }
 
 let cache: { at: number; body: Record<string, unknown> } | null = null;
@@ -306,6 +323,7 @@ export function makeChain(pub: any, cfg: Config, opts: { comet?: string; repo?: 
       const j = await r.json() as any; if (j.error) throw new Error(j.error.message ?? 'tx_search failed');
       return (j.result?.txs ?? []).map((t: any) => ({ height: t.height, events: t.tx_result?.events ?? [] }));
     },
+    blockTime: async (h) => { const b = await pub.getBlock({ blockNumber: BigInt(h) }); return b ? new Date(Number(b.timestamp) * 1000).toISOString() : null; },
     relayerNativeTxs: async () => {
       if (!cfg.relayerKey) return [];
       const qor = evmToQor(privateKeyToAccount(cfg.relayerKey).address);
