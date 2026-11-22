@@ -6,7 +6,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Button, CopyButton, Mono, Notice, PageTitle, SourceBadge, TxLink } from '../components/ui';
 import { addrUrl, TESTNET_BADGE } from '../lib/config';
 import { checkTx, normalizeHash, verdict, type Report, type SigCheck } from '../lib/txcheck';
-import { liveDeps } from '../lib/txcheckChain';
+import { liveDeps, withQoresign } from '../lib/txcheckChain';
 import { PowerMap, pocketEnv } from '../components/powers';
 import { useQuery } from '@tanstack/react-query';
 import type { Hex } from 'viem';
@@ -47,6 +47,7 @@ function Check({ c, i }: { c: SigCheck; i: number }) {
         {c.nonce !== undefined && <Row k="Nonce">{c.nonce.toString()} (read from the chain at the block before)</Row>}
         <Row k="Signed text"><span className="flex flex-col items-start gap-1.5"><Mono className="text-[11px]">{c.message}</Mono><span className="shrink-0"><CopyButton text={c.message} label="Copy signed text" /></span></span></Row>
         <Row k="Checked in this browser"><span data-testid={`check-sig-${i}-valid`}>{c.valid ? 'Valid for this exact intent.' : 'Not valid for this intent.'}</span></Row>
+        {c.qoresign && <Row k="Second library"><span data-testid={`check-sig-${i}-qoresign`}>@qorechain/qoresign (the message format QoreX signs) builds {c.qoresign.sameText ? 'the same signed text' : <b className="text-red-800">a different signed text</b>} and finds the signature {c.qoresign.valid ? 'valid' : <b className="text-red-800">not valid</b>}.</span></Row>}
         <Row k="Changed intent"><span data-testid={`check-sig-${i}-tampered`}>{c.tamperedValid ? <b className="text-red-800">The same signature also passes a changed intent ({c.tamperedWhat}).</b> : <>Same signature, changed intent ({c.tamperedWhat}): rejected.</>}</span></Row>
       </dl>
     </section>
@@ -89,7 +90,7 @@ export default function CheckTxPage() {
   const { hash: param } = useParams();
   const nav = useNavigate();
   const [text, setText] = useState(param ?? '');
-  const m = useMutation({ mutationFn: (h: string) => checkTx(h, liveDeps) });
+  const m = useMutation({ mutationFn: async (h: string) => checkTx(h, await withQoresign(liveDeps)) });
   const { mutate } = m;
   const paramAddr = param && isAddr(param) ? (param as Hex) : null;
   useEffect(() => { if (param && normalizeHash(param)) mutate(param); }, [param, mutate]);

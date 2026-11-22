@@ -2,7 +2,7 @@
 // from the chain, and a changed intent (amount, payout, next nonce) is rejected by the same signature.
 import { describe, expect, it } from 'vitest';
 import { checkTx, verdict } from '../src/lib/txcheck';
-import { liveDeps } from '../src/lib/txcheckChain';
+import { liveDeps, withQoresign } from '../src/lib/txcheckChain';
 
 const CASES: [string, string, string, string[]][] = [
   ['600BE0CF0FA16927D9E2C9C08285E504EF028BFE71A5CB6431483639A1E561A8', 'deployAndRelay', 'createDrop', ['owner']],
@@ -23,9 +23,10 @@ const EVM: [string, string, string, string[]][] = [
 
 describe('checkTx on recorded EVM-lane relays', () => {
   it.each(EVM)('%s', async (hash, action, fn, who) => {
-    const r = await checkTx(hash, liveDeps);
+    const r = await checkTx(hash, await withQoresign(liveDeps));
     console.log(hash.slice(0, 10), r.action, r.fn, r.note, r.checks.map((c) => [c.who, c.valid, c.tamperedValid, c.pinned, c.nonce]));
     expect(r.tx.lane).toBe('evm');
+    for (const c of r.checks) expect(c.qoresign).toEqual({ sameText: true, valid: true });
     expect(r.action).toBe(action);
     expect(r.fn).toBe(fn);
     expect(r.checks.map((c) => c.who)).toEqual(who);
@@ -35,14 +36,14 @@ describe('checkTx on recorded EVM-lane relays', () => {
 
 describe('checkTx on recorded hybrid relays', () => {
   it.each(CASES)('%s', async (hash, action, fn, who) => {
-    const r = await checkTx(hash, liveDeps);
+    const r = await checkTx(hash, await withQoresign(liveDeps));
     console.log(hash.slice(0, 8), r.action, r.fn, r.checks.map((c) => [c.who, c.valid, c.tamperedValid, c.pinned, c.nonce, c.tamperedWhat]));
     expect(r.tx.lane).toBe('hybrid');
     expect(r.tx.relayerHybridVerified).toBe(true);
     expect(r.action).toBe(action);
     expect(r.fn).toBe(fn);
     expect(r.checks.map((c) => c.who)).toEqual(who);
-    for (const c of r.checks) { expect(c.sigBytes).toBe(4627); expect(c.pkBytes).toBe(2592); }
+    for (const c of r.checks) { expect(c.sigBytes).toBe(4627); expect(c.pkBytes).toBe(2592); expect(c.qoresign).toEqual({ sameText: true, valid: true }); }
     expect(verdict(r)).toBe('verified');
   }, 60_000);
 });

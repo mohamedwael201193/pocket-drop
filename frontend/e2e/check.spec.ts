@@ -18,6 +18,7 @@ test('a hybrid-lane claim: the chain verified the relayer, the browser verifies 
   await expect(page.getByTestId('check-sig-0-valid')).toContainText('Valid for this exact intent');
   await expect(page.getByTestId('check-sig-0-tampered')).toContainText('rejected');
   await expect(page.getByTestId('check-sig-0')).toContainText('4,627 bytes');
+  await expect(page.getByTestId('check-sig-0-qoresign')).toContainText('builds the same signed text and finds the signature valid');
   await noSideScroll(page);
 });
 

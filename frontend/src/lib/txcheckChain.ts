@@ -20,6 +20,12 @@ async function fetchTx(hash: string): Promise<FetchedTx> {
   return t;
 }
 
+/** Load @qorechain/qoresign lazily; the checker then runs both official implementations. */
+export async function withQoresign(d: CheckDeps): Promise<CheckDeps> {
+  const q = await import('@qorechain/qoresign');
+  return { ...d, qoresign: { messageBytes: (c, data) => q.messagePqSignBytes(c, data), verify: (pk, m, s) => q.pqVerify(pk, m, s) } };
+}
+
 export const liveDeps: CheckDeps = {
   fetchTx,
   read: (address, abi, functionName, args, block) => pub.readContract({ address, abi: abi as never, functionName, args, blockNumber: block } as never),

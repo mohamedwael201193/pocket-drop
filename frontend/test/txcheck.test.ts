@@ -7,6 +7,7 @@ import { ACT, intentDigest, params, pqMessageBytes } from '../src/lib/intents';
 import { INST } from '../src/lib/v4';
 import { b64ToHex, checkTx, fromCosmosTx, normalizeHash, verdict, type CheckDeps, type FetchedTx } from '../src/lib/txcheck';
 import fixture from './fixtures/xvm-93FC5B4B.json';
+import { withQoresign } from '../src/lib/txcheckChain';
 
 const VAULT = '0xD6b6Fd3D68aD53E8FD6018099A32c01BaB4aa58b' as Hex;
 const OWNER = '0x1111111111111111111111111111111111111111' as Hex;
@@ -71,6 +72,20 @@ describe('checkTx', () => {
     expect(r.checks[0]).toMatchObject({ who: 'owner', valid: true, tamperedValid: false, pinned: true, nonce: 4n, pkBytes: 2592, sigBytes: 4627 });
     expect(r.checks[0].tamperedWhat).toMatch(/amount \+ 1 wei; next nonce \(replay\) rejected/);
     expect(verdict(r)).toBe('verified');
+  });
+  it('the QoreSign cross-check builds the same signed text and also verifies', async () => {
+    const tx = spendTx(4n);
+    const r = await checkTx(tx.hash, await withQoresign(deps(tx)));
+    expect(r.checks[0].qoresign).toEqual({ sameText: true, valid: true });
+    expect(verdict(r)).toBe('verified');
+  });
+  it('a QoreSign disagreement fails the verdict even when the first library says valid', async () => {
+    const tx = spendTx(4n);
+    const d = { ...deps(tx), qoresign: { messageBytes: () => new Uint8Array([1, 2, 3]), verify: () => false } };
+    const r = await checkTx(tx.hash, d);
+    expect(r.checks[0].valid).toBe(true);
+    expect(r.checks[0].qoresign).toEqual({ sameText: false, valid: false });
+    expect(verdict(r)).toBe('failed');
   });
   it('fails when the signature was made for another nonce', async () => {
     const tx = spendTx(3n);

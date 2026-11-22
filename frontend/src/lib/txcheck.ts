@@ -3,7 +3,7 @@
 // the tx comes from Cosmos REST (native hybrid lane) or EVM JSON-RPC, keys from the PQC precompile, state from eth_call.
 import { decodeFunctionData, keccak256, type Hex } from 'viem';
 import { dropAbi, factoryAbi, poolAbi, routerAbi, vaultAbi } from './abi4';
-import { ACT, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, pqMessageBytes, pqMessageText, recoveryDigest } from './intents';
+import { ACT, CHAIN_STR, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, pqMessageBytes, pqMessageText, recoveryDigest } from './intents';
 import { INST, type Env } from './v4';
 
 export type Lane = 'hybrid' | 'evm';
@@ -25,6 +25,8 @@ export interface SigCheck {
   /** The same signature checked against the same intent with the next nonce (owner intents) or a changed payout (link/recipient). */
   tamperedValid: boolean; tamperedWhat: string;
   nonce?: bigint;
+  /** Second, independent implementation: @qorechain/qoresign (the message format QoreX signs). null = not run. */
+  qoresign: { sameText: boolean; valid: boolean } | null;
 }
 
 export interface Report {
@@ -42,6 +44,8 @@ export interface CheckDeps {
   /** Registered ML-DSA-87 public key of an account (PQC precompile 0x...0a02), or null. */
   keyOf(address: Hex): Promise<Hex | null>;
   verify(pk: Uint8Array, message: Uint8Array, sig: Uint8Array): Promise<boolean> | boolean;
+  /** Optional cross-check with @qorechain/qoresign: its message bytes for (chain, digest text) and its ML-DSA verify. */
+  qoresign?: { messageBytes(chainId: string, data: string): Uint8Array; verify(pk: Uint8Array, message: Uint8Array, sig: Uint8Array): boolean };
 }
 
 export const isNativeHash = (h: string) => /^[0-9a-fA-F]{64}$/.test(h);
@@ -104,11 +108,19 @@ interface SigInput { who: Who; signer: Hex; fn: string; digest: Hex; tampered: H
 async function runCheck(d: CheckDeps, s: SigInput): Promise<SigCheck> {
   const sig = hexBytes(s.sig);
   const base = { who: s.who, signer: s.signer, fn: s.fn, digest: s.digest, message: pqMessageText(s.digest), keySource: s.keySource, sigBytes: sig.length, nonce: s.nonce, tamperedWhat: s.tamperedWhat };
-  if (!s.pk) return { ...base, pkBytes: 0, pinned: null, valid: false, tamperedValid: false };
+  if (!s.pk) return { ...base, pkBytes: 0, pinned: null, valid: false, tamperedValid: false, qoresign: null };
   const pk = hexBytes(s.pk);
   const valid = await d.verify(pk, pqMessageBytes(s.digest), sig);
   const tamperedValid = await d.verify(pk, pqMessageBytes(s.tampered), sig);
-  return { ...base, pkBytes: pk.length, pinned: s.pinnedHash ? keccak256(s.pk).toLowerCase() === s.pinnedHash.toLowerCase() : null, valid, tamperedValid };
+  let qoresign: SigCheck['qoresign'] = null;
+  if (d.qoresign) {
+    const ours = pqMessageBytes(s.digest);
+    const theirs = d.qoresign.messageBytes(CHAIN_STR, s.digest.toLowerCase());
+    const sameText = ours.length === theirs.length && ours.every((b, i) => b === theirs[i]);
+    let ok = false; try { ok = d.qoresign.verify(pk, theirs, sig); } catch { ok = false; }
+    qoresign = { sameText, valid: ok };
+  }
+  return { ...base, pkBytes: pk.length, pinned: s.pinnedHash ? keccak256(s.pk).toLowerCase() === s.pinnedHash.toLowerCase() : null, valid, tamperedValid, qoresign };
 }
 
 /** Nonce the owner signed: the Pocket's nonce just before the tx (0 when this tx deployed it). */
@@ -213,5 +225,5 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
 /** Overall verdict for the page header. */
 export function verdict(r: Report): 'verified' | 'failed' | 'none' {
   if (!r.checks.length) return 'none';
-  return r.checks.every((c) => c.valid && !c.tamperedValid && c.pinned !== false) ? 'verified' : 'failed';
+  return r.checks.every((c) => c.valid && !c.tamperedValid && c.pinned !== false && (c.qoresign === null || (c.qoresign.sameText && c.qoresign.valid))) ? 'verified' : 'failed';
 }
