@@ -1,5 +1,5 @@
 {
- "totalQor": 28.08125,
+ "totalQor": 28.73625,
  "entries": [
   {
    "qor": 2,
@@ -1104,6 +1104,24 @@
    "note": "v3 hybrid check: create Giveaway link #29",
    "hash": "0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd7a5854eb121522211a29d5a7",
    "at": "2026-11-22T03:54:24.466Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e webkit-390 a-confirmed sender key",
+   "hash": "0x34f351d2d135ddb441c51cf09f190c49ebc32a419556fbc388982e57a12cc70c",
+   "at": "2026-11-22T05:53:32.026Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e webkit-390 a-confirmed sender pocket",
+   "hash": "0xef709f9e7e2961acc2ed76316f8daf7750248df7018c7f7088385f797758acc1",
+   "at": "2026-11-22T05:53:33.343Z"
+  },
+  {
+   "qor": -0.22,
+   "note": "recovered: webkit-390 a-confirmed sweep",
+   "hash": "5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE",
+   "at": "2026-11-22T05:54:26.884Z"
   }
  ]
 }

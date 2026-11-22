@@ -1,0 +1,38 @@
+{
+ "project": "webkit-390",
+ "flow": "a-confirmed",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0x34f351d2d135ddb441c51cf09f190c49ebc32a419556fbc388982e57a12cc70c",
+  "fund sender Pocket 0.8 QOR": "0xef709f9e7e2961acc2ed76316f8daf7750248df7018c7f7088385f797758acc1",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "38257E288ECC14DA4E5A360A90087B34B23090295F7E39FE31A05B3C918CBA3E",
+  "recipient bind (link-key signature, relayed)": "C3A70D8453724E4F0A72A52B79C2D7E8E84CC40FE141F234F9074B8100379862",
+  "sender Pocket confirmDrop (one-tap intent)": "6B0E1224511795221E81B00B4DA824886FA061F57581C021BF6494979A5850DA",
+  "recipient claim (ML-DSA signature, relayed)": "16AA55F18251363D4CC0CFFA9BA64A491DA51EC65DF7AF82E1BD15DA45A30CC6",
+  "recipient PQ key registration (paid from the drip)": "16E1370B5AF356DA32899B7DBD7DF46EBEFE9EDA393409E65563E2737EC8109F",
+  "sweep sender Pocket back to the deployer": "5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE"
+ },
+ "checks": {
+  "recipientWords": [
+   "bicycle",
+   "among",
+   "husband",
+   "damp"
+  ],
+  "senderWordsMatchRecipient": true,
+  "recipientPocketBalanceWei": "100000000000000000",
+  "deliveryFeeWei": "380000000000000000",
+  "chain": {
+   "dropId": "p33",
+   "state": "Claimed",
+   "senderIsPocket": true,
+   "paidIntoRecipientPocket": true
+  },
+  "recipientKeyDerivation": "v2: pd2: master; EVM address = v2 secp key; bound recipientKeyHash = keccak(ML-DSA key from the independent v2 secret)"
+ },
+ "accounts": {
+  "sender.pocket": "0x42284Ae871f3CDEb0721238D567Fc3026D093803",
+  "sender.key": "0xfff383D7F73c91E36b9697d60C05d47EF2805453",
+  "recipient.pocket": "0x6645B49FF192A11F9a18b702A88CFc7A03626275"
+ },
+ "finishedAt": "2026-11-22T05:54:26.884Z"
+}

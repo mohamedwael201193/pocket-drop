@@ -47,7 +47,7 @@ export async function keyProven(addr: Hex): Promise<boolean> {
   return decodeFunctionResult({ abi: KS, functionName: 'pqcKeyStatus', data: r.data ?? '0x' })[3];
 }
 
-export const dropLink = (env: 'prod' | 'lab', id: bigint) => pub.readContract({ address: INST[env].drop.address as Hex, abi: dropAbi, functionName: 'getLink', args: [id] }) as Promise<{ state: number; payTo: Hex; recipient: Hex; sender: Hex; amount: bigint }>;
+export const dropLink = (env: 'prod' | 'lab', id: bigint) => pub.readContract({ address: INST[env].drop.address as Hex, abi: dropAbi, functionName: 'getLink', args: [id] }) as Promise<{ state: number; payTo: Hex; recipient: Hex; sender: Hex; amount: bigint; relayerFee: bigint; dripPaid: boolean }>;
 export const poolOf = (env: 'prod' | 'lab', id: bigint) => pub.readContract({ address: INST[env].pool.address as Hex, abi: poolAbi, functionName: 'getPool', args: [id] }) as Promise<{ taken: number; slots: number; perSlot: bigint }>;
 export const vaultRead = <T>(vault: Hex, fn: string) => pub.readContract({ address: vault, abi: vaultAbi, functionName: fn } as never) as Promise<T>;
 export const balanceOf = (a: string) => pub.getBalance({ address: a as Hex });

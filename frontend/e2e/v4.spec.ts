@@ -8,6 +8,7 @@ import path from 'node:path';
 import { keccak256, toHex, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { keyMaterial, parseRoot } from '../src/lib/keyderive';
+import { deliveryFeeWei } from '../src/lib/fees';
 import { INST, balanceOf, deployerAddress, dropLink, fund, guardians, pub, poolOf, qor, recovered, spentQor, txOk, vaultRead } from './chain4';
 
 const URL = (process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app').replace(/\/$/, '');
@@ -150,6 +151,9 @@ async function sendFlow(browser: Browser, opts: Record<string, unknown>, project
     const link = await dropLink('prod', BigInt(id.slice(1)));
     expect(link.state).toBe(4); // Claimed
     expect(link.sender.toLowerCase()).toBe(pocket.toLowerCase());
+    // the delivery fee the app set covers the recorded relays of this mode (lib/fees.ts)
+    expect(link.relayerFee).toBe(deliveryFeeWei(mode));
+    run.checks.deliveryFeeWei = link.relayerFee.toString();
     const rPocket = (await rp.getByTestId('final-balance').locator('xpath=ancestor::*[@data-testid="yours"]').locator('a').first().getAttribute('href'))!.split('/').pop()!;
     expect(link.payTo.toLowerCase()).toBe(rPocket.toLowerCase());
     expect(await balanceOf(rPocket)).toBe(BigInt(AMOUNT.replace('0.', '')) * 10n ** 17n);

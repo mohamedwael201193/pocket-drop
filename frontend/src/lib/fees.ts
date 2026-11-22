@@ -2,7 +2,7 @@
 // src/data/relayCosts.json built from the QA evidence), so the relayer is paid back for the relays the receiver's side
 // needs: bind and claim, plus the sender's confirm in Confirmed mode. Everything else is relayed at the team's cost.
 import { parseEther } from 'viem';
-import costs from '../data/relayCosts.json';
+import costs from '../data/relayCosts.json' with { type: 'json' };
 
 export interface RelayCost { id: string; label: string; who: string; payer: string; n: number; minUqor: number; maxUqor: number; example: string; exampleCode: number; source: string }
 export const RELAY_COSTS = costs.rows as RelayCost[];
