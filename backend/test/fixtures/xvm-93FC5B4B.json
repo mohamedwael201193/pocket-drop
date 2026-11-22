@@ -1,0 +1,173 @@
+{
+ "tx_response": {
+  "txhash": "93FC5B4B3704CF84F6C587FB4B543294793A0FDC4CC95F8D4EA0843C5345C192",
+  "height": "10527710",
+  "code": 0,
+  "gas_used": "511277",
+  "gas_wanted": "600000",
+  "raw_log": "",
+  "data": "129A010A2C2F716F7265636861696E2E63726F7373766D2E76312E4D736743726F7373564D43616C6C526573706F6E7365126A0A20396466393364363934323330383930633665316537333066393032633332633810011A400000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000020D1F413",
+  "timestamp": "2026-11-22T02:08:38Z",
+  "events": [
+   {
+    "type": "pqc_verify",
+    "attributes": [
+     {
+      "key": "address",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     },
+     {
+      "key": "key_type",
+      "value": "hybrid",
+      "index": true
+     },
+     {
+      "key": "algorithm_id",
+      "value": "dilithium5",
+      "index": true
+     },
+     {
+      "key": "hybrid_mode",
+      "value": "required",
+      "index": true
+     },
+     {
+      "key": "status",
+      "value": "algorithm_active",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "pqc_hybrid_verify",
+    "attributes": [
+     {
+      "key": "address",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     },
+     {
+      "key": "algorithm_id",
+      "value": "dilithium5",
+      "index": true
+     },
+     {
+      "key": "status",
+      "value": "verified",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "fee",
+      "value": "66000uqor",
+      "index": true
+     },
+     {
+      "key": "fee_payer",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "acc_seq",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl/459",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "signature",
+      "value": "jf46cYVl1FNSKGCObnc6WDFKV+3ZU3Aph63q3KIEww5GoPxq0uR0aRW/G+S8sPiJEk/8qguxs+GeZfdkYtHJMQ==",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "crossvm_request",
+    "attributes": [
+     {
+      "key": "message_id",
+      "value": "9df93d694230890c6e1e730f902c32c8",
+      "index": true
+     },
+     {
+      "key": "source_vm",
+      "value": "native",
+      "index": true
+     },
+     {
+      "key": "target_vm",
+      "value": "evm",
+      "index": true
+     },
+     {
+      "key": "target_contract",
+      "value": "0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209",
+      "index": true
+     },
+     {
+      "key": "sender",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     },
+     {
+      "key": "msg_index",
+      "value": "0",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "crossvm_response",
+    "attributes": [
+     {
+      "key": "message_id",
+      "value": "9df93d694230890c6e1e730f902c32c8",
+      "index": true
+     },
+     {
+      "key": "status",
+      "value": "executed",
+      "index": true
+     },
+     {
+      "key": "msg_index",
+      "value": "0",
+      "index": true
+     }
+    ]
+   }
+  ],
+  "tx": {
+   "body": {
+    "memo": "pd relay executeQueued V#1",
+    "messages": [
+     {
+      "@type": "/qorechain.crossvm.v1.MsgCrossVMCall",
+      "sender": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "source_vm": "cosmwasm",
+      "target_vm": "evm",
+      "target_contract": "0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209",
+      "payload": "wo6D/QAAAAAAAAAAAAAAANa2/T1orVPo/WAYCZoywBurSqWLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJB6yFJsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "funds": [],
+      "async": false,
+      "async_gas_limit": "0",
+      "async_max_factor": "0"
+     }
+    ]
+   }
+  }
+ }
+}

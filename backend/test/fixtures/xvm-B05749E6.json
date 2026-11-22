@@ -1,0 +1,118 @@
+{
+ "tx_response": {
+  "txhash": "B05749E6C1CAED0CB2605B420D959B6D9984581F804F15A7BD077E7019B16B70",
+  "height": "10527757",
+  "code": 14,
+  "gas_used": "360826",
+  "gas_wanted": "400000",
+  "raw_log": "failed to execute message; message index: 0: execution reverted: EVM contract execution failed: EVM contract execution failed",
+  "data": "",
+  "timestamp": "2026-11-22T02:09:45Z",
+  "events": [
+   {
+    "type": "pqc_verify",
+    "attributes": [
+     {
+      "key": "address",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     },
+     {
+      "key": "key_type",
+      "value": "hybrid",
+      "index": true
+     },
+     {
+      "key": "algorithm_id",
+      "value": "dilithium5",
+      "index": true
+     },
+     {
+      "key": "hybrid_mode",
+      "value": "required",
+      "index": true
+     },
+     {
+      "key": "status",
+      "value": "algorithm_active",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "pqc_hybrid_verify",
+    "attributes": [
+     {
+      "key": "address",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     },
+     {
+      "key": "algorithm_id",
+      "value": "dilithium5",
+      "index": true
+     },
+     {
+      "key": "status",
+      "value": "verified",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "fee",
+      "value": "44000uqor",
+      "index": true
+     },
+     {
+      "key": "fee_payer",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "acc_seq",
+      "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl/460",
+      "index": true
+     }
+    ]
+   },
+   {
+    "type": "tx",
+    "attributes": [
+     {
+      "key": "signature",
+      "value": "RIvabD5ghD93aHPyx98Sb4p+o0qJTm3hXE3NZ5+IkHxrJlgUehoT2p8PJGp3Kwm2ZMY9/+rOQE6SKQJks8+wtg==",
+      "index": true
+     }
+    ]
+   }
+  ],
+  "tx": {
+   "body": {
+    "memo": "pd relay revert probe",
+    "messages": [
+     {
+      "@type": "/qorechain.crossvm.v1.MsgCrossVMCall",
+      "sender": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "source_vm": "cosmwasm",
+      "target_vm": "evm",
+      "target_contract": "0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209",
+      "payload": "wo6D/QAAAAAAAAAAAAAAANa2/T1orVPo/WAYCZoywBurSqWLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJB6yFJsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "funds": [],
+      "async": false,
+      "async_gas_limit": "0",
+      "async_max_factor": "0"
+     }
+    ]
+   }
+  }
+ }
+}
