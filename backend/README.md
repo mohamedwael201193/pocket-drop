@@ -11,7 +11,7 @@ Vercel project: `pocketdrop-api`. Production alias: https://pocketdrop-api.verce
 | `POST /api/claim` | Relayer submits a user-signed `claim(linkId, recipientSig)`. |
 | `GET /api/link/:id` | Reads `getLink(id)` from chain (state/mode names, amounts as wei strings). |
 | `GET /api/stats` | Counts, volume and distinct addresses indexed from contract events, own vs external. |
-| `GET /api/health` | Relayer address, balance, EVM window status (remaining blocks/txs/value), contract, network, and a `warnings` list: `relayer-balance` when the balance is below `relayer.lowBalanceThreshold` (3 QOR by default, env `RELAYER_LOW_BALANCE_QOR`; `relayer.lowBalance` is then true) and `relayer-window` when fewer than 2,000 blocks remain or the window is not live. Warnings do not change the status code. 503 if the contract is unset or the window is not live. |
+| `GET /api/health` | Relayer address, balance, EVM window status (remaining blocks/txs/value), contract, network, and a `warnings` list: `relayer-balance` when the balance is below `relayer.lowBalanceThreshold` (3 QOR by default, env `RELAYER_LOW_BALANCE_QOR`; `relayer.lowBalance` is then true) and `relayer-window` when fewer than 2,000 blocks remain or the window is not live. Warnings do not change the status code. 503 if the contract is unset, or (EVM mode only) the window is not live. It also returns `relay: {mode, signature, fallback, classicalPathOpen}`. |
 | `POST /rpc` | Key-less CORS proxy to the CometBFT RPC. Allowed methods: `status abci_info abci_query broadcast_tx_sync broadcast_tx_async tx tx_search block health`. Max 10 calls per batch. |
 | `GET /rest/*` | Key-less CORS proxy to the REST API. Allowed prefixes: `/cosmos/auth/v1beta1/accounts/`, `/cosmos/bank/v1beta1/balances/`, `/cosmos/tx/v1beta1/txs/`, `/cosmos/upgrade/v1beta1/applied_plan/`, `/cosmos/base/tendermint/v1beta1/`, `/qorechain/pqc/v1/`. Path traversal is rejected. |
 
@@ -52,24 +52,22 @@ Default store is in-memory: on serverless each warm instance has its own counter
 
 ## Trust model
 
-- The serving relayer (Vercel) holds only the secp256k1 key `RELAYER_SECP_KEY`. The ML-DSA key is NOT in Vercel. It lives in the operator's local `.secrets/` and as an encrypted GitHub Actions secret (`RELAYER_PQC_SEED`, next to `RELAYER_SECP_KEY`), used only by the scheduled `renew-window` workflow.
-- The relayer can only pay gas. Every payout needs a link-key ML-DSA signature (bind) and the recipient's registered ML-DSA key signature (claim), both verified by the contract through the `pqcVerify` precompile. A relayer cannot redirect funds: changing the recipient in `bind` gives `BadLinkSignature`; claiming with a wrong key gives `BadRecipientSignature`.
-- Chain-enforced scope: the relayer account has a registered PQ key, so EVM transactions need an open EVM authorisation window, and widening the window or sending via the Cosmos lane needs the hybrid (secp + ML-DSA) signature. Live proof (`feasibility/live_r3.md`, section 4b): a holder of only the secp key is refused a wider window and `MsgSend` (code 20) and cannot send EVM txs to non-listed targets. The window is scoped to `[PocketDrop]` with a value cap, so a leaked `RELAYER_SECP_KEY` can at most burn gas on PocketDrop calls until the window ends. Whoever holds both keys can widen it; that is why the ML-DSA key is kept out of the serving function.
-- Renewer trust (GitHub Actions holds the ML-DSA key). Anyone who compromises the repo secrets, the workflow, or a maintainer with write access holds both relayer keys. They can widen the relayer window (more blocks, more txs, a higher value cap, other targets) and spend the relayer's gas float (about 3.8 QOR on testnet at the last check; see `relayer.balance` in `/api/health`). They can NOT move escrow: every payout needs the link-key ML-DSA signature (bind) and the recipient's registered ML-DSA signature (claim), and the relayer has neither. The worst case is a drained gas float, a paused relayer, or spam against PocketDrop. Senders can still cancel/refund from their own account, and a recipient can submit their own claim with their own gas.
+- Since 22 Nov 2026 the serving relayer (Vercel) holds both relayer keys: `RELAYER_SECP_KEY` and `RELAYER_PQC_SEED`, with `RELAY_MODE=hybrid`. Every relay is a native `MsgCrossVMCall` to the PocketRouter (or the v3 PocketDrop), signed with secp256k1 + ML-DSA-87. The chain verifies both and records `pqc_hybrid_verify status=verified` (`src/hybridRelayer.ts`). Each relay is dry-run first and never broadcast if it would fail; gas = dry run + 15%.
+- The relayer can only pay gas. Every payout needs a link-key ML-DSA signature (bind) and the recipient's registered ML-DSA key signature (claim), and every Pocket action needs the owner's ML-DSA intent, all verified by the contracts through the `pqcVerify` precompile. A relayer cannot redirect funds: changing the recipient in `bind` gives `BadLinkSignature`; claiming with a wrong key gives `BadRecipientSignature`.
+- The relayer's EVM window is closed, so its classical key alone cannot send anything (an ECDSA-only relay is refused at broadcast; `contracts-v4/LIVE_RESULTS.md`, "Hybrid relay lane"). `/api/health` reports `relay.classicalPathOpen`.
+- Key custody: whoever compromises the Vercel environment or the repo secrets holds both relayer keys. They can spend the relayer's gas float (see `relayer.balance` in `/api/health`), open a window for the relayer account, or stop relaying. They can NOT move escrow or Pocket funds. Senders can still cancel/refund from their own account, and anyone can submit a signed claim with their own gas.
+- A cross-VM call leaves no EVM log. `/api/xvm?env=prod|lab` lists the hybrid relays found on the native lane (`crossvm_request.target_contract`) and the drop and pool events rebuilt from their calldata and return values; `/api/stats` adds them to the log counts.
 
-## Renewing the relayer window
+## Fallback: the EVM window (manual)
 
-Automatic: `.github/workflows/renew-window.yml` runs every 2 hours (and on manual dispatch). It renews to the maximum 17,280 blocks (about 6.9 h at ~1.43 s/block) with 500 txs when fewer than 8,000 blocks remain or the window is not live, then fails the run if `/api/health` is still not live. Every 2 h rather than 4 h: 8,000 blocks is only about 3.2 h, so a 4 h cadence could let the window lapse between runs. `/api/health` lists a `relayer-window` entry in `warnings` when fewer than 2,000 blocks remain.
-
-Manual: the window expires after a number of blocks or txs. When `/api/health` shows `window.live: false` (or bind/claim return `503 RelayerWindowUnavailable`), run locally (needs `.secrets/pocketdrop-relayer.json`):
+The API falls back to an ECDSA EVM transaction only before broadcast (signer, account read or CheckTx failure), and only if a window is open. To switch the hybrid lane off: set `RELAY_MODE=evm` on `pocketdrop-api`, re-open the window with `.github/workflows/renew-window.yml` (manual dispatch) or locally, and redeploy:
 
 ```
 cd backend
-npm install
-node scripts/renew-window.mjs --blocks 17280 --txs 500   # add --if-below 8000 to renew only when needed
+node scripts/renew-window.mjs --blocks 17280 --txs 500   # needs .secrets/pocketdrop-relayer.json or RELAYER_SECP_KEY + RELAYER_PQC_SEED
 ```
 
-It hybrid-signs `MsgOpenEVMWindow` with `allowed_targets=[POCKETDROP_ADDRESS]` and `max_value` = `evmWindowCost * txs` plus headroom, then prints the status. Keep the relayer funded (check `relayer.balance` in `/api/health`).
+It hybrid-signs `MsgOpenEVMWindow` scoped to the prod router, the lab router and the v3 PocketDrop, with `max_value` = `evmWindowCost * txs` plus headroom. Keep the relayer funded.
 
 ## Other scripts
 
