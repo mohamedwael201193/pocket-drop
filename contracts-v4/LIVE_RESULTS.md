@@ -266,4 +266,49 @@ Deployed app, flow a (confirmed drop) and flow c (pool), Chromium and WebKit at 
 
 Cost: a hybrid relay used 0.099 to 0.169 QOR of native gas in these runs (gas = dry run + 15%), against about 0.08 QOR for an EVM relay. The relayer was topped up with 2 QOR from the main wallet (`D1A2C4CDA911F75C2A2BF37D25167CF522CA5AFEE0354801A3F6ED2E3F376AA5`).
 
+### Later runs on the hybrid lane (22 Nov 2026, window closed)
+
+LAB flow d on the deployed app (Chromium 1440 owner, WebKit 390 new owners and guardians; LAB delays: 60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery). Evidence: `frontend/evidence/v4/e2e/hybrid-relay-d-lab-live-2026-11-22.json`.
+
+| Step | Native tx | Height | Result |
+|---|---|---|---|
+| owner spend 0.01 (lazy deploy) | `276C21B5578B39194F684123F3BADDDA7CD31AA836076F5FD756EDAEE703B4DA` | 10531510 | code 0, verified |
+| owner lowers limit to 0.05 | `F4B841B1C6A9FADC3278799F79202B06365849A6F5B75E70DCF8FF10F5289F3C` | 10531513 | code 0, verified |
+| owner queues spend 0.08 | `6F3E42A231EAE4CB7F757F2AE8749FAC09C48FEEEDBE79E91C47CBFBCAFE1445` | 10531516 | code 0, verified |
+| owner vetoes queued #1 | `609203DC61318E1EEC496FC0DE77BD13325744D257F75A178C7382A51493CB28` | 10531519 | code 0, verified |
+| owner queues spend 0.06 | `3CD05753628AA6ED0509839D01460FB8B10DEAB3C3B4105477E14FEBE9C09816` | 10531521 | code 0, verified |
+| anyone executes queued #2 | `14F8BD0A4F9DEC16F97B6504EE7A639B0FB6E258DFF855C9319C508EACF9615E` | 10531567 | code 0, verified |
+| owner queues limit raise to 1 | `D4972AE0A1EE01DC1E1342D829B66FB0399D283217C307BEE36C088D9AED340A` | 10531569 | code 0, verified |
+| anyone applies the limit raise | `E8B81A8EFCDD734A5964938F965910C5152937BBA15584B0791599C991026B39` | 10531613 | code 0, verified |
+| owner queues guardians 2-of-3 | `493BA213EBC98499814071DE0C42D962A2C3EDE65334D7F2D60478D8F9260F43` | 10531616 | code 0, verified |
+| anyone applies guardians | `146BE1F9F67F6760D3061BFF739E73570708E249694402C0ABED58B72794B075` | 10531662 | code 0, verified |
+| guardians 2-of-3 propose threshold recovery #1 | `1BF648F9610EEC2ADC8E413C1A92981764CEAE1E7CEB44B4133DACA7BFA8FF8A` | 10531729 | code 0, verified |
+| owner vetoes recovery #1 | `ED5DE1ADB224CFB2D7DE84BD1DDE38F31FACF8435CF69C3E3445E9875B73CF04` | 10531732 | code 0, verified |
+| guardians 2-of-3 propose threshold recovery #2 | `A765898021670961F2E9A3EDCBD8BB7AAF5BA05AC4677060429B55F194D32F98` | 10531737 | code 0, verified |
+| new owner finishes recovery #2 | `90716CB4B111435066D8BC8B852C57582AFD7838302A94AE1DA94C82EE7EE440` | 10531788 | code 0, verified |
+| sweep recovered LAB Pocket Pocket to deployer | `F8F788C341068D47B7F284D1BF07E87CDAD85F2A83803940966E2B0407C5A4CC` | 10531815 | code 0, verified |
+| guardians 2-of-3 freeze | `699F4AB495102067FAA77BC7F55B65025EE6C936E72D2D19B036D8C54FB97015` | 10531820 | code 0, verified |
+| guardians 3-of-3 propose unanimous recovery (while frozen) | `1E4AA3329FCF415419C5C4675B1398C4DE55C048418F03E4331691C5603C61C6` | 10531837 | code 0, verified |
+| new owner finishes unanimous recovery | `495C47E6292F595487232C3E457077793C64AF5087E1CA97C6CBC7A0C0864390` | 10532010 | code 0, verified |
+
+18 relays, 1.800 QOR of relayer gas in total. The Q-Day rescue step is a plain hybrid MsgSend from the main wallet (`E4654677085D62526A12188E81B06F741D7EFC43A93C35D69253DFA2308C7DD1`).
+
+v3 link #29 (Giveaway, created by the team deployer with `0x811fc5e09b7ef4d1e85a9f205fbe6332b31f8dfd7a5854eb121522211a29d5a7`), claimed in WebKit 390 on the deployed app; bind and claim are relayed into the v3 PocketDrop as cross-VM calls. Evidence: `hybrid-relay-v3-live-2026-11-22.json`.
+
+| Step | Native tx | Height | Result |
+|---|---|---|---|
+| recipient bind | `1806B21CC3DC90474BCF634880797598611122606695E012214A0259413E6F24` | 10532170 | code 0, verified |
+| recipient claim | `CAFECB9ABD82E5715DAE1EB721D8332E10631370F62A15F26384825EAB98F71C` | 10532177 | code 0, verified |
+| recipient registers its ML-DSA-87 key (own hybrid tx, paid from the drip) | `44CF7B7CC0812FC87B9580E89E43500DA0BB1F3E31710264FD8E788181D39E09` | 10532173 | code 0 |
+
+Q-Day drill attempts through `POST /api/qday` (the Try it button). Each is a hybrid cross-VM call that the bait Pocket reverts, so it is mined with code 14 and leaves no EVM tx; `/api/qday` finds them by fee payer and `/qday` lists them under Refused attempts. Evidence: `hybrid-relay-qday-2026-11-22.json`.
+
+| Attempt | Native tx | Height | Result |
+|---|---|---|---|
+| pd qday try B2 spend (Expired (replay of a recorded bot attempt with its old deadline)) | `BC011B9E894932C8BCDF97D7AA1DCCAD87EB4D4FD72568741C5E19F3953E2621` | 10531305 | code 14 (reverted on purpose), relayer signature verified |
+| pd qday try B1 spend (BadSignature (in-tab attack E1: spend signed with the attacker's own ML-DSA key)) | `BB29C5D702311A1666613C66F52F68F3C54DAA454BCDEC5B2D46C92E0340BFED` | 10531318 | code 14 (reverted on purpose), relayer signature verified |
+| pd qday try B1 spend (BadSignature (in-tab attack E1: spend signed with the attacker's own ML-DSA key)) | `FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3` | 10531327 | code 14 (reverted on purpose), relayer signature verified |
+
+The relayer was topped up again with 2.5 QOR from the main wallet (`8478BC95B90616353FE4E2B635D6F4CFD74BE2C046CC6EAAEDC0920302F5ABA3`), and the deployer with 1 QOR (`5570A3AF3DEF4C97AB38BB8CF852EFB04A8950F7DFF092D0B46F13A00533FB7B`); both move team QOR and are not spending.
+
 Anyone can re-check any of these in the app: Proof > Check a transaction fetches the transaction from the chain and re-verifies each ML-DSA-87 signature in the browser, with the keys read from the chain.

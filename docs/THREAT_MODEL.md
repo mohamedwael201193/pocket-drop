@@ -54,6 +54,7 @@ Related: [contracts-v4/KNOWN_ISSUES.md](../contracts-v4/KNOWN_ISSUES.md), [contr
 - If IndexedDB is wiped but localStorage is kept, a sealed root cannot be opened; the app keeps the ciphertext aside under `<key>.undecryptable` and never overwrites it silently. The backup card (pd2: key) is the recovery path.
 - Proof of a mined QoreX `signArbitrary` intent (KNOWN_ISSUES §5).
 - The relayer now keeps both of its keys in the serverless environment (T14). A split signer (an HSM or a separate signing service for the ML-DSA half) would remove that single point; not done on testnet.
+- The /qday refused-attempts list finds hybrid-lane attempts by fee payer, so it sees every attempt our relayer sent (the Try it button and the team bot). A failed cross-VM call that someone pays for themselves leaves no crossvm_request event and no EVM tx, so it is not listed; a successful one still raises the alarm through the bait balance and key checks.
 
 ## 6. Live proof of the fix (20 Nov 2026, team-run test accounts, not users)
 Run `frontend/evidence/v4/e2e/v2-key-claim-proof.json` (Playwright `e2e/v4.spec.ts` "b. Giveaway", the recipient browser creates its key in the app). The test asserts the stored root is `pd2:`, the bound recipient address equals the v2 secp key's address, and the bound `recipientKeyHash` equals keccak of the ML-DSA key from the independent v2 secret.
