@@ -1,119 +1,145 @@
 # Pocket Drop
 
-> **Testnet only. Diana, no monetary value.** Everything here runs on the QoreChain Diana testnet (EVM chain id 9800). The QOR involved has no monetary value.
+> **Testnet only.** Everything here runs on the QoreChain Diana testnet (EVM chain id 9800, Cosmos chain id `qorechain-diana`). The QOR involved has no monetary value.
 
-Send testnet QOR to a friend who has no wallet: they open a link and get a quantum-safe QoreChain account with the money in it.
+Send QOR to a friend who has no wallet. They open a link, and their browser creates a **Pocket**: a smart account that only an ML-DSA-87 (FIPS 204) key can move. The money lands there. If the friend's classical key leaks, or a quantum computer recovers it, the money still cannot move: every spend needs a post-quantum signature that the chain checks through its `pqcVerify` and `pqcKeyStatus` precompiles.
 
-- Contract (Diana, main): `0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97` ([deploy tx](https://explore.qore.network/tx/0x316fc8d51b2d1ca3273620984058153ac58886468e89f6f17f9ed86e9b18b26a))
-- Lab instance (same bytecode, BIND_TIMEOUT 60 s): `0xce1912ed9d310f1973a88e7ff6aa56f6d76c9a67` ([deploy tx](https://explore.qore.network/tx/0x54cd1dc4efc2ba3b7d7559cf7bc763f8a958d01deae514c84cc7a2d58a8f6c4b))
-- API (relayer): https://pocketdrop-api.vercel.app
+- App: https://pocketdrop-app.vercel.app (nav: Send, Receive, Pocket, Proof)
+- Relayer API: https://pocketdrop-api.vercel.app (`/api/health`, `/api/stats`, `/api/qday`)
+- Video: _link added at submission_
+- Track: Post-Quantum dApp. License: MIT.
+
+## The story in four lines
+
+1. On Q-Day, anyone who knows a classical (secp256k1) private key can sign as its owner. Today that means a leak; later it means a quantum computer.
+2. Pocket Drop gives each user a Pocket whose owner is an ML-DSA-87 key registered on chain with proof of possession. The classical key only pays gas.
+3. A sender funds a one-time link. The link key binds exactly one recipient. The recipient claims into their Pocket, and the claim is checked by both precompiles.
+4. We publish the classical keys of five bait Pockets on `/qday` and attack them every hour. The money is still there.
+
+## Judge path: 60 seconds
+
+| Step | Open | What you should see |
+|---|---|---|
+| 1 | https://pocketdrop-app.vercel.app/qday | Five bait Pockets with their **classical keys published**, their balances (LIVE), the hourly attacker log and the alarm state. Our own drill: self-run and always on, and separate from the organisers' 18 Nov drill. |
+| 2 | https://pocketdrop-app.vercel.app/receive | Take one slot of the team-hosted sample pool. A Pocket is created in your browser, and the QOR lands in it. No wallet needed. |
+| 3 | The explorer link shown after the claim | The claim transaction on Diana, mined through our router. |
+| 4 | https://pocketdrop-app.vercel.app/judges | Every track requirement, mapped to code, a live transaction and a test. |
+
+## Numbers
+
+Each number is labelled. **LIVE** means it is read from the chain or the API when you open the link. **RECORDED** means it comes from a file in this repo, written by a named script on the date shown.
+
+| Number | Label | Source |
+|---|---|---|
+| 398 checks passed, 0 failed: 299 EVM and 43 Cosmos transactions re-checked against Diana (status, contract, decoded error) | RECORDED, 22 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| 167 Foundry tests (unit, fuzz and invariant); 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
+| 83 frontend and 143 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 22 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
+| 103 recorded live steps on the v4 contracts, 31 of them attacks that reverted on chain or were refused by the chain | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
+| QCAI audit: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
+| Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
+| Relayer balance, EVM window (blocks and txs left, allowed targets), low-balance and window warnings | LIVE | `/judges`, `GET /api/health` |
+| Drop counts and volume, split into team/test addresses and external addresses | LIVE | `/radar`, `GET /api/stats` |
+| ML-DSA-87 signature size: 4,627 bytes | Constant (FIPS 204) | `backend/src/config.ts` |
+
+## Check our claims
+
+| Claim | How to check it yourself |
+|---|---|
+| A wrong post-quantum key cannot spend a Pocket | Tx [`0x312c0fe1…0dcb`](https://explore.qore.network/tx/0x312c0fe1ecfe1a0159618152ade48639139671adbda5336b4132d06f2a830dcb) reverted with `BadSignature`. Test `test_wrong_key_wrong_prefix_raw_digest_are_rejected`. |
+| A replayed intent fails | Tx [`0x54d99c1e…7fec`](https://explore.qore.network/tx/0x54d99c1e8b04744df5a0360a5dd7b0a02b3066d7f39794a5af97f90ba6957fec) reverted. Test `test_replayed_intent_reverts`. |
+| A claim needs a registered key with proof of possession | Tx [`0x4664a69a…5b5b`](https://explore.qore.network/tx/0x4664a69a207575641d38bcf3af724d9f81753c275dd8312c2a66fb3b18be5b5b) reverted with `PossessionNotProven`. Test `test_claim_key_requirements`. |
+| A mempool thief cannot swap the recipient | Tx [`0xf72a9a09…6318`](https://explore.qore.network/tx/0xf72a9a098d5ea3708302968a6caa712b04e3982870d2c7e34e37c28381996318) reverted with `BadLinkSignature`. Test `test_bind_rejects`. |
+| Guardians can freeze a Pocket whose key was stolen | Freeze [`0xa0042ee4…56cf`](https://explore.qore.network/tx/0xa0042ee4b44a67f65342c8f99aa117229af5d24ca38301dd03b32261b49956cf), then the thief's spend [`0xd4ca2455…f416`](https://explore.qore.network/tx/0xd4ca2455271a6a0a2f16862632dda34da026789985089753ecab209fdd86f416) reverted with `Frozen`. Test `test_stolen_key_scenario_end_to_end`. |
+| The relayer can only call our routers | `GET /api/health`: `window.allowedTargets` lists the two v4 routers and the v3 drop contract. A relayer tx to any other address is refused by the chain at broadcast (`contracts-v4/LIVE_RESULTS.md`, rows marked "refused"). |
+| A QoreX wallet signature can spend a Pocket | Tx [`0xf98daf5e…6d1a`](https://explore.qore.network/tx/0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a) (TEAM-RUN), evidence in `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`. |
+| Every recorded hash is real | Run `cd frontend && npm ci && node scripts/reverify.mjs`. |
 
 ## How it works
 
-The flow is create, bind, confirm (optional), claim.
+- **Pocket** (`PocketVault`, cloned by `PocketFactory`). The owner is an address whose ML-DSA-87 key is registered with proof of possession; the key's hash is pinned at creation. Every owner action is an intent signed with that key over a QoreX-format message (`qorechain-msg-v1|qorechain-diana|0x<digest>`) that binds the chain, the Pocket, the action, the nonce and the deadline.
+  - Spends are free up to a daily limit. Anything above it is queued behind a timelock and can be vetoed by the owner.
+  - Guardians (up to 5) can freeze the Pocket, recover it by threshold (the owner can veto), or recover it unanimously (the old key cannot veto).
+  - ERC-1271 `isValidSignature` exposes the same check to other contracts. `PqGuard` lets any dApp require a post-quantum approval.
+- **PocketRouter** relays signed intents and can deploy a Pocket on first use. Funds sent to a Pocket's address before it exists are kept.
+- **PocketDrop** (send by link) and **DropPool** (one link, many claimers). The link key binds one recipient (`pqcVerify`). The claim needs the recipient's registered, proven key (`pqcKeyStatus`) and a signature from it (`pqcVerify`).
+- **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents. It cannot forge any of them.
 
-1. **Create.** The sender locks QOR in the contract with `create`, sending along the keccak256 of a fresh link ML-DSA-87 public key. The link secret travels in the URL. Optional `drip` (a little gas money for the recipient) and `relayerFee` are included in the deposit. Two modes: Confirmed (sender confirms the recipient) and Open (first valid bind wins).
-2. **Bind.** The recipient opens the link and gets bound to the link: a relayer submits `bind`, carrying the recipient address and the hash of the recipient's ML-DSA-87 key, signed by the link key. The contract verifies that signature with the `pqcVerify` precompile, so a thief who swaps the recipient in the mempool fails with `BadLinkSignature`. The first bind pays the drip, which funds the recipient's key registration.
-3. **Confirm (Confirmed mode only).** The sender compares a fingerprint of the recipient key (read aloud by the recipient) and calls `confirm`.
-4. **Claim.** A relayer submits `claim` with the recipient's signature. The contract pays the escrow to the recipient only after the checks below.
+The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects, with tests) is in [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
 
-The three post-quantum checks at claim, stated precisely:
+## Contracts on Diana (v4)
 
-1. The link-key ML-DSA-87 signature over the bind digest was already verified at `bind` time (this is what fixed the recipient).
-2. At claim, the recipient's ML-DSA-87 signature over the claim digest must verify through `pqcVerify` against the registered public key.
-3. At claim, `pqcKeyStatus(recipient)` must show a registered ML-DSA-87 key with `possessionProven == true` whose hash equals the bound `recipientKeyHash`.
+From [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json). PROD uses a 24 h timelock, 48 h recovery, 72 h freeze and 72 h unanimous recovery. LAB uses the same bytecode with short delays (60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery), so the flows can be demonstrated in minutes.
 
-Both digests include the chain id and the contract address, so signatures cannot be replayed across chains, instances or links. If the sender never gets a claim, `cancel` (while allowed) or `refund` (after expiry) returns the funds to the sender.
+| Contract | PROD | LAB |
+|---|---|---|
+| PocketRouter | `0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209` | `0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d` |
+| PocketFactory | `0x74b604e8f1bb729a6e43dcd893f01747688e3e8f` | `0x864cf0278a24c1b27d1ac66c883c3e74ff8d5a0c` |
+| PocketVault (implementation) | `0x899b289ef60444ac74d82dea5cacc6637a2a29c3` | `0xd017f09992c4c0f27f2d504ba42fe7d3bf578d96` |
+| PocketDrop | `0xbc13b9ee91f31ed56932abdb796693515c351f00` | `0x42da108a4e8bf5d152600b470f1abd28debdee59` |
+| DropPool | `0xaa981588e5430e3db9a789a3754e108cc01e3d00` | `0x1858193617bc2f2e2570a137320e1a1cb3a7ce5b` |
 
-## Frontend
+- PqGuard example (`PqGuardedCounter`): `0x5ae81c71b7ff0c93886df8fe7502f3c846c3835f`
+- Legacy v3 PocketDrop (still readable, used by old links): `0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97`
+- Relayer: `0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD` / `qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl`
 
-Live app: **https://pocketdrop-app.vercel.app** (testnet only, source in [frontend/](frontend/)).
+Explorer: `https://explore.qore.network/tx/<hash>`. The contracts are frozen: no owner, admin, pause or upgrade.
 
-- `/` Send: a browser-created sender account, a link in Confirmed or Giveaway mode, share by WhatsApp, Web Share or copy, and the sender's confirm / cancel / refund actions.
-- `/c/:id#k=...` Claim: the recipient needs no wallet. The key pair is generated in the tab, the relayer binds, the recipient registers the key with proof of possession, then claims. The link seed lives only in the URL fragment.
-- `/stats` Dashboard from the API, `/lab` the six attacks with a live re-run, `/judges` a 60-second checklist. Every number is badged LIVE (read from chain or API) or RECORDED (from files in this repo).
-- Verified end to end on the deployed URL at 390x844 in Chromium and WebKit, with real senders and recipients in separate browser contexts. Screenshots, tx hashes and receipt checks are in [frontend/evidence/](frontend/evidence/). The WhatsApp check is in [frontend/WHATSAPP_TEST.md](frontend/WHATSAPP_TEST.md).
+## Trust model and custody
 
-## Tests
+- **Users** hold their own keys. A browser user's ML-DSA-87 seed is generated independently of the secp256k1 key and stays in that browser. Users should back it up and add guardians. A QoreX wallet user signs with QoreX.
+- **Relayer custody.** The relayer has two keys, and neither can move user funds:
+  - its secp256k1 key, which pays gas. It is stored as an environment variable of the API deployment and as a GitHub Actions secret;
+  - its ML-DSA-87 seed, which is stored only as a GitHub Actions secret. It is used only by the `renew-window` workflow (every 2 hours) to re-open the relayer's scoped EVM window.
+  The window lets the relayer call only the allow-listed contracts (the two v4 routers and the v3 drop), with transaction and value caps. A malicious relayer can delay or refuse service. It cannot forge an intent, a bind or a claim.
+- **Precompiles.** `pqcVerify` (0x0A01) and `pqcKeyStatus` (0x0A02) are assumed correct. `PqcLib` fails closed on any failed call or malformed data, but it cannot detect a precompile that lies.
+- **Links** are bearer secrets until bound: whoever holds an unbound link can choose the recipient. Confirmed mode adds a sender check of the recipient key fingerprint.
 
-- Contracts: 117 Foundry tests pass (figure from the CI profile: fuzz 10,000 runs, invariant 256 runs x depth 50). Coverage of `src`: 100% lines (194/194) and 100% branches (54/54). See [contracts/COVERAGE.md](contracts/COVERAGE.md).
-- Backend: 76 vitest tests.
+Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md). Known limits: [contracts-v4/KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md).
 
+## Audit
+
+Two-stage QCAI audit: Stage 1 scored 82 (19 Nov 2026) and Stage 2 scored 78 (20 Nov 2026). Every finding is mapped to a resolution and tests, the lower Stage 2 score is explained, and the deployed bytecode is identical to the Stage 2 source. Details: [docs/AUDIT.md](docs/AUDIT.md). PDFs: [`docs/audit/`](docs/audit/).
+
+## Run it
+
+```bash
+cd contracts-v4 && forge test                  # 167 tests
+cd backend && npm ci && npm test               # relayer unit tests
+cd frontend && npm ci && npm test              # app unit tests
+cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on Diana
 ```
-cd contracts && forge test
-cd backend && npm install && npm test
-```
 
-## Live lab on Diana
+## Repository map
 
-Every row is a mined EVM transaction on Diana. Rows marked "reverted" are lab attacks and negative checks: each revert was decoded with `eth_call` first, then mined with an explicit gas limit so the revert is on-chain. Source: [contracts/LIVE_RESULTS.md](contracts/LIVE_RESULTS.md).
+| Path | What |
+|---|---|
+| [`contracts-v4/`](contracts-v4/) | v4 contracts, Foundry tests, deploy scripts, [LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md), [KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md), [SECURITY.md](contracts-v4/SECURITY.md) |
+| [`backend/`](backend/) | Relayer API (bind, claim, route, sponsor, stats, health, qday) |
+| [`frontend/`](frontend/) | Web app, e2e and QA specs, evidence, re-verification scripts |
+| [`docs/`](docs/) | [AUDIT.md](docs/AUDIT.md), [THREAT_MODEL.md](docs/THREAT_MODEL.md), [qday/FEASIBILITY.md](docs/qday/FEASIBILITY.md) |
+| [`contracts/`](contracts/) | Legacy v3 PocketDrop contract and its results |
+| [`AI_USAGE.md`](AI_USAGE.md), [`llms.txt`](llms.txt) | How AI assistance was used; a plain-text map of the repo |
 
-| step | receipt status | outcome / custom error | tx |
-|---|---|---|---|
-| fund attacker B 0.6 QOR | success | funded | [0x6beca7ca92...](https://explore.qore.network/tx/0x6beca7ca925c980debfce154e3995b217785a2148097366cbc1c6942c4b3f20c) |
-| attacker B registers PQ key (PoP) | success | possessionProven=true | [527E572EBEE9...](https://explore.qore.network/tx/527E572EBEE9DA30FDDA3417E32325603AF69BCC962EB003813EDFED6E3EB1C7) |
-| attacker B opens EVM window | success | window opened | [DD0F7D991672...](https://explore.qore.network/tx/DD0F7D991672976A762657EF437626849EC94E086D2C3F10F5219D6EB39F64B1) |
-| A1 create (Confirmed, 1 QOR, drip 0.2) | success | link created | [0x07d368c3b8...](https://explore.qore.network/tx/0x07d368c3b8c493326dd60bc2b557c57fc4dd18edcc1b8820474e781e41e4046c) |
-| ATTACK 1 thief swaps recipient in bind | reverted | BadLinkSignature | [0xdbea1fe56b...](https://explore.qore.network/tx/0xdbea1fe56bc41b07900138570d975b3acee3e862fe398b06496dc3f52fbeed10) |
-| A2: relayer binds recipient (drip lands) | success | ok | [0x1109eb4c68...](https://explore.qore.network/tx/0x1109eb4c68aa1efe0b06e442837560be867f3d7aa65b735a6afe45e18f32acfa) |
-| A2: recipient registers ML-DSA-87 key with PoP (fee paid from drip) | success | possessionProven=true | [AAF516A51BBB...](https://explore.qore.network/tx/AAF516A51BBBB50F058C4931904AE2025AB884D7F6A244D727EE2B4B41DB3EEE) |
-| A3 sender confirms (checked fingerprint of recipientKeyHash) | success | ok | [0x253f623659...](https://explore.qore.network/tx/0x253f623659d747381e22871b67b84d30009eb29bb124bdfe6c866507c0917cca) |
-| ATTACK 6 sender cancels after confirm | reverted | InvalidState | [0x1c9a969192...](https://explore.qore.network/tx/0x1c9a9691920ba98f1cd52ecb7a38d1b114c64106a7c814149945c4f286b6f582) |
-| ATTACK 5 second person (B, own proven key) claims the Confirmed link | reverted | BadRecipientSignature | [0x42bb1ca0f7...](https://explore.qore.network/tx/0x42bb1ca0f7c527de11b64e13dc7f516a4e8277eb9c557520a5f02cbc1e0c58aa) |
-| A4 relayer claims with the recipient signature | success | amount paid | [0x3e52c32c1c...](https://explore.qore.network/tx/0x3e52c32c1cfd7548dd70ea117e1fd363a1d5f7d5bae99ad4f73eb64e5a58142a) |
-| A5 second claim of a claimed link | reverted | InvalidState | [0x5af1e2fae1...](https://explore.qore.network/tx/0x5af1e2fae19f9537d88785af321ae00614ec1d47340c9c8959e6471a474f4d75) |
-| B1 create (Open, 0.5 QOR, drip 0.2) | success | link created | [0x156e7efa32...](https://explore.qore.network/tx/0x156e7efa32a546ff00f36a92d884074da8db41a6b8737a07d94d51fe87b8ec42) |
-| B2: relayer binds recipient (drip lands) | success | ok | [0x533ff1ece4...](https://explore.qore.network/tx/0x533ff1ece49b38b3a8a0155e7a805554f9dc39b2e955bc81744b30a9ea3aa964) |
-| B2: recipient registers ML-DSA-87 key with PoP (fee paid from drip) | success | possessionProven=true | [05F78E03D933...](https://explore.qore.network/tx/05F78E03D933AD1FACE5162D2F03B9E21A91C7274CF818CC996F499C669F7EDF) |
-| B3 relayer claims | success | amount paid | [0x730067b90e...](https://explore.qore.network/tx/0x730067b90eb45556ce36280bd4b02b0f33b0de2d7f0c180fb5069afa99e6796f) |
-| C1 create (Open, 0.3 QOR, drip 0.2) | success | link created | [0x356d86a4fc...](https://explore.qore.network/tx/0x356d86a4fc2ace3a77a94a5ea7ca30e412f8bbaad02a943d7eca04ed1a5e3fe1) |
-| C2: relayer binds recipient (drip lands) | success | ok | [0xc921cb27d8...](https://explore.qore.network/tx/0xc921cb27d8aae78917a179c04c48956f12a5844990fb8b0a268e6a23da56022e) |
-| C2: recipient registers ML-DSA-87 key with PoP (fee paid from drip) | success | possessionProven=true | [C06D7D3F5D5A...](https://explore.qore.network/tx/C06D7D3F5D5A4108EDD7A2A291D8361CD0426001701FF677B8EA81F854A79F96) |
-| ATTACK 2 claim signed by a key other than the registered one | reverted | BadRecipientSignature | [0x7fcc837d59...](https://explore.qore.network/tx/0x7fcc837d595e479bd2dae229f57eff9d44858230d7b2dedd9f61d9add3d64cf2) |
-| C3 honest claim still works afterwards | success | amount paid | [0x69c9b80149...](https://explore.qore.network/tx/0x69c9b80149230a805d6988b43c326a6775d72dbf5730b3a73147370e3cdb79b2) |
-| D1 create (Open, 0.2 QOR, expiry +100s) | success | link created | [0x6ab4f00f38...](https://explore.qore.network/tx/0x6ab4f00f38e1c93f9a5b6f923a68866dd3577be1486b809031888a0df11ff934) |
-| D2 bind to main test wallet (legacy key, possessionProven=false) | success | ok | [0x5956253a49...](https://explore.qore.network/tx/0x5956253a493daf0415f8240ea835d943167b7b9458e35eb45955a9ebfdbbd743) |
-| ATTACK 3 claim into an account whose key has possessionProven=false | reverted | PossessionNotProven | [0x168d02b9fa...](https://explore.qore.network/tx/0x168d02b9fa213fef2bcd2bcb179306de90476421ebe6223035daf086d9887ecc) |
-| E1 create (Open, 0.2 QOR, expiry +100s) | success | link created | [0x3e01de18e9...](https://explore.qore.network/tx/0x3e01de18e99ff6c408b51a40528f95f0dd9ef6068de07c9eecdcb882b36d1dd3) |
-| E2 bind to an account with no PQ key | success | ok | [0xd3bb48c7ed...](https://explore.qore.network/tx/0xd3bb48c7edda3bc69b124dbac6324c70a019d6d70331ad84eb04c6addaa04a9c) |
-| ATTACK 4 claim into an account with no PQ key | reverted | NotRegistered | [0x7e3c9c2e4f...](https://explore.qore.network/tx/0x7e3c9c2e4fc56d6104b38526af3e62a64cbd38e8ec7a5de0ddf239b024f42d44) |
-| F1 create (Open, 0.2 QOR, drip 0.1) | success | link created | [0x06b6e125f7...](https://explore.qore.network/tx/0x06b6e125f7f484a4412c848b3956eda74edf2e667365aab5fbc146389cd4f516) |
-| F2 sender cancels (refund amount + unpaid drip) | success | refunded | [0x86a0868b60...](https://explore.qore.network/tx/0x86a0868b60322184e73569096066dbfa6a2c3862a509d7a6b18d0c400ef4308f) |
-| F3 cancel again | reverted | InvalidState | [0xd967f73421...](https://explore.qore.network/tx/0xd967f734219f0bb0d85bdb89a29f8b8636bbfe6690aaaf3e6e8cb67edb14ca22) |
-| G1 create (Open, 0.15 QOR, expiry +40s) | success | link created | [0x51b93493b5...](https://explore.qore.network/tx/0x51b93493b5dd9e8bc3d69283c96c580cb49ca746c30b647286121b4491c69eaf) |
-| G2 refund before expiry | reverted | NotExpired | [0xeb2c68d51a...](https://explore.qore.network/tx/0xeb2c68d51a25ef5a94fd2d096c7d98d0e3358e7cef6f3377ee8ca41e7e9ce77f) |
-| G3 refund link 4 after expiry, by the relayer | success | refunded to sender | [0x250563c828...](https://explore.qore.network/tx/0x250563c8289214c3ffeda69269e923d17542f56e4ca9c51c189aad7f1483dadf) |
-| G3 refund link 5 after expiry, by the relayer | success | refunded to sender | [0xf38cf0fc90...](https://explore.qore.network/tx/0xf38cf0fc90c089f4122434a90655674ab5b1e741e1ea10ef62b1ab49787dde20) |
-| G3 refund link 7 after expiry, by the relayer | success | refunded to sender | [0xc70edceb4d...](https://explore.qore.network/tx/0xc70edceb4d4e47d38f620fe347f31c51a1987e2ec7588b1e65b85b14830da409) |
-| G4 claim after expiry/refund | reverted | InvalidState | [0x20ddfdca8d...](https://explore.qore.network/tx/0x20ddfdca8d0e6e58a50f51085b9573307cc52c16a0afc3a3df39437ef8bf1cef) |
-| H1 create on lab (Open, 0.2 QOR, drip 0.2) | success | link created | [0xf59fdb6707...](https://explore.qore.network/tx/0xf59fdb6707c131b471a9428d15ddb90001b9b659101e8f69c9a32333b88ee3ad) |
-| H2 bind R1 | success | ok | [0x9e8b97b3d4...](https://explore.qore.network/tx/0x9e8b97b3d4893dc3f474cfe56e2e112e88976960dd2900e45162aa29bf956cc4) |
-| H3 rebind before timeout is refused | reverted | InvalidState | [0xf854495d59...](https://explore.qore.network/tx/0xf854495d59fc0f92ae2eee594b39cbbc025da13da0b8f22b7f95e993a242b132) |
-| H1 create on lab (Open, 0.2 QOR, drip 0.2) | success | link created | [0x8d8323f1bc...](https://explore.qore.network/tx/0x8d8323f1bc575fc9c28453013aec1c33e33046e1222808aff59be1971182bdc9) |
-| H2 bind R1 | success | ok | [0x713d315a7c...](https://explore.qore.network/tx/0x713d315a7c75b93391e1a23e3724b677608cf529abfb2e4a8d459a548e94beaf) |
-| H3 rebind before timeout is refused | reverted | InvalidState | [0x2875a7d4a6...](https://explore.qore.network/tx/0x2875a7d4a6ee7b9dd6e5ea7bf3221a1783496977890bf150f88027c0d6aeda44) |
-| H4 rebind to R2 after timeout (no second drip) | success | rebound | [0xb0e5c11912...](https://explore.qore.network/tx/0xb0e5c11912d99cb124604a0a92aa6168854da02472eb31ed9ed08df03c96123d) |
-| H5 deployer tops up R2 for its registration fee | success | funded | [0x9e4dbc9179...](https://explore.qore.network/tx/0x9e4dbc91798f8a5df555158aded6c9351c251e81b9f7c82ea91444abb2c2db4b) |
-| H6 R2 registers PQ key (PoP) | success | ok | [9D3E454D8323...](https://explore.qore.network/tx/9D3E454D8323BAE7ABD84850AA6C63577FCD6B4444EEE54DC9202EC7C67FD1B3) |
-| H7 old recipient R1 signature no longer claims | reverted | BadRecipientSignature | [0xc9c1a22fa2...](https://explore.qore.network/tx/0xc9c1a22fa230f615da1ab7a0b794cad2ed6c5897bcd6f98035cec8c719b3dce3) |
-| H8 R2 claims | success | amount paid | [0xad0329ba28...](https://explore.qore.network/tx/0xad0329ba289c6aa682e16140197a68cf9c854ec35b84d956d859f20e574a44b8) |
+## Credits
 
-## Trust model
-
-- No owner, admin, pause or upgrade. Constants are immutable.
-- The relayer holds only a secp256k1 key for gas; its ML-DSA-87 key stays on the operator machine. It cannot redirect funds: payouts need the link-key signature (bind) and the recipient's registered ML-DSA-87 signature (claim), both verified on chain.
-- The two native precompiles (`0x0A01` verify, `0x0A02` key status) are assumed correct and honest. `PqcLib` fails closed on failures and malformed data but cannot detect a lying precompile.
-- Whoever holds the link (the link ML-DSA key) can choose the recipient, so protect the link like cash. Confirmed mode adds a sender check of the recipient key fingerprint.
-- Known limits (daily drip allowance not credited back, drip paid at first bind, and others) are listed in [contracts/SECURITY.md](contracts/SECURITY.md).
-
-## Docs
-
-- [SPEC.md](SPEC.md): frozen build spec
-- [contracts/README.md](contracts/README.md): contract build, test and deploy
-- [backend/README.md](backend/README.md): relayer API
-- [frontend/README.md](frontend/README.md): web app, tests and E2E evidence
-- [contracts/SECURITY.md](contracts/SECURITY.md): threat model, invariants, Slither review
-- [docs/AUDIT.md](docs/AUDIT.md): two-stage QCAI audit of the v4 contracts (reports `QCAIA-1795130931306-3D8DAA40` and `QCAIA-1795138339351-F6A93427`), with finding-by-finding triage
+| Used for | Package or service | License |
+|---|---|---|
+| QoreChain kit: accounts, transactions, PQC key registration | `@qorechain/sdk` | Apache-2.0 |
+| QoreChain kit: ML-DSA-87 keys, signing, proof of possession | `@qorechain/pqc` | Apache-2.0 |
+| QoreChain kit: EVM helpers | `@qorechain/evm` | Apache-2.0 |
+| Wallet connection and signing | QoreX wallet | QoreChain product |
+| Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, scoped EVM window | QoreChain network |
+| Contract audit | QCAI (QoreChain AI audit) | QoreChain service |
+| Cosmos transactions | `@cosmjs/stargate`, `cosmjs-types` | Apache-2.0 |
+| EVM client, ABI encoding | `viem` | MIT |
+| Contract tests | Foundry, `forge-std` | MIT or Apache-2.0 |
+| UI | `react`, `react-dom`, `react-router-dom`, `@tanstack/react-query`, `framer-motion`, `three`, `tailwindcss`, `@phosphor-icons/core` | MIT |
+| Data validation | `zod` | MIT |
+| Encoding, QR codes | `@scure/base`, `qrcode` | MIT |
+| Build and test | `vite`, `vitest`, `esbuild`, `eslint` (MIT); `typescript`, `@playwright/test` (Apache-2.0) | as listed |
+| Hosting | Vercel (`@vercel/node`) | Apache-2.0 |
+| Fonts | Funnel Sans, Funnel Display, Instrument Serif, DM Mono (Google Fonts) | SIL OFL 1.1 |
+| Word list for key fingerprints | BIP-39 English list, as shipped in `viem/accounts` | MIT |
 
 ## License
 
