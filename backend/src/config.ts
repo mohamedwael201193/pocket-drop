@@ -16,6 +16,13 @@ export interface Config {
   rest: string;
   contract: Hex | null;
   relayerKey: Hex | null;
+  /** The relayer's ML-DSA-87 seed (32 bytes hex). With it, relays go out as hybrid-signed MsgCrossVMCall (no EVM window). */
+  relayerPqc: Hex | null;
+  /** 'hybrid' (default when relayerPqc is set) or 'evm' (ECDSA-only EVM tx inside the relayer's EVM window). */
+  relayMode: 'hybrid' | 'evm';
+  /** Fall back to the EVM window when a hybrid tx cannot be signed or is refused before it executes (default on; RELAY_FALLBACK=none
+   *  turns it off). With the window closed the fallback is refused by the chain, so it can never add a classical-only path. */
+  relayFallback: boolean;
   /** First block to index for /api/stats (default: lookback from head). */
   deployBlock: bigint | null;
   statsLookback: bigint;
@@ -50,6 +57,9 @@ export function getConfig(env: Env = process.env): Config {
     rest: env.REST_URL?.trim() || 'https://api-testnet.qore.host',
     contract: contract && /^0x[0-9a-fA-F]{40}$/.test(contract) ? (contract as Hex) : null,
     relayerKey: hexKey(env.RELAYER_SECP_KEY),
+    relayerPqc: hexKey(env.RELAYER_PQC_SEED),
+    relayMode: env.RELAY_MODE?.trim().toLowerCase() === 'evm' || !hexKey(env.RELAYER_PQC_SEED) ? 'evm' : 'hybrid',
+    relayFallback: env.RELAY_FALLBACK?.trim().toLowerCase() !== 'none',
     deployBlock: env.POCKETDROP_DEPLOY_BLOCK && /^\d+$/.test(env.POCKETDROP_DEPLOY_BLOCK.trim()) ? BigInt(env.POCKETDROP_DEPLOY_BLOCK.trim()) : null,
     statsLookback: num(env.STATS_LOOKBACK_BLOCKS, 150_000n),
     gasBind: num(env.GAS_BIND, 900_000n),

@@ -4,9 +4,7 @@
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex, type PublicClient } from 'viem';
 import { bytesToHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { existsSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadSigner } from './signerBundle.js';
 import type { Config } from './config.js';
 import { evmToQor } from './relayer.js';
 import type { PocketCfgIn, PoolView, SponsorChain, SponsorRules, SponsorSend } from './sponsor.js';
@@ -29,16 +27,7 @@ export function createSponsorChain(cfg: Config, pub: PublicClient, rules: Sponso
   const secp = env.SPONSOR_SECP_KEY?.trim();
   const pqc = env.SPONSOR_PQC_SECRET?.trim();
   if (!secp || !pqc) return null;
-  // the signer is pre-bundled (see src/sponsorSigner.ts); load it by file URL so the runtime never require()s ESM
-  type SignerMod = typeof import('./sponsorSigner.js');
-  let signerP: Promise<SignerMod> | null = null;
-  const signerMod = () => (signerP ??= (async () => {
-    const cands = [path.join(process.cwd(), 'vendor', 'sponsor-signer.mjs')];
-    try { cands.push(fileURLToPath(new URL('../vendor/sponsor-signer.mjs', import.meta.url))); } catch { /* no file URL */ }
-    const file = cands.find((c) => existsSync(c));
-    if (!file) throw new Error('sponsor signer bundle missing');
-    return (await import(pathToFileURL(file).href)) as SignerMod;
-  })());
+  const signerMod = loadSigner;
   const sponsorEvm = privateKeyToAccount((secp.startsWith('0x') ? secp : `0x${secp}`) as Hex).address;
   const sponsorQor = evmToQor(sponsorEvm);
   const rest = cfg.rest.replace(/\/$/, '');

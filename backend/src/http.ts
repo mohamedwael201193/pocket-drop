@@ -5,7 +5,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { getConfig } from './config.js';
 import { reply, type Deps, type HttpResult } from './handlers.js';
 import { getLimiter } from './ratelimit.js';
-import { createRelayer, makePublicClient, type Relayer } from './relayer.js';
+import { makePublicClient, type Relayer } from './relayer.js';
+import { relayerFor } from './hybridRelayer.js';
 
 export type Req = IncomingMessage & { body?: unknown; query?: Record<string, string | string[] | undefined> };
 
@@ -41,11 +42,11 @@ let relayerCache: Relayer | null = null;
 export function buildDeps(): Deps {
   const cfg = getConfig();
   const pub = makePublicClient(cfg);
-  return { cfg, limiter: getLimiter(), pub, getRelayer: () => (relayerCache ??= createRelayer(cfg, { pub })) };
+  return { cfg, limiter: getLimiter(), pub, getRelayer: () => (relayerCache ??= (() => { if (!cfg.contract) throw new Error('POCKETDROP_ADDRESS not configured'); return relayerFor(cfg, cfg.contract, pub); })()) };
 }
 
 const routerRelayers = new Map<V4Env, Relayer>();
-/** v4: one relayer per PocketRouter (same secp key; its EVM window is scoped to the routers). */
+/** v4: one relayer per PocketRouter (same keys; hybrid MsgCrossVMCall, or the EVM window scoped to the routers). */
 export function buildRouteDeps(): RouteDeps {
   const cfg = getConfig();
   const pub = makePublicClient(cfg);
@@ -53,7 +54,7 @@ export function buildRouteDeps(): RouteDeps {
     cfg, limiter: getLimiter(),
     getRouterRelayer: (env) => {
       let r = routerRelayers.get(env);
-      if (!r) { r = createRelayer({ ...cfg, contract: V4_INSTANCES[env].router as Hex }, { pub }); routerRelayers.set(env, r); }
+      if (!r) { r = relayerFor(cfg, V4_INSTANCES[env].router as Hex, pub); routerRelayers.set(env, r); }
       return r;
     },
   };

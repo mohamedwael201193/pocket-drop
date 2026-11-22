@@ -8,19 +8,34 @@ import { EVM_CHAIN_ID, type Config } from './config.js';
 import { extractRevertData, isWindowError, decodeRevert, type DecodedRevert } from './errors.js';
 
 export type SimResult = { ok: true } | { ok: false; revert: DecodedRevert };
+/** How a relay reached the chain: an ECDSA-only EVM tx inside the relayer's EVM window, or a hybrid-signed MsgCrossVMCall. */
+export type Lane = 'evm' | 'hybrid';
 export type SendResult =
-  | { ok: true; hash: Hex; status: 'success' | 'reverted'; blockNumber: bigint; gasUsed: bigint }
-  | { ok: false; reason: 'window' | 'rpc'; message: string };
+  | {
+      ok: true; hash: string; lane: Lane; status: 'success' | 'reverted'; blockNumber: bigint; gasUsed: bigint;
+      /** hybrid only: the callee's ABI-encoded return value (a cross-VM call leaves no EVM log) */
+      returnData?: Hex;
+      /** hybrid only: the chain emitted pqc_hybrid_verify status=verified for this tx */
+      hybridVerified?: boolean;
+      feeUqor?: string;
+      /** hybrid only: chain log line when the EVM call reverted */
+      failure?: string;
+      /** set when the hybrid lane could not be used and the EVM window carried the tx */
+      fallbackReason?: string;
+    }
+  | { ok: false; reason: 'window' | 'rpc' | 'hybrid'; message: string; hash?: string };
 
 export interface Relayer {
+  /** 'evm' = ECDSA-only EVM tx in the scoped window; 'hybrid' = MsgCrossVMCall signed with secp256k1 + ML-DSA-87. */
+  mode: Lane;
   address: Address;
   contract: Address;
   /** eth_call against the contract as the relayer; returns decoded custom error on revert. */
   simulate(data: Hex): Promise<SimResult>;
   /** eth_estimateGas as the relayer; null when the node cannot estimate. */
   estimate?(data: Hex): Promise<bigint | null>;
-  /** Send with an explicit gas limit and wait for the receipt. */
-  send(data: Hex, gasLimit: bigint): Promise<SendResult>;
+  /** Send with an explicit (EVM) gas limit and wait for inclusion. `memo` names the tx on the native lane (hybrid only). */
+  send(data: Hex, gasLimit: bigint, memo?: string): Promise<SendResult>;
 }
 
 export const evmToQor = (addr: string): string => bech32.encode('qor', bech32.toWords(Buffer.from(addr.slice(2), 'hex')));
@@ -44,6 +59,7 @@ export function createRelayer(cfg: Pick<Config, 'evmRpc' | 'relayerKey' | 'contr
   const contract = cfg.contract as Address;
 
   return {
+    mode: 'evm',
     address: account.address,
     contract,
     async simulate(data) {
@@ -64,7 +80,7 @@ export function createRelayer(cfg: Pick<Config, 'evmRpc' | 'relayerKey' | 'contr
         const gp = ((await pub.getGasPrice()) * 13n) / 10n;
         const hash = await (wallet as any).sendTransaction({ account, chain, to: contract, data, gas: gasLimit, gasPrice: gp, type: 'legacy' } as any);
         const rc = await pub.waitForTransactionReceipt({ hash, timeout: 45_000 });
-        return { ok: true, hash, status: rc.status, blockNumber: rc.blockNumber, gasUsed: rc.gasUsed };
+        return { ok: true, hash, lane: 'evm', status: rc.status, blockNumber: rc.blockNumber, gasUsed: rc.gasUsed };
       } catch (e) {
         return { ok: false, reason: isWindowError(e) ? 'window' : 'rpc', message: String((e as any)?.details ?? (e as any)?.shortMessage ?? (e as any)?.message ?? e).slice(0, 400) };
       }
