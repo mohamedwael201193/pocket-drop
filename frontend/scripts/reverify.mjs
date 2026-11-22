@@ -197,7 +197,7 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^sponsor-liv
   const S = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
   evidenceSets.push([`sponsored onboarding run (${f})`, Object.entries(S.txs ?? {}).map(([k, h]) => [h, `sponsor run: ${k}`])]);
 }
-for (const [dir, re] of [['e2e', /^(flow-d-|qorex-|hybrid-[ac]-).*\.json$/], ['.', /^oldkey-drain-.*\.json$/]]) {
+for (const [dir, re] of [['e2e', /^(flow-d-|qorex-|hybrid-[acd]-).*\.json$/], ['.', /^oldkey-drain-.*\.json$/]]) {
   for (const f of fs.readdirSync(path.join(ev, dir)).filter((f) => re.test(f)).sort()) {
     const J = JSON.parse(fs.readFileSync(path.join(ev, dir, f), 'utf8'));
     evidenceSets.push([`team run (${f})`, Object.entries(J.txs ?? {}).map(([k, h]) => [h, `${f.replace(/-2026.*$/, '')}: ${k}`])]);
