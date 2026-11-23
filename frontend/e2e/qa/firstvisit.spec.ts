@@ -2,6 +2,7 @@
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/firstvisit.spec.ts --project=chromium-390
 import { test, expect } from '../fixtures';
 import fs from 'node:fs';
+import { REQUIREMENTS } from '../../src/data/requirements';
 
 const sample = JSON.parse(fs.readFileSync(new URL('../../src/data/sample-pool.json', import.meta.url), 'utf8')) as { poolId: number };
 
@@ -46,7 +47,7 @@ test('judges: the Q-Day Drill is step 1, the requirement table has every row, bo
   await page.goto(`${BASE}/judges`);
   await expect(page).toHaveTitle('Judges checklist · Pocket Drop');
   await expect(page.getByRole('heading', { level: 2 }).first()).toHaveText('Start here: the Q-Day Drill');
-  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(11);
+  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(REQUIREMENTS.length);
   await expect(page.getByTestId('req-pqc-verify')).toContainText('pqcVerify');
   await expect(page.getByTestId('qcai')).toContainText('Stage 2');
   await expect(page.getByTestId('qcai')).toContainText('78');
