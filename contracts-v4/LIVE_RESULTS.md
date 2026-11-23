@@ -328,3 +328,13 @@ Flow a (Confirmed drop) on the deployed app, WebKit 390, `e2e/v4.spec.ts`. Evide
 | sweep sender Pocket back to the deployer | `5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE` | 10537189 | code 0, pqc_hybrid_verify verified, fee 0.105 QOR |
 
 The link's `relayerFee` read back from the chain was 0.38 QOR (the new delivery fee for a Confirmed link); its three relays after creation cost 0.324 QOR. Wallet balances before and after: deployer 1.4782204725 relayer 4.29370440875 2026-11-22T05:51:21.867Z / deployer 0.8170779725 relayer 4.07570540875 2026-11-22T05:54:43.236Z (deployer funds 0.1 QOR went to the team QA recipient Pocket; 0.22 QOR swept back).
+
+## QoreSeal key, relayer refill and relay smoke test (23 Nov 2026, LIVE, Diana testnet)
+
+| Step | Tx | Result |
+|---|---|---|
+| relay smoke: TEAM-RUN Pocket `0xc9e3…472D` spends 0.01 QOR through `/api/route` | `2F9E84FC9D5AC13F4CAE91132B4485FAFB5EBFC45F7DEA2D22D1C81A16D52424` | code 0, hybrid MsgCrossVMCall, pqc_hybrid_verify verified, crossvm_response executed, fee 0.106 QOR |
+| deployer registers its ML-KEM-1024 key (MsgRegisterKEMKey) | `D53D4B3B3568AEF0437295333A9E88F8EC50AEF608FE2EBF358FBAE5BD76191B` | code 0, height 10625147, pqc_kem_key_registered, fee 0.105 QOR |
+| burner funds the refill wallet `qor17ur48…fg2r` with 3 QOR | `7982974FFCE83475CF1660BC71A5AB3C4D9D48E403A0782020364C18A6FC367D` | code 0 |
+| refill wallet registers its ML-DSA-87 key (PoP) | `6539F50705728FA08FC07D644E2A037D666875FD5D8FD11E2D300864BB1B5195` | code 0 |
+| first relayer refill, 0.8 QOR | `2C3D0A59D299C953A94EC68280CA6C6FCC11424A8580765C5C4905D0DFED87C8` | code 0, relayer 3.227 → 4.027 QOR |
