@@ -1,0 +1,62 @@
+// The sidebar dashboard shell and the Overview wiring (read-only, spends nothing).
+//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/shell.spec.ts
+import { test, expect } from './fixtures';
+
+const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
+const noSideScroll = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+
+test('shell: the primary navigation is Send, Receive, Pocket, Proof; the rest sits under Verify or More', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await expect(page).toHaveTitle('Overview · Pocket Drop');
+  await expect(page.getByTestId('logo')).toBeVisible();
+  const mobile = page.viewportSize()!.width < 768;
+  if (mobile) {
+    for (const k of ['send', 'receive', 'pocket', 'proof', 'more']) await expect(page.getByTestId(`tab-${k}`)).toBeVisible();
+    await expect(page.getByTestId('sidebar')).toHaveCount(0);
+    await page.getByTestId('tab-more').click();
+    await expect(page.getByTestId('more-sheet')).toBeVisible();
+    await page.getByTestId('more-qday').click();
+    await expect(page).toHaveURL(/\/qday$/);
+    await expect(page.getByTestId('tab-proof')).toHaveAttribute('aria-current', 'page');
+  } else {
+    await expect(page.getByTestId('sidebar')).toBeVisible();
+    await expect(page.getByTestId('tabbar')).toHaveCount(0);
+    await expect(page.getByTestId('nav-overview')).toHaveAttribute('aria-current', 'page');
+    await page.getByTestId('nav-send').click();
+    await expect(page).toHaveURL(/\/send$/);
+    await expect(page.getByTestId('nav-send')).toHaveAttribute('aria-current', 'page');
+    await page.getByTestId('side-check').click();
+    await expect(page.getByTestId('check-page')).toBeVisible();
+    await expect(page.getByTestId('side-block')).toContainText(/\d{1,3}(,\d{3})+/, { timeout: 60_000 });
+  }
+  await expect(page.locator('[data-testid=nav-qday], [data-testid=tab-qday]')).toHaveCount(0);
+  await noSideScroll(page);
+});
+
+test('overview: every card carries a source label and the numbers match the live API', async ({ page, request }) => {
+  const [h, s] = await Promise.all([request.get(`${API}/api/health`).then((r) => r.json()), request.get(`${API}/api/stats`).then((r) => r.json())]);
+  await page.goto(`${BASE}/`);
+  await expect(page.getByTestId('overview')).toBeVisible();
+  for (const id of ['ov-safety', 'ov-proof', 'ov-activity', 'ov-relayer']) await expect(page.getByTestId(id)).toContainText('LIVE');
+  await expect(page.getByTestId('ov-tests')).toContainText('RECORDED');
+  await expect(page.getByTestId('ov-pocket-empty')).toBeVisible(); // a fresh browser holds no key
+  await expect(page.getByTestId('ov-check-hybrid')).toHaveAttribute('data-state', h.relay?.mode === 'hybrid' ? 'ok' : 'no', { timeout: 60_000 });
+  await expect(page.getByTestId('ov-check-registered')).toHaveAttribute('data-state', 'nokey');
+  const hybrid = s.v4?.prod?.hybridRelayEvents;
+  if (typeof hybrid === 'number') await expect(page.getByTestId('ov-hybrid')).toHaveAttribute('data-value', String(hybrid), { timeout: 60_000 });
+  await expect(page.getByTestId('ov-relayer-balance')).toContainText(Number(h.relayer.balance).toFixed(2).slice(0, -1), { timeout: 60_000 });
+  await expect(page.getByTestId('ov-activity-rows').locator('a[href^="/check/"]').first()).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByTestId('ov-spark')).toBeVisible();
+  await page.getByTestId('ov-search').locator('input').fill('0x392f50b1955a827458A320205e19acf7C664f116');
+  await page.getByTestId('ov-search').locator('input').press('Enter');
+  await expect(page).toHaveURL(/\/check\/0x392f50b1955a827458A320205e19acf7C664f116$/);
+  await noSideScroll(page);
+});
+
+test('the landing story lives on /about and keeps its sections', async ({ page }) => {
+  await page.goto(`${BASE}/about`);
+  await expect(page.getByTestId('how-it-works')).toContainText('Send a link');
+  await expect(page.getByTestId('landing-qday')).toBeVisible();
+  await noSideScroll(page);
+});

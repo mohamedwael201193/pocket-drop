@@ -14,7 +14,7 @@ test('/api/stats counts v3 link #29, which was bound and claimed through hybrid 
 });
 
 test('the landing technical cards name the current API and contract calls', async ({ page }) => {
-  await page.goto(BASE);
+  await page.goto(`${BASE}/about`);
   await page.getByTestId('landing-tech').locator('summary').click();
   const deck = page.getByTestId('stacked-deck');
   await deck.scrollIntoViewIfNeeded();

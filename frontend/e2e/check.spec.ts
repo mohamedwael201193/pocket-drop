@@ -74,7 +74,7 @@ test('a guarded prod Q-Day bait from the examples; a non-Pocket address is expla
 });
 
 test('with the EVM window closed and hybrid relays, the app shows the relayer as live (no paused banner)', async ({ page }) => {
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/about`);
   await expect(page.getByTestId('landing-window')).toContainText(/ECDSA-only path closed|ECDSA window still open|Window live/, { timeout: 90_000 });
   await expect(page.getByText('Diana 9800 · live').first()).toBeVisible();
   await expect(page.getByTestId('relayer-banner')).toHaveCount(0);
@@ -104,6 +104,6 @@ test('/judges: the relayer item reads the live relay lane, the table has the hyb
 test('the landing card and /lab agree on how many v4 attacks the chain refused', async ({ page }) => {
   await page.goto(`${BASE}/lab`);
   const n = (await page.getByRole('heading', { level: 1 }).textContent())!.match(/(\d+) attacks/)![1];
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/about`);
   await expect(page.getByRole('link', { name: new RegExp(`All ${n} v4 attacks`) })).toBeVisible();
 });

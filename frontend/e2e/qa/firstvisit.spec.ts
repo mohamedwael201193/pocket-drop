@@ -10,7 +10,7 @@ const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 const fits = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
 
 test('landing: three plain steps, the Q-Day Drill section, test counts from evidence, jargon only under Technical details', async ({ page }) => {
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/about`);
   await expect(page).toHaveTitle(/Pocket Drop/);
   await expect(page.getByTestId('how-it-works')).toContainText('Send a link');
   await expect(page.getByTestId('how-it-works')).toContainText('quantum-safe Pocket');
