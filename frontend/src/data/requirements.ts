@@ -149,4 +149,29 @@ export const REQUIREMENTS: Requirement[] = [
     live: [{ label: 'CI runs on GitHub Actions', note: 'see the Actions tab of the repository' }],
     tests: ['forge test (178, 100% line and branch coverage of src/)', 'node frontend/scripts/reverify.mjs'],
   },
+  {
+    id: 'qoreseal',
+    requirement: 'QoreSeal: an ML-KEM-1024 encryption key registered on chain (MsgRegisterKEMKey, hybrid-signed) from a listed project account, read back and used to seal and open a note',
+    code: [
+      { label: 'qoreseal-key.mjs (register, read back, seal, open, refuse a wrong key)', path: 'tools/qoreseal-key.mjs' },
+      { label: 'evidence (LIVE check output)', path: 'frontend/evidence/v4/qoreseal/deployer-kem.json' },
+    ],
+    live: [
+      { label: 'deployer registers its ML-KEM-1024 key: code 0, pqc_hybrid_verify=verified, pqc_kem_key_registered', note: 'Cosmos tx D53D4B3B3568AEF0437295333A9E88F8EC50AEF608FE2EBF358FBAE5BD76191B at height 10625147; reverify.mjs section 10 also reads the key back from /qorechain/pqc/v1/kem' },
+    ],
+    tests: ['reverify.mjs section 10 (tx code, sender, hybrid status, on-chain key = recorded sha256)', 'qoreseal-key.mjs check (own key opens, random key: NOT_A_RECIPIENT, wrong purpose: DECRYPTION_FAILED)'],
+  },
+  {
+    id: 'relayer-refill',
+    requirement: 'The relayer cannot quietly run dry: a capped auto-refill job, shown on /api/health',
+    code: [
+      { label: 'refill.ts (plan, 24 h cap read from the chain)', path: 'backend/src/refill.ts' },
+      { label: 'refill-relayer.yml (every 3 h)', path: '.github/workflows/refill-relayer.yml' },
+    ],
+    live: [
+      { label: 'first refill: 0.8 QOR to the relayer, hybrid-signed MsgSend', note: 'Cosmos tx 2C3D0A59D299C953A94EC68280CA6C6FCC11424A8580765C5C4905D0DFED87C8; /api/health relayer.refill shows the last refill' },
+    ],
+    liveHealth: true,
+    tests: ['backend test/refill.test.ts (caps, reserve, 24 h sum, health block)'],
+  },
 ];
