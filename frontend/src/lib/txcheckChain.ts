@@ -1,5 +1,6 @@
 // Live chain reads for the transaction checker: Cosmos REST (through the key-less CORS proxy), EVM JSON-RPC and the PQC precompile.
-import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
+import { bytesToHex, encodeFunctionData, parseAbi, type Hex } from 'viem';
+import { decodeKeyStatusStrict } from './keystatus';
 import { pub } from './chain';
 import { COSMOS_REST } from './config';
 import { fromCosmosTx, isEvmHash, type CheckDeps, type FetchedTx } from './txcheck';
@@ -32,8 +33,9 @@ export const liveDeps: CheckDeps = {
   hasCode: async (address, block) => ((await pub.getCode({ address, blockNumber: block })) ?? '0x') !== '0x',
   keyOf: async (addr) => {
     const r = await pub.call({ to: PQC, data: encodeFunctionData({ abi: KS, functionName: 'pqcKeyStatus', args: [addr] }) });
-    const [registered, , pk] = decodeFunctionResult({ abi: KS, functionName: 'pqcKeyStatus', data: r.data ?? '0x' });
-    return registered && pk && pk !== '0x' ? pk : null;
+    // Hand-validated decode (offset 0x80, 0/1 booleans, exact 2592-byte ML-DSA-87 key, zero padding); anything else = no key.
+    const ks = decodeKeyStatusStrict(r.data ?? '0x');
+    return ks.ok && ks.registered && ks.pubkey.length > 0 ? bytesToHex(ks.pubkey) : null;
   },
   verify: async (pk, msg, sig) => { const { mldsa } = await import('@qorechain/pqc'); try { return mldsa.verify(pk, msg, sig); } catch { return false; } },
 };
