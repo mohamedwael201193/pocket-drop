@@ -29,6 +29,14 @@ describe('intruder file', () => {
     expect(f.succeeded).toBe(2);
     expect(f.refused).toBe(0);
   });
+  it('counts a mined tx once even if two source lists carry it, and reports distinct sending accounts', () => {
+    const f = intruderFile(state(
+      [row({ tx: '0xAA', from: '0xF1' }), row({ tx: '0xbb', from: '0xf1' }), row({ tx: '0xcc', from: '0xF2' })],
+      [row({ tx: 'aa', from: '0xF1', source: 'team-bot' })],
+    ));
+    expect(f.refused).toBe(3);
+    expect(f.fromAccounts).toBe(2);
+  });
   it('names a defence for every call the classifier can return', () => {
     for (const c of ['spend', 'setLimit', 'setGuardians', 'guardianFreeze', 'proposeRecovery', 'finalizeRecovery', 'executeQueued', 'drop.claim', 'fund', 'deploy']) expect(defenceFor(c).length).toBeGreaterThan(20);
     expect(defenceFor('guardianFreeze')).toMatch(/guardians/);

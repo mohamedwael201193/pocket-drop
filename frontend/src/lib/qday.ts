@@ -41,15 +41,27 @@ export function whenLine(r: Pick<IntruderRow, 'when' | 'height'>, fmt: (t: strin
   return `${t} · ${r.height ? `block ${r.height.toLocaleString('en-US')}` : 'not mined'}`;
 }
 
-export function intruderFile(s: Pick<QdayState, 'log'>): { rows: IntruderRow[]; refused: number; succeeded: number } {
-  const mined = [...s.log.onChain.rows, ...s.log.teamBot.rows].filter((r) => r.source !== 'team-setup');
+/**
+ * The refused-attempts list. Counting rules (metrics honesty): a mined transaction is counted once even if it shows up in
+ * more than one source list (deduplicated by tx hash); `refused` counts attempts, never people; `fromAccounts` is the
+ * number of distinct sending accounts behind the mined attempts (team-run and visitor-relayed rows share our relayer).
+ */
+export function intruderFile(s: Pick<QdayState, 'log'>): { rows: IntruderRow[]; refused: number; succeeded: number; fromAccounts: number } {
+  const seenTx = new Set<string>();
+  const mined = [...s.log.onChain.rows, ...s.log.teamBot.rows].filter((r) => r.source !== 'team-setup').filter((r) => {
+    const k = r.tx.toLowerCase().replace(/^0x/, '');
+    if (seenTx.has(k)) return false;
+    seenTx.add(k);
+    return true;
+  });
   const rows: IntruderRow[] = [
     ...mined.filter((r) => r.failed).map((r): IntruderRow => ({ key: r.tx, when: r.time ?? null, height: r.height, bait: r.bait, call: r.call, who: SRC[r.source] ?? r.source, where: r.lane === 'hybrid' ? 'on chain (hybrid lane)' : 'on chain (EVM)', result: r.error ?? 'reverted', defence: defenceFor(r.call), tx: r.tx })),
     ...s.log.relayerRefused.rows.filter((r) => !/WOULD SUCCEED/.test(r.error)).map((r): IntruderRow => ({ key: `${r.at}-${r.bait}-${r.call}`, when: r.at, height: null, bait: r.bait, call: r.call, who: r.via === 'qday' ? 'a visitor (Try it)' : 'a relay request', where: 'refused before sending', result: r.error, defence: defenceFor(r.call), tx: null })),
   ];
   rows.sort((a, b) => (b.height ?? Infinity) - (a.height ?? Infinity) || String(b.when).localeCompare(String(a.when)));
   const succeeded = mined.filter((r) => !r.failed && r.call !== 'fund' && r.call !== 'deploy').length + s.log.relayerRefused.rows.filter((r) => /WOULD SUCCEED/.test(r.error)).length;
-  return { rows, refused: rows.length, succeeded };
+  const fromAccounts = new Set(mined.filter((r) => r.failed && r.from).map((r) => r.from.toLowerCase())).size;
+  return { rows, refused: rows.length, succeeded, fromAccounts };
 }
 export interface QdayState {
   ok: true; label: string; network: string; keysPublished: boolean; baits: LiveBait[]; alarm: { raised: boolean; reasons: string[] };
