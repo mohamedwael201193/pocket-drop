@@ -1,8 +1,8 @@
 # Cryptographic inventory (CBOM)
 
-`cbom.json` is a CycloneDX 1.6 CBOM written by QoreScan Community 0.1.0 (`@qorechain/qorescan`, the official launcher) on 22 Nov 2026 at 05:14 Cairo (03:14 UTC). `agility.md` is QoreScan's crypto-agility draft generated from it. Re-create both with `sh docs/cbom/scan.sh` from the repository root. QoreScan only reads; it is an inventory aid, not a certification or an audit.
+`cbom.json` is a CycloneDX 1.6 CBOM written by QoreScan Community 0.1.0 (`@qorechain/qorescan`, the official launcher) on 23 Nov 2026 at 19:33 Cairo (17:33 UTC). The launcher is pinned as a devDependency in `tools/package.json`. `agility.md` is QoreScan's crypto-agility draft generated from it. Re-create both with `npm --prefix tools run cbom` (or `sh docs/cbom/scan.sh`) from the repository root. QoreScan only reads; it is an inventory aid, not a certification or an audit.
 
-What was scanned: live Diana testnet state over REST (chain parameters, the relayer account `qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl`), the Solidity sources in `contracts-v4/src` and `contracts/src`, and the TLS endpoints of the app, the API and the EVM RPC.
+What was scanned: live Diana testnet state over REST (chain parameters, the five qor1 accounts listed on the project page: main wallet `qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus`, deployer `qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq`, relayer `qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl`, sponsor `qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh`, QoreX test wallet `qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e`), the Solidity sources in `contracts-v4/src` and `contracts/src`, and the TLS endpoints of the app, the API and the EVM RPC.
 
 ## What it found, and what it means for Pocket Drop
 

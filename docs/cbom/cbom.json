@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:3340561e-8631-5241-b2df-6ddea33b63dc",
+  "serialNumber": "urn:uuid:b9501955-aba5-5a50-89c1-04c838c83eec",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-22T03:14:15Z",
+    "timestamp": "2026-11-23T17:33:07Z",
     "tools": {
       "components": [
         {
@@ -176,7 +176,7 @@
       },
       {
         "name": "qorescan:chain:protocol-features",
-        "value": "341 enabled at height 10530462 (31 PQC-related listed)"
+        "value": "341 enabled at height 10624855 (31 PQC-related listed)"
       },
       {
         "name": "qorescan:chain:pqc:hybrid-signature-mode",
@@ -216,7 +216,23 @@
       },
       {
         "name": "qorescan:chain:account-pqc-status",
+        "value": "qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus: hybrid key, dilithium5"
+      },
+      {
+        "name": "qorescan:chain:account-pqc-status",
+        "value": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq: hybrid key, dilithium5"
+      },
+      {
+        "name": "qorescan:chain:account-pqc-status",
         "value": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl: hybrid key, dilithium5"
+      },
+      {
+        "name": "qorescan:chain:account-pqc-status",
+        "value": "qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh: hybrid key, dilithium5"
+      },
+      {
+        "name": "qorescan:chain:account-pqc-status",
+        "value": "qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e: hybrid key, dilithium5"
       },
       {
         "name": "qorescan:solidity:files",
@@ -405,9 +421,29 @@
             "additionalContext": "EVM lane: transactions signed with ECDSA secp256k1 over Keccak-256; ecrecover (0x01), sha256 (0x02) and ripemd160 (0x03) precompiles"
           },
           {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "classical key of qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus"
+          },
+          {
             "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
             "symbol": "account.ecdsa_pubkey",
             "additionalContext": "classical key of qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "classical key of qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "classical key of qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "classical key of qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh"
           },
           {
             "location": "https://api-testnet.qore.host/qorechain/pqc/v1/params",
@@ -567,7 +603,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10530463"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10624856"
           }
         ]
       },
@@ -931,9 +967,29 @@
             "additionalContext": "EVM precompile pqcVerify (0x0000000000000000000000000000000000000a01) is active: signature verification from contracts"
           },
           {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus: dilithium5, key type hybrid, registered at height 10234917"
+          },
+          {
             "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
             "symbol": "account",
             "additionalContext": "PQC key of qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl: dilithium5, key type hybrid, registered at height 10347539"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq: dilithium5, key type hybrid, registered at height 10348295"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e: dilithium5, key type hybrid, registered at height 10424199"
+          },
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh: dilithium5, key type hybrid, registered at height 10411603"
           },
           {
             "location": "https://api-testnet.qore.host/qorechain/pqc/v1/params",
@@ -1733,6 +1789,36 @@
     },
     {
       "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-classical/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "name": "Account classical public key qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "source: stored"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+          "algorithmRef": "crypto/algorithm/ecdsa-secp256k1",
+          "size": 264,
+          "format": "SEC 1"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
       "bom-ref": "crypto/key/account-classical/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
       "name": "Account classical public key qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
       "evidence": {
@@ -1758,6 +1844,138 @@
         {
           "name": "qorescan:source",
           "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-classical/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "name": "Account classical public key qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "source: stored"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+          "algorithmRef": "crypto/algorithm/ecdsa-secp256k1",
+          "size": 264,
+          "format": "SEC 1"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-classical/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "name": "Account classical public key qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "source: auth_account"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+          "algorithmRef": "crypto/algorithm/ecdsa-secp256k1",
+          "size": 264,
+          "format": "SEC 1"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-classical/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+      "name": "Account classical public key qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+            "symbol": "account.ecdsa_pubkey",
+            "additionalContext": "source: stored"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+          "algorithmRef": "crypto/algorithm/ecdsa-secp256k1",
+          "size": 264,
+          "format": "SEC 1"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-pqc/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "name": "Account PQC public key qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus: dilithium5, key type hybrid, registered at height 10234917"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+          "algorithmRef": "crypto/algorithm/ml-dsa-87",
+          "size": 20736,
+          "format": "raw"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        },
+        {
+          "name": "qorescan:pqc:key-type",
+          "value": "hybrid"
+        },
+        {
+          "name": "qorescan:pqc:registry-id",
+          "value": "1"
+        },
+        {
+          "name": "qorescan:pqc:classical-key-source",
+          "value": "stored"
         }
       ]
     },
@@ -1805,6 +2023,132 @@
     },
     {
       "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-pqc/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "name": "Account PQC public key qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq: dilithium5, key type hybrid, registered at height 10348295"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+          "algorithmRef": "crypto/algorithm/ml-dsa-87",
+          "size": 20736,
+          "format": "raw"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        },
+        {
+          "name": "qorescan:pqc:key-type",
+          "value": "hybrid"
+        },
+        {
+          "name": "qorescan:pqc:registry-id",
+          "value": "1"
+        },
+        {
+          "name": "qorescan:pqc:classical-key-source",
+          "value": "stored"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-pqc/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "name": "Account PQC public key qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e: dilithium5, key type hybrid, registered at height 10424199"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+          "algorithmRef": "crypto/algorithm/ml-dsa-87",
+          "size": 20736,
+          "format": "raw"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        },
+        {
+          "name": "qorescan:pqc:key-type",
+          "value": "hybrid"
+        },
+        {
+          "name": "qorescan:pqc:registry-id",
+          "value": "1"
+        },
+        {
+          "name": "qorescan:pqc:classical-key-source",
+          "value": "auth_account"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-pqc/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+      "name": "Account PQC public key qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/account/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+            "symbol": "account",
+            "additionalContext": "PQC key of qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh: dilithium5, key type hybrid, registered at height 10411603"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+          "algorithmRef": "crypto/algorithm/ml-dsa-87",
+          "size": 20736,
+          "format": "raw"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        },
+        {
+          "name": "qorescan:pqc:key-type",
+          "value": "hybrid"
+        },
+        {
+          "name": "qorescan:pqc:registry-id",
+          "value": "1"
+        },
+        {
+          "name": "qorescan:pqc:classical-key-source",
+          "value": "stored"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
       "bom-ref": "crypto/key/active-validators/ed25519",
       "name": "Active validator consensus public keys (Ed25519)",
       "evidence": {
@@ -1812,7 +2156,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10530463"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10624856"
           }
         ]
       },
@@ -2058,8 +2402,16 @@
         "crypto/certificate/76b27b80a58027dc",
         "crypto/certificate/b10b6f00e609509e",
         "crypto/certificate/b780bccea3104338",
+        "crypto/key/account-classical/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
         "crypto/key/account-classical/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+        "crypto/key/account-classical/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+        "crypto/key/account-classical/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+        "crypto/key/account-classical/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+        "crypto/key/account-pqc/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
         "crypto/key/account-pqc/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+        "crypto/key/account-pqc/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+        "crypto/key/account-pqc/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+        "crypto/key/account-pqc/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
         "crypto/key/active-validators/ed25519",
         "crypto/key/certificate/103d368d8e8f3acc",
         "crypto/key/certificate/871a9194f4eed5b3",
@@ -2151,13 +2503,61 @@
       ]
     },
     {
+      "ref": "crypto/key/account-classical/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "dependsOn": [
+        "crypto/algorithm/ecdsa-secp256k1"
+      ]
+    },
+    {
       "ref": "crypto/key/account-classical/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
       "dependsOn": [
         "crypto/algorithm/ecdsa-secp256k1"
       ]
     },
     {
+      "ref": "crypto/key/account-classical/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "dependsOn": [
+        "crypto/algorithm/ecdsa-secp256k1"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-classical/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "dependsOn": [
+        "crypto/algorithm/ecdsa-secp256k1"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-classical/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+      "dependsOn": [
+        "crypto/algorithm/ecdsa-secp256k1"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-pqc/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
+      "dependsOn": [
+        "crypto/algorithm/ml-dsa-87"
+      ]
+    },
+    {
       "ref": "crypto/key/account-pqc/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+      "dependsOn": [
+        "crypto/algorithm/ml-dsa-87"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-pqc/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "dependsOn": [
+        "crypto/algorithm/ml-dsa-87"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-pqc/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
+      "dependsOn": [
+        "crypto/algorithm/ml-dsa-87"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-pqc/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
       "dependsOn": [
         "crypto/algorithm/ml-dsa-87"
       ]

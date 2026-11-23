@@ -2,7 +2,7 @@
 
 > **Disclaimer.** QoreScan output is an inventory aid. It is not a certification, an audit or a legal opinion, and it does not establish conformity with any regulation or standard. This draft is pre-filled only with facts the scan recorded; the organisation is responsible for completing, checking and adopting it.
 
-Prepared from CBOM `urn:uuid:3340561e-8631-5241-b2df-6ddea33b63dc` (2026-11-22T03:14:15Z). Statements are limited to what the scan recorded; everything else is marked to be completed.
+Prepared from CBOM `urn:uuid:b9501955-aba5-5a50-89c1-04c838c83eec` (2026-11-23T17:33:07Z). Statements are limited to what the scan recorded; everything else is marked to be completed.
 
 ## 1. Scope
 
@@ -18,15 +18,15 @@ Systems outside this scan: _To be completed._
 |---|---|---|
 | ECDSA P-256 | quantum-vulnerable | presented by the server (2 occurrences in the CBOM) |
 | ECDSA P-384 | quantum-vulnerable | presented by the server |
-| ECDSA secp256k1 | quantum-vulnerable | EVM lane: transactions signed with ECDSA secp256k1 over Keccak-256; ecrecover (0x01), sha256 (0x02) and ripemd160 (0x03) precompiles; classical key of qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl (3 occurrences in the CBOM) |
+| ECDSA secp256k1 | quantum-vulnerable | EVM lane: transactions signed with ECDSA secp256k1 over Keccak-256; ecrecover (0x01), sha256 (0x02) and ripemd160 (0x03) precompiles; classical key of qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus (7 occurrences in the CBOM) |
 | ECDSA with SHA-256 | quantum-vulnerable | presented by the server |
 | ECDSA with SHA-384 | quantum-vulnerable | presented by the server |
-| Ed25519 | quantum-vulnerable | 4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10530463 |
+| Ed25519 | quantum-vulnerable | 4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10624856 |
 | RSA PKCS#1 v1.5 with SHA-256 | quantum-vulnerable | presented by the server (7 occurrences in the CBOM) |
 | RSA-2048 | quantum-vulnerable | presented by the server (4 occurrences in the CBOM) |
 | RSA-4096 | quantum-vulnerable | presented by the server (2 occurrences in the CBOM) |
 | X25519MLKEM768 | hybrid | hybrid key exchange X25519MLKEM768 (3 occurrences in the CBOM) |
-| ML-DSA-87 | post-quantum | QoreChain pqcVerify precompile (0x0A01): ML-DSA-87 signature verification; QoreChain pqcKeyStatus precompile (0x0A02): reads an account's registered ML-DSA-87 key (5 occurrences in the CBOM) |
+| ML-DSA-87 | post-quantum | QoreChain pqcVerify precompile (0x0A01): ML-DSA-87 signature verification; QoreChain pqcKeyStatus precompile (0x0A02): reads an account's registered ML-DSA-87 key (9 occurrences in the CBOM) |
 | AES-128-GCM | symmetric | TLS_AES_128_GCM_SHA256 (3 occurrences in the CBOM) |
 | HKDF-SHA256 | symmetric | TLS_AES_128_GCM_SHA256 (3 occurrences in the CBOM) |
 | Keccak-256 | symmetric | Keccak-256 hash; EVM lane: transactions signed with ECDSA secp256k1 over Keccak-256; ecrecover (0x01), sha256 (0x02) and ripemd160 (0x03) precompiles (33 occurrences in the CBOM) |

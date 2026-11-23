@@ -1,0 +1,13 @@
+{
+  "name": "pocketdrop-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pocket Drop operator tools (read-only): QoreScan CBOM of the project on Diana testnet",
+  "type": "module",
+  "scripts": {
+    "cbom": "cd .. && sh docs/cbom/scan.sh"
+  },
+  "devDependencies": {
+    "@qorechain/qorescan": "0.1.0"
+  }
+}
