@@ -372,6 +372,16 @@ contract DropHandler is Fx {
         } catch {}
     }
 
+    /// Bind, confirm (Confirmed mode) and claim in one step, so claims (and attempted double claims) happen often even
+    /// though random warps usually outlive the 1 h bind window. Each step is the same guarded action as above.
+    function bindConfirmClaim(uint256 idSeed, uint256 rSeed) external {
+        if (drop.linkCount() == 0) return;
+        this.bind(idSeed, rSeed, 0);
+        this.confirm(idSeed, rSeed);
+        this.claim(idSeed, 1); // as the bound recipient
+        this.claim(idSeed, 1); // and again: must never pay twice
+    }
+
     function cancel(uint256 idSeed) external {
         uint256 c = drop.linkCount();
         if (c == 0) return;
@@ -411,7 +421,8 @@ contract DropInvariantTest is StdInvariant, V4Base {
         vm.deal(alice, 10_000 ether);
         h = new DropHandler(drop, alice, relayer, mallory);
         targetContract(address(h));
-        bytes4[] memory sels = new bytes4[](7);
+        bytes4[] memory sels = new bytes4[](8);
+        sels[7] = DropHandler.bindConfirmClaim.selector;
         sels[0] = DropHandler.create.selector;
         sels[1] = DropHandler.bind.selector;
         sels[2] = DropHandler.confirm.selector;
@@ -445,6 +456,31 @@ contract DropInvariantTest is StdInvariant, V4Base {
 
     function afterInvariant() public view {
         console2.log("drop links", drop.linkCount(), "claims", h.nClaims());
+    }
+
+    /// No permanent lock: from ANY reachable state, once every link has expired anyone can refund each live link, and
+    /// then the contract holds exactly the pull balances; withdrawing those empties it. Checked on a snapshot.
+    function invariant_every_live_link_can_be_unwound_after_expiry() public {
+        uint256 snap = vm.snapshotState();
+        vm.warp(block.timestamp + 30 days + 1);
+        for (uint256 id = 1; id <= drop.linkCount(); id++) {
+            PocketDrop.State s = drop.getLink(id).state;
+            if (s == PocketDrop.State.Open || s == PocketDrop.State.Bound || s == PocketDrop.State.Confirmed) {
+                vm.prank(mallory);
+                drop.refund(id); // must not revert
+                assertEq(drop.unpaidOf(id), 0);
+            }
+        }
+        assertEq(address(drop).balance, drop.totalPending());
+        address[6] memory who = [alice, relayer, mallory, address(uint160(0xb0b01)), address(uint160(0xb0b02)), address(uint160(0xb0b03))];
+        for (uint256 i; i < who.length; i++) {
+            if (drop.pending(who[i]) > 0) {
+                vm.prank(who[i]);
+                drop.withdraw();
+            }
+        }
+        assertEq(address(drop).balance, 0, "funds left with no owner");
+        vm.revertToState(snap);
     }
 
     function invariant_terminal_links_hold_nothing() public view {
@@ -560,6 +596,26 @@ contract PoolInvariantTest is StdInvariant, V4Base {
                 assertEq(p.taken, total);
             }
         }
+    }
+
+    /// No permanent lock: after expiry anyone can close every open pool; the contract then holds only pull balances.
+    function invariant_every_pool_can_be_closed_after_expiry() public {
+        uint256 snap = vm.snapshotState();
+        vm.warp(block.timestamp + 30 days + 1);
+        for (uint256 id = 1; id <= pool.poolCount(); id++) {
+            if (!pool.getPool(id).closed) {
+                vm.prank(mallory);
+                pool.close(id); // must not revert
+            }
+            assertEq(pool.unclaimedOf(id), 0);
+        }
+        assertEq(address(pool).balance, pool.totalPending());
+        if (pool.pending(host) > 0) {
+            vm.prank(host);
+            pool.withdraw();
+        }
+        assertEq(address(pool).balance, pool.totalPending());
+        vm.revertToState(snap);
     }
 
     function invariant_claims_and_closes_follow_the_rules() public view {
