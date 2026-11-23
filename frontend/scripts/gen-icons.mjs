@@ -18,6 +18,10 @@ const MAP = {
   Play: ['play', 'duotone', ''], Radio: ['broadcast', 'duotone', ''], Scale: ['scales', 'duotone', ''], Send: ['paper-plane-tilt', 'duotone', '', ['fill']],
   Share2: ['share-network', 'duotone', ''], ShieldCheck: ['shield-check', 'duotone', '', ['fill']], ShieldX: ['shield-slash', 'duotone', ''], ShieldAlert: ['shield-warning', 'duotone', ''],
   SkipForward: ['skip-forward', 'duotone', ''], TriangleAlert: ['warning', 'duotone', ''], Users: ['users', 'duotone', ''], Wallet: ['wallet', 'duotone', '', ['fill']],
+  // App shell (sidebar dashboard)
+  LayoutGrid: ['squares-four', 'duotone', '', ['fill']], Menu: ['list', 'bold', ''], X: ['x', 'bold', ''], Sidebar: ['sidebar-simple', 'duotone', ''],
+  Search: ['magnifying-glass', 'bold', ''], Info: ['info', 'duotone', ''], History: ['clock-counter-clockwise', 'duotone', ''], ArrowUpRight: ['arrow-up-right', 'bold', 'ph-arrow'],
+  Zap: ['lightning', 'duotone', '', ['fill']],
 };
 const jsx = (svg) => svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '')
   .replace(/([a-z]+)-([a-z])([a-z]*)=/g, (_, a, b, c) => `${a}${b.toUpperCase()}${c}=`)
