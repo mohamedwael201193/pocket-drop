@@ -47,6 +47,8 @@ export interface EnvStats {
   claimers: { pool: string; recipient: string; payTo: string; own: boolean; tx: Hex; block: bigint }[];
   /** events rebuilt from hybrid relays and merged in (null = the API index could not be read) */
   hybridEvents?: number | null;
+  /** Block number of every v4 event counted above (Pockets, drops, pools), ascending: the Overview sparkline. */
+  eventBlocks?: number[];
   /** legacy-key telemetry (item 10): deployed Pockets by deploy block against the v2 key release */
   keyEras: KeyEras;
 }
@@ -135,6 +137,7 @@ export async function envStats(env: Env): Promise<EnvStats> {
     drops: { created: created.length, bound: bound.length, confirmed: confirmed.length, claimed: claimed.length, cancelled: cancelled.length },
     dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent, claimers,
     hybridEvents: hybrid === null ? null : hybrid.length,
+    eventBlocks: [...deployed, ...created, ...bound, ...confirmed, ...claimed, ...cancelled, ...poolsMade, ...poolClaims].map((x) => Number(x.blockNumber)).sort((a, b) => a - b),
   };
 }
 

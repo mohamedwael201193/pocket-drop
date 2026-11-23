@@ -1,11 +1,12 @@
 import { Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import LandingPage from './pages/LandingPage';
+import OverviewPage from './pages/OverviewPage';
 import { Skeleton } from './components/ui';
 import { AccountProvider } from './lib/account';
 import { lazyPage } from './lib/lazyPage';
 
+const LandingPage = lazyPage(() => import('./pages/LandingPage'));
 const SendPage = lazyPage(() => import('./pages/SendPage'));
 const InboxPage = lazyPage(() => import('./pages/InboxPage'));
 const ReceivePage = lazyPage(() => import('./pages/ReceivePage'));
@@ -27,8 +28,10 @@ export default function App() {
         <Suspense fallback={<div className="mx-auto max-w-md p-8"><Skeleton className="h-8 w-48" /></div>}>
           <Routes>
             <Route element={<Layout />}>
+              {/* Overview: the dashboard home */}
+              <Route path="/" element={<OverviewPage />} />
+              <Route path="/about" element={<LandingPage />} />
               {/* Send tab */}
-              <Route path="/" element={<LandingPage />} />
               <Route path="/send" element={<SendPage />} />
               <Route path="/send/inbox" element={<InboxPage />} />
               <Route path="/dashboard" element={<Navigate to="/send" replace />} />
