@@ -3,6 +3,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { NETWORK, EVM_CHAIN_ID, COSMOS_CHAIN_ID, type Config } from './config.js';
 import { evmToQor } from './relayer.js';
 import { pqSignerKind } from './hybridRelayer.js';
+import { refillFunder, refillStatus } from './refill.js';
 
 /** Public facts of the isolated ML-DSA-87 signer (GET on it), so /api/health can show which key it holds. */
 export async function pqSignerFacts(cfg: Pick<Config, 'pqSignerUrl'>, f: typeof fetch = fetch): Promise<{ reachable: boolean; pqPublicKeyKeccak?: string; relayer?: string; signedThisHour?: number } | null> {
@@ -65,7 +66,7 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };
   const address = privateKeyToAccount(cfg.relayerKey).address;
   const qor = evmToQor(address);
-  const [bal, head, win, pqs] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f)]);
+  const [bal, head, win, pqs, rf] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f), refillStatus(cfg.rest, refillFunder(env), qor, Date.now(), f)]);
   const balance = bal.status === 'fulfilled' ? bal.value : null;
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
   const threshold = lowBalanceThresholdWei(env);
@@ -86,6 +87,8 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
     relayer: {
       address, cosmosAddress: qor, balanceWei: balance?.toString() ?? null, balance: balance === null ? null : formatEther(balance), unit: 'QOR',
       lowBalance: balWarn?.level === 'low', lowBalanceThreshold: formatEther(threshold),
+      /** auto-refill job: rules, the refill wallet, its last refill and the rolling 24 h total (read from the chain) */
+      refill: rf.status === 'fulfilled' ? rf.value : { configured: true, error: 'refill read failed' },
     },
     window,
     relay: {

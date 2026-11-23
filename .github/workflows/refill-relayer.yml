@@ -1,0 +1,52 @@
+name: refill-relayer
+# Relayer auto-refill (Diana testnet only). Every 3 hours: if the relayer holds less than 3 QOR, the dedicated refill
+# wallet (qor17ur48yaln4f2pemfzzh9j028uame2kgvhqfg2r, TEAM-RUN) sends a hybrid-signed (secp256k1 + ML-DSA-87) MsgSend
+# that brings it up to 4 QOR. Caps (backend/src/refill.ts): 1.5 QOR per send, 3 QOR in any rolling 24 h (summed from the
+# chain), and the refill wallet keeps a 0.3 QOR fee reserve. /api/health shows relayer.refill (last refill, 24 h total).
+# Secrets: REFILL_SECP_KEY, REFILL_PQC_SECRET (the refill wallet only; it holds no other funds and no relayer key).
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      force_qor:
+        description: 'Send this much now even if the relayer is not low (still capped per send and per 24 h). Empty = normal run.'
+        type: string
+        default: ''
+      dry_run:
+        description: 'Only read and plan'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: refill-relayer
+  cancel-in-progress: false
+jobs:
+  refill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npx esbuild scripts/refill-relayer.ts --bundle --platform=node --format=esm --packages=external --outfile=scripts/.refill-run.mjs --log-level=warning
+      - name: Refill if low
+        env:
+          REFILL_SECP_KEY: ${{ secrets.REFILL_SECP_KEY }}
+          REFILL_PQC_SECRET: ${{ secrets.REFILL_PQC_SECRET }}
+          FORCE_QOR: ${{ inputs.force_qor }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$REFILL_SECP_KEY" ] || [ -z "$REFILL_PQC_SECRET" ]; then echo "::warning::REFILL_SECP_KEY / REFILL_PQC_SECRET are not set; nothing sent"; exit 0; fi
+          ARGS=""
+          if [ -n "$FORCE_QOR" ]; then ARGS="--force-qor $FORCE_QOR"; fi
+          if [ "$DRY" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/.refill-run.mjs $ARGS
+      - name: Public health after the run
+        run: curl -fsS https://pocketdrop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('relayer',h.relayer?.balance,'low',h.relayer?.lowBalance,'refill',JSON.stringify(h.relayer?.refill??null))})"

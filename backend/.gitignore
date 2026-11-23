@@ -6,3 +6,4 @@ coverage/
 
 .vercel
 .env*
+scripts/.refill-run.mjs
