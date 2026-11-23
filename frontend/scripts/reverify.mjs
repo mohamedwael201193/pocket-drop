@@ -245,6 +245,26 @@ try {
     `LIVE: isolated signer ${SIGNER} signs for ${g?.relayer ?? '?'} with PQ key ${String(g?.pqPublicKeyKeccak).slice(0, 12)}…, the key the API expects`);
 } catch (e) { check(false, `isolated signer not readable (${e.message})`); }
 tally['hybrid relays'] = { evm: 0, cosmos: hybridN };
+// 10. QoreSeal key (evidence/v4/qoreseal/deployer-kem.json) and relayer refills (evidence/v4/refill/refills.json)
+try {
+  section('QoreSeal ML-KEM-1024 key and relayer refills');
+  b = { e: evmTxs, c: cosmosTxs };
+  const K = JSON.parse(fs.readFileSync(path.join(ev, 'qoreseal', 'deployer-kem.json'), 'utf8'));
+  await cosmosCheck(K.registerTx, `MsgRegisterKEMKey from ${K.account} (hybrid-signed)`);
+  const t = (await (await fetch(`${REST}/cosmos/tx/v1beta1/txs/${K.registerTx}`, { headers: { 'user-agent': 'curl/8' } })).json()).tx_response;
+  const m = (t?.tx?.body?.messages ?? []).find((x) => x['@type'] === '/qorechain.pqc.v1.MsgRegisterKEMKey');
+  const hy = (t?.events ?? []).filter((e) => e.type === 'pqc_hybrid_verify').flatMap((e) => e.attributes).find((a) => a.key === 'status')?.value;
+  check(!!m && m.sender === K.account && hy === 'verified', `MsgRegisterKEMKey sender ${m?.sender ?? '?'}, pqc_hybrid_verify ${hy ?? 'missing'}`);
+  const kem = await (await fetch(`${REST}/qorechain/pqc/v1/kem/${K.account}`, { headers: { 'user-agent': 'curl/8' } })).json();
+  const pk = kem?.key?.public_key ? Buffer.from(kem.key.public_key, 'base64') : null;
+  const { createHash } = await import('node:crypto');
+  const sha = pk ? createHash('sha256').update(pk).digest('hex') : null;
+  check(kem?.found === true && pk?.length === 1568 && sha === K.registry.publicKeySha256, `LIVE: ${K.account} has an ML-KEM-1024 key on chain (${pk?.length ?? 0} bytes, sha256 ${String(sha).slice(0, 12)}… = recorded)`);
+  const R = JSON.parse(fs.readFileSync(path.join(ev, 'refill', 'refills.json'), 'utf8'));
+  for (const row of R.txs) await cosmosCheck(row.hash, `refill: ${row.step}`, null, row.expectCode ?? 0);
+  mark('QoreSeal key and refills', b);
+} catch (e) { check(false, `QoreSeal / refill evidence not readable (${e.message})`); }
+
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
   section(name);

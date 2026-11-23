@@ -1,0 +1,11 @@
+{
+  "label": "RECORDED",
+  "note": "Relayer auto-refill (backend/src/refill.ts, .github/workflows/refill-relayer.yml). The refill wallet is TEAM-RUN; its keys are not in this repo. Every row is a hybrid-signed (secp256k1 + ML-DSA-87) tx on Diana testnet.",
+  "funder": "qor17ur48yaln4f2pemfzzh9j028uame2kgvhqfg2r",
+  "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+  "txs": [
+    { "hash": "7982974FFCE83475CF1660BC71A5AB3C4D9D48E403A0782020364C18A6FC367D", "step": "team burner wallet funds the refill wallet with 3 QOR (setup)", "expectCode": 0 },
+    { "hash": "6539F50705728FA08FC07D644E2A037D666875FD5D8FD11E2D300864BB1B5195", "step": "refill wallet registers its ML-DSA-87 key with proof of possession (setup)", "expectCode": 0 },
+    { "hash": "2C3D0A59D299C953A94EC68280CA6C6FCC11424A8580765C5C4905D0DFED87C8", "step": "first refill: 0.8 QOR to the relayer (manual run of the same job), relayer 3.227 -> 4.027 QOR", "expectCode": 0 }
+  ]
+}
