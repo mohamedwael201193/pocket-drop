@@ -43,8 +43,23 @@ export function buildV4Env(env: V4Env, l: Record<EvName, EvLog[]>, own: OwnMap) 
   const dropRecipients = S(); for (const b of l.LinkBound) bump(dropRecipients, String(b.args.recipient));
   const poolHosts = S(); for (const p of l.PoolCreated) bump(poolHosts, via(p.args.host));
   const poolClaimers = S(); for (const c of l.PoolClaimed) bump(poolClaimers, String(c.args.recipient));
+  // Distinct accounts (metrics honesty): the per-role counts above count EVENTS (one per Pocket, link, rebind, slot).
+  // These count each address once per role, and `all` counts each address once across every role.
+  const roleAddrs: Record<'pocketOwners' | 'dropSenders' | 'dropRecipients' | 'poolHosts' | 'poolClaimers', string[]> = {
+    pocketOwners: l.PocketDeployed.map((d) => String(d.args.owner)),
+    dropSenders: l.LinkCreated.map((c) => via(c.args.sender)),
+    dropRecipients: l.LinkBound.map((b) => String(b.args.recipient)),
+    poolHosts: l.PoolCreated.map((p) => via(p.args.host)),
+    poolClaimers: l.PoolClaimed.map((c) => String(c.args.recipient)),
+  };
+  const distinctSplit = (xs: string[]): Split => { const s = S(); for (const a of new Set(xs.map((x) => x.toLowerCase()))) bump(s, a); return s; };
+  const distinctAccounts = {
+    ...(Object.fromEntries(Object.entries(roleAddrs).map(([k, v]) => [k, distinctSplit(v)])) as Record<keyof typeof roleAddrs, Split>),
+    all: distinctSplit(Object.values(roleAddrs).flat()),
+    note: 'Each address counted once per role; `all` counts each address once across all roles. Addresses, not people.',
+  };
   return {
-    env, pockets: l.PocketDeployed.length, pocketsOwn,
+    env, pockets: l.PocketDeployed.length, pocketsOwn, distinctAccounts,
     drops: { created: l.LinkCreated.length, bound: l.LinkBound.length, confirmed: l.LinkConfirmed.length, claimed: l.LinkClaimed.length, cancelled: l.LinkCancelled.length },
     dropSenders, dropRecipients, pools: { created: l.PoolCreated.length, slotsClaimed: l.PoolClaimed.length }, poolHosts, poolClaimers,
   };
