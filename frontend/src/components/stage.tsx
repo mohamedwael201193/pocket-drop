@@ -74,18 +74,18 @@ export function PocketObject({ className }: { className?: string }) {
   );
 }
 
-/** Full-bleed dark band that opens a page. Content aligns with the page column below it (--page-w set by <Page>). */
+/** The page header: a white card at the top of the page column (light dashboard). Same props as the old dark band. */
 export function Stage({ eyebrow, title, children, action, object = true, live, testId }: { live?: boolean; eyebrow?: ReactNode; title: ReactNode; children?: ReactNode; action?: ReactNode; object?: boolean; testId?: string }) {
   return (
-    <header data-testid={testId} className="stage relative left-1/2 mb-8 -mt-8 w-screen -translate-x-1/2 sm:mb-10 sm:-mt-12">
-      <div className="relative z-[1] mx-auto flex items-center gap-6 px-4 py-9 sm:px-6 sm:py-12 lg:px-8" style={{ maxWidth: 'calc(var(--page-w, 64rem))' }}>
-        <motion.div className="min-w-0 flex-1" initial={{ y: 12 }} animate={{ y: 0 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-          {eyebrow && <div className={cx('flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-invMuted [overflow-wrap:anywhere]', object && 'pr-[84px] sm:pr-0')}>{live && <span className="live-dot animate-pulseDot" aria-hidden />}{eyebrow}</div>}
-          <h1 className={cx(object && 'pr-[72px] sm:pr-0', 'mt-3 font-display text-[2.5rem] font-medium leading-[1.02] tracking-[-0.035em] text-stone-50 sm:text-[3.5rem]')}>{title}</h1>
-          {children && <div className="mt-4 max-w-2xl text-[15px] leading-relaxed text-stone-300 sm:text-base">{children}</div>}
+    <header data-testid={testId} className="stage relative mb-6 -mt-2 sm:mb-8 sm:-mt-4">
+      <div className="relative z-[1] flex items-center gap-6 px-5 py-7 sm:px-8 sm:py-9">
+        <motion.div className="min-w-0 flex-1" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+          {eyebrow && <div className={cx('flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-emerald-800 [overflow-wrap:anywhere]', object && 'pr-[84px] sm:pr-0')}>{live && <span className="live-dot animate-pulseDot" aria-hidden />}{eyebrow}</div>}
+          <h1 className={cx(object && 'pr-[72px] sm:pr-0', 'mt-2 font-display text-[2rem] font-semibold leading-[1.05] tracking-[-0.035em] text-zinc-950 sm:text-[2.75rem]')}>{title}</h1>
+          {children && <div className="mt-3 max-w-2xl text-[15px] leading-relaxed text-zinc-600">{children}</div>}
           {action && <div className="mt-6">{action}</div>}
         </motion.div>
-        {object && <PocketObject className="pointer-events-none absolute right-3 top-5 h-20 w-20 shrink-0 sm:static sm:order-last sm:h-40 sm:w-40 md:h-52 md:w-52 lg:h-60 lg:w-60" />}
+        {object && <PocketObject className="pointer-events-none absolute right-3 top-4 h-16 w-16 shrink-0 sm:static sm:order-last sm:h-32 sm:w-32 lg:h-40 lg:w-40" />}
       </div>
     </header>
   );

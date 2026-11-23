@@ -17,6 +17,7 @@ import { deliveryFeeWei, deliverySteps } from '../lib/fees';
 import { explainError } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { useSponsorStatus } from '../lib/sponsor';
+import { Celebrate } from '../components/alive';
 
 export function SendTabs() {
   const cls = ({ isActive }: { isActive: boolean }) => cx('flex-1 rounded-full px-4 py-2 text-center text-sm font-medium', isActive ? 'bg-zinc-900 text-stone-100' : 'text-zinc-600');
@@ -107,6 +108,7 @@ export default function SendPage() {
       <PageTitle eyebrow="Send" title="Send QOR from your Pocket">Your friend opens the link and the QOR lands in a Pocket made for them. They need no wallet, and you need nothing but this page.</PageTitle>
       <details className="-mt-4 mb-6 text-xs text-zinc-600" data-testid="send-tech"><summary className="cursor-pointer">Technical details</summary><p className="mt-2 leading-relaxed">Each drop is an intent signed in this browser with your ML-DSA-87 key; the chain checks the signature with its post-quantum precompile. A relayer submits it and pays the gas, so there is no EVM window or activation step for you.</p></details>
       <SendTabs />
+      {made && <Celebrate once={`made-${made.kind}-${made.id}`} />}
       <div className="space-y-5">
         <StepCard n={1} title="Your Pocket" done={ready && !!pv && pv.balance > 0n} testId="step-account">
           {!a.root ? <ConnectChoices /> : (
