@@ -43,6 +43,11 @@ test('overview: every card carries a source label and the numbers match the live
   await expect(page.getByTestId('ov-pocket-empty')).toBeVisible(); // a fresh browser holds no key
   await expect(page.getByTestId('ov-check-hybrid')).toHaveAttribute('data-state', h.relay?.mode === 'hybrid' ? 'ok' : 'no', { timeout: 60_000 });
   await expect(page.getByTestId('ov-check-registered')).toHaveAttribute('data-state', 'nokey');
+  if (h.relay?.mode === 'hybrid') { // a fresh browser: 1 of 3, never 100%
+    await expect(page.getByTestId('ov-gauge')).toHaveAttribute('data-pct', '33');
+    await expect(page.getByTestId('ov-gauge-ratio')).toHaveText('1 of 3');
+  }
+  await expect(page.getByTestId('ov-create-key')).toHaveAttribute('href', '/send');
   const hybrid = s.v4?.prod?.hybridRelayEvents;
   if (typeof hybrid === 'number') await expect(page.getByTestId('ov-hybrid')).toHaveAttribute('data-value', String(hybrid), { timeout: 60_000 });
   await expect(page.getByTestId('ov-relayer-balance')).toContainText(Number(h.relayer.balance).toFixed(2).slice(0, -1), { timeout: 60_000 });
@@ -52,6 +57,12 @@ test('overview: every card carries a source label and the numbers match the live
   await page.getByTestId('ov-search').locator('input').press('Enter');
   await expect(page).toHaveURL(/\/check\/0x392f50b1955a827458A320205e19acf7C664f116$/);
   await noSideScroll(page);
+});
+
+test('/proof shows the CBOM run date from the data; page headers carry the light glass Pocket', async ({ page }) => {
+  await page.goto(`${BASE}/proof`);
+  await expect(page.getByTestId('proof-cbom-date')).toHaveText('Last run: 23 Nov 2026.');
+  await expect(page.getByTestId('pocket-object').first()).toHaveAttribute('data-mode', 'svg');
 });
 
 test('the landing story lives on /about and keeps its sections', async ({ page }) => {

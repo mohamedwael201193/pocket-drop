@@ -5,12 +5,15 @@ import { PROOF_ITEMS } from '../components/Layout';
 import { INST } from '../lib/v4';
 import { SOURCE_URL, addrUrl } from '../lib/config';
 import { useHealth } from '../lib/queries';
+import CBOM_META from '../data/cbom-meta.json';
+
+const CBOM_DATE = new Date(CBOM_META.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
 const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday': 'LIVE', '/radar': 'LIVE', '/judges': 'RECORDED', '/check': 'LIVE' };
 
 const CONTRACTS = [['Pocket router', 'router'], ['Pocket factory', 'factory'], ['Drop links', 'drop'], ['Drop pools', 'pool']] as const;
 
-/** From docs/cbom/cbom.json (QoreScan 0.1.0, 22 Nov 2026). */
+/** From docs/cbom/cbom.json (QoreScan 0.1.0; run date in src/data/cbom-meta.json). */
 const CBOM_ROWS: [string, string, string][] = [
   ['ML-DSA-87 (FIPS 204)', 'post-quantum', 'Every Pocket action, bind, claim, freeze and recovery; the relayer\'s second signature'],
   ['X25519MLKEM768', 'hybrid', 'TLS key exchange of the app, the API and the EVM RPC'],
@@ -61,8 +64,8 @@ export default function ProofPage() {
       </section>
 
       <section className="mt-5 space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-cbom">
-        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Every algorithm we depend on</h2><SourceBadge kind="RECORDED" title="QoreScan Community 0.1.0 run on 22 Nov 2026; re-run it with docs/cbom/scan.sh" /></div>
-        <p className="text-sm text-zinc-700">A cryptographic bill of materials (CycloneDX 1.6) written by the official QoreScan from the live chain state, our contracts and our three endpoints. It is an inventory, not an audit.</p>
+        <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Every algorithm we depend on</h2><SourceBadge kind="RECORDED" title={`${CBOM_META.tool} run on ${CBOM_DATE}; re-run it with docs/cbom/scan.sh`} /></div>
+        <p className="text-sm text-zinc-700">A cryptographic bill of materials (CycloneDX 1.6) written by the official QoreScan from the live chain state, our contracts and our three endpoints. It is an inventory, not an audit. <span data-testid="proof-cbom-date">Last run: {CBOM_DATE}.</span></p>
         <ul className="divide-y divide-zinc-100 text-sm">
           {CBOM_ROWS.map(([alg, cls, where]) => (
             <li key={alg} className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-baseline sm:gap-3">
