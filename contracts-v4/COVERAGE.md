@@ -1,8 +1,8 @@
 # Coverage (src/ only)
 
 `FOUNDRY_PROFILE=coverage forge coverage --report summary --no-match-coverage "test/"` (solc 0.8.28, optimizer off so source maps are exact).
-100% line, statement, branch and function coverage on every file in `src/`. Tests: 145 unit, 18 fuzz, 16 invariant functions (167 Foundry tests; the 16 invariants run as 4 stateful suites). New: guardian freeze + unanimous recovery (19 unit, 4 fuzz, 5 invariants incl. "no spend or execute succeeds while frozen").
-CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 runs x depth 50): 167 passed, 0 failed.
+100% line, statement, branch and function coverage on every file in `src/`. Tests: 154 unit, 20 fuzz, 18 invariant functions (178 Foundry tests; the 18 invariants run as 4 stateful suites). Added 23 Nov 2026 (tests only, `src/` unchanged so coverage is unchanged): `KeyStatusVectors.t.sol`, `Hardening.t.sol`, and two liveness invariants (every live link / pool unwinds after expiry). New: guardian freeze + unanimous recovery (19 unit, 4 fuzz, 5 invariants incl. "no spend or execute succeeds while frozen").
+CI profile (`FOUNDRY_PROFILE=ci forge test`: fuzz 10,000 runs, invariants 256 runs x depth 50): 178 passed, 0 failed (23 Nov 2026).
 
 | File                              | % Lines           | % Statements      | % Branches        | % Funcs         |
 | src/DropPool.sol                  | 100.00% (56/56)   | 100.00% (91/91)   | 100.00% (20/20)   | 100.00% (8/8)   |

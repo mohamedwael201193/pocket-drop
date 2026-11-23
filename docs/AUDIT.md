@@ -82,6 +82,19 @@ QCAI only computes its "Quantum readiness" score for QoreChain-native contracts.
 | [`PqcLib.checkKey` / `requireKey`](../contracts-v4/src/PqcLib.sol#L137-L156) | `pqcKeyStatus` | The key must be registered, ML-DSA-87, have possession proven and, when a hash is pinned, match it. `requireKey` reverts with `KeyUnavailable`, `NotRegistered`, `UnsupportedAlgo`, `PossessionNotProven` or `KeyMismatch`. | `test_checkKey_codes`, `test_requireKey_reverts_per_code` |
 | [`PqcLib.verifyFor` / `verifyForKey`](../contracts-v4/src/PqcLib.sol#L160-L174) | both | Reads the account's registered key with `checkKey`, then verifies with `verify`. Returns false (no revert) if the key is missing, unproven, of another algorithm, mismatched with the pinned hash, or the signature is wrong. | `test_verifyFor_uses_registered_key_and_exact_message` |
 
+**Added 23 Nov 2026 (tests only, no source change, the audited bytecode is unchanged).**
+
+| Property | Where | Tests |
+|---|---|---|
+| `keyStatus` on 18 shared raw-return vectors, two of them RECORDED from the Diana precompile (block 10,624,498): canonical layout is offset 0x80 and a 2,592-byte key | `contracts-v4/test/fixtures/keystatus/` | `KeyStatusVectors.t.sol`: `test_every_vector_decodes_as_recorded`, `test_live_diana_return_is_canonical_and_usable`, `test_live_key_without_possession_is_refused` |
+| Owner key re-read from `pqcKeyStatus` on every intent: withdrawn PoP, other algorithm, unregistered, rotated registry key, missing key or verify precompile all refuse without consuming the nonce | `PqcLib.verifyForKey` via `PocketVault._auth` | `Hardening.t.sol`: `test_owner_key_status_is_re_read_on_every_intent`, `test_erc1271_applies_the_same_key_rules`, `test_missing_key_precompile_fails_closed`, `test_missing_verify_precompile_fails_closed` |
+| New owner key must be proven at proposal and at finalization (threshold and unanimous) | `requireKey(newOwner, newKeyHash)` | `test_threshold_recovery_needs_a_proven_new_key_at_proposal_and_finalization`, `test_unanimous_recovery_needs_a_proven_new_key_at_proposal_and_finalization` |
+| Expired and replayed intents never execute (any time after the deadline; any time after first use) | `_auth` | `testFuzz_expired_intent_never_executes`, `testFuzz_replayed_intent_never_executes` |
+| No permanent lock: every live link and every pool unwinds after expiry from any reachable state | `PocketDrop.refund`, `DropPool.close`, `Payout.withdraw` | `invariant_every_live_link_can_be_unwound_after_expiry`, `invariant_every_pool_can_be_closed_after_expiry` |
+| Signed bytes identical across the contracts' fixtures, the app and `@qorechain/qoresign`; all 596 fixture signatures reproduced byte for byte by qoresign | `PqcLib.pqMessage`, `frontend/src/lib/intents.ts` | `frontend/test/qoresign.diff.test.ts` |
+
+Known limit (hygiene, not a finding we can exploit): `PqcLib` leaves the 4,627 / 2,592 byte sizes to the precompile and the pinned key hash, and accepts a key-status offset above 0x80. The API checks the sizes before relaying (`backend/src/pqPreflight.ts`). Changing `PqcLib` would need a redeploy and a new QCAI run; see `docs/THREAT_MODEL.md` section 5.
+
 ### 5.2 PocketVault (the smart account)
 
 | Call site | Calls | What it protects | Tests | Live on Diana |
