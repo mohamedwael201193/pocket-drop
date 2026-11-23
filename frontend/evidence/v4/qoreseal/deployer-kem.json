@@ -1,0 +1,26 @@
+{
+  "label": "LIVE",
+  "network": "Diana testnet (qorechain-diana)",
+  "checkedAt": "2026-11-23T17:45:43.038Z",
+  "account": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+  "role": "deployer (listed on the project page)",
+  "registry": {
+    "registered": true,
+    "algorithm": "mlkem1024",
+    "registeredHeight": "10625147",
+    "publicKeyBytes": 1568,
+    "publicKeySha256": "15d8b0d04c73ed91ef284fcd533b13f3c4ff40ed0ab5dd821cc9acc3c4d7bcd2",
+    "matchesDerivedKey": true
+  },
+  "sealTest": {
+    "mode": "mlkem (ML-KEM-1024 only)",
+    "purpose": "pocketdrop-note",
+    "envelopeBytes": 1780,
+    "envelopeSha256": "0c9f25b9d7b92e15d2accd28cf4039d98f0eda126d91c476a894ae7a0a327c5a",
+    "envelopeTextPrefix": "qoreseal:UVNFTAECAgEBAKj",
+    "openedWithOwnKey": true,
+    "wrongKey": "refused: NOT_A_RECIPIENT",
+    "wrongPurpose": "refused: DECRYPTION_FAILED"
+  },
+  "registerTx": "D53D4B3B3568AEF0437295333A9E88F8EC50AEF608FE2EBF358FBAE5BD76191B"
+}

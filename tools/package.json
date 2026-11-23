@@ -8,6 +8,9 @@
     "cbom": "cd .. && sh docs/cbom/scan.sh"
   },
   "devDependencies": {
-    "@qorechain/qorescan": "0.1.0"
+    "@cosmjs/stargate": "^0.39.0",
+    "@qorechain/qorescan": "0.1.0",
+    "@qorechain/qoreseal": "^0.1.0",
+    "@qorechain/sdk": "^0.14.0"
   }
 }
