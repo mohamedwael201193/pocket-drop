@@ -31,9 +31,9 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 
 | Number | Label | Source |
 |---|---|---|
-| 468 checks passed, 0 failed: 316 EVM and 95 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`) | RECORDED, 22 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| 167 Foundry tests (unit, fuzz and invariant); 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
-| 130 frontend and 177 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 22 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
+| 483 checks passed, 0 failed: 318 EVM and 106 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`) | RECORDED, 23 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| 178 Foundry tests (unit, fuzz and invariant); 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
+| 185 frontend and 203 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 23 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
 | 103 recorded live steps on the v4 contracts, 31 of them attacks that reverted on chain or were refused by the chain | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
 | QCAI audit: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
@@ -104,7 +104,7 @@ Two-stage QCAI audit: Stage 1 scored 82 (19 Nov 2026) and Stage 2 scored 78 (20 
 ## Run it
 
 ```bash
-cd contracts-v4 && forge test                  # 167 tests
+cd contracts-v4 && forge test                  # 178 tests
 cd backend && npm ci && npm test               # relayer unit tests
 cd frontend && npm ci && npm test              # app unit tests
 cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on Diana

@@ -19,7 +19,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'intent signed by another proven key: reverted BadSignature', hash: '0x312c0fe1ecfe1a0159618152ade48639139671adbda5336b4132d06f2a830dcb' },
       { label: 'replayed intent: reverted BadSignature', hash: '0x54d99c1e8b04744df5a0360a5dd7b0a02b3066d7f39794a5af97f90ba6957fec' },
     ],
-    tests: ['test_wrong_key_wrong_prefix_raw_digest_are_rejected', 'test_replayed_intent_reverts', 'test_verify_false_variants', 'test_verify_passes_exact_calldata'],
+    tests: ['test_wrong_key_wrong_prefix_raw_digest_are_rejected', 'test_replayed_intent_reverts', 'test_verify_false_variants', 'test_verify_passes_exact_calldata', 'test_missing_verify_precompile_fails_closed', 'testFuzz_expired_intent_never_executes', 'testFuzz_replayed_intent_never_executes', 'frontend test/qoresign.diff.test.ts (596 fixture signatures reproduced byte for byte by @qorechain/qoresign)', 'backend test/pqPreflight.test.ts (4,627-byte signatures and 2,592-byte keys checked before relaying)'],
   },
   {
     id: 'pqc-key-status',
@@ -33,7 +33,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'claim into a key without proof of possession: reverted PossessionNotProven', hash: '0x4664a69a207575641d38bcf3af724d9f81753c275dd8312c2a66fb3b18be5b5b' },
       { label: 'claim into an account with no PQ key: reverted NotRegistered', hash: '0x634daabad61a5506cee38d3d7e262a9fd83d901e39445fd1eb07ce87a2073e26' },
     ],
-    tests: ['test_claim_key_requirements', 'test_account_without_pop_cannot_claim', 'test_deploy_requires_registered_proven_owner_key', 'test_requireKey_reverts_per_code'],
+    tests: ['test_claim_key_requirements', 'test_account_without_pop_cannot_claim', 'test_deploy_requires_registered_proven_owner_key', 'test_requireKey_reverts_per_code', 'test_owner_key_status_is_re_read_on_every_intent', 'test_every_vector_decodes_as_recorded', 'test_live_diana_return_is_canonical_and_usable', 'frontend test/keystatus.test.ts (strict decoder, same vectors)'],
   },
   {
     id: 'key-registration',
@@ -99,7 +99,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'unanimous recovery finalized, owner replaced', hash: '0x97aa69e5597e70fcccd49ad012f85b4ab8bf29ff010317186c5c99135ee05494' },
       { label: 'old key spends after recovery: reverted BadSignature', hash: '0x3aee0b0293126ddb74e2698b733ee83edbb2f9f5881327275fc8837f3af54f4c' },
     ],
-    tests: ['test_stolen_key_scenario_end_to_end', 'test_unanimous_recovery_old_key_cannot_veto', 'test_owner_key_cannot_lift_a_freeze', 'e2e v4.spec.ts "d. Guardian freeze on a LAB Pocket"'],
+    tests: ['test_stolen_key_scenario_end_to_end', 'test_unanimous_recovery_old_key_cannot_veto', 'test_owner_key_cannot_lift_a_freeze', 'test_threshold_recovery_needs_a_proven_new_key_at_proposal_and_finalization', 'test_unanimous_recovery_needs_a_proven_new_key_at_proposal_and_finalization', 'e2e v4.spec.ts "d. Guardian freeze on a LAB Pocket"'],
   },
   {
     id: 'link',
@@ -112,7 +112,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'thief swaps the recipient in a signed bind: reverted BadLinkSignature', hash: '0xf72a9a098d5ea3708302968a6caa712b04e3982870d2c7e34e37c28381996318' },
       { label: 'claim lands in the recipient Pocket', hash: '0x94d872a4b94ed9307bd29933161027891ca48e5b6d81602b0028a6b9c038a275' },
     ],
-    tests: ['test_bind_rejects', 'test_digests_commit_to_everything', 'test_full_journey_sender_pocket_to_recipient_pocket_through_the_router'],
+    tests: ['test_bind_rejects', 'test_digests_commit_to_everything', 'test_full_journey_sender_pocket_to_recipient_pocket_through_the_router', 'invariant_every_live_link_can_be_unwound_after_expiry (V4.invariant.t.sol)', 'invariant_a_link_pays_at_most_once (V4.invariant.t.sol)'],
   },
   {
     id: 'qorex',
@@ -147,6 +147,6 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'reverify.mjs', path: 'frontend/scripts/reverify.mjs' },
     ],
     live: [{ label: 'CI runs on GitHub Actions', note: 'see the Actions tab of the repository' }],
-    tests: ['forge test (167, 100% line and branch coverage of src/)', 'node frontend/scripts/reverify.mjs'],
+    tests: ['forge test (178, 100% line and branch coverage of src/)', 'node frontend/scripts/reverify.mjs'],
   },
 ];
