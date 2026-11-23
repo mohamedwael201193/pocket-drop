@@ -9,6 +9,7 @@ import { reply, type HttpResult } from './handlers.js';
 import { V4_INSTANCES, type V4Env } from './v4.js';
 import { formatIssues, routeSchema } from './validation.js';
 import { noteRouteRefusal } from './qday.js';
+import { pqPreflight } from './pqPreflight.js';
 
 export interface RouteDeps {
   cfg: Config;
@@ -72,6 +73,15 @@ export async function handleRoute(rawBody: unknown, ip: string, d: RouteDeps): P
   const key = (v.pocket ? `p:${v.pocket.owner}` : `t:${v.target}`).toLowerCase();
   const tHit = await d.limiter.hit('route:target', key, RULES.routeTarget);
   if (!tHit.ok) return reply(429, { ok: false, error: { name: 'RateLimited', message: `Too many requests for this Pocket. Retry in ${tHit.retryAfterSec}s.` } }, { 'retry-after': String(tHit.retryAfterSec) });
+
+  const pf = pqPreflight(v.data);
+  if (pf.known && pf.issues.length) {
+    const i = pf.issues[0];
+    return reply(400, {
+      ok: false, sent: false,
+      error: { name: 'BadPqLength', message: `${i.fn}: ${i.arg}${i.index === undefined ? '' : `[${i.index}]`} is ${i.bytes} bytes; ML-DSA-87 needs ${i.expected}. Nothing was simulated or sent.`, issues: pf.issues },
+    });
+  }
 
   if (!d.cfg.relayerKey) return notConfigured('RELAYER_SECP_KEY');
   const router = V4_INSTANCES[v.env].router;
