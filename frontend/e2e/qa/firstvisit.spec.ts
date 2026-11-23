@@ -46,7 +46,7 @@ test('judges: the Q-Day Drill is step 1, the requirement table has every row, bo
   await page.goto(`${BASE}/judges`);
   await expect(page).toHaveTitle('Judges checklist · Pocket Drop');
   await expect(page.getByRole('heading', { level: 2 }).first()).toHaveText('Start here: the Q-Day Drill');
-  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(10);
+  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(11);
   await expect(page.getByTestId('req-pqc-verify')).toContainText('pqcVerify');
   await expect(page.getByTestId('qcai')).toContainText('Stage 2');
   await expect(page.getByTestId('qcai')).toContainText('78');

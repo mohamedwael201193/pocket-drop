@@ -5,7 +5,7 @@
  *  - < 768 px: a slim top bar and a bottom tab bar (Send, Receive, Pocket, Proof, More); More opens a sheet with the rest.
  * Only the chrome for the current width is rendered, so every test id exists once.
  */
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Suspense, useEffect, useState, type ComponentType } from 'react';
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
@@ -124,7 +124,7 @@ function PocketChip() {
 function SideLink({ item, active, collapsed, group }: { item: Item; active: boolean; collapsed: boolean; group: string }) {
   const { Icon } = item;
   return (
-    <NavLink to={item.to} end={item.to === '/'} data-testid={group === 'main' ? `nav-${item.key}` : `side-${item.key}`} title={collapsed ? item.label : undefined}
+    <Link to={item.to} data-testid={group === 'main' ? `nav-${item.key}` : `side-${item.key}`} title={collapsed ? item.label : undefined}
       aria-current={active ? 'page' : undefined}
       className={cx('group relative flex min-h-[42px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors', active ? 'text-emerald-900' : 'text-zinc-600 hover:text-zinc-950', collapsed && 'justify-center px-0')}>
       {active && <motion.span layoutId="side-active" className="absolute inset-0 rounded-xl bg-emerald-50 ring-1 ring-emerald-100" transition={{ type: 'spring', stiffness: 520, damping: 42 }} />}
@@ -132,7 +132,7 @@ function SideLink({ item, active, collapsed, group }: { item: Item; active: bool
       {!active && <span className="absolute inset-0 rounded-xl bg-zinc-100 opacity-0 transition-opacity group-hover:opacity-100" />}
       <Icon className={cx('relative h-[20px] w-[20px] transition-transform duration-300 group-hover:scale-110', active ? 'text-accent' : 'text-zinc-500 group-hover:text-zinc-800')} weight={active ? 'fill' : undefined} />
       {!collapsed && <span className="relative truncate">{item.label}</span>}
-    </NavLink>
+    </Link>
   );
 }
 
@@ -239,14 +239,14 @@ function TabBar() {
           {TABS.map((t) => {
             const on = isActive(t);
             return (
-              <NavLink key={t.key} to={t.to} data-testid={`tab-${t.key}`} aria-current={on ? 'page' : undefined}
+              <Link key={t.key} to={t.to} data-testid={`tab-${t.key}`} aria-current={on ? 'page' : undefined}
                 className={cx('relative flex min-h-[60px] flex-col items-center justify-center gap-1 text-[12px] font-medium transition-colors', on ? 'text-emerald-900' : 'text-zinc-500')}>
                 {on && <motion.span layoutId="tab-pill" className="absolute top-1.5 h-8 w-14 rounded-full bg-emerald-50" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
                 <motion.span className="relative flex" animate={on ? { y: -1, scale: 1.08 } : { y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 26 }}>
                   <t.Icon className={cx('h-[22px] w-[22px]', on && 'text-accent')} weight={on ? 'fill' : 'duotone'} />
                 </motion.span>
                 <span className="relative">{t.label}</span>
-              </NavLink>
+              </Link>
             );
           })}
           <button type="button" data-testid="tab-more" aria-haspopup="dialog" aria-expanded={more} onClick={() => setMore(true)}
