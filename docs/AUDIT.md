@@ -135,6 +135,18 @@ Known limit (hygiene, not a finding we can exploit): `PqcLib` leaves the 4,627 /
 
 **ECDSA.** No spend or recovery path uses an ECDSA authority. The relayer's secp256k1 key only pays gas. Through the chain's scoped EVM window it can only call an allow list: the two v4 routers and the v3 drop contract. A Pocket refuses any intent without the owner's ML-DSA-87 signature.
 
+### 5.6 For jurors: the two Solidity PQC features, checked by hand
+
+The project page can only show "Solidity PQC signature check" and "Solidity PQC key status" as Declared: the FAQ says these two features never turn Verified automatically and jurors check them in the repository. This is where to look, and how to confirm the deployed bytecode really calls the precompiles.
+
+| Feature | Source | Deployed on Diana (v4 PROD, deployer `qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq`) | Deployment tx (status 1) |
+|---|---|---|---|
+| pqcVerify `0x…0a01` and pqcKeyStatus `0x…0a02` | [`PqcLib.sol` L14-L16](../contracts-v4/src/PqcLib.sol#L14-L16) (constants), `verify` L37-L40, `keyStatus` L51-L54 | PocketVault implementation `0x899b289ef60444ac74d82dea5cacc6637a2a29c3` (every Pocket is an EIP-1167 clone of it) | `0x220d854be6d942af2e0f32bb8ca47794ee027967b2df27c95d91c0ec6ca245bc` |
+| same | [`PocketDrop.sol`](../contracts-v4/src/PocketDrop.sol) bind / claim | PocketDrop `0xbc13b9ee91f31ed56932abdb796693515c351f00` | `0x5c69b08bd9d8201c56d9a54ee76cfaafe766460b29e6f06412c5299f2500aa7c` |
+| same | [`DropPool.sol`](../contracts-v4/src/DropPool.sol) claim | DropPool `0xaa981588e5430e3db9a789a3754e108cc01e3d00` | `0xf44405b57d8bb41c15e6e59cc9ec84c65e936cdf5f7c5da7050473983d2e360a` |
+
+Bytecode check (read 23 Nov 2026, 19:40 Cairo): the runtime code of all three contains `PUSH2 0x0a01` (`610a01`) and `PUSH2 0x0a02` (`610a02`), the precompile addresses. Re-check with `eth_getCode` on `https://evm-testnet.qore.host`. Live accepted and refused calls for both features are in sections 5.2-5.4 and on `/judges`.
+
 ## 6. Reproduce
 
 ```bash
