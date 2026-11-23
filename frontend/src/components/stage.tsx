@@ -1,75 +1,46 @@
 /**
- * The obsidian stage every app page opens with (direction B), and the 3D Pocket that lives in it.
- * The 3D chunk loads only after the page is idle, never for reduced motion or data saver, and falls back
- * to the static drawing below if WebGL is missing or the device is slow.
+ * The page header (a white card) and the Pocket object that lives in it: a frosted emerald glass hexagon
+ * holding a droplet, with a dotted orbit. Plain SVG + CSS (no WebGL, no extra chunk); it floats, the orbit turns
+ * and the droplet falls in once. All motion stops for prefers-reduced-motion (index.css).
  */
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { reducedMotion } from './alive';
 
 const cx = (...a: Array<string | false | null | undefined>) => a.filter(Boolean).join(' ');
 
-const Pocket3D = lazy(() => import('./Pocket3D'));
-const SLOW_KEY = 'pd.3d.slow';
-
-function webgl(): boolean {
-  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
-}
-
-/** Static Pocket drawing: the first paint and the fallback. Same object as the 3D one. */
+/** Frosted emerald glass Pocket (matches the light cover). */
 export function PocketStatic({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 200 200" className={className} aria-hidden>
+    <svg viewBox="6 30 188 150" className={className} aria-hidden>
       <defs>
-        <linearGradient id="pk-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3A3A40" /><stop offset=".55" stopColor="#161619" /><stop offset="1" stopColor="#2A2A2F" /></linearGradient>
-        <linearGradient id="pk-plate" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ECE8E0" /><stop offset=".5" stopColor="#B9B3A8" /><stop offset="1" stopColor="#E2DDD3" /></linearGradient>
-        <radialGradient id="pk-drop" cx=".38" cy=".32" r=".7"><stop offset="0" stopColor="#A7F3D0" /><stop offset=".45" stopColor="#10B981" /><stop offset="1" stopColor="#0B6B4B" /></radialGradient>
+        <linearGradient id="pg-side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#34D399" stopOpacity=".85" /><stop offset="1" stopColor="#059669" stopOpacity=".95" /></linearGradient>
+        <linearGradient id="pg-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#D1FAE5" stopOpacity=".95" /><stop offset=".6" stopColor="#6EE7B7" stopOpacity=".7" /><stop offset="1" stopColor="#34D399" stopOpacity=".8" /></linearGradient>
+        <linearGradient id="pg-well" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#10B981" stopOpacity=".55" /><stop offset="1" stopColor="#A7F3D0" stopOpacity=".5" /></linearGradient>
+        <radialGradient id="pg-drop" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#ffffff" /><stop offset=".5" stopColor="#D1FAE5" /><stop offset="1" stopColor="#34D399" /></radialGradient>
+        <radialGradient id="pg-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#10B981" stopOpacity=".35" /><stop offset="1" stopColor="#10B981" stopOpacity="0" /></radialGradient>
       </defs>
-      <ellipse cx="100" cy="100" rx="86" ry="30" fill="none" stroke="#6EE7B7" strokeOpacity=".5" strokeWidth="1.4" transform="rotate(-18 100 100)" />
-      <polygon points="100,24 166,62 166,138 100,176 34,138 34,62" fill="url(#pk-body)" stroke="#6EE7B7" strokeOpacity=".45" strokeWidth="1.2" />
-      <polygon points="100,44 149,72 149,128 100,156 51,128 51,72" fill="url(#pk-plate)" />
-      <ellipse cx="100" cy="102" rx="19" ry="23" fill="url(#pk-drop)" />
-      <circle cx="176" cy="78" r="3.5" fill="#F6F5F3" />
+      <ellipse cx="100" cy="160" rx="70" ry="16" fill="url(#pg-glow)" />
+      <g><ellipse className="pg-orbit" cx="100" cy="110" rx="92" ry="34" fill="none" stroke="#10B981" strokeOpacity=".45" strokeWidth="1.6" strokeDasharray="1.5 6" strokeLinecap="round" /></g>
+      <g className="pg-float">
+        {/* body: front faces of a hexagonal prism */}
+        <path d="M38 78 L38 128 L70 150 L130 150 L162 128 L162 78 L130 100 L70 100 Z" fill="url(#pg-side)" />
+        <path d="M70 100 L70 150 M130 100 L130 150" stroke="#ECFDF5" strokeOpacity=".5" strokeWidth="1.2" />
+        {/* top face with the well */}
+        <path d="M70 56 L130 56 L162 78 L130 100 L70 100 L38 78 Z" fill="url(#pg-top)" stroke="#ffffff" strokeOpacity=".9" strokeWidth="1.4" />
+        <path d="M80 64 L120 64 L141 78 L120 92 L80 92 L59 78 Z" fill="url(#pg-well)" />
+        <path d="M41 80 L70 100 L130 100" fill="none" stroke="#ffffff" strokeOpacity=".7" strokeWidth="1.2" />
+        <g className="pg-drop"><path d="M100 50c5 7 9 12.5 9 17.5a9 9 0 1 1-18 0c0-5 4-10.5 9-17.5Z" fill="url(#pg-drop)" stroke="#ffffff" strokeOpacity=".9" strokeWidth="1" /></g>
+        <ellipse cx="100" cy="80" rx="12" ry="3.5" fill="#ffffff" fillOpacity=".5" className="pg-ripple" />
+      </g>
     </svg>
   );
 }
 
-/** The decorative Pocket object: static first, then three.js once idle. */
+/** The decorative Pocket object in each page header. */
 export function PocketObject({ className }: { className?: string }) {
-  const [want, setWant] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [slow, setSlow] = useState(false);
-  useEffect(() => {
-    if (reducedMotion() || sessionStorage.getItem(SLOW_KEY) === '1') return;
-    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-    if (conn?.saveData || !webgl()) return;
-    let idle = 0; let to = 0;
-    const go = () => { to = window.setTimeout(() => setWant(true), 600); };
-    const ric = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-    const start = () => { if (ric) idle = ric(go, { timeout: 2500 }); else to = window.setTimeout(go, 1200); };
-    // Desktop: once the page is idle. Phones and tablets: only after the first touch or scroll, so the
-    // 3D chunk never competes with the first paint or the first input on a slow phone.
-    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const evs = ['pointerdown', 'scroll', 'keydown'] as const;
-    const onFirst = () => { evs.forEach((e) => window.removeEventListener(e, onFirst)); start(); };
-    if (!fine) evs.forEach((e) => window.addEventListener(e, onFirst, { once: true, passive: true }));
-    else if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
-    return () => { evs.forEach((e) => window.removeEventListener(e, onFirst)); window.removeEventListener('load', start); clearTimeout(to); const c = (window as Window & { cancelIdleCallback?: (n: number) => void }).cancelIdleCallback; if (idle && c) c(idle); };
-  }, []);
   return (
-    <div className={className} aria-hidden data-testid="pocket-object" data-mode={ready && !slow ? '3d' : 'static'}>
-      <div className="relative h-full w-full">
-        <motion.div className="absolute inset-[8%]" animate={{ opacity: ready && !slow ? 0 : 1 }} transition={{ duration: 0.6 }}>
-          <PocketStatic className="h-full w-full drop-shadow-[0_24px_40px_rgba(0,0,0,.45)]" />
-        </motion.div>
-        {want && !slow && (
-          <Suspense fallback={null}>
-            <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: ready ? 1 : 0 }} transition={{ duration: 0.8 }}>
-              <Pocket3D onReady={() => setReady(true)} onSlow={() => { sessionStorage.setItem(SLOW_KEY, '1'); setSlow(true); }} />
-            </motion.div>
-          </Suspense>
-        )}
-      </div>
+    <div className={className} aria-hidden data-testid="pocket-object" data-mode="svg">
+      <PocketStatic className="h-full w-full drop-shadow-[0_18px_30px_rgba(16,185,129,.25)]" />
     </div>
   );
 }
