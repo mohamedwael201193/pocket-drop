@@ -11,7 +11,7 @@ export interface SafetyCheck { id: 'registered' | 'possession' | 'hybrid'; label
 /** The three quantum-safety checks shown on the Overview gauge. Without a key in this browser, the two key checks are 'nokey'. */
 export function safetyChecks(hasKey: boolean, status: KeyStatus | undefined, health: Health | undefined): SafetyCheck[] {
   const key = (ok: boolean | undefined, yes: string, no: string): Pick<SafetyCheck, 'state' | 'detail'> =>
-    !hasKey ? { state: 'nokey', detail: 'No key in this browser yet' } : ok === undefined ? { state: 'unknown', detail: 'Reading the chain…' } : ok ? { state: 'ok', detail: yes } : { state: 'no', detail: no };
+    !hasKey ? { state: 'nokey', detail: 'Not yet: no key in this browser' } : ok === undefined ? { state: 'unknown', detail: 'Reading the chain…' } : ok ? { state: 'ok', detail: yes } : { state: 'no', detail: no };
   const relay = health?.relay;
   const hybrid: Pick<SafetyCheck, 'state' | 'detail'> = !health ? { state: 'unknown', detail: 'Reading the relayer…' }
     : relay?.mode === 'hybrid' && !relay.classicalPathOpen ? { state: 'ok', detail: 'secp256k1 + ML-DSA-87, ECDSA-only path closed' }
@@ -23,11 +23,12 @@ export function safetyChecks(hasKey: boolean, status: KeyStatus | undefined, hea
   ];
 }
 
-/** Share of checks that pass, 0..100, over the checks that can be judged (unknown and nokey are left out). */
-export function safetyScore(checks: SafetyCheck[]): { pct: number; passed: number; judged: number } {
-  const judged = checks.filter((c) => c.state === 'ok' || c.state === 'no');
-  const passed = judged.filter((c) => c.state === 'ok').length;
-  return { pct: judged.length ? Math.round((passed / judged.length) * 100) : 0, passed, judged: judged.length };
+/** Honest ratio over all three checks: a key check this browser cannot run yet ('nokey') counts as not passed.
+ *  `ready` is false while any check is still being read, so the gauge never shows a provisional number. */
+export function safetyScore(checks: SafetyCheck[]): { pct: number; passed: number; total: number; ready: boolean } {
+  const passed = checks.filter((c) => c.state === 'ok').length;
+  const total = checks.length;
+  return { pct: total ? Math.round((passed / total) * 100) : 0, passed, total, ready: !checks.some((c) => c.state === 'unknown') };
 }
 
 /** Cumulative event count over a block range, in `bins` equal buckets: the sparkline under the Proof card. */

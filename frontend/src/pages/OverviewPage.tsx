@@ -87,19 +87,19 @@ function SafetyCard() {
     <Bento i={1} className="lg:col-span-4" testId="ov-safety">
       <CardHead title="Quantum safety" badge={<SourceBadge kind="LIVE" title="pqcKeyStatus precompile and /api/health, read just now" />} />
       <div className="flex items-center gap-5">
-        <GaugeRing pct={sc.judged ? sc.pct : null} size={118} stroke={11} testId="ov-gauge"
-          label={sc.judged ? <><span className="font-display text-2xl font-semibold tracking-tight text-zinc-950"><CountUp value={sc.pct} />%</span><span className="text-[11px] text-zinc-500">{sc.passed} of {sc.judged} checked</span></> : <Shimmer className="h-5 w-12" />} />
+        <GaugeRing pct={sc.ready ? sc.pct : null} size={118} stroke={11} testId="ov-gauge"
+          label={sc.ready ? <><span className="font-display text-2xl font-semibold tracking-tight text-zinc-950"><CountUp value={sc.pct} />%</span><span className="text-[11px] text-zinc-500" data-testid="ov-gauge-ratio">{sc.passed} of {sc.total}</span></> : <Shimmer className="h-5 w-12" />} />
         <ul className="min-w-0 flex-1 space-y-2.5">
           {checks.map((c, i) => (
             <motion.li key={c.id} data-testid={`ov-check-${c.id}`} data-state={c.state} className="flex items-start gap-2"
               initial={motionOk() ? { opacity: 0, x: 8 } : false} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 + i * 0.12 }}>
               <span className="mt-0.5">{ICON[c.state]}</span>
-              <span className="min-w-0"><span className="block text-sm font-medium text-zinc-900">{c.label}</span><span className="block text-xs leading-snug text-zinc-500">{c.detail}</span></span>
+              <span className="min-w-0"><span className={cx('block text-sm font-medium', c.state === 'nokey' ? 'text-zinc-500' : 'text-zinc-900')}>{c.label}</span><span className="block text-xs leading-snug text-zinc-500">{c.detail}</span></span>
             </motion.li>
           ))}
         </ul>
       </div>
-      {!a.root && <p className="mt-4 text-xs text-zinc-500">The key checks run once this browser holds a key. The relay check is for everyone.</p>}
+      {!a.root && <Link to="/send" data-testid="ov-create-key" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accentHover"><KeyRound className="h-4 w-4" />Create your key on Send <ArrowRight className="h-4 w-4" /></Link>}
     </Bento>
   );
 }

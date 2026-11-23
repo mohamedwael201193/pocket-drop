@@ -6,15 +6,19 @@ const health = (mode: 'hybrid' | 'evm', classicalPathOpen = false) => ({ ok: tru
   relay: { mode, signature: 'x', fallback: 'evm-window', classicalPathOpen } }) as unknown as Health;
 
 describe('overview: quantum-safety checks', () => {
-  it('without a key only the relay lane is judged', () => {
+  it('without a key the gauge is 1 of 3 (33%), never 100%', () => {
     const c = safetyChecks(false, undefined, health('hybrid'));
     expect(c.map((x) => x.state)).toEqual(['nokey', 'nokey', 'ok']);
-    expect(safetyScore(c)).toEqual({ pct: 100, passed: 1, judged: 1 });
+    expect(safetyScore(c)).toEqual({ pct: 33, passed: 1, total: 3, ready: true });
+  });
+  it('100% only when all three checks pass', () => {
+    expect(safetyScore(safetyChecks(true, { registered: true, algoId: 1, possessionProven: true }, health('hybrid')))).toEqual({ pct: 100, passed: 3, total: 3, ready: true });
+    expect(safetyScore(safetyChecks(true, { registered: true, algoId: 1, possessionProven: true }, health('evm'))).pct).toBe(67);
   });
   it('a registered key without possession proof scores 2 of 3', () => {
     const c = safetyChecks(true, { registered: true, algoId: 1, possessionProven: false }, health('hybrid'));
     expect(c.map((x) => x.state)).toEqual(['ok', 'no', 'ok']);
-    expect(safetyScore(c)).toEqual({ pct: 67, passed: 2, judged: 3 });
+    expect(safetyScore(c)).toEqual({ pct: 67, passed: 2, total: 3, ready: true });
   });
   it('a key registered with another algorithm id is not counted as ML-DSA-87', () => {
     expect(safetyChecks(true, { registered: true, algoId: 2, possessionProven: true }, health('hybrid'))[0].state).toBe('no');
@@ -23,7 +27,7 @@ describe('overview: quantum-safety checks', () => {
     expect(safetyChecks(true, undefined, health('evm'))[2].state).toBe('no');
     const c = safetyChecks(true, undefined, undefined);
     expect(c.map((x) => x.state)).toEqual(['unknown', 'unknown', 'unknown']);
-    expect(safetyScore(c)).toEqual({ pct: 0, passed: 0, judged: 0 });
+    expect(safetyScore(c).ready).toBe(false);
   });
   it('the relay detail says the ECDSA-only path is closed only when it is', () => {
     expect(safetyChecks(false, undefined, health('hybrid', false))[2].detail).toContain('closed');
