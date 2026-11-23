@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decodeEventLog, decodeFunctionData, encodeFunctionData, decodeFunctionResult, getAddress, keccak256, parseAbi, type Address, type Hex, type Log } from 'viem';
+import { decodeEventLog, decodeFunctionData, encodeFunctionData, getAddress, keccak256, parseAbi, type Address, type Hex, type Log } from 'viem';
 import { routerAbi } from './abi4.js';
 import { EXPLORER_TX, type Config } from './config.js';
 import { log } from './log.js';
@@ -15,6 +15,7 @@ import { evmToQor, type Relayer } from './relayer.js';
 import { reply, type HttpResult } from './handlers.js';
 import { privateKeyToAccount } from 'viem/accounts';
 import { mapLimited } from './limit.js';
+import { decodeKeyStatusStrict } from './keystatus.js';
 
 export interface Bait {
   id: string; description: string; keyAccount: Address; keyAccountCosmos: string; pocket: Address; deployed: boolean;
@@ -143,7 +144,7 @@ export async function baitState(b: Bait, ch: Chain, cfg: QdayConfig, keys: Recor
     ch.call('0x0000000000000000000000000000000000000a02', encodeFunctionData({ abi: KS, functionName: 'pqcKeyStatus', args: [b.keyAccount] })).catch(() => null),
     ch.getCode(b.pocket).catch(() => '0x' as Hex), ch.windowLive(b.keyAccountCosmos).catch(() => null)]);
   let liveKeyHash: Hex | null = null;
-  if (ksRaw) { try { const r = decodeFunctionResult({ abi: KS, functionName: 'pqcKeyStatus', data: ksRaw }); liveKeyHash = r[2] && r[2] !== '0x' ? keccak256(r[2]) : null; } catch { /* unreadable */ } }
+  if (ksRaw) { const r = decodeKeyStatusStrict(ksRaw); liveKeyHash = r.ok && r.registered && r.pubkey.length > 0 ? keccak256(r.pubkey) : null; }
   const deployed = code !== '0x';
   const nonce = deployed ? await ch.readNonce(b.pocket).catch(() => 0n) : 0n;
   const events: BaitState['events'] = [];

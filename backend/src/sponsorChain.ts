@@ -1,10 +1,11 @@
 // Live chain access for /api/sponsor: viem reads, Cosmos REST for the sponsor's own send history, and a hybrid-signed
 // (secp256k1 + ML-DSA-87) MsgSend from the sponsor wallet. QoreChain rejects classical-only sends from accounts, so the
 // sponsor's own key is PoP-registered. Secrets come from SPONSOR_SECP_KEY / SPONSOR_PQC_SECRET and are never logged.
-import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex, type PublicClient } from 'viem';
+import { encodeFunctionData, parseAbi, type Hex, type PublicClient } from 'viem';
 import { bytesToHex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { loadSigner } from './signerBundle.js';
+import { decodeKeyStatusStrict, isUsableKey } from './keystatus.js';
 import type { Config } from './config.js';
 import { evmToQor } from './relayer.js';
 import type { PocketCfgIn, PoolView, SponsorChain, SponsorRules, SponsorSend } from './sponsor.js';
@@ -58,8 +59,8 @@ export function createSponsorChain(cfg: Config, pub: PublicClient, rules: Sponso
     hasCode: async (a) => ((await pub.getCode({ address: a })) ?? '0x') !== '0x',
     keyRegistered: async (a) => {
       const r = await pub.call({ to: KEYS, data: encodeFunctionData({ abi: KS, functionName: 'pqcKeyStatus', args: [a] }) });
-      const [registered, , , proven] = decodeFunctionResult({ abi: KS, functionName: 'pqcKeyStatus', data: r.data ?? '0x' });
-      return registered && proven;
+      // Hand-validated decode: only a registered, possession-proven, exactly 2592-byte ML-DSA-87 key counts.
+      return isUsableKey(decodeKeyStatusStrict(r.data ?? '0x'));
     },
     getPool: async (e: V4Env, id) => {
       const p = (await pub.readContract({ address: V4_INSTANCES[e].pool as Hex, abi: POOL, functionName: 'getPool', args: [id] })) as unknown as PoolView & { slots: number };
