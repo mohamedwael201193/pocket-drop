@@ -3,8 +3,8 @@ import { titleFor } from '../src/lib/titles';
 
 describe('document titles', () => {
   it('names each route', () => {
-    expect(titleFor('/')).toBe('Overview · Pocket Drop');
-    expect(titleFor('/about')).toBe('Quantum-safe QOR through a single link · Pocket Drop');
+    expect(titleFor('/')).toBe('Send QOR by link, guarded by ML-DSA-87 · Pocket Drop');
+    expect(titleFor('/app')).toBe('Overview · Pocket Drop');
     expect(titleFor('/check/0xabc')).toBe('Check a transaction · Pocket Drop');
     expect(titleFor('/send/inbox')).toBe('Your links · Pocket Drop');
     expect(titleFor('/qday')).toBe('Q-Day Drill · Pocket Drop');
