@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { Hex } from 'viem';
 import { API_BASE } from './config';
+import { routeWithFallback, type RouteBody } from './selfRelayCore';
 
 const hex = z.string().regex(/^0x[0-9a-fA-F]*$/);
 const addr = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
@@ -88,8 +89,8 @@ export const fetchLink = (id: string | bigint) => getJson(`/api/link/${id}`, z.o
 
 const txOk = z.object({ ok: z.literal(true), txHash: z.string(), blockNumber: z.union([z.string(), z.number()]).optional(), gasUsed: z.union([z.string(), z.number()]).optional(), explorer: z.string().optional() }).passthrough();
 
-async function post<T>(path: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
-  const r = await fetch(`${API_BASE}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+async function post<T>(path: string, body: unknown, schema: z.ZodType<T>, timeoutMs?: number): Promise<T> {
+  const r = await fetch(`${API_BASE}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), ...(timeoutMs && typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? { signal: AbortSignal.timeout(timeoutMs) } : {}) });
   const j = await r.json().catch(() => null);
   if (!r.ok || !j?.ok) {
     const e = apiError.safeParse(j?.error);
@@ -109,8 +110,12 @@ const routeOk = z.object({
   result: z.object({ linkId: z.string().optional(), poolId: z.string().optional(), queuedId: z.string().optional(), pocket: z.string().optional() }).passthrough().optional(),
 }).passthrough();
 /** v4: relay a user-signed intent through PocketRouter. 422 means the simulation reverted (nothing was sent). */
-export const postRoute = (p: { env: 'prod' | 'lab' | 'prodV4' | 'labV4'; target?: string; data: string; pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string } }): Promise<RouteResult> =>
-  post('/api/route', p, routeOk).then((r) => ({ ...r, txHash: r.txHash as Hex }));
+export const postRouteRelayer = (p: RouteBody): Promise<RouteResult> =>
+  post('/api/route', p, routeOk, 60_000).then((r) => ({ ...r, txHash: r.txHash as Hex }));
+/** Relayer first. If it is down, slow (60 s) or out of gas, the app offers "Relay it yourself": this browser's own account
+ *  submits the same signed call through its own router-only EVM window (selfRelay.ts). The Advanced setting skips the relayer. */
+export const postRoute = (p: RouteBody): Promise<RouteResult> =>
+  routeWithFallback(p, postRouteRelayer, async (b) => (await import('./selfRelay')).selfRelayRoute(b));
 export const postBind = (p: { linkId: string; recipient: string; recipientKeyHash: string; linkPk: string; linkSig: string }) => post('/api/bind', p, txOk);
 export const postClaim = (p: { linkId: string; recipientSig: string }) => post('/api/claim', p, txOk);
 
