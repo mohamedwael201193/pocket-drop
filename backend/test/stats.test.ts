@@ -149,6 +149,26 @@ describe('loadOwnAccounts', () => {
       for (const a of list) expect(m.has(a.address.toLowerCase()), `${f}: ${a.label} ${a.address}`).toBe(true);
     }
   });
+  it('every account named in a v4/v5 E2E run file (frontend/evidence/v4/e2e/*.json "accounts") is own', () => {
+    const m = loadOwnAccounts();
+    const dir = path.join(process.cwd(), '..', 'frontend', 'evidence', 'v4', 'e2e');
+    if (!fs.existsSync(dir)) return;
+    let n = 0;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json'))) {
+      const acc = (JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as { accounts?: Record<string, unknown> }).accounts;
+      if (!acc || typeof acc !== 'object') continue;
+      for (const [k, v] of Object.entries(acc)) if (typeof v === 'string' && /^0x[0-9a-fA-F]{40}$/.test(v)) { n++; expect(m.has(v.toLowerCase()), `${f}: ${k} ${v}`).toBe(true); }
+    }
+    expect(n).toBeGreaterThan(0);
+  });
+  it('the TEAM-RUN accounts that live /api/stats counted as external on 26 Nov 2026 are own (scripts/list-external.ts)', () => {
+    const m = loadOwnAccounts();
+    // v5 e2e chromium-390 a-confirmed sender key + recipient key, v4 e2e webkit-390 recipient key, v3 link 29 recipient
+    for (const a of ['0x874406CbcD2009a3e1853dE6794F2Cec8366F11B', '0x71A50B0E3ca7ce94A5A95E3265D0dDCC653DF6CD', '0x43Dce76e6e73f4dD617C7F989776F335A1d92484', '0x718b9e52fD791d93589Eb174965c7A73F9405146']) {
+      expect(m.has(a.toLowerCase()), a).toBe(true);
+      expect(m.get(a.toLowerCase())).toMatch(/^TEAM-RUN /);
+    }
+  });
   it('every sender recorded in the v3-contract E2E evidence and the v3 live-test recipients are own', () => {
     const m = loadOwnAccounts();
     const ev = path.join(process.cwd(), '..', 'frontend', 'evidence');
