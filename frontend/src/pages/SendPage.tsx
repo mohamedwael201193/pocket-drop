@@ -15,6 +15,7 @@ import { rememberNonce } from '../lib/links4';
 import { DEFAULTS, INST, REGISTRATION_FEE_WEI, createdId } from '../lib/v4';
 import { deliveryFeeWei, deliverySteps } from '../lib/fees';
 import { explainError } from '../lib/api';
+import { isCancelled } from '../lib/signReview';
 import { fmtQor, parseQor } from '../lib/chain';
 import { useSponsorStatus } from '../lib/sponsor';
 import { Celebrate } from '../components/alive';
@@ -88,7 +89,7 @@ export default function SendPage() {
       rememberNonce(a.env, 'drop', linkId, r.nonce);
       setMade({ url: claimUrl4(window.location.origin, a.env, linkId, r.seed), id: linkId4(a.env, linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
       await qc.invalidateQueries();
-    } catch (e) { setErr({ where: 'drop', text: explainError(e) }); } finally { setBusy(null); }
+    } catch (e) { setErr(isCancelled(e) ? null : { where: 'drop', text: explainError(e) }); } finally { setBusy(null); }
   }
   async function makePool() {
     if (!a.actionCtx || !a.root || per === null) return;
@@ -99,7 +100,7 @@ export default function SendPage() {
       rememberNonce(a.env, 'pool', poolId, r.nonce);
       setMade({ url: claimUrl4(window.location.origin, a.env, poolId, r.seed, 'pool'), id: linkId4(a.env, poolId), kind: 'pool', amountText: fmtQor(per), hash: r.res.txHash });
       await qc.invalidateQueries();
-    } catch (e) { setErr({ where: 'pool', text: explainError(e) }); } finally { setBusy(null); }
+    } catch (e) { setErr(isCancelled(e) ? null : { where: 'pool', text: explainError(e) }); } finally { setBusy(null); }
   }
 
   const pending = links.filter((l) => l.drop?.state === 'Bound' && l.drop.mode === 'Confirmed');

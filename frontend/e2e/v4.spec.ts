@@ -40,6 +40,12 @@ async function user(browser: Browser, opts: Record<string, unknown>, name: strin
   const page = await ctx.newPage();
   PAGES.push({ name, page });
   page.on('pageerror', (e) => { sink.checks[`pageerror:${name}`] = e.message; });
+  // clear signing: every owner intent opens the review sheet first; approve it like a user would, and keep what it showed
+  await page.addLocatorHandler(page.getByTestId('sign-review-approve'), async (btn) => {
+    const title = (await page.getByTestId('sign-review-title').textContent().catch(() => '')) ?? '';
+    sink.checks[`signReview:${name}:${Object.keys(sink.checks).length}`] = title;
+    await btn.click();
+  });
   return { ctx, page };
 }
 

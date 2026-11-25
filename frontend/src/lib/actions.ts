@@ -7,6 +7,8 @@ import { INST, chainTimestamp, dropCall, nextNonce, poolCall, relayTo, relayToPo
 import type { RouteResult } from './api';
 import { vaultAbi } from './abi4';
 import { pub } from './chain';
+import { describeIntent } from './clearsign';
+import { SignCancelled, reviewIntent } from './signReview';
 
 export interface Ctx { env: Env; cfg: PocketCfg; address: Hex; acct: KeyAccount }
 
@@ -15,6 +17,10 @@ async function owner(c: Ctx, action: Hex, p: Hex, fn: string, mk: (deadline: big
   const nonce = await nextNonce(c.address);
   const deadline = BigInt((await chainTimestamp()) + 3600);
   const digest = intentDigest({ action, vault: c.address, nonce, deadline, params: p });
+  // clear signing: the user sees what these exact fields mean before the key signs their digest
+  const clear = describeIntent({ action, vault: c.address, nonce, deadline, params: p });
+  if (clear.digest !== digest) throw new Error('The readable summary does not match the hash to sign, so nothing was signed. Reload and try again.');
+  if (!(await reviewIntent(clear))) throw new SignCancelled();
   const sig = await signDigest(c.acct.pqc.secretKey, digest);
   return relayToPocket(c.env, c.cfg, c.address, vaultCall(fn, mk(deadline, sig)));
 }

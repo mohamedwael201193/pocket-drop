@@ -11,6 +11,7 @@ import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { LegacyKeyStrip } from './upgrade';
 import { SpotlightTracker } from './alive';
+import { SignReviewHost } from './signReview';
 import { LogoMark, Wordmark } from './logo';
 import { Compass, FlaskConical, Inbox, KeyRound, LayoutGrid, Menu, Radio, RefreshCw, Scale, Send, ShieldCheck, Sidebar, Wallet, X, type IconProps } from './icons';
 import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
@@ -330,6 +331,7 @@ export function Layout() {
         </footer>
         {bp === 'mobile' && <TabBar />}
       </div>
+      <SignReviewHost />
     </MotionConfig>
   );
 }
