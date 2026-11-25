@@ -1,4 +1,4 @@
-// Re-verify the Pocket Drop v4 deployment and its recorded live results against the chain. Testnet only, read-only, no keys.
+// Re-verify the Pocket Drop v5 deployment, the previous v4 deployment and its recorded live results against the chain. Testnet only, read-only, no keys.
 //   node frontend/scripts/reverify.mjs      (Node 20+, no npm install: keccak256 and the JSON-RPC calls are inline below)
 // Checks:
 //   1. every recorded v4 contract has code on Diana and its keccak256 equals the recorded runtime keccak
@@ -79,8 +79,13 @@ let pass = 0; let fail = 0;
 const check = (ok, label) => { if (ok) pass++; else fail++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`); };
 const eq = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
-for (const env of ['prod', 'lab']) {
+// prod / lab = current v5 contracts; prodV4 / labV4 = the previous v4 contracts (kept live, still checked)
+for (const env of ['prod', 'lab', 'prodV4', 'labV4']) {
   const i = v4.instances[env];
+  {
+    const rc = await rpc('eth_getTransactionReceipt', [i.router.deployTx]);
+    check(!!rc && rc.status === '0x1' && eq(rc.contractAddress, i.router.address), `${env}.router deploy tx ${i.router.deployTx.slice(0, 12)}… mined and created ${i.router.address.slice(0, 10)}…`);
+  }
   for (const k of ['router', 'factory', 'vaultImpl', 'drop', 'pool']) {
     const code = await rpc('eth_getCode', [i[k].address, 'latest']);
     check(!!code && code !== '0x', `${env}.${k} has code at ${i[k].address}`);

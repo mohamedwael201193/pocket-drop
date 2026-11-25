@@ -51,7 +51,7 @@ export default function ProofPage() {
             </div>
           ))}
         </dl>
-        <p className="text-xs text-zinc-600">Production instance. The lab instance (60 s delays, for demos) has its own set, listed on the Lab page.</p>
+        <p className="text-xs text-zinc-600">Production instance of the current v5 contracts. The lab instance (60 s delays) and the previous v4 contracts (production and lab) are listed on the Judges page with their deploy transactions.</p>
       </section>
 
       <section className="mt-5 space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-relayer">

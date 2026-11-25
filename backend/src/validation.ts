@@ -64,7 +64,7 @@ export const pocketConfigSchema = z
 
 export const routeSchema = z
   .object({
-    env: z.enum(['prod', 'lab']).default('prod'),
+    env: z.enum(['prod', 'lab', 'prodV4', 'labV4']).default('prod'),
     /** Forward `data` to this Pocket, PocketDrop or DropPool (router.relay). Omit when `pocket` is given. */
     target: addressSchema.optional(),
     /** Lazy deployment: deploy this Pocket config first if it does not exist yet (router.deployAndRelay). */

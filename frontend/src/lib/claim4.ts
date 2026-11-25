@@ -1,20 +1,22 @@
-// Recipient side of v4 drops and pools. v3 link ids are plain numbers (/c/17); v4 ids carry the instance: p12 = prod, l12 = lab.
+// Recipient side of drops and pools. v3 link ids are plain numbers (/c/17). v4 (previous contracts) ids: p12 = prod, l12 = lab.
+// v5 (current contracts) ids: q12 = prod, k12 = lab. Old v4 links keep working against the v4 contracts.
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
 import { dropAbi, poolAbi } from './abi4';
 import { pub } from './chain';
 import { signDigest, keyHashOfAccount, type KeyAccount } from './identity';
 import { bytesToHex } from './protocol';
 import { dropBindDigest, dropClaimDigest, poolClaimDigest, poolLinkDigest } from './intents';
-import { INST, relayTo, type Env } from './v4';
+import { INST, LINK_PREFIX, relayTo, type Env } from './v4';
 import { postRoute, type RouteResult } from './api';
 
 export type ParsedId = { v: 3; id: string } | { v: 4; env: Env; id: bigint };
 export function parseLinkId(raw: string): ParsedId | null {
   if (/^\d+$/.test(raw)) return { v: 3, id: raw };
-  const m = /^([pl])(\d{1,18})$/.exec(raw);
-  return m && BigInt(m[2]) > 0n ? { v: 4, env: m[1] === 'p' ? 'prod' : 'lab', id: BigInt(m[2]) } : null;
+  const m = /^([plqk])(\d{1,18})$/.exec(raw);
+  return m && BigInt(m[2]) > 0n ? { v: 4, env: PREFIX_ENV[m[1]], id: BigInt(m[2]) } : null;
 }
-export const linkId4 = (env: Env, id: bigint | string) => `${env === 'prod' ? 'p' : 'l'}${id}`;
+const PREFIX_ENV: Record<string, Env> = { q: 'prod', k: 'lab', p: 'prodV4', l: 'labV4' };
+export const linkId4 = (env: Env, id: bigint | string) => `${LINK_PREFIX[env]}${id}`;
 export const claimUrl4 = (origin: string, env: Env, id: bigint | string, seed: Uint8Array, kind: 'c' | 'pool' = 'c') =>
   `${origin}/${kind}/${linkId4(env, id)}#k=${bytesToHex(seed).slice(2)}`;
 

@@ -10,6 +10,7 @@ import { liveDeps, withQoresign } from '../lib/txcheckChain';
 import { PowerMap, pocketEnv } from '../components/powers';
 import { useQuery } from '@tanstack/react-query';
 import type { Hex } from 'viem';
+import { envLabel, isProdLike } from '../lib/v4';
 
 const isAddr = (s: string) => /^0x[0-9a-fA-F]{40}$/.test(s.trim());
 
@@ -72,7 +73,7 @@ function ReportView({ r }: { r: Report }) {
           <Row k="Relayer signature"><span data-testid="check-lane">{r.tx.lane === 'hybrid'
             ? <>Hybrid: secp256k1 + ML-DSA-87 on a native cross-VM call. The chain's own check: {r.tx.relayerHybridVerified ? <b>pqc_hybrid_verify = verified</b> : 'no pqc_hybrid_verify event'}.</>
             : <>EVM transaction (secp256k1), sent inside the relayer's scoped window. The relayer only pays gas; the signatures below are what move funds.</>}</span></Row>
-          {r.env && <Row k="Instance">{r.env === 'prod' ? 'production' : 'lab (60 s timers)'}</Row>}
+          {r.env && <Row k="Instance">{envLabel(r.env)}{isProdLike(r.env) ? '' : ', 60 s timers'}</Row>}
           <Row k="Call"><Mono className="text-xs">router.{r.action}{r.fn ? ` → ${r.fn}` : ''}</Mono>{r.target && <> on <a className="font-mono text-xs underline" href={addrUrl(r.target)} target="_blank" rel="noopener noreferrer">{r.target.slice(0, 10)}…</a></>}</Row>
           {r.tx.memo && <Row k="Memo"><Mono className="text-xs">{r.tx.memo}</Mono></Row>}
         </dl>

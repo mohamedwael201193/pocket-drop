@@ -9,12 +9,12 @@ import { useAccount } from '../lib/account';
 import { useLink } from '../lib/queries';
 import { parseLinkId, readDrop } from '../lib/claim4';
 import { fmtQor } from '../lib/chain';
-import type { Env } from '../lib/v4';
+import { LINK_PREFIX, type Env } from '../lib/v4';
 
-/** Accepts a full link or a bare path: "/c/17#k=<64 hex>" (v3), "/c/p12#k=…" (v4 drop) or "/pool/p3#k=…" (v4 pool). Returns the in-app path. */
+/** Accepts a full link or a bare path: "/c/17#k=<64 hex>" (v3), "/c/q12#k=…" (v5 drop; p/l = v4) or "/pool/q3#k=…" (v5 pool). Returns the in-app path. */
 export function parseClaimInput(raw: string): string | null {
-  const m = /\/(c|pool)\/([pl]?\d+)#k=([0-9a-fA-F]{64})\s*$/.exec(raw.trim());
-  if (!m || (m[1] === 'pool' && !/^[pl]/.test(m[2]))) return null;
+  const m = /\/(c|pool)\/([plqk]?\d+)#k=([0-9a-fA-F]{64})\s*$/.exec(raw.trim());
+  if (!m || (m[1] === 'pool' && !/^[plqk]/.test(m[2]))) return null;
   return `/${m[1]}/${m[2]}#k=${m[3].toLowerCase()}`;
 }
 
@@ -35,8 +35,8 @@ function openedHere(): string[] {
       const k = localStorage.key(i);
       const m = k && /^pd\.recv\.(\d+)$/.exec(k);
       if (m) ids.push(m[1]);
-      const m4 = k && /^pd\.recv4\.(prod|lab)\.(\d+)$/.exec(k);
-      if (m4) ids.push(`${m4[1] === 'prod' ? 'p' : 'l'}${m4[2]}`);
+      const m4 = k && /^pd\.recv4\.(prod|lab|prodV4|labV4)\.(\d+)$/.exec(k);
+      if (m4) ids.push(`${LINK_PREFIX[m4[1] as Env]}${m4[2]}`);
     }
     return ids.sort();
   } catch { return []; }

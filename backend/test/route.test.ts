@@ -159,10 +159,11 @@ describe('/rpc proxy: eth_* read calls', () => {
 describe('v4 instances', () => {
   const file = path.resolve(__dirname, '..', '..', 'contracts-v4', 'deployments', 'diana.json');
   it.skipIf(!fs.existsSync(file))('match contracts-v4/deployments/diana.json', () => {
-    const dep = JSON.parse(fs.readFileSync(file, 'utf8')).v4;
-    for (const env of ['prod', 'lab'] as const) {
+    const all = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const pairs = [['prod', all.v5.prod], ['lab', all.v5.lab], ['prodV4', all.v4.prod], ['labV4', all.v4.lab]] as const;
+    for (const [env, rec] of pairs) {
       for (const k of ['router', 'factory', 'drop', 'pool'] as const) {
-        expect(V4_INSTANCES[env][k].toLowerCase()).toBe(dep[env][k].address.toLowerCase());
+        expect(V4_INSTANCES[env][k].toLowerCase()).toBe(rec[k].address.toLowerCase());
       }
     }
   });

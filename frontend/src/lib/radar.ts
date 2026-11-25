@@ -4,7 +4,7 @@ import { createPublicClient, getAbiItem, http, type Hex } from 'viem';
 import { dropAbi, factoryAbi, poolAbi } from './abi4';
 import { dianaChain, EVM_RPC } from './config';
 import { keyStatus } from './claim4';
-import { INST, type Env } from './v4';
+import { INST, LINK_PREFIX, type Env } from './v4';
 import own from '../data/own.json';
 import { fetchXvm, type XvmEvent } from './api';
 
@@ -116,7 +116,7 @@ export async function envStats(env: Env): Promise<EnvStats> {
   const tag = (who: string) => ({ who, own: isOwnAddress(who) });
   const recipientOf = new Map<string, string>(bound.map((b) => [String(b.args.linkId), String(b.args.recipient)]));
   const idOf = (p: string, n: unknown) => `${p}${n}`;
-  const pre = env === 'prod' ? 'p' : 'l';
+  const pre = LINK_PREFIX[env];
   const recent: EnvStats['recent'] = [
     ...deployed.map((x) => ({ kind: 'Pocket deployed', id: String(x.args.pocket), tx: x.transactionHash, block: x.blockNumber, ...tag(String(x.args.owner)) })),
     ...created.map((x) => ({ kind: 'Drop created', id: idOf(pre, x.args.linkId), tx: x.transactionHash, block: x.blockNumber, ...tag(viaPocket(x.args.sender)) })),

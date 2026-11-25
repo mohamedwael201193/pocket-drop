@@ -3,7 +3,7 @@
  *  - Your Pocket: balance of the active Pocket (chain), its address and whether its key is ML-DSA-87 protected (pqcKeyStatus).
  *  - Quantum safety: key registered, possession proven (pqcKeyStatus precompile) and the relay lane (/api/health).
  *  - Proof: hybrid-signed relays verified by the chain (/api/stats) and a sparkline of every v4 event by block (contract logs).
- *  - Recent activity: the latest v4 events on Diana (contract logs), each opening in the transaction checker.
+ *  - Recent activity: the latest production events on Diana (v5 and the previous v4) (contract logs), each opening in the transaction checker.
  * Test counts are RECORDED (frontend/src/data/tests.json). Nothing here is a mock.
  */
 import { useState, type FormEvent, type ReactNode } from 'react';
@@ -23,7 +23,20 @@ const qorNum = (wei: bigint) => Number(wei) / 1e18;
 const fmtBal = (n: number) => (n >= 100 ? n.toFixed(2) : n >= 1 ? n.toFixed(2) : n.toFixed(4));
 
 function useActivity() {
-  return useQuery({ queryKey: ['radar', 'prod'], queryFn: () => import('../lib/radar').then((m) => m.envStats('prod')), refetchInterval: 60_000, retry: 1, staleTime: 30_000 });
+  // production on the current v5 contracts plus the previous v4 contracts, merged newest first
+  return useQuery({
+    queryKey: ['radar', 'prod+prodV4'], refetchInterval: 60_000, retry: 1, staleTime: 30_000,
+    queryFn: async () => {
+      const m = await import('../lib/radar');
+      const [a, b] = await Promise.all([m.envStats('prod'), m.envStats('prodV4')]);
+      return {
+        pockets: a.pockets + b.pockets,
+        hybridEvents: a.hybridEvents == null || b.hybridEvents == null ? null : a.hybridEvents + b.hybridEvents,
+        eventBlocks: [...(a.eventBlocks ?? []), ...(b.eventBlocks ?? [])].sort((x, y) => x - y),
+        recent: [...a.recent.map((r) => ({ ...r, gen: 'v5' })), ...b.recent.map((r) => ({ ...r, gen: 'v4' }))].sort((x, y) => (x.block === y.block ? 0 : x.block > y.block ? -1 : 1)),
+      };
+    },
+  });
 }
 
 function CardHead({ title, badge, to }: { title: string; badge?: ReactNode; to?: string }) {
@@ -107,8 +120,9 @@ function SafetyCard() {
 function ProofCard() {
   const { data: s } = useStats();
   const { data: act } = useActivity();
-  const v4 = s?.v4 as { prod?: { hybridRelayEvents?: number; pockets?: number } } | undefined;
-  const hybrid = v4?.prod?.hybridRelayEvents ?? act?.hybridEvents ?? null;
+  const v4 = s?.v4 as { prod?: { hybridRelayEvents?: number }; prodV4?: { hybridRelayEvents?: number } } | undefined;
+  const apiHybrid = v4?.prod?.hybridRelayEvents != null && v4?.prodV4?.hybridRelayEvents != null ? v4.prod.hybridRelayEvents + v4.prodV4.hybridRelayEvents : null;
+  const hybrid = apiHybrid ?? act?.hybridEvents ?? null;
   const series = cumulativeSeries(act?.eventBlocks ?? [], 28);
   return (
     <Bento i={2} className="lg:col-span-3" testId="ov-proof">
@@ -118,7 +132,7 @@ function ProofCard() {
       </p>
       <p className="mt-1.5 text-sm text-zinc-600">hybrid-signed relays the chain verified (secp256k1 + ML-DSA-87)</p>
       <div className="mt-3"><Sparkline values={series} testId="ov-spark" /></div>
-      <p className="mt-1 text-xs text-zinc-500" data-testid="ov-events">{act ? `${act.eventBlocks?.length ?? 0} v4 events · ${act.pockets} Pockets on chain` : 'Counting v4 events…'}</p>
+      <p className="mt-1 text-xs text-zinc-500" data-testid="ov-events">{act ? `${act.eventBlocks?.length ?? 0} events (v5 + v4) · ${act.pockets} Pockets on chain` : 'Counting events…'}</p>
     </Bento>
   );
 }
@@ -129,7 +143,7 @@ function ActivityCard() {
   const mine = new Set([a.acct?.evm, a.activePocket, ...a.adopted].filter(Boolean).map((x) => String(x).toLowerCase()));
   return (
     <Bento i={3} className="lg:col-span-8" testId="ov-activity">
-      <CardHead title="Recent activity" badge={<SourceBadge kind="LIVE" title="PocketFactory, PocketDrop and DropPool events on Diana (production v4), read just now" />} to="/radar" />
+      <CardHead title="Recent activity" badge={<SourceBadge kind="LIVE" title="PocketFactory, PocketDrop and DropPool events on Diana (production, current v5 and previous v4), read just now" />} to="/radar" />
       <div className="overflow-hidden rounded-2xl border border-zinc-200/80">
         <table className="w-full text-left text-sm">
           <thead className="bg-zinc-50/80 text-xs text-zinc-500"><tr><th className="px-4 py-2.5 font-medium">Action</th><th className="hidden px-4 py-2.5 font-medium sm:table-cell">Ref</th><th className="px-4 py-2.5 font-medium">When</th><th className="px-4 py-2.5 text-right font-medium">Tx</th></tr></thead>
@@ -141,7 +155,7 @@ function ActivityCard() {
                   <span className="inline-flex items-center gap-2"><span className={cx('h-1.5 w-1.5 rounded-full', r.kind.includes('claimed') ? 'bg-emerald-500' : r.kind.includes('Pocket') ? 'bg-zinc-400' : 'bg-accent')} />{r.kind}</span>
                   {mine.has(r.who.toLowerCase()) && <span className="ml-2 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-800">yours</span>}
                 </td>
-                <td className="hidden px-4 py-2.5 font-mono text-xs text-zinc-600 sm:table-cell">{r.id.startsWith('0x') ? shortAddr(r.id) : r.id}</td>
+                <td className="hidden px-4 py-2.5 font-mono text-xs text-zinc-600 sm:table-cell">{r.id.startsWith('0x') ? shortAddr(r.id) : r.id} <span className="text-zinc-400">{r.gen}</span></td>
                 <td className="px-4 py-2.5 text-xs text-zinc-600">{r.at ? ago(r.at) : `block ${r.block.toString()}`}</td>
                 <td className="px-4 py-2.5 text-right"><Link to={`/check/${r.tx}`} className="font-mono text-xs text-zinc-700 underline decoration-zinc-300 underline-offset-2 hover:text-accent" title="Re-verify this transaction">{shortAddr(r.tx)}</Link></td>
               </motion.tr>
@@ -151,7 +165,7 @@ function ActivityCard() {
           </tbody>
         </table>
       </div>
-      {act && act.recent.length === 0 && <p className="mt-3 text-sm text-zinc-500">No v4 events yet.</p>}
+      {act && act.recent.length === 0 && <p className="mt-3 text-sm text-zinc-500">No events yet.</p>}
       {!act && isLoading && <p className="mt-3 text-xs text-zinc-500">Reading contract events from Diana…</p>}
     </Bento>
   );

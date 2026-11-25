@@ -207,6 +207,11 @@ export const v4ErrorsAbi = [
   },
   {
     "type": "error",
+    "name": "BadKeyLength",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "BadNonce",
     "inputs": []
   },

@@ -5,12 +5,13 @@ import { isAddress, type Hex } from 'viem';
 import { Button, CopyButton, Mono, Notice, Page, PageTitle, Pill, SourceBadge, StepCard, TxLink, cx } from '../components/ui';
 import { ActivationCard, BackupCard, ConnectChoices, PocketCard } from '../components/account';
 import { LegacyKeyBanner } from '../components/upgrade';
+import { PreviousPocketCard } from '../components/previousPocket';
 import { ChevronDown } from '../components/icons';
 import { RescuePanel } from '../components/rescue';
 import { HelpFriend, LostPhone } from '../components/guardians';
 import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
 import { applyGuardians, applyLimit, cancelPending, executeQueued, finalizeRecovery, setGuardians, setLimit, spend, vetoQueued, vetoRecovery } from '../lib/actions';
-import { INST, chainTimestamp, type Env } from '../lib/v4';
+import { ALL_ENVS, CURRENT_ENVS, INST, chainTimestamp } from '../lib/v4';
 import { explainError, type RouteResult } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { addrUrl } from '../lib/config';
@@ -79,7 +80,7 @@ export default function PocketPage() {
   const rc = checkRecipient(to, {
     pocket: pv?.address ?? null, keyAccount: (a.acct?.evm as Hex | undefined) ?? null,
     known: [...(pv?.guardians ?? []), ...(pv?.queue.map((q) => q.to) ?? []), ...recentRecipients()],
-    protocol: Object.fromEntries((['prod', 'lab'] as Env[]).flatMap((e) => [[INST[e].drop.toLowerCase(), 'PocketDrop'], [INST[e].pool.toLowerCase(), 'DropPool'], [INST[e].router.toLowerCase(), 'PocketRouter'], [INST[e].factory.toLowerCase(), 'PocketFactory']])),
+    protocol: Object.fromEntries(ALL_ENVS.flatMap((e) => [[INST[e].drop.toLowerCase(), 'PocketDrop'], [INST[e].pool.toLowerCase(), 'DropPool'], [INST[e].router.toLowerCase(), 'PocketRouter'], [INST[e].factory.toLowerCase(), 'PocketFactory']])),
     code: toOk ? (toCode ?? null) : null,
   });
   const needAck = !!rc.confirm && ack !== to.trim().toLowerCase();
@@ -100,6 +101,7 @@ export default function PocketPage() {
           {!a.root ? <ConnectChoices /> : (
             <div className="space-y-5">
               <LegacyKeyBanner />
+              <PreviousPocketCard />
               <PocketCard />
               {!(pv?.deployed && pv.owner && !owned) && <ActivationCard />}
               {a.adopted.length > 0 && (
@@ -110,7 +112,7 @@ export default function PocketPage() {
               <details className="rounded-2xl border border-zinc-200 bg-white/70 p-4"><summary className="cursor-pointer text-sm font-medium text-zinc-900">Backup key</summary><div className="mt-3"><BackupCard /></div></details>
               <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-600" data-testid="env-switch">
                 <span>Instance:</span>
-                {(['prod', 'lab'] as Env[]).map((e) => <button key={e} type="button" data-testid={`env-${e}`} onClick={() => a.setEnv(e)} className={cx('rounded-full border px-3 py-1', a.env === e ? 'border-zinc-900 bg-zinc-900 text-stone-50' : 'border-zinc-300 bg-white')}>{e === 'prod' ? 'Production (24 h timelock)' : 'Lab (60 s timelock, for demos)'}</button>)}
+                {CURRENT_ENVS.map((e) => <button key={e} type="button" data-testid={`env-${e}`} onClick={() => a.setEnv(e)} className={cx('rounded-full border px-3 py-1', a.env === e ? 'border-zinc-900 bg-zinc-900 text-stone-50' : 'border-zinc-300 bg-white')}>{e === 'prod' ? 'Production (24 h timelock)' : 'Lab (60 s timelock, for demos)'}</button>)}
               </div>
             </div>
           )}

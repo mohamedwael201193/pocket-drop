@@ -10,8 +10,115 @@
   "cosmosChainId": "qorechain-diana",
   "explorer": "https://explore.qore.network"
  },
+ "current": "v5",
  "instances": {
   "prod": {
+   "router": {
+    "address": "0x13b8e379e50da657b943781d2816fc17473ae376",
+    "deployTx": "0x72cd976af4effc18cc04fc09e3487688516912d51ebc8689b2bde0b776bb8393",
+    "blockNumber": "10746808",
+    "codeKeccak": "0xf1064c1c05798496ac4e5f02a15d109ace2d62121877e772fa7049c5cc7fd258"
+   },
+   "factory": {
+    "address": "0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f",
+    "deployTx": "0x235d9aed4407a82e9c2f7996a09806d356659f2d7cf4d77c97e4c2892620c5bf",
+    "blockNumber": "10746805",
+    "codeKeccak": "0xbb1415bdebe2a913446570d9a82d8356c8b20a612414e4aef7e53ff30aa748b7"
+   },
+   "drop": {
+    "address": "0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798",
+    "deployTx": "0xb07dcc3501f6dd86323462fa68fbea678f1d21b76239fe5d5eb47583ff957913",
+    "blockNumber": "10746806",
+    "codeKeccak": "0xc5b46b02f33058191dbedb25606033d6b110e7575c899ff3d18da4e42621b9af"
+   },
+   "pool": {
+    "address": "0xdb67b9881b37c0e9a4988a56089c05c221c0a26f",
+    "deployTx": "0x0d93303d343bc130896f7e064994cc8efbab2e99cf93294e20972556facddcda",
+    "blockNumber": "10746807",
+    "codeKeccak": "0x43a804052a63803e8a443c3a0c35e780b456530eb2217c1dd56dec4f03848d9d"
+   },
+   "vaultImpl": {
+    "address": "0x8603937464a48c18ebede4de1149e8e7dc4e91b4",
+    "deployTx": "0x7f3edd9af1f07bad87071e6ceb5106c5b81b039b4a7d0f48634e3d5940558f12",
+    "blockNumber": "10746804",
+    "codeKeccak": "0x237b596e5e439cdfb1f80f59bf0c1e98005b96bdc14de7e72559af07d35d6d7e"
+   },
+   "readBack": {
+    "TIMELOCK": "86400",
+    "RECOVERY_DELAY": "172800",
+    "FREEZE_PERIOD": "259200",
+    "UNANIMOUS_RECOVERY_DELAY": "259200",
+    "BIND_TIMEOUT": "3600"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "3600",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "lab": {
+   "router": {
+    "address": "0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75",
+    "deployTx": "0xe66b229a5e017614f5dce0db4083303fc175ecb85882d4f2455de2588922683f",
+    "blockNumber": "10746813",
+    "codeKeccak": "0x79dfbe82763dac7167cbfdd936a9e77b88c854b9642dea16f21b27ebbd69b40c"
+   },
+   "factory": {
+    "address": "0xf00a2ce5945dd6bf762105d03d00b6cb91639443",
+    "deployTx": "0x80555a94b55fc249dda48738adcaade0c788fb926e25a31bcd64dd03fb594c5f",
+    "blockNumber": "10746810",
+    "codeKeccak": "0xd45a0b3b3be8bcff8c5de76d5ae9c819a3687eecb4ca7822f82c04bf6c389800"
+   },
+   "drop": {
+    "address": "0xb4a6b993e7aaa450b729fbc1f1b05048d093169a",
+    "deployTx": "0x3a765512da9bfe9e3232ac857ef79d9096cbe876a905b85518788a1d1a8bd6df",
+    "blockNumber": "10746811",
+    "codeKeccak": "0x56f569d0236ed6f1b2a49d787648856e1c7bf0de5e2fde8b7dff23e24b17528b"
+   },
+   "pool": {
+    "address": "0xd358dd2e8bcd1db502bfefd99b2795f3e81aa3d6",
+    "deployTx": "0xe0d167501df691ccaaa76137e6933d035f521591b0c6c72a04f9f422aa44b84e",
+    "blockNumber": "10746812",
+    "codeKeccak": "0x43a804052a63803e8a443c3a0c35e780b456530eb2217c1dd56dec4f03848d9d"
+   },
+   "vaultImpl": {
+    "address": "0x5c17c28b7c000e302a7ac67c87562aa767439584",
+    "deployTx": "0x3c54308f770440884a940e7a3b0137b780430161351642f25f929bae72a628df",
+    "blockNumber": "10746809",
+    "codeKeccak": "0xd261837ea1d2fa16f374046dbd69f0176a9d9722f6ed9bc8162737af06262640"
+   },
+   "readBack": {
+    "TIMELOCK": "60",
+    "RECOVERY_DELAY": "60",
+    "FREEZE_PERIOD": "120",
+    "UNANIMOUS_RECOVERY_DELAY": "180",
+    "BIND_TIMEOUT": "60"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "60",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "prodV4": {
    "router": {
     "address": "0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209",
     "deployTx": "0x41ef0c2b710588557f5e7e2ec4de4d98f8e918614b83201da50363c491acb31b",
@@ -64,7 +171,7 @@
     "2592000"
    ]
   },
-  "lab": {
+  "labV4": {
    "router": {
     "address": "0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d",
     "deployTx": "0xe8b738b480f89ccfd0fe52271afe5ebaf88efb86e6d894dece9dc2472396a588",
@@ -958,13 +1065,13 @@
   "stage2PublicReport": "https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427"
  },
  "tests": {
-  "total": 167,
-  "unit": 145,
-  "fuzz": 18,
-  "invariantFns": 16,
-  "passed": 167,
+  "total": 178,
+  "unit": 154,
+  "fuzz": 20,
+  "invariantFns": 18,
+  "passed": 178,
   "failed": 0,
   "coverage": "100% line, statement, branch and function on src/",
-  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 167 passed, 0 failed (contracts-v4/COVERAGE.md)"
+  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 178 passed, 0 failed (contracts-v4/COVERAGE.md)"
  }
 }

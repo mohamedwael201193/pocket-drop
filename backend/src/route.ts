@@ -92,7 +92,7 @@ export async function handleRoute(rawBody: unknown, ip: string, d: RouteDeps): P
   const sim = await relayer.simulate(data);
   if (!sim.ok) {
     log('warn', 'route.simulate_revert', { env: v.env, action, error: sim.revert.name });
-    if (v.env === 'prod') noteRouteRefusal(data, router, sim.revert.name);
+    if (v.env === 'prod' || v.env === 'prodV4') noteRouteRefusal(data, router, sim.revert.name);
     return reply(422, {
       ok: false, sent: false, env: v.env, action,
       error: { name: sim.revert.name, message: sim.revert.message, selector: sim.revert.selector, known: sim.revert.known, args: sim.revert.args?.map((a) => (typeof a === 'bigint' ? a.toString() : a)) },

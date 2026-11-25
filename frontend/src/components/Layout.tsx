@@ -312,7 +312,7 @@ export function Layout() {
             <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">QCAI automated audit {scoreOf(QCAI.score)}, then {scoreOf(QCAI.stage2Score)} of 100 · no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
             <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
               <a href={`${API_BASE}/api/health`} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">API health</a>
-              <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">v4 router</a>
+              <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">router (v5)</a>
               <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">Source</a>
             </span>
           </div>

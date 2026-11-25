@@ -6,20 +6,31 @@ import { decodeCode, encodeCode } from '../src/lib/actions';
 import { toEvmAddress } from '../src/components/rescue';
 import { defaultCfg, ZERO_SALT } from '../src/lib/v4';
 
-describe('link ids: v3 numbers keep working, v4 carries the instance', () => {
+describe('link ids: v3 numbers keep working, v4 and v5 carry the instance', () => {
   it('parses', () => {
     expect(parseLinkId('17')).toEqual({ v: 3, id: '17' });
-    expect(parseLinkId('p12')).toEqual({ v: 4, env: 'prod', id: 12n });
-    expect(parseLinkId('l3')).toEqual({ v: 4, env: 'lab', id: 3n });
+    // links shared before v5 keep resolving to the v4 contracts
+    expect(parseLinkId('p12')).toEqual({ v: 4, env: 'prodV4', id: 12n });
+    expect(parseLinkId('l3')).toEqual({ v: 4, env: 'labV4', id: 3n });
+    // v5 (current) links
+    expect(parseLinkId('q12')).toEqual({ v: 4, env: 'prod', id: 12n });
+    expect(parseLinkId('k3')).toEqual({ v: 4, env: 'lab', id: 3n });
     expect(parseLinkId('p0')).toBeNull();
+    expect(parseLinkId('q0')).toBeNull();
     expect(parseLinkId('x1')).toBeNull();
-    expect(linkId4('prod', 5n)).toBe('p5');
+    expect(linkId4('prod', 5n)).toBe('q5');
+    expect(linkId4('lab', 5n)).toBe('k5');
+    expect(linkId4('prodV4', 5n)).toBe('p5');
+    expect(linkId4('labV4', 5n)).toBe('l5');
   });
   it('builds and re-parses claim URLs', () => {
     const seed = new Uint8Array(32).fill(7);
     const u = claimUrl4('https://app.test', 'lab', 4n, seed, 'pool');
-    expect(u).toBe(`https://app.test/pool/l4#k=${'07'.repeat(32)}`);
-    expect(parseClaimInput(u)).toBe(`/pool/l4#k=${'07'.repeat(32)}`);
+    expect(u).toBe(`https://app.test/pool/k4#k=${'07'.repeat(32)}`);
+    expect(parseClaimInput(u)).toBe(`/pool/k4#k=${'07'.repeat(32)}`);
+    const old = claimUrl4('https://app.test', 'labV4', 4n, seed, 'pool');
+    expect(old).toBe(`https://app.test/pool/l4#k=${'07'.repeat(32)}`);
+    expect(parseClaimInput(old)).toBe(`/pool/l4#k=${'07'.repeat(32)}`);
   });
   it('the receive box accepts v3, v4 drop and v4 pool links, and rejects a pool without an instance', () => {
     const k = 'ab'.repeat(32);

@@ -7,7 +7,7 @@ import { DROP_CALLS, POOL_CALLS, VAULT_CALLS, decodeHybridRelay, eventsOf, hybri
 import { mergeHybrid } from '../src/statsv4.js';
 
 const OK = JSON.parse(fs.readFileSync(new URL('./fixtures/xvm-93FC5B4B.json', import.meta.url), 'utf8')).tx_response;
-const P = V4_INSTANCES.prod;
+const P = V4_INSTANCES.prodV4; // the recorded fixtures are relays into the v4 (previous) router
 const POCKET = '0x00000000000000000000000000000000000000AA' as Hex; // checksummed, as viem decodes it
 const OWNER = '0x00000000000000000000000000000000000000bb' as Hex;
 const REC = '0x00000000000000000000000000000000000000cc' as Hex;
@@ -65,7 +65,7 @@ describe('eventsOf', () => {
       R({ height: 7n, inner: encodeFunctionData({ abi: VAULT_CALLS, functionName: 'cancelDrop', args: [P.drop as Hex, 6n, 1n, '0x'] }) }),
       R({ height: 8n, inner: '0x1eb2149b' + '00'.repeat(31) + '01' as Hex }), // executeQueued: no stats event
     ];
-    const ev = await eventsOf('prod', relays, new Set(), readLink);
+    const ev = await eventsOf('prodV4', relays, new Set(), readLink);
     expect(ev.map((e) => e.eventName)).toEqual(['PocketDeployed', 'LinkCreated', 'LinkBound', 'LinkConfirmed', 'LinkClaimed', 'PoolCreated', 'PoolClaimed', 'LinkCancelled']);
     expect(ev[1].args).toMatchObject({ linkId: 5n, sender: POCKET, amount: 100n, drip: 2n, relayerFee: 3n, mode: 0 });
     expect(ev[3].args).toMatchObject({ linkId: 5n, recipient: REC });
@@ -76,7 +76,7 @@ describe('eventsOf', () => {
   });
   it('never re-deploys a Pocket already seen in logs, and survives state read failures', async () => {
     const relays = [R({ action: 'deployAndRelay', owner: OWNER }), R({ target: P.drop as Hex, inner: encodeFunctionData({ abi: DROP_CALLS, functionName: 'claim', args: [1n, '0x'] }) })];
-    const ev = await eventsOf('prod', relays, new Set([POCKET.toLowerCase()]), async () => { throw new Error('rpc'); });
+    const ev = await eventsOf('prodV4', relays, new Set([POCKET.toLowerCase()]), async () => { throw new Error('rpc'); });
     expect(ev.map((e) => e.eventName)).toEqual(['LinkClaimed']);
     expect(ev[0].args.amount).toBeUndefined();
   });
@@ -105,8 +105,8 @@ describe('searchRouterTxs / hybridRelays', () => {
     expect(decodeURIComponent(f.mock.calls[0][0])).toContain(`crossvm_request.target_contract='${P.router.toLowerCase()}'`);
     clearXvmCache();
     const g = vi.fn(async () => new Response(JSON.stringify({ tx_responses: [OK], total: '1' })));
-    expect(await hybridRelays('prod', 'http://rest/', g as never)).toHaveLength(1);
-    await hybridRelays('prod', 'http://rest/', g as never);
+    expect(await hybridRelays('prodV4', 'http://rest/', g as never)).toHaveLength(1);
+    await hybridRelays('prodV4', 'http://rest/', g as never);
     expect(g).toHaveBeenCalledTimes(1);
     await expect(searchRouterTxs('http://rest', P.router, (async () => new Response('x', { status: 500 })) as never)).rejects.toThrow(/HTTP 500/);
     expect(jsonSafe({ a: 1n })).toEqual({ a: '1' });

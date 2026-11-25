@@ -21,13 +21,17 @@ function useFacts() {
   return useQuery({
     queryKey: ['v4-facts'], refetchInterval: 30_000,
     queryFn: async () => {
-      const [links, pools, dropCode, poolCode] = await Promise.all([
-        pub.readContract({ address: INST.prod.drop, abi: dropAbi, functionName: 'linkCount' }) as Promise<bigint>,
-        pub.readContract({ address: INST.prod.pool, abi: poolAbi, functionName: 'poolCount' }) as Promise<bigint>,
-        pub.getCode({ address: INST.prod.drop }), pub.getCode({ address: INST.prod.router }),
-      ]);
-      const [escrow, poolEscrow] = await Promise.all([pub.getBalance({ address: INST.prod.drop }), pub.getBalance({ address: INST.prod.pool })]);
-      return { links, pools, escrow, poolEscrow, dropBytes: ((dropCode?.length ?? 2) - 2) / 2, routerBytes: ((poolCode?.length ?? 2) - 2) / 2 };
+      // production counts on the current v5 contracts and on the previous v4 contracts, read separately
+      const one = async (e: 'prod' | 'prodV4') => {
+        const [links, pools, escrow, poolEscrow] = await Promise.all([
+          pub.readContract({ address: INST[e].drop, abi: dropAbi, functionName: 'linkCount' }) as Promise<bigint>,
+          pub.readContract({ address: INST[e].pool, abi: poolAbi, functionName: 'poolCount' }) as Promise<bigint>,
+          pub.getBalance({ address: INST[e].drop }), pub.getBalance({ address: INST[e].pool }),
+        ]);
+        return { links, pools, escrow, poolEscrow };
+      };
+      const [v5, v4p] = await Promise.all([one('prod'), one('prodV4')]);
+      return { v5, v4: v4p };
     },
   });
 }
@@ -89,26 +93,28 @@ export default function JudgesPage() {
           </div>
         </section>
 
-        <Item n={2} title="The v4 contracts are on Diana (two instances: production and a 60 s lab)" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
+        <Item n={2} title="The contracts are on Diana: current v5 (strict PqcLib) and the previous v4, each with production and a 60 s lab" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
+          <p className="text-xs text-zinc-500">v5 changes only the signature library: exact ML-DSA-87 key and signature sizes are required before the precompile is called, and the key-status reply must have the exact canonical layout (<a className="underline" href={blob('contracts-v4/docs/V5.md')} target="_blank" rel="noopener noreferrer">docs/V5.md</a>). New Pockets, drops and pools use v5. Pockets, links and recorded evidence made on v4 stay on v4 and keep working.</p>
           <div className="overflow-x-auto rounded-xl bg-stoneBg p-3" data-testid="v4-addresses">
-            <table className="w-full min-w-[34rem] text-left font-mono text-xs">
-              <thead><tr className="text-zinc-500"><th className="pr-3">Contract</th><th className="pr-3">Production</th><th>Lab</th></tr></thead>
+            <table className="w-full min-w-[60rem] text-left font-mono text-xs">
+              <thead><tr className="text-zinc-500"><th className="pr-3">Contract</th><th className="pr-3">v5 production</th><th className="pr-3">v5 lab</th><th className="pr-3">v4 production (previous)</th><th>v4 lab (previous)</th></tr></thead>
               <tbody>{CONTRACTS.map(([k, label]) => (
                 <tr key={k} className="align-top"><td className="pr-3 py-1 text-zinc-700">{label}</td>
-                  {(['prod', 'lab'] as const).map((e) => <td key={e} className="pr-3 py-1"><a className="underline" href={addrUrl(v4.instances[e][k].address)} target="_blank" rel="noopener noreferrer" data-testid={`addr-${e}-${k}`}>{v4.instances[e][k].address}</a> <a className="text-zinc-500 underline" href={txUrl(v4.instances[e][k].deployTx)} target="_blank" rel="noopener noreferrer">deploy tx</a></td>)}
+                  {(['prod', 'lab', 'prodV4', 'labV4'] as const).map((e) => <td key={e} className="pr-3 py-1"><a className="underline" href={addrUrl(v4.instances[e][k].address)} target="_blank" rel="noopener noreferrer" data-testid={`addr-${e}-${k}`}>{v4.instances[e][k].address}</a> <a className="text-zinc-500 underline" href={txUrl(v4.instances[e][k].deployTx)} target="_blank" rel="noopener noreferrer">deploy tx</a></td>)}
                 </tr>))}
               </tbody>
             </table>
           </div>
           {!f ? <Skeleton className="h-12 w-full" /> : (
             <dl className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-xl bg-stoneBg p-3 font-mono text-xs" data-testid="v4-facts">
-              <dt className="text-zinc-500">drops created (prod) <SourceBadge kind="LIVE" /></dt><dd data-testid="fact-links">{f.links.toString()}</dd>
-              <dt className="text-zinc-500">pools created (prod)</dt><dd>{f.pools.toString()}</dd>
-              <dt className="text-zinc-500">escrow held (drops / pools)</dt><dd>{fmtQor(f.escrow)} / {fmtQor(f.poolEscrow)} QOR</dd>
+              <dt className="text-zinc-500">drops created, production v5 / v4 <SourceBadge kind="LIVE" /></dt><dd data-testid="fact-links">{f.v5.links.toString()} / {f.v4.links.toString()}</dd>
+              <dt className="text-zinc-500">pools created, production v5 / v4</dt><dd>{f.v5.pools.toString()} / {f.v4.pools.toString()}</dd>
+              <dt className="text-zinc-500">escrow held v5 (drops / pools)</dt><dd>{fmtQor(f.v5.escrow)} / {fmtQor(f.v5.poolEscrow)} QOR</dd>
+              <dt className="text-zinc-500">escrow held v4 (drops / pools)</dt><dd>{fmtQor(f.v4.escrow)} / {fmtQor(f.v4.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">timelock / recovery / freeze / unanimous</dt><dd>{Number(v4.instances.prod.readBack.TIMELOCK) / 3600} h / {Number(v4.instances.prod.readBack.RECOVERY_DELAY) / 3600} h / {Number(v4.instances.prod.readBack.FREEZE_PERIOD) / 3600} h / {Number(v4.instances.prod.readBack.UNANIMOUS_RECOVERY_DELAY) / 3600} h</dd>
             </dl>
           )}
-          <p className="text-xs text-zinc-500">No owner, no admin, no upgradeability. The relayer only ever calls the two routers (hybrid cross-VM calls; the fallback EVM window is scoped to the same targets), so it cannot reach a Pocket or the drop contract directly.</p>
+          <p className="text-xs text-zinc-500">No owner, no admin, no upgradeability. The relayer only ever calls the routers (v5 and v4; hybrid cross-VM calls; the fallback EVM window is scoped to the same targets), so it cannot reach a Pocket or the drop contract directly.</p>
         </Item>
 
         <Item n={3} title="The attacks, including a stolen key, are refused on-chain" action={<SourceBadge kind="RECORDED" />}>

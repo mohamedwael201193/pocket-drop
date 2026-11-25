@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:b9501955-aba5-5a50-89c1-04c838c83eec",
+  "serialNumber": "urn:uuid:54b1740e-b061-5b37-a457-9e78a456a520",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-23T17:33:07Z",
+    "timestamp": "2026-11-25T20:11:09Z",
     "tools": {
       "components": [
         {
@@ -175,8 +175,16 @@
         "value": "qcb-pqc-submitter-own-message"
       },
       {
+        "name": "qorescan:chain:protocol-feature",
+        "value": "pqc-key-registration-own-message"
+      },
+      {
+        "name": "qorescan:chain:protocol-feature",
+        "value": "pqc-verify-empty-message"
+      },
+      {
         "name": "qorescan:chain:protocol-features",
-        "value": "341 enabled at height 10624855 (31 PQC-related listed)"
+        "value": "353 enabled at height 10747200 (33 PQC-related listed)"
       },
       {
         "name": "qorescan:chain:pqc:hybrid-signature-mode",
@@ -603,7 +611,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10624856"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10747201"
           }
         ]
       },
@@ -888,7 +896,7 @@
           },
           {
             "location": "PqcLib.sol",
-            "line": 143,
+            "line": 155,
             "symbol": "keccak256",
             "additionalContext": "Keccak-256 hash"
           },
@@ -1045,6 +1053,57 @@
         {
           "name": "qorescan:pqc:hybrid-signature-mode",
           "value": "required"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto/algorithm/ml-kem-1024",
+      "name": "ML-KEM-1024",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/kem/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "key",
+            "additionalContext": "KEM public key published by qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "kem",
+          "parameterSetIdentifier": "1024",
+          "cryptoFunctions": [
+            "keygen",
+            "encapsulate",
+            "decapsulate"
+          ],
+          "classicalSecurityLevel": 256,
+          "nistQuantumSecurityLevel": 5
+        },
+        "oid": "2.16.840.1.101.3.4.4.3"
+      },
+      "properties": [
+        {
+          "name": "qorescan:classification",
+          "value": "post-quantum"
+        },
+        {
+          "name": "qorescan:transition",
+          "value": "Not scheduled for deprecation by NIST IR 8547"
+        },
+        {
+          "name": "qorescan:standard",
+          "value": "FIPS 203"
+        },
+        {
+          "name": "qorescan:family",
+          "value": "ML-KEM"
+        },
+        {
+          "name": "qorescan:source",
+          "value": "chain"
         }
       ]
     },
@@ -1939,6 +1998,36 @@
     },
     {
       "type": "cryptographic-asset",
+      "bom-ref": "crypto/key/account-kem/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "name": "Account KEM public key qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "evidence": {
+        "occurrences": [
+          {
+            "location": "https://api-testnet.qore.host/qorechain/pqc/v1/kem/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+            "symbol": "key",
+            "additionalContext": "KEM public key published by qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq"
+          }
+        ]
+      },
+      "cryptoProperties": {
+        "assetType": "related-crypto-material",
+        "relatedCryptoMaterialProperties": {
+          "type": "public-key",
+          "id": "qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+          "algorithmRef": "crypto/algorithm/ml-kem-1024",
+          "size": 12544,
+          "format": "raw"
+        }
+      },
+      "properties": [
+        {
+          "name": "qorescan:source",
+          "value": "chain"
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
       "bom-ref": "crypto/key/account-pqc/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
       "name": "Account PQC public key qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
       "evidence": {
@@ -2156,7 +2245,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10624856"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10747201"
           }
         ]
       },
@@ -2388,6 +2477,7 @@
         "crypto/algorithm/hkdf-sha256",
         "crypto/algorithm/keccak-256",
         "crypto/algorithm/ml-dsa-87",
+        "crypto/algorithm/ml-kem-1024",
         "crypto/algorithm/rsa-2048",
         "crypto/algorithm/rsa-4096",
         "crypto/algorithm/rsa-pkcs1v15-sha256",
@@ -2407,6 +2497,7 @@
         "crypto/key/account-classical/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
         "crypto/key/account-classical/qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e",
         "crypto/key/account-classical/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
+        "crypto/key/account-kem/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
         "crypto/key/account-pqc/qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus",
         "crypto/key/account-pqc/qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
         "crypto/key/account-pqc/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
@@ -2530,6 +2621,12 @@
       "ref": "crypto/key/account-classical/qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh",
       "dependsOn": [
         "crypto/algorithm/ecdsa-secp256k1"
+      ]
+    },
+    {
+      "ref": "crypto/key/account-kem/qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq",
+      "dependsOn": [
+        "crypto/algorithm/ml-kem-1024"
       ]
     },
     {

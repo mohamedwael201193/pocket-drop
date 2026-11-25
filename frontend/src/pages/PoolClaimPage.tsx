@@ -7,7 +7,7 @@ import { Celebrate } from '../components/alive';
 import { ActivationCard, KEY_ACCOUNT_MIN_WEI } from '../components/account';
 import { claimPoolSlot, linkId4, parseLinkId, poolClaimed, readPool } from '../lib/claim4';
 import { useAccount, useKeyAccount } from '../lib/account';
-import { defaultCfg, predictPocket } from '../lib/v4';
+import { defaultCfg, genOf, isProdLike, predictPocket } from '../lib/v4';
 import { explainError } from '../lib/api';
 import { fmtQor, pub } from '../lib/chain';
 import { addrUrl } from '../lib/config';
@@ -69,7 +69,7 @@ export default function PoolClaimPage() {
     <Page narrow testId="pool-page">
       <div className="space-y-5">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
-          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Drop Pool · {linkId4(env, pid)}{env === 'lab' ? ' · lab' : ''}</span><span className="flex items-center gap-2">{isSamplePool(env, pid) && <span className="rounded-full border border-stone-500 px-2 py-0.5 font-mono text-xs text-stone-200" data-testid="pool-team-hosted">TEAM-HOSTED sample</span>}<SourceBadge kind="LIVE" /></span></div>
+          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Drop Pool · {linkId4(env, pid)}{isProdLike(env) ? '' : ' · lab'}{genOf(env) === 'v4' ? ' · v4' : ''}</span><span className="flex items-center gap-2">{isSamplePool(env, pid) && <span className="rounded-full border border-stone-500 px-2 py-0.5 font-mono text-xs text-stone-200" data-testid="pool-team-hosted">TEAM-HOSTED sample</span>}<SourceBadge kind="LIVE" /></span></div>
           <div className="mt-3 text-sm text-stone-300">One slot is worth</div>
           <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="slot-amount">{pool ? fmtQor(pool.perSlot) : <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-stone-700/70 align-middle" aria-label="Loading the pool" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
           <div className="mt-2 font-mono text-xs text-stone-400" data-testid="pool-slots-left">{pool ? `${pool.slots - pool.taken} of ${pool.slots} slots left · self-funded by the host${isSamplePool(env, pid) ? ' (the PocketDrop team)' : ''} · Testnet` : <span className="inline-block h-3 w-48 animate-pulse rounded bg-stone-700/70 align-middle" aria-hidden />}</div>

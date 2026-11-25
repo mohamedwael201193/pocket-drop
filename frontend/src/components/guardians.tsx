@@ -3,7 +3,7 @@ import { isAddress, type Hex } from 'viem';
 import { Button, CopyButton, Mono, Notice, TxLink } from './ui';
 import { useAccount, useKeyAccount } from '../lib/account';
 import { decodeCode, encodeCode, makeRequest, newOwnerCode, requestDigest, signRequest, submitShares, type GuardianKind, type GuardianRequest, type GuardianShare } from '../lib/actions';
-import { INST, readPocket, type Env } from '../lib/v4';
+import { INST, envLabel, readPocket, type Env } from '../lib/v4';
 import { explainError } from '../lib/api';
 
 // "threshold" = the minimum number of guardians the owner chose (for example 2 of 3); "unanimous" = every guardian (UX-6)
@@ -122,7 +122,7 @@ export function HelpFriend() {
         {shareCount === 0 && <p className="text-xs text-zinc-600" data-testid="shares-reason">Paste at least one signature share first.</p>}
         {sub.err && <Notice tone="error" testId="shares-error">{sub.err}</Notice>}
         {sub.hash && <Notice tone="ok" testId="shares-ok">Mined: <TxLink hash={sub.hash} testId="shares-tx" check /></Notice>}
-        <p className="text-xs text-zinc-500">The chain checks each signature against the guardian&apos;s registered key. Instance: {env === 'prod' ? 'production' : 'lab'} ({INST[env].router.slice(0, 8)}…).</p>
+        <p className="text-xs text-zinc-500">The chain checks each signature against the guardian&apos;s registered key. Instance: {envLabel(env)} ({INST[env].router.slice(0, 8)}…).</p>
       </div>
     </div>
   );

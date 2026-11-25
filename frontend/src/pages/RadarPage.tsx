@@ -6,7 +6,7 @@ import { Stage } from '../components/stage';
 import { CountUp } from '../components/alive';
 import { compareWithApi, envStats, pqSample, V2_RELEASE_BLOCK, type EnvStats, type Split } from '../lib/radar';
 import { addrUrl } from '../lib/config';
-import { INST, type Env } from '../lib/v4';
+import { INST, genOf, isProdLike, type Env } from '../lib/v4';
 import { useHealth } from '../lib/queries';
 import { fetchStats } from '../lib/api';
 import { PHONE } from '../data/proofs';
@@ -37,7 +37,7 @@ function EnvCard({ s }: { s: EnvStats }) {
   const max = Math.max(1, s.drops.created);
   return (
     <div className={card} data-testid={`radar-${s.env}`}>
-      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">{s.env === 'prod' ? 'Production instance' : 'Lab instance (60 s delays)'}</h2><SourceBadge kind="LIVE" title="Read from chain logs just now" /></div>
+      <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">{isProdLike(s.env) ? 'Production' : 'Lab (60 s delays)'} · {genOf(s.env)}{genOf(s.env) === 'v4' ? ' (previous)' : ''}</h2><SourceBadge kind="LIVE" title="Read from chain logs just now" /></div>
       <p className="mt-1 font-mono text-xs text-zinc-500">router <a className="underline" href={addrUrl(i.router)} target="_blank" rel="noopener noreferrer">{i.router.slice(0, 10)}…</a> · factory <a className="underline" href={addrUrl(i.factory)} target="_blank" rel="noopener noreferrer">{i.factory.slice(0, 10)}…</a></p>
       <p className="mt-1 text-xs text-zinc-600" data-testid={`${s.env}-hybrid-note`}>{s.hybridEvents === null || s.hybridEvents === undefined
         ? 'Hybrid relays could not be read from the native lane just now; the counts below are from EVM logs only.'
@@ -94,28 +94,39 @@ function useEnv(e: Env) { return useQuery({ queryKey: ['radar', e], queryFn: () 
 export default function RadarPage() {
   const prod = useEnv('prod');
   const lab = useEnv('lab');
+  const prodV4 = useEnv('prodV4');
+  const labV4 = useEnv('labV4');
+  const all = [prod, lab, prodV4, labV4];
+  const allIn = all.every((x) => !!x.data);
   const pq = useQuery({ queryKey: ['pq-sample'], queryFn: () => pqSample(30, 120), refetchInterval: 120_000, retry: 1 });
   const { data: h } = useHealth();
   const ext = (s?: EnvStats) => (s ? s.pocketsOwn.external + s.dropSenders.external + s.dropRecipients.external + s.poolHosts.external + s.poolClaimers.external : 0);
-  const extTotal = ext(prod.data) + ext(lab.data);
+  const extTotal = all.reduce((n, x) => n + ext(x.data), 0);
   const api = useQuery({ queryKey: ['api-stats'], queryFn: fetchStats, refetchInterval: 120_000, retry: 1 });
   const apiV4 = api.data?.v4 as Record<string, Parameters<typeof compareWithApi>[1]> | undefined;
-  const diffs = prod.data && lab.data && apiV4 ? [...compareWithApi(prod.data, apiV4.prod).map((d) => `prod ${d}`), ...compareWithApi(lab.data, apiV4.lab).map((d) => `lab ${d}`)] : null;
-  const eras = prod.data?.keyEras;
+  const diffs = allIn && apiV4 ? (['prod', 'lab', 'prodV4', 'labV4'] as const).flatMap((e, i) => compareWithApi(all[i].data!, apiV4[e]).map((d) => `${e} ${d}`)) : null;
+  // key eras describe the Pockets made before v5; every v5 Pocket was deployed long after the v2 key release
+  const eras = prodV4.data?.keyEras;
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6 sm:pb-16 sm:pt-12 lg:px-8" data-testid="radar">
-      <Stage live eyebrow={<>Radar · v4 <SourceBadge kind="LIVE" /></>} title="What is actually on-chain">Every number is counted from contract events on Diana testnet when you opened this page. Accounts that belong to the Pocket Drop team and its test setup are counted as <b>own</b>; everyone else is <b>external</b>. Nothing is added by hand.</Stage>
+      <Stage live eyebrow={<>Radar · v5 and previous v4 <SourceBadge kind="LIVE" /></>} title="What is actually on-chain">Every number is counted from contract events on Diana testnet when you opened this page. Accounts that belong to the Pocket Drop team and its test setup are counted as <b>own</b>; everyone else is <b>external</b>. Nothing is added by hand.</Stage>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Reveal>{prod.data ? <EnvCard s={prod.data} /> : <div className={card}><Dash />{prod.error && <Notice tone="error">Could not read the logs: {(prod.error as Error).message}</Notice>}</div>}</Reveal>
         <Reveal delay={0.08}>{lab.data ? <EnvCard s={lab.data} /> : <div className={card}><Dash />{lab.error && <Notice tone="error">Could not read the logs: {(lab.error as Error).message}</Notice>}</div>}</Reveal>
       </div>
+      <h2 className="mt-8 font-serif text-xl text-zinc-900" data-testid="radar-previous">Previous contracts (v4)</h2>
+      <p className="mt-1 text-sm text-zinc-600">Everything made before the v5 deploy on 25 Nov 2026 stays on the v4 contracts and keeps working. Counted here separately, never added into the v5 numbers above.</p>
+      <div className="mt-3 grid gap-5 lg:grid-cols-2">
+        <Reveal>{prodV4.data ? <EnvCard s={prodV4.data} /> : <div className={card}><Dash />{prodV4.error && <Notice tone="error">Could not read the logs: {(prodV4.error as Error).message}</Notice>}</div>}</Reveal>
+        <Reveal delay={0.08}>{labV4.data ? <EnvCard s={labV4.data} /> : <div className={card}><Dash />{labV4.error && <Notice tone="error">Could not read the logs: {(labV4.error as Error).message}</Notice>}</div>}</Reveal>
+      </div>
 
       <Reveal>
         <div className={cx(card, 'mt-5')} data-testid="external-usage">
           <h2 className="font-serif text-2xl text-zinc-900">Outside use</h2>
-          <p className="mt-1 text-sm text-zinc-700"><span className="font-mono text-2xl" data-testid="external-total">{prod.data && lab.data ? extTotal : '…'}</span> external account roles across both instances. {prod.data && lab.data && extTotal === 0 && 'No outside account has used Pocket Drop yet. The team accounts are the only users so far, and this page says so on purpose.'}</p>
+          <p className="mt-1 text-sm text-zinc-700"><span className="font-mono text-2xl" data-testid="external-total">{allIn ? extTotal : '…'}</span> external account roles across all four instances (v5 and v4, production and lab). {allIn && extTotal === 0 && 'No outside account has used Pocket Drop yet. The team accounts are the only users so far, and this page says so on purpose.'}</p>
         </div>
       </Reveal>
 
@@ -124,7 +135,7 @@ export default function RadarPage() {
           <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-2xl text-zinc-900">Legacy keys still on chain</h2><SourceBadge kind="LIVE" title="PocketDeployed logs and Pocket balances read just now" /></div>
           {eras ? (
             <>
-              <p className="mt-2 text-lg text-zinc-900" data-testid="key-eras-line"><b className="font-mono">{eras.v1Era.total}</b> production Pockets were deployed before the v2 key release, <b className="font-mono">{eras.v1Era.stillHoldingQor}</b> of them still hold QOR ({eras.v1Era.stillHoldingExternal} external). <b className="font-mono">{eras.v2Era.total}</b> were deployed after it.</p>
+              <p className="mt-2 text-lg text-zinc-900" data-testid="key-eras-line"><b className="font-mono">{eras.v1Era.total}</b> v4 production Pockets were deployed before the v2 key release, <b className="font-mono">{eras.v1Era.stillHoldingQor}</b> of them still hold QOR ({eras.v1Era.stillHoldingExternal} external). <b className="font-mono">{eras.v2Era.total}</b> were deployed after it.</p>
               <div className="mt-3 space-y-3">
                 <Bar label={`Before v2 (own ${eras.v1Era.own}, external ${eras.v1Era.external})`} value={eras.v1Era.total} max={Math.max(1, eras.v1Era.total + eras.v2Era.total)} tone="bg-amber-600" />
                 <Bar label="Before v2 and still holding QOR" value={eras.v1Era.stillHoldingQor} max={Math.max(1, eras.v1Era.total + eras.v2Era.total)} tone="bg-red-700" />
@@ -135,7 +146,7 @@ export default function RadarPage() {
           ) : <p className="mt-2 text-sm text-zinc-500">Reading Pocket deployments… <Dash /></p>}
           <p className="mt-3 border-t border-zinc-100 pt-3 text-xs text-zinc-700" data-testid="api-agrees">
             {diffs === null ? (api.error ? <>/api/stats could not be read: {(api.error as Error).message}</> : <>Checking that <code className="font-mono">/api/stats</code> counts the same… <Dash /></>)
-              : diffs.length === 0 ? <><b className="text-emerald-800">/api/stats agrees</b> with this page for both instances (Pockets, drops created and claimed, pools, external Pocket owners). The API reports v3 and v4 separately.</>
+              : diffs.length === 0 ? <><b className="text-emerald-800">/api/stats agrees</b> with this page for all four instances (Pockets, drops created and claimed, pools, external Pocket owners). The API reports v3, v4 and v5 separately.</>
               : <><b className="text-amber-800">/api/stats differs</b> on {diffs.join(', ')}. The API caches for 30 s, so a new event can show here first.</>}
           </p>
         </div>

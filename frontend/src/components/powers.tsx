@@ -4,7 +4,7 @@ import { factoryAbi } from '../lib/abi4';
 import { pub } from '../lib/chain';
 import { addrUrl } from '../lib/config';
 import { dur, powersOf, readDelays, type Power } from '../lib/powers';
-import { INST, readPocket, type Env } from '../lib/v4';
+import { ALL_ENVS, INST, envLabel, readPocket, type Env } from '../lib/v4';
 import { Notice, SourceBadge } from './ui';
 import type { Hex } from 'viem';
 
@@ -13,7 +13,7 @@ const LABEL: Record<Power['state'], string> = { open: 'possible now', paused: 'p
 
 /** Which instance (if any) deployed this Pocket. An undeployed (counterfactual) address is not recognised. */
 export async function pocketEnv(address: Hex): Promise<Env | null> {
-  for (const env of ['prod', 'lab'] as Env[]) {
+  for (const env of ALL_ENVS) {
     if (await pub.readContract({ address: INST[env].factory, abi: factoryAbi, functionName: 'isPocket', args: [address] })) return env;
   }
   return null;
@@ -37,7 +37,7 @@ export function PowerMap({ env, address }: { env: Env; address: Hex }) {
         <h2 className="text-sm font-semibold text-zinc-900">Who can do what with this Pocket</h2>
         <SourceBadge kind="LIVE" title="Read from the Pocket contract on Diana; refreshed every 30 s" />
       </div>
-      <p className="mt-1 text-xs text-zinc-600">Pocket <a className="font-mono underline" href={addrUrl(address)} target="_blank" rel="noopener noreferrer">{address.slice(0, 10)}…{address.slice(-4)}</a> on the {env === 'prod' ? 'production' : 'lab'} instance. Every row is enforced by the contract, not by this app.</p>
+      <p className="mt-1 text-xs text-zinc-600">Pocket <a className="font-mono underline" href={addrUrl(address)} target="_blank" rel="noopener noreferrer">{address.slice(0, 10)}…{address.slice(-4)}</a> on the {envLabel(env)} instance. Every row is enforced by the contract, not by this app.</p>
       {q.isLoading && <p className="mt-3 text-sm text-zinc-500">Reading the Pocket…</p>}
       {q.error && <div className="mt-3"><Notice tone="error">Could not read the Pocket: {(q.error as Error).message}</Notice></div>}
       {q.data && (

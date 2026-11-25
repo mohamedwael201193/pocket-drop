@@ -109,7 +109,7 @@ const routeOk = z.object({
   result: z.object({ linkId: z.string().optional(), poolId: z.string().optional(), queuedId: z.string().optional(), pocket: z.string().optional() }).passthrough().optional(),
 }).passthrough();
 /** v4: relay a user-signed intent through PocketRouter. 422 means the simulation reverted (nothing was sent). */
-export const postRoute = (p: { env: 'prod' | 'lab'; target?: string; data: string; pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string } }): Promise<RouteResult> =>
+export const postRoute = (p: { env: 'prod' | 'lab' | 'prodV4' | 'labV4'; target?: string; data: string; pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string } }): Promise<RouteResult> =>
   post('/api/route', p, routeOk).then((r) => ({ ...r, txHash: r.txHash as Hex }));
 export const postBind = (p: { linkId: string; recipient: string; recipientKeyHash: string; linkPk: string; linkSig: string }) => post('/api/bind', p, txOk);
 export const postClaim = (p: { linkId: string; recipientSig: string }) => post('/api/claim', p, txOk);
@@ -164,4 +164,4 @@ const xvmSchema = z.object({
   events: z.array(z.object({ eventName: z.string(), args: z.record(z.unknown()), blockNumber: z.string(), transactionHash: z.string(), lane: z.literal('hybrid') })),
 }).passthrough();
 /** GET /api/xvm: hybrid relays into the PocketRouter of `env`, decoded into the events they stand for. */
-export const fetchXvm = (env: 'prod' | 'lab') => getJson(`/api/xvm?env=${env}`, xvmSchema).then((r) => r.events as XvmEvent[]);
+export const fetchXvm = (env: 'prod' | 'lab' | 'prodV4' | 'labV4') => getJson(`/api/xvm?env=${env}`, xvmSchema).then((r) => r.events as XvmEvent[]);

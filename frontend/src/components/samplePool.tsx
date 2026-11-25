@@ -8,11 +8,13 @@ import { samplePoolShare } from '../lib/share';
 import { SharePanel } from './sharePanel';
 
 export const SAMPLE_POOL_ID = BigInt(sample.poolId);
-export const isSamplePool = (env: string, id: bigint) => env === 'prod' && id === SAMPLE_POOL_ID;
+// The sample pool was created on the v4 (previous) production contracts; its link id keeps the v4 prefix p.
+export const SAMPLE_ENV = 'prodV4' as const;
+export const isSamplePool = (env: string, id: bigint) => env === SAMPLE_ENV && id === SAMPLE_POOL_ID;
 
 /** "No link yet?": a standing pool the team funded from its own test Pocket, so a visitor can try receiving without a friend. */
 export function SamplePoolCard({ compact }: { compact?: boolean }) {
-  const { data: pool } = useQuery({ queryKey: ['pool4', 'prod', sample.poolId.toString()], queryFn: () => readPool('prod', SAMPLE_POOL_ID), refetchInterval: 15_000 });
+  const { data: pool } = useQuery({ queryKey: ['pool4', SAMPLE_ENV, sample.poolId.toString()], queryFn: () => readPool(SAMPLE_ENV, SAMPLE_POOL_ID), refetchInterval: 15_000 });
   const left = pool ? pool.slots - pool.taken : null;
   const open = !!pool && !pool.closed && left! > 0 && pool.expiry * 1000 > Date.now();
   return (

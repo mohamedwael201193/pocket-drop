@@ -111,7 +111,7 @@ describe('checkTx', () => {
   it('a call to something that is not a v4 router is explained, not checked', async () => {
     const tx = { ...spendTx(4n), router: '0x3333333333333333333333333333333333333333' as Hex };
     const r = await checkTx(tx.hash, deps(tx));
-    expect(r.note).toMatch(/does not call a Pocket Drop v4 router/);
+    expect(r.note).toMatch(/does not call a Pocket Drop router \(v5 or the previous v4\)/);
   });
   it('rejects input that is not a hash', async () => {
     await expect(checkTx('hello', deps(spendTx(4n)))).rejects.toThrow(/64 hex/);

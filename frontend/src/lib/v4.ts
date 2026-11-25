@@ -5,7 +5,19 @@ import { dropAbi, factoryAbi, poolAbi, vaultAbi } from './abi4';
 import { pub } from './chain';
 import { postRoute, type RouteResult } from './api';
 
-export type Env = 'prod' | 'lab';
+/** prod / lab = the CURRENT contracts (v5, strict PqcLib). prodV4 / labV4 = the previous v4 contracts (history, old links,
+ *  Pockets made before 25 Nov 2026). New Pockets, drops and pools are always made on the current contracts. */
+export type Env = 'prod' | 'lab' | 'prodV4' | 'labV4';
+export const CURRENT_ENVS = ['prod', 'lab'] as const satisfies readonly Env[];
+export const PREVIOUS_ENVS = ['prodV4', 'labV4'] as const satisfies readonly Env[];
+export const ALL_ENVS: Env[] = [...CURRENT_ENVS, ...PREVIOUS_ENVS];
+/** Link id prefixes: q / k = v5 prod / lab, p / l = v4 prod / lab (links shared before v5 keep their prefix). */
+export const LINK_PREFIX: Record<Env, string> = { prod: 'q', lab: 'k', prodV4: 'p', labV4: 'l' };
+export const CURRENT_VERSION = 'v5';
+export const genOf = (e: Env): 'v5' | 'v4' => (e === 'prodV4' || e === 'labV4' ? 'v4' : 'v5');
+export const previousOf = (e: Env): Env => (e === 'prod' ? 'prodV4' : e === 'lab' ? 'labV4' : e);
+export const isProdLike = (e: Env) => e === 'prod' || e === 'prodV4';
+export const envLabel = (e: Env) => `${isProdLike(e) ? 'production' : 'lab'} (${genOf(e)}${genOf(e) === 'v4' ? ', previous contracts' : ''})`;
 const addr = (x: string) => x as Hex;
 const mk = (e: Env) => {
   const i = data.instances[e];
@@ -19,7 +31,7 @@ const mk = (e: Env) => {
     minPerSlot: BigInt(i.poolLimits[0]), maxPerSlot: BigInt(i.poolLimits[1]), maxSlots: Number(i.poolLimits[2]),
   };
 };
-export const INST = { prod: mk('prod'), lab: mk('lab') } as const;
+export const INST = { prod: mk('prod'), lab: mk('lab'), prodV4: mk('prodV4'), labV4: mk('labV4') } as const;
 export type Inst = (typeof INST)[Env];
 
 /** Drip must cover the newcomer's PQ registration fee (0.06 QOR) with margin. The delivery fee (relayerFee) is per mode, from measured relay costs: lib/fees.ts. */
