@@ -1,7 +1,7 @@
 // Landing-only constants. Kept free of viem and of the app's config module so the landing chunk stays small.
 import sample from '../data/sample-pool.json';
 
-export const API_BASE: string = import.meta.env.VITE_API_BASE || 'https://pocketdrop-api.vercel.app';
+export const API_BASE: string = import.meta.env.VITE_API_BASE || 'https://pocket-drop-api.vercel.app';
 export const EXPLORER = 'https://explore.qore.network';
 export const SOURCE_URL = 'https://github.com/mohamedwael201193/pocket-drop';
 export const explorerTx = (h: string) => `${EXPLORER}/tx/${h}`;

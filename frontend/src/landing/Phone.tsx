@@ -23,7 +23,7 @@ function Chat() {
       <motion.div className="pd-bub pd-bub--in" {...tick(0.1)}>Did you get set up for the demo?</motion.div>
       <motion.div className="pd-bub pd-bub--out" {...tick(0.35)}>Not yet, I don’t have a wallet</motion.div>
       <motion.div className="pd-bub pd-bub--in pd-bub--link" {...tick(0.7)}>
-        <div className="pd-linkcard"><LogoMark size={22} /><div><b>2.00 QOR for you</b><small>pocketdrop-app.vercel.app</small></div></div>
+        <div className="pd-linkcard"><LogoMark size={22} /><div><b>2.00 QOR for you</b><small>pocket-drop.vercel.app</small></div></div>
         <span>You don’t need one. Tap this.</span>
       </motion.div>
     </div>

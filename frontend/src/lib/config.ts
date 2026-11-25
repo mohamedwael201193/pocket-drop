@@ -1,7 +1,7 @@
 import { defineChain } from 'viem';
 
 const env = import.meta.env;
-export const API_BASE: string = env.VITE_API_BASE || 'https://pocketdrop-api.vercel.app';
+export const API_BASE: string = env.VITE_API_BASE || 'https://pocket-drop-api.vercel.app';
 export const EVM_RPC: string = env.VITE_EVM_RPC || 'https://evm-testnet.qore.host';
 // CometBFT RPC and Cosmos REST go through the relayer's key-less CORS proxy (these hosts send no CORS headers).
 export const COSMOS_RPC = `${API_BASE}/rpc`;
