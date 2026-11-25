@@ -259,15 +259,19 @@ contract RealCryptoTest is V4Base {
         assertTrue(probe.verifyFor(BOB, "m", s));
     }
 
-    function test_pocket_with_truncated_owner_key_can_never_spend() public {
+    /// v5: a Pocket cannot even be created for an owner whose registered ML-DSA-87 key has the wrong length.
+    function test_pocket_with_truncated_owner_key_cannot_be_created() public {
         bytes memory k = pk("bob");
-        keys.set(BOB, true, 1, _trunc(k, PK_LEN - 1), true);
         address[] memory none = new address[](0);
+        keys.set(BOB, true, 1, _trunc(k, PK_LEN - 1), true);
+        vm.expectRevert(PqcLib.BadKeyLength.selector);
+        factory.deploy(BOB, none, 0, 5 ether, bytes32(uint256(78)));
+        keys.set(BOB, true, 1, bytes.concat(k, hex"00"), true);
+        vm.expectRevert(PqcLib.BadKeyLength.selector);
+        factory.deploy(BOB, none, 0, 5 ether, bytes32(uint256(78)));
+        keys.set(BOB, true, 1, k, true);
         PocketVault p = PocketVault(payable(factory.deploy(BOB, none, 0, 5 ether, bytes32(uint256(78)))));
-        vm.deal(address(p), 5 ether);
-        bytes memory s = _signDigest("bob", p.intentDigest(p.ACT_SPEND(), 0, DL, abi.encode(SINK, 1 ether)));
-        vm.expectRevert(PocketVault.BadSignature.selector);
-        p.spend(SINK, 1 ether, DL, s);
+        assertEq(p.ownerKeyHash(), keccak256(k));
     }
 
     function test_erc1271_real_signature() public {

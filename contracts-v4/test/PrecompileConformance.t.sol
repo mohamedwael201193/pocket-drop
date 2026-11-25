@@ -37,7 +37,8 @@ contract PrecompileConformanceTest is Test {
             bytes memory ret = vm.parseJsonBytes(j, _p("v", i, "ret"));
             bool expected = vm.parseJsonBool(j, _p("v", i, "expected"));
             RawMock(VERIFY_ADDR).set(ret, reverted);
-            bool got = h.verify(hex"01", hex"02", hex"03"); // inputs are irrelevant: the live answer is replayed
+            // inputs only need ML-DSA-87 sizes (the v5 lib checks them first): the live answer is replayed
+            bool got = h.verify(new bytes(2592), new bytes(4627), hex"03");
             assertEq(got, expected, vm.parseJsonString(j, _p("v", i, "name")));
             if (got) trues++;
         }

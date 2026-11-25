@@ -18,6 +18,12 @@ library PqcLib {
     uint8 internal constant ALGO_ML_DSA_87 = 1;
     /// @dev Upper bound on a decoded public key (ML-DSA-87 keys are 2592 bytes); larger data is treated as malformed.
     uint256 internal constant MAX_PUBKEY_LEN = 8192;
+    /// @dev FIPS 204 ML-DSA-87 sizes. v5: enforced in the contract, not only by the precompile and the pinned key hash.
+    uint256 internal constant ML_DSA_87_PK_LEN = 2592;
+    uint256 internal constant ML_DSA_87_SIG_LEN = 4627;
+    /// @dev The only key-status layout accepted (v5): the bytes field starts right after the 4-word head. Every
+    ///      recorded Diana answer uses it (docs/PRECOMPILE_CONFORMANCE.md).
+    uint256 internal constant KEY_STATUS_BYTES_OFFSET = 0x80;
 
     /// @notice Decoded result of `pqcKeyStatus`.
     /// @dev `ok == false` means the precompile call failed or its data was malformed; all other fields are then zero.
@@ -33,8 +39,10 @@ library PqcLib {
     /// @param pk Public key.
     /// @param sig Signature.
     /// @param message Signed message.
-    /// @return valid True only if the precompile returned exactly one word equal to 1.
+    /// @return valid True only if `pk` is 2592 bytes, `sig` is 4627 bytes and the precompile returned exactly one word
+    ///         equal to 1. Wrong sizes return false without calling the precompile.
     function verify(bytes memory pk, bytes memory sig, bytes memory message) internal view returns (bool valid) {
+        if (pk.length != ML_DSA_87_PK_LEN || sig.length != ML_DSA_87_SIG_LEN) return false;
         (bool success, bytes memory ret) =
             VERIFY_PRECOMPILE.staticcall(abi.encodeWithSignature("pqcVerify(bytes,bytes,bytes)", pk, sig, message));
         if (!success || ret.length != 32) return false;
@@ -67,14 +75,15 @@ library PqcLib {
             possession := mload(add(ret, 128))
         }
         if (registered > 1 || possession > 1 || algo > type(uint8).max) return st;
-        // The dynamic part must start after the head, be word aligned and leave room for its length word.
-        if (offset < 128 || offset % 32 != 0 || offset > n - 32) return st;
+        // v5: the dynamic part must start exactly after the head (canonical ABI layout, no gap, no overlap).
+        if (offset != KEY_STATUS_BYTES_OFFSET) return st;
 
         uint256 len;
         assembly ("memory-safe") {
             len := mload(add(add(ret, 32), offset))
         }
-        if (len > MAX_PUBKEY_LEN || offset + 32 + len > n) return st;
+        // v5: the return data must be exactly head + length word + the key padded to a whole word (no trailing data).
+        if (len > MAX_PUBKEY_LEN || n != 160 + ((len + 31) / 32) * 32) return st;
 
         bytes memory pk = new bytes(len);
         assembly ("memory-safe") {
@@ -107,7 +116,8 @@ library PqcLib {
         NotRegistered,
         UnsupportedAlgo,
         NotProven,
-        KeyMismatch
+        KeyMismatch,
+        BadKeyLength
     }
 
     error KeyUnavailable();
@@ -115,6 +125,7 @@ library PqcLib {
     error UnsupportedAlgo();
     error PossessionNotProven();
     error KeyMismatch();
+    error BadKeyLength();
 
     /// @notice The exact bytes an owner signs for `digest`. THE ONE PLACE the message format lives.
     /// @dev data = lowercase hex of the digest with a 0x prefix (66 chars), as produced by viem `keccak256`. If QoreX
@@ -139,6 +150,7 @@ library PqcLib {
         if (!ks.ok) return (KeyCheck.Unavailable, pk);
         if (!ks.registered) return (KeyCheck.NotRegistered, pk);
         if (ks.algoId != ALGO_ML_DSA_87) return (KeyCheck.UnsupportedAlgo, pk);
+        if (ks.pubkey.length != ML_DSA_87_PK_LEN) return (KeyCheck.BadKeyLength, pk);
         if (!ks.possessionProven) return (KeyCheck.NotProven, pk);
         if (pinned != bytes32(0) && keccak256(ks.pubkey) != pinned) return (KeyCheck.KeyMismatch, pk);
         return (KeyCheck.Ok, ks.pubkey);
@@ -153,6 +165,7 @@ library PqcLib {
         if (code == KeyCheck.UnsupportedAlgo) revert UnsupportedAlgo();
         if (code == KeyCheck.NotProven) revert PossessionNotProven();
         if (code == KeyCheck.KeyMismatch) revert KeyMismatch();
+        if (code == KeyCheck.BadKeyLength) revert BadKeyLength();
     }
 
     /// @notice Verify `sig` over `message` with the key currently registered for `account`.

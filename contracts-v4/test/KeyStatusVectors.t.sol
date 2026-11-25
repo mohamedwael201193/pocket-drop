@@ -27,6 +27,13 @@ contract KeyStatusVectorsTest is Test {
         return string.concat(".vectors[", vm.toString(i), "].", field);
     }
 
+    /// @dev Shared vectors whose v4 decode was ok but which the v5 strict PqcLib refuses (non-canonical layout).
+    function _v5Refuses(string memory name) internal pure returns (bool) {
+        bytes32 k = keccak256(bytes(name));
+        return k == keccak256("offset-0xa0-with-gap") || k == keccak256("trailing-word")
+            || k == keccak256("unaligned-extra-byte");
+    }
+
     function test_every_vector_decodes_as_recorded() public {
         string memory json = _vectors();
         uint256 n = vm.parseJsonUint(json, ".count");
@@ -35,6 +42,13 @@ contract KeyStatusVectorsTest is Test {
             string memory name = vm.parseJsonString(json, _p(i, "name"));
             raw.set(vm.parseJsonBytes(json, _p(i, "raw")), false);
             PqcLib.KeyStatus memory st = h.keyStatus(address(0xabc));
+            if (_v5Refuses(name)) {
+                // v5 strict layout: offset exactly 0x80 and no trailing data. These decoded under v4.
+                assertFalse(st.ok, name);
+                assertFalse(st.registered, name);
+                assertEq(st.pubkey.length, 0, name);
+                continue;
+            }
             assertEq(st.ok, vm.parseJsonBool(json, _p(i, "contract.ok")), name);
             assertEq(st.registered, vm.parseJsonBool(json, _p(i, "contract.registered")), name);
             assertEq(uint256(st.algoId), vm.parseJsonUint(json, _p(i, "contract.algoId")), name);

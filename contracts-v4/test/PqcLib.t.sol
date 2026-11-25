@@ -44,6 +44,9 @@ contract PqcLibTest is Test {
     RawMock internal rawVerify = RawMock(VERIFY_ADDR);
     RawMock internal rawKeys = RawMock(KEYS_ADDR);
     address internal acct = address(0xabc);
+    /// @dev v5: PqcLib.verify only calls the precompile for ML-DSA-87 sizes, so the raw-return tests use those sizes.
+    bytes internal P = new bytes(2592);
+    bytes internal S = new bytes(4627);
 
     function setUp() public {
         h = new PqcLibHarness();
@@ -55,48 +58,105 @@ contract PqcLibTest is Test {
 
     function test_verify_true_only_for_exactly_one_word_equal_one() public {
         rawVerify.set(abi.encode(uint256(1)), false);
-        assertTrue(h.verify("a", "b", "c"));
+        assertTrue(h.verify(P, S, "c"));
         rawVerify.set(abi.encode(true), false);
-        assertTrue(h.verify("a", "b", "c"));
+        assertTrue(h.verify(P, S, "c"));
     }
 
     function test_verify_false_variants() public {
         rawVerify.set(abi.encode(uint256(0)), false);
-        assertFalse(h.verify("a", "b", "c"), "false word");
+        assertFalse(h.verify(P, S, "c"), "false word");
         rawVerify.set(abi.encode(uint256(2)), false);
-        assertFalse(h.verify("a", "b", "c"), "word 2 is not true");
+        assertFalse(h.verify(P, S, "c"), "word 2 is not true");
         rawVerify.set(abi.encode(type(uint256).max), false);
-        assertFalse(h.verify("a", "b", "c"), "max word");
+        assertFalse(h.verify(P, S, "c"), "max word");
         rawVerify.set(hex"", false);
-        assertFalse(h.verify("a", "b", "c"), "empty return");
+        assertFalse(h.verify(P, S, "c"), "empty return");
         rawVerify.set(hex"01", false);
-        assertFalse(h.verify("a", "b", "c"), "1 byte");
+        assertFalse(h.verify(P, S, "c"), "1 byte");
         rawVerify.set(new bytes(31), false);
-        assertFalse(h.verify("a", "b", "c"), "31 bytes");
+        assertFalse(h.verify(P, S, "c"), "31 bytes");
         rawVerify.set(bytes.concat(abi.encode(uint256(1)), hex"00"), false);
-        assertFalse(h.verify("a", "b", "c"), "33 bytes");
+        assertFalse(h.verify(P, S, "c"), "33 bytes");
         rawVerify.set(abi.encode(uint256(1), uint256(1)), false);
-        assertFalse(h.verify("a", "b", "c"), "64 bytes");
+        assertFalse(h.verify(P, S, "c"), "64 bytes");
         rawVerify.set(abi.encode(uint256(1)), true);
-        assertFalse(h.verify("a", "b", "c"), "reverting precompile");
+        assertFalse(h.verify(P, S, "c"), "reverting precompile");
     }
 
     function test_verify_false_when_precompile_has_no_code() public {
         vm.etch(VERIFY_ADDR, hex"");
-        assertFalse(h.verify("a", "b", "c"), "no code => empty return => false");
+        assertFalse(h.verify(P, S, "c"), "no code => empty return => false");
     }
 
     function test_verify_passes_exact_calldata() public {
         // Use the signature-real mock: only the exact triple is accepted.
         vm.etch(VERIFY_ADDR, address(new MockPqcVerify()).code);
-        bytes memory pk = hex"0102";
-        bytes memory sig = hex"030405";
+        bytes memory pk = _filled(2592, 0x11);
+        bytes memory sig = _filled(4627, 0x22);
         bytes memory m = hex"06";
         MockPqcVerify(VERIFY_ADDR).accept(keccak256(abi.encode(pk, sig, m)));
         assertTrue(h.verify(pk, sig, m));
         assertFalse(h.verify(pk, sig, hex"07"));
-        assertFalse(h.verify(pk, hex"030406", m));
-        assertFalse(h.verify(hex"0103", sig, m));
+        bytes memory sig2 = _filled(4627, 0x22);
+        sig2[4626] = 0x23;
+        assertFalse(h.verify(pk, sig2, m));
+        bytes memory pk2 = _filled(2592, 0x11);
+        pk2[0] = 0x12;
+        assertFalse(h.verify(pk2, sig, m));
+    }
+
+    /*---------------- v5: sizes enforced in the contract ----------------*/
+
+    function _filled(uint256 n, uint8 b) internal pure returns (bytes memory out) {
+        out = new bytes(n);
+        for (uint256 i; i < n; i++) {
+            out[i] = bytes1(b);
+        }
+    }
+
+    /// The precompile is never reached for a wrong size, even if it would answer true.
+    function test_v5_verify_refuses_wrong_sizes_before_the_precompile() public {
+        rawVerify.set(abi.encode(uint256(1)), false); // a precompile that says yes to everything
+        assertTrue(h.verify(P, S, "m"));
+        assertFalse(h.verify(new bytes(2591), S, "m"), "pk 2591");
+        assertFalse(h.verify(new bytes(2593), S, "m"), "pk 2593");
+        assertFalse(h.verify("", S, "m"), "pk empty");
+        assertFalse(h.verify(new bytes(1952), S, "m"), "ML-DSA-65 key size");
+        assertFalse(h.verify(P, new bytes(4626), "m"), "sig 4626");
+        assertFalse(h.verify(P, new bytes(4628), "m"), "sig 4628");
+        assertFalse(h.verify(P, "", "m"), "sig empty");
+        assertFalse(h.verify(P, new bytes(3309), "m"), "ML-DSA-65 sig size");
+    }
+
+    function testFuzz_v5_verify_true_only_at_exact_sizes(uint16 pkLen, uint16 sigLen) public {
+        pkLen = uint16(bound(pkLen, 0, 6000));
+        sigLen = uint16(bound(sigLen, 0, 6000));
+        rawVerify.set(abi.encode(uint256(1)), false);
+        bool got = h.verify(new bytes(pkLen), new bytes(sigLen), "m");
+        assertEq(got, pkLen == 2592 && sigLen == 4627);
+    }
+
+    function test_v5_keyStatus_refuses_trailing_data() public {
+        bytes memory good = _enc(true, 1, P, true);
+        rawKeys.set(good, false);
+        assertTrue(h.keyStatus(acct).ok);
+        _assertNotOk(bytes.concat(good, new bytes(32)), false, "32 trailing bytes");
+        _assertNotOk(bytes.concat(good, hex"00"), false, "1 trailing byte");
+    }
+
+    function test_v5_checkKey_refuses_ml_dsa_87_key_of_wrong_length() public {
+        _setKeys(true, 1, new bytes(2591), true);
+        (PqcLib.KeyCheck code,) = h.checkKey(acct, 0);
+        assertEq(uint8(code), uint8(PqcLib.KeyCheck.BadKeyLength));
+        vm.expectRevert(PqcLib.BadKeyLength.selector);
+        h.requireKey(acct, 0);
+        _setKeys(true, 1, new bytes(2593), true);
+        (code,) = h.checkKey(acct, 0);
+        assertEq(uint8(code), uint8(PqcLib.KeyCheck.BadKeyLength));
+        _setKeys(true, 1, P, true);
+        (code,) = h.checkKey(acct, 0);
+        assertEq(uint8(code), uint8(PqcLib.KeyCheck.Ok));
     }
 
     /*---------------- keyStatus ----------------*/
@@ -137,16 +197,13 @@ contract PqcLibTest is Test {
         assertEq(st.pubkey, pk);
     }
 
-    function test_keyStatus_accepts_gap_between_head_and_tail() public {
-        // offset 160 instead of 128: still well-formed
+    function test_v5_keyStatus_refuses_gap_between_head_and_tail() public {
+        // offset 160 instead of 128: valid ABI, but not the layout the precompile produces. v4 accepted it; v5 does not.
         bytes memory pk = hex"0102030405";
         bytes memory data = abi.encodePacked(
             uint256(1), uint256(1), uint256(160), uint256(1), uint256(0), uint256(pk.length), pk, new bytes(27)
         );
-        rawKeys.set(data, false);
-        PqcLib.KeyStatus memory st = h.keyStatus(acct);
-        assertTrue(st.ok);
-        assertEq(st.pubkey, pk);
+        _assertNotOk(data, false, "offset 0xa0");
     }
 
     function _assertNotOk(bytes memory data, bool doRevert, string memory why) internal {
@@ -295,7 +352,7 @@ contract PqcLibTest is Test {
     }
 
     function test_checkKey_codes() public {
-        bytes memory pk = hex"0102";
+        bytes memory pk = _filled(2592, 0x01);
         (PqcLib.KeyCheck code,) = h.checkKey(acct, 0); // RawMock: empty data => unavailable
         assertEq(uint8(code), uint8(PqcLib.KeyCheck.Unavailable));
         _setKeys(false, 0, "", false);
@@ -319,7 +376,7 @@ contract PqcLibTest is Test {
     }
 
     function test_requireKey_reverts_per_code() public {
-        bytes memory pk = hex"0102";
+        bytes memory pk = _filled(2592, 0x01);
         vm.expectRevert(PqcLib.KeyUnavailable.selector);
         h.requireKey(acct, 0);
         _setKeys(false, 0, "", false);
@@ -338,8 +395,8 @@ contract PqcLibTest is Test {
     }
 
     function test_verifyFor_uses_registered_key_and_exact_message() public {
-        bytes memory pk = hex"0102";
-        bytes memory sig = hex"0304";
+        bytes memory pk = _filled(2592, 0x01);
+        bytes memory sig = _filled(4627, 0x03);
         bytes memory m = hex"05";
         _setKeys(true, 1, pk, true);
         vm.etch(VERIFY_ADDR, address(new MockPqcVerify()).code);
