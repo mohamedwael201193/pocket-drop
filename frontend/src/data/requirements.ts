@@ -63,15 +63,22 @@ export const REQUIREMENTS: Requirement[] = [
   },
   {
     id: 'scoped-window',
-    requirement: 'Scoped EVM window (the fallback, closed while relays are hybrid): when open, the relayer can only call the two routers (and the v3 drop), with tx and value caps',
+    requirement: 'Scoped EVM window, two kinds. (1) Per user, "Relay it yourself": the user\'s own account opens a hybrid-signed window scoped to the one v5 router (about 9 minutes, 3 txs) and submits its own claim or spend; the app offers it when the relayer is down or slow, or always (Advanced setting on /pocket). (2) The relayer\'s fallback window, scoped to the routers with tx and value caps, closed while relays are hybrid',
     code: [
-      { label: 'renew-window.mjs (hybrid-signed MsgOpenEVMWindow, allowed_targets)', path: 'backend/scripts/renew-window.mjs#L37-L39' },
-      { label: 'renew-window.yml (every 2 h)', path: '.github/workflows/renew-window.yml' },
+      { label: 'selfRelay.ts (own router-only window, then the router call from the user\'s account)', path: 'frontend/src/lib/selfRelay.ts' },
+      { label: 'recipient.ts openRouterWindow (MsgOpenEVMWindow, allowed_targets = [router])', path: 'frontend/src/lib/recipient.ts' },
+      { label: 'self-relay-v5.mjs (the live run below)', path: 'contracts-v4/script/self-relay-v5.mjs' },
+      { label: 'PocketRouter.relay: no caller check, authority is the ML-DSA-87 signature inside the call', path: 'contracts-v4/src/PocketRouter.sol#L37-L42' },
+      { label: 'renew-window.mjs (relayer fallback window)', path: 'backend/scripts/renew-window.mjs#L37-L39' },
     ],
     live: [
+      { label: 'test account opens its own window, hybrid-signed, scoped to the v5 router only (400 blocks, 3 txs, expiry height 10,755,999): code 0, pqc_hybrid_verify verified', hash: 'A6C998D75F07A78F260EB64CC6AB597D30A842599265D5D8627F514E5ED663FD' },
+      { label: 'the same account submits its own claim through router.relay (0.2 QOR into its Pocket)', hash: '0xb7941d40569f7e45217980137a3120c7690bdb0c4aa17e9d2df150c718fd2663' },
+      { label: 'the same account submits its own first spend through router.deployAndRelay (deploys its Pocket, 0.05 QOR)', hash: '0x3abed0a3672504bf026a2e104e03ce917c4c2ddcfe2735430096d92ea88403b6' },
+      { label: 'it closes its window: code 0', hash: '3DAFE5B728E8630EF8FE5BB8284F0743BDB3166F6CB8A1A40AAF0F7DE82D8CD5' },
       { label: 'relayer tx to the drop contract directly: refused by the chain at broadcast (not an allowed recipient)', note: 'refused before inclusion, so there is no hash; see contracts-v4/LIVE_RESULTS.md' },
     ],
-    tests: ['backend test/misc.test.ts "health" and "windowWarning"', 'test_relay_refuses_non_pocket_targets'],
+    tests: ['frontend test/selfRelay.test.ts (calldata, window reuse only when router-only, fallback rules, the recorded run)', 'reverify.mjs section 11 (window scope, submitter = the user, window closed now)', 'backend test/misc.test.ts "health" and "windowWarning"', 'test_relay_refuses_non_pocket_targets'],
   },
   {
     id: 'smart-account',
