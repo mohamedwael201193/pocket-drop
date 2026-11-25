@@ -1,9 +1,9 @@
 {
   "stage": 3,
   "version": "v5",
-  "auditId": null,
-  "publicReportUrl": null,
-  "note": "No report ID or public link was created by the dashboard for this run; PDF export and screenshots are archived alongside this JSON.",
+  "auditId": "QCAIA-1795645590445-DF0CEDA6",
+  "publicReportUrl": "https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6",
+  "note": "The public report page title shows 'Unknown contract'; the public audits list names it 'PocketDrop v5 (strict PqcLib)'.",
   "generatedAtCairo": "2026-11-26T00:26:43+02:00",
   "generatedAtUtc": "2026-11-25T22:26:43Z",
   "contractName": "PocketDrop v5 (strict PqcLib)",

@@ -11,13 +11,13 @@ All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary
 | Stage | Date (UTC) | Audit ID | Score / risk | PDF | JSON | Audited source |
 |---|---|---|---|---|---|---|
 | 1 | 2026-11-19 23:28 | `QCAIA-1795130931306-3D8DAA40` | 82 / MEDIUM | [`docs/audit/stage1/QCAI-stage1-2026-11-19.pdf`](audit/stage1/QCAI-stage1-2026-11-19.pdf) | [`.json`](audit/stage1/QCAI-stage1-2026-11-19.json) | [`stage1/PocketDrop-v4-flattened.sol`](audit/stage1/PocketDrop-v4-flattened.sol), 1601 lines, SHA-256 `a4fdacc97a798149c6ce0b15e46b9944c94fb5ecb11ab68d235440692ad32cd4` |
-| 3 (v5) | 2026-11-25 22:26 | `none (PDF export only)` | 85 / MEDIUM | [`docs/audit/stage3/QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf) | [`.json`](audit/stage3/qcai-stage3-v5.json) | [`stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610` |
+| 3 (v5) | 2026-11-25 22:26 | `QCAIA-1795645590445-DF0CEDA6` | 85 / MEDIUM | [`docs/audit/stage3/QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf) | [`.json`](audit/stage3/qcai-stage3-v5.json) | [`stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610` |
 | 2 | 2026-11-20 01:32 | `QCAIA-1795138339351-F6A93427` | 78 / MEDIUM | [`docs/audit/stage2/QCAI-stage2-2026-11-20.pdf`](audit/stage2/QCAI-stage2-2026-11-20.pdf) | [`.json`](audit/stage2/QCAI-stage2-2026-11-20.json), SHA-256 `a1d587ebb749c6cd8601b47bbcf63f6cf4f5709e0b72f6168c114ba2eb30bbc7` | [`stage2/PocketDrop-v4-flattened.sol`](audit/stage2/PocketDrop-v4-flattened.sol), 1605 lines, SHA-256 `c4b19a8d00879b64417aece0d7dd65a20e1398285c4fbf895f19e78cdfe1b0cf` |
 
 Public reports:
 - Stage 1: https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795130931306-3D8DAA40
 - Stage 2: https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427
-- Stage 3 (v5): no report ID or public link was created on the dashboard page; the exported PDF ([`QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf)), screenshots ([summary](audit/stage3/QCAI-stage3-v5-summary.png), [findings](audit/stage3/QCAI-stage3-v5-findings.png)), and structured record ([`qcai-stage3-v5.json`](audit/stage3/qcai-stage3-v5.json)) are archived in `docs/audit/stage3/`.
+- Stage 3 (v5): https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6
 
 All three runs use the blockchain setting "Ethereum (EVM/Solidity)". The dashboard showed a cost of 150 QOR (testnet) for each run.
 
@@ -193,7 +193,8 @@ Run metadata:
 - **Target:** `dashboard.qorechain.io/audit`, Testnet, 150 test QOR fee, Blockchain `Ethereum (EVM/Solidity)`, Name `PocketDrop v5 (strict PqcLib)`
 - **Audited source:** [`docs/audit/stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610`
 - **Score history:** Stage 1 (v4) `82/100` -> Stage 2 (v4) `78/100` -> Stage 3 (v5) `85/100` (Risk: `MEDIUM`, Quantum Safe: `Not scored` for Ethereum/EVM setting)
-- **Artifacts:** [`QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf), [`qcai-stage3-v5.json`](audit/stage3/qcai-stage3-v5.json), [`QCAI-stage3-v5-summary.png`](audit/stage3/QCAI-stage3-v5-summary.png), [`QCAI-stage3-v5-findings.png`](audit/stage3/QCAI-stage3-v5-findings.png). No report ID or public link was exposed on the dashboard page for this run.
+- **Audit ID:** `QCAIA-1795645590445-DF0CEDA6`. Public report: https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6 (the report page title shows "Unknown contract"; the public audits list names it "PocketDrop v5 (strict PqcLib)").
+- **Artifacts:** [`QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf), [`qcai-stage3-v5.json`](audit/stage3/qcai-stage3-v5.json), [`QCAI-stage3-v5-summary.png`](audit/stage3/QCAI-stage3-v5-summary.png), [`QCAI-stage3-v5-findings.png`](audit/stage3/QCAI-stage3-v5-findings.png).
 
 Executive summary (verbatim from the report):
 > The PocketDrop v5 contract implements a robust post-quantum secure smart account system with multiple security features including ML-DSA-87 signature verification, guardian-based recovery mechanisms, and reentrancy protection. However, there are several medium-severity issues related to access control and potential logic flaws that need attention. The contract follows best practices for post-quantum cryptography and includes comprehensive error handling.
@@ -207,3 +208,7 @@ Executive summary (verbatim from the report):
 | 5 | INFO | `PocketVault.sol:270` (actual `PocketVault.sol:232-235`; flattened `:545-548`) | **ERC-1271 Implementation:** "The PocketVault contract implements ERC-1271 correctly with the `isValidSignature` function." | **Informational** | `isValidSignature` (`PocketVault.sol:232-235`) verifies the owner's ML-DSA-87 signature against `owner` and `ownerKeyHash` over `PqcLib.pqMessage(hash)`, returning `0x1626ba7e` when valid and `0xffffffff` otherwise. Report recommends "None required." | `test_erc1271` (`PocketVault.t.sol`); `test_erc1271_applies_the_same_key_rules` (`Hardening.t.sol`); `test_pocket_and_plain_account_both_approve` (`PqGuard.t.sol`) |
 
 Counts: 5 findings (1 high, 2 medium, 1 low, 1 info). 0 valid unmitigated bugs; no contract source changes required.
+
+## 10. Stage 4 (prepared, not yet run)
+
+The Stage 4 flattened source is in [`docs/audit/stage4/`](audit/stage4/) (`PocketDrop-v5-stage4-flattened.sol`, SHA-256 `0716a307935475256cf1fd813e9317abbd567715f89481778a9e4770a251fc47`). A paid testnet re-run of that source failed twice on the dashboard side (HTTP 402 "Send failed"). No QOR was charged. Stage 4 will run on the next free daily audit.

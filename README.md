@@ -38,7 +38,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | Precompile conformance: 43 eth_call cases on 0x0A01 / 0x0A02, 0 anomalies against FIPS 204 | RECORDED, 25 Nov 2026 | [`docs/PRECOMPILE_CONFORMANCE.md`](docs/PRECOMPILE_CONFORMANCE.md) |
 | 202 frontend and 215 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 25 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
 | 115 recorded live rows: 103 on the v4 contracts (31 of them attacks that reverted on chain or were refused by the chain) and 12 from the v5 deploy smoke (one drop sent and claimed, one pool) | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
-| QCAI audits: Stage 1 (v4) 82, Stage 2 (v4) 78, Stage 3 (v5) 85 (5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
+| QCAI audits: Stage 1 (v4) 82, Stage 2 (v4) 78, Stage 3 (v5) 85 (`QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md), [Stage 3 public report](https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 | Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
 | Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
@@ -114,7 +114,7 @@ Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL
 
 ## Audit
 
-Three-stage QCAI audit across v4 and v5: Stage 1 (v4) scored 82 (19 Nov 2026), Stage 2 (v4) scored 78 (20 Nov 2026), and Stage 3 (v5) scored 85 (25 Nov 2026 UTC / 26 Nov 2026 Cairo; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a resolution and named Foundry tests, and the deployed v5 bytecode is unchanged. Details: [docs/AUDIT.md](docs/AUDIT.md). Reports: [`docs/audit/`](docs/audit/).
+Three-stage QCAI audit across v4 and v5: Stage 1 (v4) scored 82 (19 Nov 2026), Stage 2 (v4) scored 78 (20 Nov 2026), and Stage 3 (v5) scored 85 (25 Nov 2026 UTC / 26 Nov 2026 Cairo; audit `QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a resolution and named Foundry tests, and the deployed v5 bytecode is unchanged. Details: [docs/AUDIT.md](docs/AUDIT.md). Stage 3 public report: https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6. PDFs: [`docs/audit/`](docs/audit/).
 
 ## Run it
 
