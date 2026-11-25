@@ -36,3 +36,11 @@ describe('distinct external accounts', () => {
     expect(distinctExternal([{ externalAccounts: [] }])).toBe(0);
   });
 });
+
+describe('log cache codec', () => {
+  it('round-trips bigints in rows and args', async () => {
+    const { _codec } = await import('../src/lib/radar');
+    const rows = [{ eventName: 'LinkCreated', args: { linkId: 33n, sender: '0xab', amount: 10n ** 18n }, transactionHash: '0x01' as `0x${string}`, blockNumber: 10_748_000n }];
+    expect(_codec.dec(_codec.enc(rows))).toEqual(rows);
+  });
+});

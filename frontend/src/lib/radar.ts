@@ -23,11 +23,26 @@ async function limited<T>(f: () => Promise<T>): Promise<T> {
   try { return await f(); } finally { active--; waiting.shift()?.(); }
 }
 type Row = { eventName: string; args: Record<string, unknown>; transactionHash: Hex; blockNumber: bigint };
+/** Log cache for closed block ranges (localStorage, this browser only). BigInts are stored as {"$n":"…"}. */
+const CACHE = 'pd.logs.v1:';
+const enc = (v: Row[]) => JSON.stringify(v.map((r) => ({ eventName: r.eventName, args: r.args, transactionHash: r.transactionHash, blockNumber: r.blockNumber })), (_k, x) => (typeof x === 'bigint' ? { $n: x.toString() } : x));
+const dec = (s: string) => JSON.parse(s, (_k, x) => (x && typeof x === 'object' && typeof x.$n === 'string' && Object.keys(x).length === 1 ? BigInt(x.$n) : x)) as Row[];
+export function cacheGet(k: string): Row[] | null { try { const s = localStorage.getItem(k); return s ? dec(s) : null; } catch { return null; } }
+export function cachePut(k: string, rows: Row[]) { try { localStorage.setItem(k, enc(rows)); } catch { /* full or private mode: just do not cache */ } }
+export const _codec = { enc, dec };
 /** Every log of `events` from `address`, one getLogs per 9,000-block range, grouped by event name. */
 async function logsOf(address: Hex, events: ReturnType<typeof getAbiItem>[], from: bigint, head: bigint): Promise<Record<string, Omit<Row, 'eventName'>[]>> {
   const ranges: [bigint, bigint][] = [];
   for (let f = from; f <= head; f += CHUNK) ranges.push([f, f + CHUNK - 1n > head ? head : f + CHUNK - 1n]);
-  const parts = await Promise.all(ranges.map(([f, t]) => limited(() => pub.getLogs({ address, events: events as never, fromBlock: f, toBlock: t }) as unknown as Promise<Row[]>)));
+  const sig = events.map((e) => (e as { name: string }).name).join(',');
+  const parts = await Promise.all(ranges.map(([f, t]) => {
+    // Diana finalises every block (CometBFT), so a full range that ended before the head never changes: keep it in this browser
+    const closed = t - f === CHUNK - 1n && t < head;
+    const k = `${CACHE}${address.toLowerCase()}:${sig}:${f}:${t}`;
+    const hit = closed ? cacheGet(k) : null;
+    if (hit) return Promise.resolve(hit);
+    return limited(() => pub.getLogs({ address, events: events as never, fromBlock: f, toBlock: t }) as unknown as Promise<Row[]>).then((rows) => { if (closed) cachePut(k, rows); return rows; });
+  }));
   const out: Record<string, Omit<Row, 'eventName'>[]> = {};
   for (const e of events) out[(e as { name: string }).name] = [];
   for (const l of parts.flat()) out[l.eventName]?.push({ args: l.args ?? {}, transactionHash: l.transactionHash, blockNumber: l.blockNumber });

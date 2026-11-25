@@ -8,7 +8,8 @@
  */
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
+import type { EnvStats } from '../lib/radar';
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, Check, CircleDashed, Inbox, KeyRound, Search, Send, ShieldCheck, XCircle, Zap } from '../components/icons';
 import { CountUp, motionOk } from '../components/alive';
@@ -23,21 +24,22 @@ import { StartHere } from '../components/startHere';
 const qorNum = (wei: bigint) => Number(wei) / 1e18;
 const fmtBal = (n: number) => (n >= 100 ? n.toFixed(2) : n >= 1 ? n.toFixed(2) : n.toFixed(4));
 
+/** Production activity: the current v5 contracts and the previous v4 contracts, each read from contract logs. v5 covers few
+ *  blocks and arrives first, so the table fills at once; v4 (a longer history) is merged in when it lands. `complete` is true
+ *  only when both are in, and only then are totals shown. */
 function useActivity() {
-  // production on the current v5 contracts plus the previous v4 contracts, merged newest first
-  return useQuery({
-    queryKey: ['radar', 'prod+prodV4'], refetchInterval: 60_000, retry: 1, staleTime: 30_000,
-    queryFn: async () => {
-      const m = await import('../lib/radar');
-      const [a, b] = await Promise.all([m.envStats('prod'), m.envStats('prodV4')]);
-      return {
-        pockets: a.pockets + b.pockets,
-        hybridEvents: a.hybridEvents == null || b.hybridEvents == null ? null : a.hybridEvents + b.hybridEvents,
-        eventBlocks: [...(a.eventBlocks ?? []), ...(b.eventBlocks ?? [])].sort((x, y) => x - y),
-        recent: [...a.recent.map((r) => ({ ...r, gen: 'v5' })), ...b.recent.map((r) => ({ ...r, gen: 'v4' }))].sort((x, y) => (x.block === y.block ? 0 : x.block > y.block ? -1 : 1)),
-      };
-    },
-  });
+  const q = (env: 'prod' | 'prodV4') => ({ queryKey: ['radar', env], refetchInterval: 60_000, retry: 1, staleTime: 30_000, queryFn: async () => (await import('../lib/radar')).envStats(env) });
+  const [v5, v4] = useQueries({ queries: [q('prod'), q('prodV4')] });
+  const parts = [v5.data && { s: v5.data, gen: 'v5' }, v4.data && { s: v4.data, gen: 'v4' }].filter(Boolean) as { s: EnvStats; gen: string }[];
+  const complete = !!v5.data && !!v4.data;
+  const data = parts.length ? {
+    complete,
+    pockets: parts.reduce((n, p) => n + p.s.pockets, 0),
+    hybridEvents: complete && v5.data!.hybridEvents != null && v4.data!.hybridEvents != null ? v5.data!.hybridEvents + v4.data!.hybridEvents : null,
+    eventBlocks: parts.flatMap((p) => p.s.eventBlocks ?? []).sort((x, y) => x - y),
+    recent: parts.flatMap((p) => p.s.recent.map((r) => ({ ...r, gen: p.gen }))).sort((x, y) => (x.block === y.block ? 0 : x.block > y.block ? -1 : 1)),
+  } : undefined;
+  return { data, isLoading: v5.isLoading && v4.isLoading, error: v5.error && v4.error ? v5.error : null };
 }
 
 function CardHead({ title, badge, to }: { title: string; badge?: ReactNode; to?: string }) {
@@ -124,7 +126,7 @@ function ProofCard() {
   const v4 = s?.v4 as { prod?: { hybridRelayEvents?: number }; prodV4?: { hybridRelayEvents?: number } } | undefined;
   const apiHybrid = v4?.prod?.hybridRelayEvents != null && v4?.prodV4?.hybridRelayEvents != null ? v4.prod.hybridRelayEvents + v4.prodV4.hybridRelayEvents : null;
   const hybrid = apiHybrid ?? act?.hybridEvents ?? null;
-  const series = cumulativeSeries(act?.eventBlocks ?? [], 28);
+  const series = cumulativeSeries(act?.complete ? act.eventBlocks : [], 28);
   return (
     <Bento i={2} className="lg:col-span-3" testId="ov-proof">
       <CardHead title="Proof" badge={<SourceBadge kind="LIVE" title="/api/stats and contract logs, read just now" />} to="/proof" />
@@ -133,7 +135,7 @@ function ProofCard() {
       </p>
       <p className="mt-1.5 text-sm text-zinc-600">hybrid-signed relays the chain verified (secp256k1 + ML-DSA-87)</p>
       <div className="mt-3"><Sparkline values={series} testId="ov-spark" /></div>
-      <p className="mt-1 text-xs text-zinc-500" data-testid="ov-events">{act ? `${act.eventBlocks?.length ?? 0} events (v5 + v4) · ${act.pockets} Pockets on chain` : 'Counting events…'}</p>
+      <p className="mt-1 text-xs text-zinc-500" data-testid="ov-events">{act?.complete ? `${act.eventBlocks.length} events (v5 + v4) · ${act.pockets} Pockets on chain` : 'Counting events…'}</p>
     </Bento>
   );
 }
