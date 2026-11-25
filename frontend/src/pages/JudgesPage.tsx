@@ -14,6 +14,7 @@ import { SamplePoolCard } from '../components/samplePool';
 import { REQUIREMENTS } from '../data/requirements';
 import selfRelay from '../../evidence/v4/e2e/self-relay-v5.json';
 import delta from '../../evidence/v4/e2e/delta-run-2026-11-26.json';
+import intercept from '../../evidence/v4/e2e/intercept-confirmed-v5.json';
 import { COSTS_NOTE, RELAY_COSTS, deliveryCostUqor, deliveryFeeWei } from '../lib/fees';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
@@ -121,7 +122,13 @@ export default function JudgesPage() {
 
         <Item n={3} title="The attacks, including a stolen key, are refused on-chain" action={<SourceBadge kind="RECORDED" />}>
           <p>{v4.liveRows.filter((r) => r.status === 'reverted' || r.status === 'refused').length} attack rows, each a mined revert (or a chain refusal at broadcast) with an explorer link, including the stolen-key freeze and unanimous-recovery scenario. The Lab re-checks them against the chain live.</p>
-          <Link className="inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/lab">Open the lab</Link>
+          <p className="mt-2" data-testid="judges-intercept">Intercepted link, on v5 (TEAM-RUN test accounts): someone who sees a Confirmed link first can bind their own key, but cannot take the money. The public API refused to relay their claim, and the claims they sent themselves were mined and reverted. The sender saw 4 words that were not the friend&apos;s, cancelled, and got {intercept.summary.senderRecoveredQor} QOR back. Confirmed is the default; above 0.5 QOR a first-to-open link needs an explicit OK.</p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm" data-testid="judges-intercept-txs">
+            {intercept.rows.filter((r) => r.hash && (r.step.startsWith('2 ') || r.step.startsWith('4 ') || r.step.startsWith('5 ') || r.step.startsWith('6 '))).map((r) => (
+              <li key={r.hash}>{r.step.slice(2)}{'decodedError' in r && r.decodedError ? ` (${r.decodedError})` : ''}: <Link className="font-mono text-xs underline" to={`/check/${r.hash}`}>{(r.hash as string).slice(0, 12)}…</Link></li>
+            ))}
+          </ul>
+          <Link className="mt-2 inline-block rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/lab">Open the lab</Link>
         </Item>
 
         <Item n={4} title="Every sensitive action is a post-quantum intent, checked on-chain" >
