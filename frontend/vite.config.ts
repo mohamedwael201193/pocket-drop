@@ -8,7 +8,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 2500,
     rollupOptions: {
       output: {
-        manualChunks: { react: ['react', 'react-dom', 'react-router-dom'], motion: ['framer-motion'], viem: ['viem'] },
+        // Function form, so Vite's tiny preload helper gets its own chunk instead of being absorbed into the viem chunk
+        // (with the object form the landing and the entry had to download viem just to lazy-load anything).
+        manualChunks(id) {
+          if (id.includes('vite/preload-helper')) return 'preload';
+          if (!id.includes('/node_modules/')) return undefined;
+          if (/\/node_modules\/(react|react-dom|react-router|react-router-dom|@remix-run\/router|scheduler)\//.test(id)) return 'react';
+          if (/\/node_modules\/(framer-motion|motion-dom|motion-utils)\//.test(id)) return 'motion';
+          if (/\/node_modules\/(viem)\//.test(id)) return 'viem';
+          return undefined;
+        },
       },
     },
   },
