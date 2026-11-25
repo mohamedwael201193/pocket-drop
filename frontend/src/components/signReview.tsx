@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { setReviewHost, type ReviewRequest } from '../lib/signReview';
 import { ShieldCheck, X } from './icons';
 import { Button, CopyButton, cx } from './ui';
+import { SelfRelayOfferHost } from './selfRelayOffer';
 
 const KEY_LINES = new Set(['Recipient', 'Amount', 'Link amount', 'Total leaving the Pocket', 'Per claimer', 'Slots', 'New daily limit', 'Guardians']);
 const isLong = (v: string) => /^0x[0-9a-fA-F]{40,}$/.test(v);
@@ -22,6 +23,8 @@ export function SignReviewHost() {
   }, [req]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
+    <>
+    <SelfRelayOfferHost />
     <AnimatePresence>
       {req && (
         <motion.div key="sign-review" className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -62,5 +65,6 @@ export function SignReviewHost() {
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }
