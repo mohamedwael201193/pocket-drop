@@ -169,6 +169,17 @@ describe('loadOwnAccounts', () => {
       expect(m.get(a.toLowerCase())).toMatch(/^TEAM-RUN /);
     }
   });
+  it('every test account and Pocket in a measured-delta run (frontend/evidence/v4/e2e/delta-run-*.json) is own, never external', () => {
+    const m = loadOwnAccounts();
+    const dir = path.join(process.cwd(), '..', 'frontend', 'evidence', 'v4', 'e2e');
+    if (!fs.existsSync(dir)) return;
+    let n = 0;
+    for (const f of fs.readdirSync(dir).filter((x) => /^delta-run-.*\.json$/.test(x))) {
+      const j = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')) as { sender: { pocket: string }; pathA: { account: string; pocket: string }[]; pathB: { account: string }[] };
+      for (const a of [j.sender.pocket, ...j.pathA.flatMap((r) => [r.account, r.pocket]), ...j.pathB.map((r) => r.account)]) { n++; expect(m.get(a.toLowerCase()), `${f}: ${a}`).toMatch(/^TEAM-RUN /); }
+    }
+    expect(n).toBeGreaterThan(0);
+  });
   it('every sender recorded in the v3-contract E2E evidence and the v3 live-test recipients are own', () => {
     const m = loadOwnAccounts();
     const ev = path.join(process.cwd(), '..', 'frontend', 'evidence');

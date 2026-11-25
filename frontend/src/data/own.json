@@ -354,6 +354,22 @@
     "TEAM-RUN self-relay v5 aborted1 recipientPocket (self-relay-v5.json)": "0x2149e79B3Db07353141D574c008C36e00D059a08",
     "TEAM-RUN self-relay v5 aborted2 senderPocket (self-relay-v5.json)": "0x9c93B0Cda5be92a09AB2a71979932664e5C260e8",
     "TEAM-RUN self-relay v5 aborted2 recipient (self-relay-v5.json)": "0x8679842a30BCf52126E8D6fffd80E0222b3EA5B8",
-    "TEAM-RUN self-relay v5 aborted2 recipientPocket (self-relay-v5.json)": "0xEAd622D34377F88F03BDfD2906b42A2c37191875"
+    "TEAM-RUN self-relay v5 aborted2 recipientPocket (self-relay-v5.json)": "0xEAd622D34377F88F03BDfD2906b42A2c37191875",
+    "TEAM-RUN delta run sender Pocket (delta-run-2026-11-26.json)": "0x02eD40525851A7EF003B9379DA10fF62aB77bDC1",
+    "TEAM-RUN delta run A1 test account (delta-run-2026-11-26.json)": "0xbA917672C715f5499B01401C72AE9bBEE3334a3a",
+    "TEAM-RUN delta run A1 Pocket (delta-run-2026-11-26.json)": "0x9fF35cA9a9Cd1d00eF99610eFFaA783FFC51482e",
+    "TEAM-RUN delta run A2 test account (delta-run-2026-11-26.json)": "0x14789C12dCC9C1E2424233256e76C4031Ebad438",
+    "TEAM-RUN delta run A2 Pocket (delta-run-2026-11-26.json)": "0x6506179CF3e82159a1d5b6226B80c65653a8BF22",
+    "TEAM-RUN delta run A3 test account (delta-run-2026-11-26.json)": "0xE5877A8f21a7438B70A1c26D487f20D387441D78",
+    "TEAM-RUN delta run A3 Pocket (delta-run-2026-11-26.json)": "0xb59520948758923DE4cbE8A67821a85D1861b58a",
+    "TEAM-RUN delta run A4 test account (delta-run-2026-11-26.json)": "0xC76B1c27BE04023E67a91A38349197BA683bF2d0",
+    "TEAM-RUN delta run A4 Pocket (delta-run-2026-11-26.json)": "0xEB95a3C6B4A786f6c2dBd69BEe4d972ce2987dED",
+    "TEAM-RUN delta run A5 test account (delta-run-2026-11-26.json)": "0x79324BA8C2037B16EfbC4BB8FB37a2B4050292A0",
+    "TEAM-RUN delta run A5 Pocket (delta-run-2026-11-26.json)": "0xf7415B4e89Df7C3EfC6Fa188839d6d5a646e54D8",
+    "TEAM-RUN delta run B1 test account, control (delta-run-2026-11-26.json)": "0xF55e9fDEd4858d94D719ad60EF4C3a112c324B21",
+    "TEAM-RUN delta run B2 test account, control (delta-run-2026-11-26.json)": "0xBD6cc76a957A66B2C1eA0Bd5047BE6876bc4c493",
+    "TEAM-RUN delta run B3 test account, control (delta-run-2026-11-26.json)": "0x9F88dD18153cFDf8D97a98bc3836B6097dE05920",
+    "TEAM-RUN delta run B4 test account, control (delta-run-2026-11-26.json)": "0x71B8155C4aA788237243684034A9B405BA261D7e",
+    "TEAM-RUN delta run B5 test account, control (delta-run-2026-11-26.json)": "0xc30D36bd5b408Ad7Ca9D8F5020b97Aa6222C7886"
   }
 }

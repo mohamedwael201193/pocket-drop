@@ -1,0 +1,306 @@
+{
+  "note": "TEAM-RUN. Every account is a team test account (fresh keys that start with 0 QOR); counts are accounts, not people. Path A is relayed by the public Pocket Drop API; Path B is the control.",
+  "network": "diana-testnet",
+  "instance": "v5.prod",
+  "api": "https://pocketdrop-api.vercel.app",
+  "startedAt": "2026-11-25T23:41:13.737Z",
+  "n": 5,
+  "amountQor": "0.1",
+  "dripQor": "0.1",
+  "deliveryFeeQor": "0.26",
+  "firstSpendQor": "0.05",
+  "funding": [
+    {
+      "step": "funder -> sender Pocket 0x02eD40525851A7EF003B9379DA10fF62aB77bDC1 (2.35 QOR, hybrid MsgSend)",
+      "hash": "275F36C2BE25A3FBE6B8FA7932D9917C21B3B07741A15A432D9C6DE80CB1B82C",
+      "code": 0
+    }
+  ],
+  "pathA": [
+    {
+      "id": "A1",
+      "account": "0xbA917672C715f5499B01401C72AE9bBEE3334a3a",
+      "pocket": "0x9fF35cA9a9Cd1d00eF99610eFFaA783FFC51482e",
+      "pocketCfg": [
+        "0xbA917672C715f5499B01401C72AE9bBEE3334a3a",
+        "",
+        "0",
+        "1000000000000000000",
+        "0x8975f2e1c94694629cab98831fcb078f5aa8671c21b6c6a2d1b2e0fac8675f34"
+      ],
+      "startBalanceQor": "0",
+      "keyRegisteredAtStart": false,
+      "txs": {
+        "createDrop": "EE9985C951EE4D4459BB05412FF2B20C016DF596E289168621689097F0310856",
+        "bind": "BD9607A9E1E6E088F51CFACF8200F601DA5783C0A7B2D2A06B367BCC5E24E915",
+        "registerKey": "00E7B45A414011EAFD720F09D39A316B23A87619CD78811EE351490624B5D2C6",
+        "claim": "8A734F26BD4EAC2CDE6FF79C4508F15FD682FB460AF301C64C67DAED05AD6BA9",
+        "firstSpend": "E8B929D0C565AF970EAD9E3EB97DDE583BA8EA39B056D6788003EB5C4F2138F9"
+      },
+      "linkId": "6",
+      "possessionProven": true,
+      "pocketAfterClaimQor": "0.1",
+      "secondsToFirstSpend": 15,
+      "pocketAfterSpendQor": "0.05",
+      "spent": true,
+      "outcome": "claimed 0.1 QOR into its Pocket and spent 0.05 QOR with an ML-DSA-87 intent"
+    },
+    {
+      "id": "A2",
+      "account": "0x14789C12dCC9C1E2424233256e76C4031Ebad438",
+      "pocket": "0x6506179CF3e82159a1d5b6226B80c65653a8BF22",
+      "pocketCfg": [
+        "0x14789C12dCC9C1E2424233256e76C4031Ebad438",
+        "",
+        "0",
+        "1000000000000000000",
+        "0xb02c8aa32564a561f7257ae76930776e90ad93eb25139b414bc6bb708f091f07"
+      ],
+      "startBalanceQor": "0",
+      "keyRegisteredAtStart": false,
+      "txs": {
+        "createDrop": "A653A5093B87CF9245C3D34D6853DA18880879FDE892EC3A2878A06997C54E5D",
+        "bind": "1B2CE8E6B774B780AD63CAF29B7559D5A92FB77743DD409B00155625827E4624",
+        "registerKey": "65F71034A4903714C21C109A77F2DC10C8B7C215E82F73E2B423ECABAC768627",
+        "claim": "1E8EBF004D986C02FAF0F98738F8263749AF0CDB7870D2AE39226B9B38D813D8",
+        "firstSpend": "2A4596811CF5788B21B67AD566CC7298F388CB00590F3D6588E55972B1DA5634"
+      },
+      "linkId": "7",
+      "possessionProven": true,
+      "pocketAfterClaimQor": "0.1",
+      "secondsToFirstSpend": 18,
+      "pocketAfterSpendQor": "0.05",
+      "spent": true,
+      "outcome": "claimed 0.1 QOR into its Pocket and spent 0.05 QOR with an ML-DSA-87 intent"
+    },
+    {
+      "id": "A3",
+      "account": "0xE5877A8f21a7438B70A1c26D487f20D387441D78",
+      "pocket": "0xb59520948758923DE4cbE8A67821a85D1861b58a",
+      "pocketCfg": [
+        "0xE5877A8f21a7438B70A1c26D487f20D387441D78",
+        "",
+        "0",
+        "1000000000000000000",
+        "0xa36d51b537ad7baee098b2d528219001999791531d44132ff0c453d138ee9728"
+      ],
+      "startBalanceQor": "0",
+      "keyRegisteredAtStart": false,
+      "txs": {
+        "createDrop": "C4F191F6A3F532F51F723C2C5CC6567D68C6A6102CFBB95027DA9C4DEEECD979",
+        "bind": "6AD41DCF9F1E8478B80D230E7549D3F4DAB554825224293C47F861CBD0A7F451",
+        "registerKey": "ED24646F715E50B9DCA4510240F83D14B17CF8359882434C61919D6315F6094D",
+        "claim": "EF25913EB0D75769FF0205FFE6D3F6960B010D324BD8CF93FBDB24D53769C951",
+        "firstSpend": "415D3F9E8FD4653AA150C3227DE71ADE1F09D6E15EEA319190FF588757940F25"
+      },
+      "linkId": "8",
+      "possessionProven": true,
+      "pocketAfterClaimQor": "0.1",
+      "secondsToFirstSpend": 15,
+      "pocketAfterSpendQor": "0.05",
+      "spent": true,
+      "outcome": "claimed 0.1 QOR into its Pocket and spent 0.05 QOR with an ML-DSA-87 intent"
+    },
+    {
+      "id": "A4",
+      "account": "0xC76B1c27BE04023E67a91A38349197BA683bF2d0",
+      "pocket": "0xEB95a3C6B4A786f6c2dBd69BEe4d972ce2987dED",
+      "pocketCfg": [
+        "0xC76B1c27BE04023E67a91A38349197BA683bF2d0",
+        "",
+        "0",
+        "1000000000000000000",
+        "0x30130a9ed3b5654d0d262e71763c958dbe9cf29e21ba7ce8e9dbf2f2bfbbb161"
+      ],
+      "startBalanceQor": "0",
+      "keyRegisteredAtStart": false,
+      "txs": {
+        "createDrop": "47843CD1CF289E0B962E70746E8B0937CF4699F43CC0C74E3142341431D78C15",
+        "bind": "8953260EF7B670AD4B66E1A74EBC40B7B0075938190128D3E0F89A0C55A3F9A0",
+        "registerKey": "976F8C98284DD4680974CA101F3B051A45F2DD16B5BCC13DDBF32D3163871504",
+        "claim": "1B0D9FC3BB86C9B7E1A8ECE5760F0A8BCF0864F4DEDC257990E8F7B38A17F5F6",
+        "firstSpend": "17B0963B1699CB31A2A44F562A5EE1F34B300F46D9822467E0235F763DF65017"
+      },
+      "linkId": "9",
+      "possessionProven": true,
+      "pocketAfterClaimQor": "0.1",
+      "secondsToFirstSpend": 17,
+      "pocketAfterSpendQor": "0.05",
+      "spent": true,
+      "outcome": "claimed 0.1 QOR into its Pocket and spent 0.05 QOR with an ML-DSA-87 intent"
+    },
+    {
+      "id": "A5",
+      "account": "0x79324BA8C2037B16EfbC4BB8FB37a2B4050292A0",
+      "pocket": "0xf7415B4e89Df7C3EfC6Fa188839d6d5a646e54D8",
+      "pocketCfg": [
+        "0x79324BA8C2037B16EfbC4BB8FB37a2B4050292A0",
+        "",
+        "0",
+        "1000000000000000000",
+        "0x7d665d18a5082c160c0b777275b3d7fd3f368890f729a1a7374d1be87a73a424"
+      ],
+      "startBalanceQor": "0",
+      "keyRegisteredAtStart": false,
+      "txs": {
+        "createDrop": "DD491D79661FECB6FF3C37A3A05BDA0DAC4E646B4AB579D9207CFFDDDA021539",
+        "bind": "73C5D778760F7DE099FCC9000740D97B69B5BFF1E15DA563F301B80FBDFDB209",
+        "registerKey": "704FA0FCF0B2713904F8EDEEEE60EF02351C8B371FAED4628291156562BD1B55",
+        "claim": "E8536F86589C6E64453D27C91211DEFBA5AC8AA8252612913F1FE45A2DBCC00C",
+        "firstSpend": "0E26E6D251B611D447131D14F5AADAFA4BAA20176640F6F33AFE91E10AA2C5D2"
+      },
+      "linkId": "10",
+      "possessionProven": true,
+      "pocketAfterClaimQor": "0.1",
+      "secondsToFirstSpend": 18,
+      "pocketAfterSpendQor": "0.05",
+      "spent": true,
+      "outcome": "claimed 0.1 QOR into its Pocket and spent 0.05 QOR with an ML-DSA-87 intent"
+    }
+  ],
+  "pathB": [
+    {
+      "id": "B1",
+      "account": "0xF55e9fDEd4858d94D719ad60EF4C3a112c324B21",
+      "cosmos": "qor1740flhk5skxef4ce44sw7np6zykryjepxfqvce",
+      "startBalanceQor": "0",
+      "txs": {
+        "directSend": "06D1D079323B6C42A59E770A9CAF45A92752F3D6F793E4EC6E70B25941590880"
+      },
+      "attempts": [
+        {
+          "kind": "EVM transfer",
+          "accepted": false,
+          "error": "Missing or invalid parameters."
+        },
+        {
+          "kind": "Cosmos MsgSend (classical)",
+          "accepted": false,
+          "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        }
+      ],
+      "balanceAfterSendQor": "0.1",
+      "balanceAfterAttemptsQor": "0.1",
+      "spent": false,
+      "keyRegistered": false
+    },
+    {
+      "id": "B2",
+      "account": "0xBD6cc76a957A66B2C1eA0Bd5047BE6876bc4c493",
+      "cosmos": "qor1h4kvw6540fnt9s02p02sg7lxsa4uf3yn40lsxs",
+      "startBalanceQor": "0",
+      "txs": {
+        "directSend": "C159EF00C9846BD12027BC2E7A7F964C82A06D1E71CF180ED795AABEBB0FF101"
+      },
+      "attempts": [
+        {
+          "kind": "EVM transfer",
+          "accepted": false,
+          "error": "Missing or invalid parameters."
+        },
+        {
+          "kind": "Cosmos MsgSend (classical)",
+          "accepted": false,
+          "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        }
+      ],
+      "balanceAfterSendQor": "0.1",
+      "balanceAfterAttemptsQor": "0.1",
+      "spent": false,
+      "keyRegistered": false
+    },
+    {
+      "id": "B3",
+      "account": "0x9F88dD18153cFDf8D97a98bc3836B6097dE05920",
+      "cosmos": "qor1n7yd6xq48n7l3kt6nz7rsd4kp977qkfqu7lys9",
+      "startBalanceQor": "0",
+      "txs": {
+        "directSend": "0607514AB62F3F5FF9D4325DD197980C58D685C567AB7BD7561291129C8CDAA6"
+      },
+      "attempts": [
+        {
+          "kind": "EVM transfer",
+          "accepted": false,
+          "error": "Missing or invalid parameters."
+        },
+        {
+          "kind": "Cosmos MsgSend (classical)",
+          "accepted": false,
+          "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        }
+      ],
+      "balanceAfterSendQor": "0.1",
+      "balanceAfterAttemptsQor": "0.1",
+      "spent": false,
+      "keyRegistered": false
+    },
+    {
+      "id": "B4",
+      "account": "0x71B8155C4aA788237243684034A9B405BA261D7e",
+      "cosmos": "qor1wxup2hz257yzxujrdpqrf2d5qkazv8t7y608my",
+      "startBalanceQor": "0",
+      "txs": {
+        "directSend": "1781D8E4052853DAF3075A29592CD3D0A5DA41E1C6F1069D8704E270771497B1"
+      },
+      "attempts": [
+        {
+          "kind": "EVM transfer",
+          "accepted": false,
+          "error": "Missing or invalid parameters."
+        },
+        {
+          "kind": "Cosmos MsgSend (classical)",
+          "accepted": false,
+          "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        }
+      ],
+      "balanceAfterSendQor": "0.1",
+      "balanceAfterAttemptsQor": "0.1",
+      "spent": false,
+      "keyRegistered": false
+    },
+    {
+      "id": "B5",
+      "account": "0xc30D36bd5b408Ad7Ca9D8F5020b97Aa6222C7886",
+      "cosmos": "qor1cvxnd02mgz9d0j5a3agzpwt65c3zc7yx39pgy6",
+      "startBalanceQor": "0",
+      "txs": {
+        "directSend": "75C5B0368ED4AA6A12BDE670810BEFCC1380079A5BC61252806C806CB8E3E9A5"
+      },
+      "attempts": [
+        {
+          "kind": "EVM transfer",
+          "accepted": false,
+          "error": "Missing or invalid parameters."
+        },
+        {
+          "kind": "Cosmos MsgSend (classical)",
+          "accepted": false,
+          "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        }
+      ],
+      "balanceAfterSendQor": "0.1",
+      "balanceAfterAttemptsQor": "0.1",
+      "spent": false,
+      "keyRegistered": false
+    }
+  ],
+  "sender": {
+    "owner": "0x392f50b1955a827458A320205e19acf7C664f116",
+    "funder": "0x8ab5CE4fcd45cC69FEe31Ea6E9e6222C1e18bBDd",
+    "pocket": "0x02eD40525851A7EF003B9379DA10fF62aB77bDC1",
+    "pocketCfg": [
+      "0x392f50b1955a827458A320205e19acf7C664f116",
+      "",
+      "0",
+      "5000000000000000000",
+      "0x14648d25341eb39dee17f5c00e3e1187491c22e72eede25198f13e59fb977b31"
+    ]
+  },
+  "finishedAt": "2026-11-25T23:44:23.546Z",
+  "summary": {
+    "pathA": "5 of 5 fresh accounts made a first PQ-signed spend",
+    "pathB": "0 of 5 could spend the direct transfer",
+    "medianSecondsToFirstSpend": 17
+  }
+}
