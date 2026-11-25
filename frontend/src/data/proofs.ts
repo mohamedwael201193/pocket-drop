@@ -32,7 +32,7 @@ export const TESTS = {
 } as const;
 
 export const KNOWN_LIMITS = [
-  'No human audit (three automated QCAI audits only). Testnet code, not for mainnet.',
+  'No human audit (three automated QCAI audits only; Stage 3 public report QCAIA-1795645590445-DF0CEDA6). Testnet code, not for mainnet.',
   'Whoever holds the link key can choose the recipient, so protect the link like cash. Confirmed mode adds the sender check.',
   'The gas drip is paid at first open to the recipient and cannot be recovered by the sender.',
   'An Open-mode link that is bound cannot be cancelled by the sender; money returns only after expiry.',

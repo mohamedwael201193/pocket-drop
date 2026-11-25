@@ -1160,9 +1160,10 @@
   "stage2AuditId": "QCAIA-1795138339351-F6A93427",
   "stage2Score": "78 / MEDIUM",
   "stage2PublicReport": "https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427",
-  "stage3AuditId": null,
+  "stage3AuditId": "QCAIA-1795645590445-DF0CEDA6",
   "stage3Score": "85 / MEDIUM",
-  "stage3Findings": "5 findings (1 high, 2 medium, 1 low, 1 info)"
+  "stage3Findings": "5 findings (1 high, 2 medium, 1 low, 1 info)",
+  "stage3PublicReport": "https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6"
  },
  "tests": {
   "total": 190,

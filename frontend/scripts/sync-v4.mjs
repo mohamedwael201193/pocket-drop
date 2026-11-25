@@ -72,9 +72,10 @@ if (fs.existsSync(auditFile)) {
     stage2AuditId: stage2Done ? id2 : null,
     stage2Score: stage2Done ? (score2?.trim() ?? null) : null,
     stage2PublicReport: stage2Done ? g(/^- Stage 2: (https:\/\/\S+)/m) : null,
-    stage3AuditId: stage3Done && !id3.startsWith('none') ? id3 : null,
+    stage3AuditId: stage3Done ? id3 : null,
     stage3Score: stage3Done ? score3.trim() : null,
     stage3Findings: stage3Done ? g(/## 9\. Stage 3[\s\S]*?Counts: (\d+ findings[^.]*)\./) : null,
+    stage3PublicReport: stage3Done ? g(/^- Stage 3 \(v5\): (https:\/\/\S+)/m) : null,
   };
 }
 

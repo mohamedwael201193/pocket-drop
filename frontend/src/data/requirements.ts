@@ -137,7 +137,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'Stage 3 PDF (26 Nov Cairo, v5)', path: 'docs/audit/stage3/QCAI-stage3-v5.pdf' },
       { label: 'Stage 3 JSON (26 Nov Cairo, v5)', path: 'docs/audit/stage3/qcai-stage3-v5.json' },
     ],
-    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 v5 (85, PDF/JSON archived)', note: 'links and artifacts in docs/AUDIT.md' }],
+    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 QCAIA-1795645590445-DF0CEDA6 (85)', note: 'https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6' }],
     tests: ['each finding names its regression tests in docs/AUDIT.md'],
   },
   {
