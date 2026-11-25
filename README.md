@@ -27,24 +27,33 @@ Send QOR to a friend who has no wallet. They open a link, and their browser crea
 
 ## Numbers
 
-Each number is labelled. **LIVE** means it is read from the chain or the API when you open the link. **RECORDED** means it comes from a file in this repo, written by a named script on the date shown.
+Each number is labelled. **LIVE** means it is read from the chain or the API when you open the link. **RECORDED** means it comes from a file in this repo, written by a named script on the date shown. TEAM-RUN rows use team test accounts; they are never counted as external users.
+
+| Number (deployed v5) | Label | Source |
+|---|---|---|
+| v5 contracts on Diana: router `0x13b8e379…e376`, drop `0xcd52c8d2…d798` (all addresses under [Contracts on Diana](#contracts-on-diana)); each runtime code hash equals the one recorded at deploy | LIVE | `node frontend/scripts/reverify.mjs` |
+| 606 checks passed, 0 failed: 331 EVM and 166 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
+| QCAI Stage 3 on v5: 85 (`QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [Stage 3 public report](https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6), [`docs/AUDIT.md`](docs/AUDIT.md) |
+| Tests: 190 Foundry (unit, fuzz, invariant; 100% line, statement, branch and function coverage of `contracts-v4/src`), 22 real ML-DSA-87, 27 against the live precompiles; 252 frontend and 218 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
+| Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
+
+<details>
+<summary>More numbers and history (v4, earlier audits)</summary>
 
 | Number | Label | Source |
 |---|---|---|
-| 547 checks passed, 0 failed: 325 EVM and 121 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`), plus the code hash of every v5 and v4 contract | RECORDED, 25 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| 190 Foundry tests (unit, fuzz and invariant) on v5; 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
 | 22 real-crypto Foundry tests: every signature is a real ML-DSA-87 signature, checked by two independent implementations through `vm.ffi`; with an accept-all verifier 18 of them fail, as they must | RECORDED, 25 Nov 2026 | `contracts-v4/test-real/`, CI job `contracts-realcrypto`, [docs/AUDIT.md section 7](docs/AUDIT.md#7-testing-beyond-mocks-added-25-nov-2026) |
 | 27 live-precompile tests: the real-crypto suite rerun against the Diana `pqcVerify` precompile by eth_call, plus live key-status and fork checks | RECORDED, 25 Nov 2026 | `contracts-v4/test-live/`, CI job `contracts-live` |
 | Precompile conformance: 43 eth_call cases on 0x0A01 / 0x0A02, 0 anomalies against FIPS 204 | RECORDED, 25 Nov 2026 | [`docs/PRECOMPILE_CONFORMANCE.md`](docs/PRECOMPILE_CONFORMANCE.md) |
-| 226 frontend and 215 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 26 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
 | 115 recorded live rows: 103 on the v4 contracts (31 of them attacks that reverted on chain or were refused by the chain) and 12 from the v5 deploy smoke (one drop sent and claimed, one pool) | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
-| QCAI audits: Stage 1 (v4) 82, Stage 2 (v4) 78, Stage 3 (v5) 85 (`QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md), [Stage 3 public report](https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6) |
-| Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s from opening the link; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it (the chain refused an EVM transfer and a classical send) | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
-| Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
+| QCAI Stage 1 (v4) 82 and Stage 2 (v4) 78, on the previous contracts | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
 | Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
 | Drop counts and volume, split into team/test addresses and external addresses | LIVE | `/radar`, `GET /api/stats` |
 | ML-DSA-87 signature size: 4,627 bytes | Constant (FIPS 204) | `backend/src/config.ts` |
+
+</details>
 
 ## Check our claims
 
@@ -60,6 +69,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | A QoreX wallet signature can spend a Pocket | Tx [`0xf98daf5e…6d1a`](https://explore.qore.network/tx/0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a) (TEAM-RUN), evidence in `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`. |
 | The relayer is optional: a user's own scoped EVM window can claim and spend | TEAM-RUN on v5 prod, 26 Nov 2026: a fresh test account (0 QOR at start; the drip paid its fees) opened its own window scoped to the v5 router, 400 blocks and 3 txs, expiry height 10,755,999 ([`A6C998D7…63FD`](https://pocketdrop-app.vercel.app/check/A6C998D75F07A78F260EB64CC6AB597D30A842599265D5D8627F514E5ED663FD)), sent its own claim [`0xb7941d40…2663`](https://explore.qore.network/tx/0xb7941d40569f7e45217980137a3120c7690bdb0c4aa17e9d2df150c718fd2663) and its own first spend [`0x3abed0a3…03b6`](https://explore.qore.network/tx/0x3abed0a3672504bf026a2e104e03ce917c4c2ddcfe2735430096d92ea88403b6), then closed the window (`3DAFE5B7…8CD5`). Evidence `frontend/evidence/v4/e2e/self-relay-v5.json`, script `contracts-v4/script/self-relay-v5.mjs`, `reverify.mjs` section 11. |
 | A link gets a new account to its first post-quantum spend; a direct transfer does not | TEAM-RUN on v5 prod, 26 Nov 2026, five test accounts per path. Path A, first account: claim [`8A734F26…6BA9`](https://pocketdrop-app.vercel.app/check/8A734F26BD4EAC2CDE6FF79C4508F15FD682FB460AF301C64C67DAED05AD6BA9), first spend [`E8B929D0…38F9`](https://pocketdrop-app.vercel.app/check/E8B929D0C565AF970EAD9E3EB97DDE583BA8EA39B056D6788003EB5C4F2138F9). Path B, first account: direct transfer [`06D1D079…0880`](https://pocketdrop-app.vercel.app/check/06D1D079323B6C42A59E770A9CAF45A92752F3D6F793E4EC6E70B25941590880); its spends were refused (`no usable registered post-quantum key`, `classical fallback not allowed`). All rows: [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md). Re-check: `node scripts/delta-verify.mjs`; re-run: `node scripts/delta-run.mjs --n 5`. |
+| Someone who intercepts a Confirmed link cannot take the money | TEAM-RUN on v5 prod, 26 Nov 2026 (link 11, 0.1 QOR). The interceptor test account bound its own key with the link ([`D509C601…1A37`](https://pocketdrop-app.vercel.app/check/D509C6017E5D05405F5DE55295A15F3DA59A6E598317C5743305A6858CCC1A37)). The public API refused to relay its claim (422 `InvalidState`, nothing sent). Its own claim through its own router-only window was mined and reverted `InvalidState(Bound)` ([`0xe83979b1…39a9`](https://explore.qore.network/tx/0xe83979b1c34beac28df888c20bb732b9f58b897d448c46d0dd091f318bf439a9)). The sender saw 4 words that were not the friend's and cancelled, getting 0.1 QOR back ([`B4CA6735…128F`](https://pocketdrop-app.vercel.app/check/B4CA6735A5ABFEA17804B0CD1A7EB2285E59F26D7AEFFD16E8336B7009CA128F)); a second claim reverted `InvalidState(Cancelled)` ([`0xd06dc5d4…de53`](https://explore.qore.network/tx/0xd06dc5d49bab8e5d508783a6703af5cd12486513ca1889b4391ac4852198de53)). The interceptor kept the 0.1 QOR drip. Evidence `frontend/evidence/v4/e2e/intercept-confirmed-v5.json`, script `contracts-v4/script/intercept-v5.mjs`, `reverify.mjs` section 13. |
 | Every recorded hash is real | Run `cd frontend && npm ci && node scripts/reverify.mjs`. |
 
 ## How it works
@@ -71,9 +81,17 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 - **PocketRouter** relays signed intents and can deploy a Pocket on first use. Funds sent to a Pocket's address before it exists are kept.
 - **PocketDrop** (send by link) and **DropPool** (one link, many claimers). The link key binds one recipient (`pqcVerify`). The claim needs the recipient's registered, proven key (`pqcKeyStatus`) and a signature from it (`pqcVerify`).
 - **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents as hybrid-signed `MsgCrossVMCall`s (secp256k1 + ML-DSA-87, both checked by the chain before the EVM runs). It cannot forge any intent.
+- **Confirmed by default.** A new link is Confirmed (Someone I know): the sender compares 4 words of the recipient's key before any money moves. Open (first to open it) is for small gifts and works like cash; above 0.5 QOR the app asks for an explicit OK before it makes one.
+- **Open in QoreX.** The claim and receive pages link to the same page in the QoreX app's dApp browser, using the `browse` link from the [QoreX dApp integration guide](https://docs.qorechain.io/qorex/dapp-integration). A claim link carries its link key in the `#` fragment, so it only gets the on-device `qorex://browse` form, never the `https://link.qore.network/browse` form, which would send the key to a web server. We have not tested this on a phone.
 - **Relay it yourself.** `PocketRouter.relay` has no caller check, so the relayer is optional. When it is down or slow (or always, with the Advanced setting on `/pocket`), the user's own account opens a hybrid-signed EVM window scoped to the one v5 router (about 9 minutes, 3 transactions) and submits the call it signed. Inside that window the classical key can only call the router, and the router only forwards calls whose authority is an ML-DSA-87 signature. The account pays its own fees, so it needs some QOR (a link's drip covers it). The native window transaction goes through the app's key-less `/rpc` proxy because Diana's public REST and RPC send no CORS headers; the proxy holds no keys. Code: [`frontend/src/lib/selfRelay.ts`](frontend/src/lib/selfRelay.ts).
 
 The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects, with tests) is in [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
+
+## How Pocket Drop differs
+
+- **From a wallet-to-wallet payment request.** A payment request is signed by someone who already has a wallet and asks another wallet holder to pay. Pocket Drop goes the other way: the sender pushes money to someone who has no wallet, no key and no QOR yet. Opening the link creates their key and their Pocket, and the link's drip pays for the key registration.
+- **From a bearer claim link.** Whoever holds a bearer link can take the money. A Pocket Drop link binds exactly one recipient key on chain. In Confirmed mode, the default, the money moves only after the sender has checked 4 words of that key, so someone who intercepts the link can bind it but cannot claim it (see Check our claims). Open mode is the bearer case, and the app says so.
+- **Where the money lands.** It lands in a Pocket, a smart account that only an ML-DSA-87 key can move, with a daily limit, a timelock above it, guardians and recovery, all enforced by the contract rather than by an app.
 
 ## Contracts on Diana
 
@@ -112,7 +130,7 @@ Explorer: `https://explore.qore.network/tx/<hash>`. The contracts are frozen: no
   - its secp256k1 key (`RELAYER_SECP_KEY`), held by the API deployment, and its ML-DSA-87 seed (`RELAYER_PQC_SEED`), held by a separate signer deployment (`signer/`) that signs only policy-checked relays. One compromised environment does not give both keys; `/api/health` shows `relay.pqSigner: isolated`. Both are also GitHub Actions secrets for the manual `renew-window` workflow, and an unused seed copy in the API environment awaits removal.
   The relayer's EVM window is closed, so it has no ECDSA-only path. If an operator re-opens it by hand, it is scoped to the two v4 routers and the v3 drop, with transaction and value caps. Whoever holds both relayer keys can spend the relayer's gas float or delay and refuse service. They cannot forge an intent, a bind or a claim, and cannot move escrow or Pocket funds (`docs/THREAT_MODEL.md`, T14).
 - **Precompiles.** `pqcVerify` (0x0A01) and `pqcKeyStatus` (0x0A02) are assumed correct. `PqcLib` fails closed on any failed call or malformed data, but it cannot detect a precompile that lies.
-- **Links** are bearer secrets until bound: whoever holds an unbound link can choose the recipient. Confirmed mode adds a sender check of the recipient key fingerprint.
+- **Links** are bearer secrets until bound: whoever holds an unbound link can choose the recipient. Confirmed mode, the default, adds a sender check of the recipient key fingerprint, so an interceptor can bind but not claim; it keeps the drip.
 
 Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md). Known limits: [contracts-v4/KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md).
 
