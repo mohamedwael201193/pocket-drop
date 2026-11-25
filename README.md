@@ -32,13 +32,13 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | Number | Label | Source |
 |---|---|---|
 | 547 checks passed, 0 failed: 325 EVM and 121 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`), plus the code hash of every v5 and v4 contract | RECORDED, 25 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| 185 Foundry tests (unit, fuzz and invariant) on v5; 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED, 25 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
+| 190 Foundry tests (unit, fuzz and invariant) on v5; 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
 | 22 real-crypto Foundry tests: every signature is a real ML-DSA-87 signature, checked by two independent implementations through `vm.ffi`; with an accept-all verifier 18 of them fail, as they must | RECORDED, 25 Nov 2026 | `contracts-v4/test-real/`, CI job `contracts-realcrypto`, [docs/AUDIT.md section 7](docs/AUDIT.md#7-testing-beyond-mocks-added-25-nov-2026) |
 | 27 live-precompile tests: the real-crypto suite rerun against the Diana `pqcVerify` precompile by eth_call, plus live key-status and fork checks | RECORDED, 25 Nov 2026 | `contracts-v4/test-live/`, CI job `contracts-live` |
 | Precompile conformance: 43 eth_call cases on 0x0A01 / 0x0A02, 0 anomalies against FIPS 204 | RECORDED, 25 Nov 2026 | [`docs/PRECOMPILE_CONFORMANCE.md`](docs/PRECOMPILE_CONFORMANCE.md) |
 | 202 frontend and 215 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 25 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
 | 115 recorded live rows: 103 on the v4 contracts (31 of them attacks that reverted on chain or were refused by the chain) and 12 from the v5 deploy smoke (one drop sent and claimed, one pool) | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
-| QCAI audit of v4: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives). A Stage 3 run on the v5 source has not been run yet | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
+| QCAI audits: Stage 1 (v4) 82, Stage 2 (v4) 78, Stage 3 (v5) 85 (5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 | Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
 | Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
@@ -114,12 +114,12 @@ Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL
 
 ## Audit
 
-Two-stage QCAI audit of v4: Stage 1 scored 82 (19 Nov 2026) and Stage 2 scored 78 (20 Nov 2026). Every finding is mapped to a resolution and tests, the lower Stage 2 score is explained, and the v4 bytecode is identical to the Stage 2 source. v5 changes only `PqcLib`; its Stage 3 run has not been run yet (steps and the flattened source: docs/AUDIT.md section 8). Details: [docs/AUDIT.md](docs/AUDIT.md). PDFs: [`docs/audit/`](docs/audit/).
+Three-stage QCAI audit across v4 and v5: Stage 1 (v4) scored 82 (19 Nov 2026), Stage 2 (v4) scored 78 (20 Nov 2026), and Stage 3 (v5) scored 85 (25 Nov 2026 UTC / 26 Nov 2026 Cairo; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a resolution and named Foundry tests, and the deployed v5 bytecode is unchanged. Details: [docs/AUDIT.md](docs/AUDIT.md). Reports: [`docs/audit/`](docs/audit/).
 
 ## Run it
 
 ```bash
-cd contracts-v4 && forge test                  # 185 tests
+cd contracts-v4 && forge test                  # 190 tests
 cd contracts-v4 && npm ci && FOUNDRY_PROFILE=realcrypto forge test   # 22 real ML-DSA-87 tests
 cd contracts-v4 && FOUNDRY_PROFILE=live forge test                  # 27 tests against the live precompiles
 cd backend && npm ci && npm test               # relayer unit tests
