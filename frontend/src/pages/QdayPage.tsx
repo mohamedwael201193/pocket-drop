@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { markDrillSeen } from '../lib/firstRun';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Button, CopyButton, Mono, Notice, Page, PageTitle, Pill, SourceBadge, TxLink, cx } from '../components/ui';
@@ -146,6 +147,7 @@ function TryIt({ baits }: { baits: LiveBait[] }) {
 }
 
 export default function QdayPage() {
+  useEffect(() => { markDrillSeen(); }, []);
   const q = useQuery({ queryKey: ['qday'], queryFn: fetchQday, refetchInterval: 30_000, retry: 1 });
   const s = q.data;
   const [scriptBait, setScriptBait] = useState('B1');

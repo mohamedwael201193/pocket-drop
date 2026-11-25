@@ -18,6 +18,7 @@ import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
 import { useHealth, useStats } from '../lib/queries';
 import { ago, cumulativeSeries, safetyChecks, safetyScore, shortAddr, type CheckState } from '../lib/overview';
 import tests from '../data/tests.json';
+import { StartHere } from '../components/startHere';
 
 const qorNum = (wei: bigint) => Number(wei) / 1e18;
 const fmtBal = (n: number) => (n >= 100 ? n.toFixed(2) : n >= 1 ? n.toFixed(2) : n.toFixed(4));
@@ -251,6 +252,7 @@ export default function OverviewPage() {
           <span>A spend is waiting in your Pocket&apos;s timelock. You can stop it on the Pocket page.</span><ArrowRight className="h-4 w-4" />
         </Link>
       )}
+      <StartHere />
       <div className="grid gap-4 lg:grid-cols-12">
         <PocketCardO />
         <SafetyCard />
