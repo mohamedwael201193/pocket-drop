@@ -15,6 +15,7 @@
 //      (code 0, or code 14 where the row records expectCode 14: a Q-Day attack the bait Pocket reverted on purpose)
 //      router, code 0, and the chain's own pqc_hybrid_verify event says verified (secp256k1 + ML-DSA-87); the relayer's
 //      EVM window is closed now (LIVE), so its classical key alone cannot relay
+//  11. relay it yourself (evidence/v4/e2e/self-relay-*.json): the user's own router-only window and its own router txs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -269,6 +270,47 @@ try {
   for (const row of R.txs) await cosmosCheck(row.hash, `refill: ${row.step}`, null, row.expectCode ?? 0);
   mark('QoreSeal key and refills', b);
 } catch (e) { check(false, `QoreSeal / refill evidence not readable (${e.message})`); }
+
+// 11. "Relay it yourself" (evidence/v4/e2e/self-relay-*.json): each submitter opened its OWN hybrid-signed EVM window scoped
+//     to the one v5 router (short expiry, 3 txs), the EVM txs came from that account to the router and succeeded, and the
+//     window was closed afterwards (LIVE: closed now). Our relayer and API are not in any of these txs.
+for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^self-relay-.*\.json$/.test(f)).sort()) {
+  section(`relay it yourself (${f})`);
+  b = { e: evmTxs, c: cosmosTxs };
+  const J = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
+  const router = String(J.router).toLowerCase();
+  const read = async (h) => (await retry(async () => { const r = await fetch(`${REST}/cosmos/tx/v1beta1/txs/${h}`, { headers: { 'user-agent': 'curl/8' } }); if (!r.ok) throw new Error(`REST ${r.status}`); return r.json(); })).tx_response;
+  const cosmosOf = new Map();
+  for (const row of J.rows.filter((r) => r.window)) {
+    cosmosTxs++; seenHash.add(row.hash.toLowerCase());
+    try {
+      const t = await read(row.hash);
+      const m = (t.tx?.body?.messages ?? []).find((x) => x['@type'] === '/qorechain.pqc.v1.MsgOpenEVMWindow');
+      const hy = (t.events ?? []).filter((e) => e.type === 'pqc_hybrid_verify').flatMap((e) => e.attributes).find((a) => a.key === 'status')?.value;
+      const scope = (m?.allowed_targets ?? []).map((a) => String(a).toLowerCase());
+      check(t.code === 0 && !!m && scope.length === 1 && scope[0] === router && Number(m.blocks) <= 600 && Number(m.max_txs) <= 3 && hy === 'verified',
+        `window ${row.hash.slice(0, 12)}… MsgOpenEVMWindow by ${m?.sender ?? '?'}: scope ${scope.join(',') || 'ANY'}, ${m?.blocks ?? '?'} blocks, ${m?.max_txs ?? '?'} txs, pqc_hybrid_verify ${hy ?? 'missing'}`);
+      if (m) cosmosOf.set(row.step.split(' ')[0], m.sender);
+    } catch (e) { check(false, `window ${row.hash.slice(0, 12)}… not readable (${e.message})`); }
+  }
+  for (const row of J.rows.filter((r) => r.lane === 'evm')) {
+    evmTxs++; seenHash.add(row.hash.toLowerCase());
+    try {
+      const [tx, rc] = await Promise.all([rpc('eth_getTransactionByHash', [row.hash]), rpc('eth_getTransactionReceipt', [row.hash])]);
+      const who = String(row.submitter).split(' ').pop().toLowerCase();
+      check(!!tx && !!rc && rc.status === '0x1' && String(tx.to).toLowerCase() === router && String(tx.from).toLowerCase() === who,
+        `tx ${row.hash.slice(0, 12)}… from ${String(tx?.from).slice(0, 10)}… (recorded ${row.submitter.split(' ')[0]}) to the router, ${rc?.status === '0x1' ? 'success' : 'NOT success'}: ${row.step.slice(0, 50)}`);
+    } catch (e) { check(false, `tx ${row.hash.slice(0, 12)}… not readable (${e.message})`); }
+  }
+  for (const row of J.rows.filter((r) => r.lane === 'native' && !r.window)) await cosmosCheck(row.hash, row.step, row.height);
+  for (const [who, addr] of cosmosOf) {
+    try {
+      const w = await (await fetch(`${REST}/qorechain/pqc/v1/evm_window/${addr}`, { headers: { 'user-agent': 'curl/8' } })).json();
+      check(w.live === false, `LIVE: the ${who}'s window is ${w.live ? 'OPEN' : 'closed'} now`);
+    } catch (e) { check(false, `${who} window not readable (${e.message})`); }
+  }
+  mark('relay it yourself', b);
+}
 
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
