@@ -345,6 +345,15 @@
     "TEAM-RUN v5 e2e chromium-390 a-confirmed recipient key (bind 42E08642 in chromium-390-a-confirmed.json)": "0x71A50B0E3ca7ce94A5A95E3265D0dDCC653DF6CD",
     "TEAM-RUN v5 e2e chromium-390 a-confirmed recipient Pocket (chromium-390-a-confirmed.json)": "0x87A803a28A0F21b7891D32b0514a3Db5Cd4C6d0e",
     "TEAM-RUN v4 e2e webkit-390 a-confirmed recipient key (bind C3A70D84 in webkit-390-a-confirmed.json)": "0x43Dce76e6e73f4dD617C7F989776F335A1d92484",
-    "TEAM-RUN v3 link 29 WebKit 390 recipient (bind 1806B21C, claim CAFECB9A in hybrid-relay-v3-live-2026-11-22.json)": "0x718b9e52fD791d93589Eb174965c7A73F9405146"
+    "TEAM-RUN v3 link 29 WebKit 390 recipient (bind 1806B21C, claim CAFECB9A in hybrid-relay-v3-live-2026-11-22.json)": "0x718b9e52fD791d93589Eb174965c7A73F9405146",
+    "TEAM-RUN self-relay v5 run senderPocket (self-relay-v5.json)": "0x6f065A0D1ab626422E42B0F30997422320eb2A57",
+    "TEAM-RUN self-relay v5 run recipient (self-relay-v5.json)": "0x60C92D715f12e5dfC486BDF9f9053c472f38E91e",
+    "TEAM-RUN self-relay v5 run recipientPocket (self-relay-v5.json)": "0x76635DD9Bf381cBdbc2e9e96aa6C9D9650A78605",
+    "TEAM-RUN self-relay v5 aborted1 senderPocket (self-relay-v5.json)": "0xb1c827e9617f7322256FBaEf2D4A9F6233eb86c6",
+    "TEAM-RUN self-relay v5 aborted1 recipient (self-relay-v5.json)": "0xb98F1cB38Ed6a67CaBE581A52feDafB364b6174e",
+    "TEAM-RUN self-relay v5 aborted1 recipientPocket (self-relay-v5.json)": "0x2149e79B3Db07353141D574c008C36e00D059a08",
+    "TEAM-RUN self-relay v5 aborted2 senderPocket (self-relay-v5.json)": "0x9c93B0Cda5be92a09AB2a71979932664e5C260e8",
+    "TEAM-RUN self-relay v5 aborted2 recipient (self-relay-v5.json)": "0x8679842a30BCf52126E8D6fffd80E0222b3EA5B8",
+    "TEAM-RUN self-relay v5 aborted2 recipientPocket (self-relay-v5.json)": "0xEAd622D34377F88F03BDfD2906b42A2c37191875"
   }
 }
