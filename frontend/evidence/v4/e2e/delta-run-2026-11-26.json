@@ -177,6 +177,12 @@
           "kind": "Cosmos MsgSend (classical)",
           "accepted": false,
           "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        },
+        {
+          "kind": "EVM transfer (raw re-check)",
+          "accepted": false,
+          "at": "2026-11-25T23:49:16.032Z",
+          "error": "failed to broadcast transaction: account qor1740flhk5skxef4ce44sw7np6zykryjepxfqvce has no usable registered post-quantum key; the EVM lane requires one, like every other lane: no open EVM authorisation window: no open EVM authorisation window"
         }
       ],
       "balanceAfterSendQor": "0.1",
@@ -202,6 +208,12 @@
           "kind": "Cosmos MsgSend (classical)",
           "accepted": false,
           "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        },
+        {
+          "kind": "EVM transfer (raw re-check)",
+          "accepted": false,
+          "at": "2026-11-25T23:49:16.327Z",
+          "error": "failed to broadcast transaction: account qor1h4kvw6540fnt9s02p02sg7lxsa4uf3yn40lsxs has no usable registered post-quantum key; the EVM lane requires one, like every other lane: no open EVM authorisation window: no open EVM authorisation window"
         }
       ],
       "balanceAfterSendQor": "0.1",
@@ -227,6 +239,12 @@
           "kind": "Cosmos MsgSend (classical)",
           "accepted": false,
           "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        },
+        {
+          "kind": "EVM transfer (raw re-check)",
+          "accepted": false,
+          "at": "2026-11-25T23:49:16.946Z",
+          "error": "failed to broadcast transaction: account qor1n7yd6xq48n7l3kt6nz7rsd4kp977qkfqu7lys9 has no usable registered post-quantum key; the EVM lane requires one, like every other lane: no open EVM authorisation window: no open EVM authorisation window"
         }
       ],
       "balanceAfterSendQor": "0.1",
@@ -252,6 +270,12 @@
           "kind": "Cosmos MsgSend (classical)",
           "accepted": false,
           "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        },
+        {
+          "kind": "EVM transfer (raw re-check)",
+          "accepted": false,
+          "at": "2026-11-25T23:49:17.258Z",
+          "error": "failed to broadcast transaction: account qor1wxup2hz257yzxujrdpqrf2d5qkazv8t7y608my has no usable registered post-quantum key; the EVM lane requires one, like every other lane: no open EVM authorisation window: no open EVM authorisation window"
         }
       ],
       "balanceAfterSendQor": "0.1",
@@ -277,6 +301,12 @@
           "kind": "Cosmos MsgSend (classical)",
           "accepted": false,
           "error": "Broadcasting transaction failed with code 8 (codespace: pqc). Log: account has no PQC key and classical fallback is disabled: classical fallback not allowed"
+        },
+        {
+          "kind": "EVM transfer (raw re-check)",
+          "accepted": false,
+          "at": "2026-11-25T23:49:17.540Z",
+          "error": "failed to broadcast transaction: account qor1cvxnd02mgz9d0j5a3agzpwt65c3zc7yx39pgy6 has no usable registered post-quantum key; the EVM lane requires one, like every other lane: no open EVM authorisation window: no open EVM authorisation window"
         }
       ],
       "balanceAfterSendQor": "0.1",
