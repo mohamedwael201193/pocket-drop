@@ -25,7 +25,7 @@ import { cx } from './ui';
 import v4 from '../data/v4.json';
 import { titleFor } from '../lib/titles';
 
-const QCAI = v4.qcai as { score?: string; stage2Score?: string };
+const QCAI = v4.qcai as { score?: string; stage2Score?: string; stage3Score?: string };
 const scoreOf = (s?: string) => (s ?? '').split(' ')[0];
 
 type Item = { key: string; label: string; to: string; Icon: ComponentType<IconProps>; match: (p: string) => boolean };
@@ -321,7 +321,7 @@ export function Layout() {
         </main>
         <footer className="border-t border-zinc-200/70 py-6">
           <div className={cx('mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 text-center text-[13px] text-zinc-600 sm:flex-row sm:px-6 sm:text-left lg:px-8', bp === 'mobile' && 'pb-20')}>
-            <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">QCAI automated audit {scoreOf(QCAI.score)}, then {scoreOf(QCAI.stage2Score)} of 100 · no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
+            <span>Testnet QOR only · No monetary value · <a href={`${SOURCE_URL}/blob/main/docs/AUDIT.md`} target="_blank" rel="noopener noreferrer" className="underline decoration-zinc-300 underline-offset-2 hover:text-zinc-900" data-testid="footer-audit">QCAI automated audit {scoreOf(QCAI.score)}, {scoreOf(QCAI.stage2Score)}, then {scoreOf(QCAI.stage3Score)} (v5) of 100 · no human audit</a> · <span className="whitespace-nowrap">Diana 9800</span></span>
             <span className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
               <a href={`${API_BASE}/api/health`} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">API health</a>
               <a href={addrUrl(INST.prod.router)} target="_blank" rel="noopener noreferrer" className="hover:text-zinc-900">router (v5)</a>

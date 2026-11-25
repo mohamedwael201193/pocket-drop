@@ -51,6 +51,8 @@ test('judges: the Q-Day Drill is step 1, the requirement table has every row, bo
   await expect(page.getByTestId('req-pqc-verify')).toContainText('pqcVerify');
   await expect(page.getByTestId('qcai')).toContainText('Stage 2');
   await expect(page.getByTestId('qcai')).toContainText('78');
+  await expect(page.getByTestId('qcai')).toContainText('Stage 3');
+  await expect(page.getByTestId('qcai')).toContainText('85');
   await expect(page.getByTestId('test-others')).toContainText(/\d+ frontend and \d+ backend unit tests pass/);
   await expect(page.getByTestId('sample-pool')).toBeVisible();
   await fits(page);

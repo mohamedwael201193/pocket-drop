@@ -129,13 +129,15 @@ export const REQUIREMENTS: Requirement[] = [
   },
   {
     id: 'qcai',
-    requirement: 'Two-stage QCAI audit, every finding answered',
+    requirement: 'Three-stage QCAI audit (v4 Stages 1–2, v5 Stage 3), every finding answered',
     code: [
       { label: 'docs/AUDIT.md (finding -> resolution -> test)', path: 'docs/AUDIT.md' },
-      { label: 'Stage 1 PDF (19 Nov)', path: 'docs/audit/stage1/QCAI-stage1-2026-11-19.pdf' },
-      { label: 'Stage 2 PDF (20 Nov)', path: 'docs/audit/stage2/QCAI-stage2-2026-11-20.pdf' },
+      { label: 'Stage 1 PDF (19 Nov, v4)', path: 'docs/audit/stage1/QCAI-stage1-2026-11-19.pdf' },
+      { label: 'Stage 2 PDF (20 Nov, v4)', path: 'docs/audit/stage2/QCAI-stage2-2026-11-20.pdf' },
+      { label: 'Stage 3 PDF (26 Nov Cairo, v5)', path: 'docs/audit/stage3/QCAI-stage3-v5.pdf' },
+      { label: 'Stage 3 JSON (26 Nov Cairo, v5)', path: 'docs/audit/stage3/qcai-stage3-v5.json' },
     ],
-    live: [{ label: 'public reports QCAIA-1795130931306-3D8DAA40 (82) and QCAIA-1795138339351-F6A93427 (78)', note: 'links in docs/AUDIT.md' }],
+    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 v5 (85, PDF/JSON archived)', note: 'links and artifacts in docs/AUDIT.md' }],
     tests: ['each finding names its regression tests in docs/AUDIT.md'],
   },
   {

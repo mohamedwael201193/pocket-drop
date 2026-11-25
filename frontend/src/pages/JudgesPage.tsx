@@ -54,7 +54,7 @@ export default function JudgesPage() {
   const { hash } = useLocation();
   // /judges#costs (linked from Send) lands on that section
   useEffect(() => { if (hash) requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })); }, [hash]);
-  const q = v4.qcai as { stage1: string; stage2: string; report: string | null; auditId?: string | null; score?: string | null; findings?: string | null; publicReport?: string | null; stage2AuditId?: string; stage2Score?: string; stage2PublicReport?: string };
+  const q = v4.qcai as { stage1: string; stage2: string; stage3?: string; report: string | null; auditId?: string | null; score?: string | null; findings?: string | null; publicReport?: string | null; stage2AuditId?: string; stage2Score?: string; stage2PublicReport?: string; stage3AuditId?: string | null; stage3Score?: string | null; stage3Findings?: string | null };
   const t = v4.tests;
   return (
     <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16 lg:px-8" data-testid="judges">
@@ -175,12 +175,12 @@ export default function JudgesPage() {
           <p className="text-xs text-zinc-500">{t.verifiedBy}. Foundry cannot fork the native precompiles, so the live suite (<code>contracts-v4/test/live/*.mjs</code>) is the end-to-end proof. <a className="underline" href={blob('contracts-v4/COVERAGE.md')} target="_blank" rel="noopener noreferrer">COVERAGE.md</a></p>
         </Item>
 
-        <Item n={7} title="QCAI audit (two stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
+        <Item n={7} title="QCAI audit (three stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
           {q.stage1 === 'complete' ? (
             <div data-testid="qcai" className="space-y-1">
-              <p><b>Stage 1:</b> score {q.score}, {q.findings}. <b>Stage 2</b> (re-run on the final code): {q.stage2 === 'complete' ? <>score {q.stage2Score}.</> : 'not run yet.'} Both are automated QCAI audits; there was no human audit.</p>
-              {q.auditId && <p className="break-all font-mono text-xs">Stage 1 ID {q.auditId}{q.stage2AuditId ? ` · Stage 2 ID ${q.stage2AuditId}` : ''}</p>}
-              <p className="flex flex-wrap gap-3 text-xs"><a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md (triage and resolutions)</a>{q.publicReport && <a className="underline" href={q.publicReport} target="_blank" rel="noopener noreferrer">Stage 1 public report</a>}{q.stage2PublicReport && <a className="underline" href={q.stage2PublicReport} target="_blank" rel="noopener noreferrer">Stage 2 public report</a>}<a className="underline" href={blob('docs/audit/stage1/QCAI-stage1-2026-11-19.pdf')} target="_blank" rel="noopener noreferrer">Stage 1 PDF</a></p>
+              <p><b>Stage 1 (v4):</b> score {q.score}, {q.findings}. <b>Stage 2 (v4):</b> {q.stage2 === 'complete' ? <>score {q.stage2Score}.</> : 'not run yet.'} <b>Stage 3 (v5):</b> {q.stage3 === 'complete' ? <>score {q.stage3Score}{q.stage3Findings ? `, ${q.stage3Findings}` : ''} (no public report ID; PDF &amp; JSON archived).</> : 'not run yet.'} All are automated QCAI audits; there was no human audit.</p>
+              {q.auditId && <p className="break-all font-mono text-xs">Stage 1 ID {q.auditId}{q.stage2AuditId ? ` · Stage 2 ID ${q.stage2AuditId}` : ''}{q.stage3 === 'complete' ? ' · Stage 3 (v5): PDF export only' : ''}</p>}
+              <p className="flex flex-wrap gap-3 text-xs"><a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md (triage and resolutions)</a>{q.publicReport && <a className="underline" href={q.publicReport} target="_blank" rel="noopener noreferrer">Stage 1 public report</a>}{q.stage2PublicReport && <a className="underline" href={q.stage2PublicReport} target="_blank" rel="noopener noreferrer">Stage 2 public report</a>}<a className="underline" href={blob('docs/audit/stage1/QCAI-stage1-2026-11-19.pdf')} target="_blank" rel="noopener noreferrer">Stage 1 PDF</a>{q.stage3 === 'complete' && <a className="underline" href={blob('docs/audit/stage3/QCAI-stage3-v5.pdf')} target="_blank" rel="noopener noreferrer">Stage 3 PDF (v5)</a>}</p>
             </div>
           ) : <p data-testid="qcai"><b>Stage 1 in progress.</b> <a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md</a> appears when the report is in.</p>}
         </Item>
@@ -199,7 +199,7 @@ export default function JudgesPage() {
         <Item n={10} title="What it does not do">
           <ul className="space-y-1.5">
             {[
-              `No human audit. Two automated QCAI audits: Stage 1 ${q.score ?? ''}, Stage 2 ${q.stage2Score ?? 'not run'} (findings and fixes in docs/AUDIT.md). Testnet only.`,
+              `No human audit. Automated QCAI audits: Stage 1 (v4) ${q.score ?? ''}, Stage 2 (v4) ${q.stage2Score ?? 'not run'}, Stage 3 (v5) ${q.stage3Score ?? 'not run'} (findings and triage in docs/AUDIT.md). Testnet only.`,
               'A thief who holds the owner key can spend up to the daily limit before the guardians freeze the Pocket (the freeze is guardian-signed, so it is only as fast as your guardians).',
               'A Drop Pool slot goes to a distinct proof-of-possession account, not a person: one person can hold many accounts.',
               'The sender can still lose a link: whoever opens it first becomes the recipient (Confirmed mode adds a 4-word check).',

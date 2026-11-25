@@ -61,14 +61,20 @@ if (fs.existsSync(auditFile)) {
   const row = (n) => new RegExp(`^\\| ${n} \\| [^|]+\\| \x60([^\x60]+)\x60 \\| ([^|]+)\\|`, 'm').exec(t) ?? [];
   const [, id1, score1] = row(1);
   const [, id2, score2] = row(2);
+  const [, id3, score3] = row('3 \\(v5\\)');
   const stage2Done = !!id2;
+  const stage3Done = !!score3 && score3.trim() !== 'n/a';
   qcai = {
     stage1: 'complete', stage2: stage2Done ? 'complete' : 'pending',
+    stage3: stage3Done ? 'complete' : 'pending',
     report: 'docs/AUDIT.md', auditId: id1 ?? null, score: score1?.trim() ?? null,
     findings: g(/Counts: (\d+ findings[^.]*)\./), publicReport: g(/^- Stage 1: (https:\/\/\S+)/m),
     stage2AuditId: stage2Done ? id2 : null,
     stage2Score: stage2Done ? (score2?.trim() ?? null) : null,
     stage2PublicReport: stage2Done ? g(/^- Stage 2: (https:\/\/\S+)/m) : null,
+    stage3AuditId: stage3Done && !id3.startsWith('none') ? id3 : null,
+    stage3Score: stage3Done ? score3.trim() : null,
+    stage3Findings: stage3Done ? g(/## 9\. Stage 3[\s\S]*?Counts: (\d+ findings[^.]*)\./) : null,
   };
 }
 
