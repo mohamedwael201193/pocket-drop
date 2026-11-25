@@ -101,11 +101,14 @@ function BlockHeight() {
   return (
     <div className="mt-1 flex items-center justify-between font-mono text-xs text-zinc-500" data-testid="side-block" title="Head block read from the relayer API (LIVE, every 30 s)">
       <span>block</span>
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.span key={n ?? 'none'} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 8, opacity: 0 }} transition={{ duration: 0.3 }} className="tabular-nums text-zinc-700">
-          {n ? n.toLocaleString('en-US') : '…'}
-        </motion.span>
-      </AnimatePresence>
+      {/* old and new number share one grid cell, so no popLayout (its injected <style> is blocked by the CSP) */}
+      <span className="grid overflow-hidden text-right">
+        <AnimatePresence initial={false}>
+          <motion.span key={n ?? 'none'} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 8, opacity: 0 }} transition={{ duration: 0.3 }} className="col-start-1 row-start-1 tabular-nums text-zinc-700">
+            {n ? n.toLocaleString('en-US') : '…'}
+          </motion.span>
+        </AnimatePresence>
+      </span>
     </div>
   );
 }
@@ -126,7 +129,7 @@ function SideLink({ item, active, collapsed, group }: { item: Item; active: bool
   return (
     <Link to={item.to} data-testid={group === 'main' ? `nav-${item.key}` : `side-${item.key}`} title={collapsed ? item.label : undefined}
       aria-current={active ? 'page' : undefined}
-      className={cx('group relative flex min-h-[42px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors', active ? 'text-emerald-900' : 'text-zinc-600 hover:text-zinc-950', collapsed && 'justify-center px-0')}>
+      className={cx('group relative flex min-h-[38px] items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors', active ? 'text-emerald-900' : 'text-zinc-600 hover:text-zinc-950', collapsed && 'justify-center px-0')}>
       {active && <motion.span layoutId="side-active" className="absolute inset-0 rounded-xl bg-emerald-50 ring-1 ring-emerald-100" transition={{ type: 'spring', stiffness: 520, damping: 42 }} />}
       {active && <motion.span layoutId="side-bar" className="absolute -left-3 top-2 bottom-2 w-[3px] rounded-r-full bg-accent" transition={{ type: 'spring', stiffness: 520, damping: 42 }} />}
       {!active && <span className="absolute inset-0 rounded-xl bg-zinc-100 opacity-0 transition-opacity group-hover:opacity-100" />}
@@ -147,15 +150,21 @@ function SidebarNav({ collapsed, onToggle, overlay }: { collapsed: boolean; onTo
           <LogoMark size={32} pulse={pathname} />
           {!collapsed && <Wordmark />}
         </Link>
+        {!collapsed && (
+          <button type="button" onClick={onToggle} data-testid="sidebar-toggle" aria-label="Collapse sidebar" aria-expanded title="Collapse sidebar"
+            className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+            <Sidebar className="h-4 w-4" />
+          </button>
+        )}
       </div>
       <nav aria-label="Main" className={cx('flex-1 overflow-y-auto overflow-x-hidden pb-4 pt-2', collapsed ? 'px-2.5' : 'px-4')}>
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <SideLink item={OVERVIEW} active={OVERVIEW.match(pathname)} collapsed={collapsed} group="main" />
           {TABS.map((t) => <SideLink key={t.key} item={t} active={t.match(pathname)} collapsed={collapsed} group="main" />)}
         </div>
-        <div className="my-4 h-px bg-zinc-200/80" role="separator" />
+        <div className="my-3 h-px bg-zinc-200/80" role="separator" />
         {!collapsed && <p className="mb-1.5 px-3 text-xs font-medium uppercase tracking-[0.14em] text-zinc-400">Verify</p>}
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {SECONDARY.map((t) => <SideLink key={t.key} item={t} active={t.match(pathname)} collapsed={collapsed} group="side" />)}
         </div>
       </nav>
@@ -171,10 +180,12 @@ function SidebarNav({ collapsed, onToggle, overlay }: { collapsed: boolean; onTo
             <PocketChip />
           </div>
         )}
-        <button type="button" onClick={onToggle} data-testid="sidebar-toggle" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed}
-          className={cx('mt-2 flex min-h-[36px] w-full items-center gap-2 rounded-xl px-3 text-[13px] text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900', collapsed && 'justify-center px-0')}>
-          <Sidebar className="h-4 w-4" />{!collapsed && 'Collapse'}
-        </button>
+        {collapsed && (
+          <button type="button" onClick={onToggle} data-testid="sidebar-toggle" aria-label="Expand sidebar" aria-expanded={false} title="Expand sidebar"
+            className="mt-2 flex min-h-[36px] w-full items-center justify-center rounded-xl text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900">
+            <Sidebar className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </motion.aside>
   );
