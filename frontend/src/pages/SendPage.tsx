@@ -14,6 +14,7 @@ import { claimUrl4, linkId4 } from '../lib/claim4';
 import { rememberNonce } from '../lib/links4';
 import { DEFAULTS, INST, REGISTRATION_FEE_WEI, createdId } from '../lib/v4';
 import { deliveryFeeWei, deliverySteps } from '../lib/fees';
+import { OPEN_ACK_ABOVE_WEI, openNeedsAck } from '../lib/sendMode';
 import { explainError } from '../lib/api';
 import { isCancelled } from '../lib/signReview';
 import { fmtQor, parseQor } from '../lib/chain';
@@ -42,6 +43,7 @@ export default function SendPage() {
   const inst = INST[a.env];
   const [mode, setMode] = useState<'Confirmed' | 'Open'>('Confirmed');
   const [amount, setAmount] = useState('0.3');
+  const [openAck, setOpenAck] = useState(false);
   const [slots, setSlots] = useState('3');
   const [perSlot, setPerSlot] = useState('0.02');
   const [busy, setBusy] = useState<'drop' | 'pool' | null>(null);
@@ -67,6 +69,8 @@ export default function SendPage() {
     : pv && pv.deployed && total! > pv.allowanceLeft ? `Your daily limit has ${fmtQor(pv.allowanceLeft)} QOR left; this drop needs ${fmtQor(total!)} QOR.`
     : pv && !pv.deployed && total! > DEFAULTS.dailyLimit ? `A new Pocket's daily limit is ${fmtQor(DEFAULTS.dailyLimit)} QOR.`
     : pv?.frozen ? 'This Pocket is frozen by its guardians.' : null;
+  const needsAck = openNeedsAck(mode, amt);
+  const ackProblem = needsAck && !openAck ? `Above ${fmtQor(OPEN_ACK_ABOVE_WEI)} QOR, a first-to-open link needs your OK below, or switch to Someone I know.` : null;
   const ns = Number(slots);
   const per = parseQor(perSlot);
   const poolTotal = per !== null && Number.isInteger(ns) ? per * BigInt(ns) : null;
@@ -81,7 +85,7 @@ export default function SendPage() {
   const poolProblem = slotsProblem ?? perProblem ?? poolFundsProblem;
 
   async function makeDrop() {
-    if (!a.actionCtx || !a.root || amt === null) return;
+    if (!a.actionCtx || !a.root || amt === null || ackProblem) return;
     setBusy('drop'); setErr(null); setMade(null);
     try {
       const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: fee, ttlSeconds: DEFAULTS.ttlSeconds });
@@ -138,6 +142,12 @@ export default function SendPage() {
               </button>
             ))}
           </div>
+          {needsAck && (
+            <label className="mt-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-zinc-900" data-testid="open-ack">
+              <input type="checkbox" className="mt-0.5" checked={openAck} onChange={(e) => setOpenAck(e.target.checked)} data-testid="open-ack-box" />
+              <span>Anyone who opens this link first can take {amt !== null ? fmtQor(amt) : ''} QOR, with no check. Use this only for a giveaway. For a friend, Someone I know is safer: you compare 4 words before any money moves.</span>
+            </label>
+          )}
           <label htmlFor="amount" className="mt-4 block text-sm font-semibold text-zinc-900">Amount (QOR)</label>
           <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" data-testid="amount" disabled={!ready}
             aria-invalid={ready && !!dropProblem} aria-describedby="drop-total drop-problem amount-lock"
@@ -159,8 +169,8 @@ export default function SendPage() {
         </StepCard>
 
         <StepCard n={3} title="Create and share" done={made?.kind === 'drop'} locked={!ready || !!dropProblem}>
-          <Button block busy={busy === 'drop'} disabled={!ready || !!dropProblem || !!busy} onClick={() => void makeDrop()} data-testid="create-drop">Create drop link</Button>
-          {(lockReason || (ready && dropProblem)) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-drop-reason">{lockReason ?? `Fix the amount first: ${dropProblem}`}</p>}
+          <Button block busy={busy === 'drop'} disabled={!ready || !!dropProblem || !!ackProblem || !!busy} onClick={() => void makeDrop()} data-testid="create-drop">Create drop link</Button>
+          {(lockReason || (ready && (dropProblem || ackProblem))) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-drop-reason">{lockReason ?? (dropProblem ? `Fix the amount first: ${dropProblem}` : ackProblem)}</p>}
           {err?.where === 'drop' && <div className="mt-3"><Notice tone="error" testId="drop-error">{err.text}</Notice></div>}
           {made?.kind === 'drop' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} amountText={made.amountText} headline="Your link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="create-tx" check /> <SourceBadge kind="LIVE" /></p></div>}
         </StepCard>
