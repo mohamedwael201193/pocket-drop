@@ -13,6 +13,7 @@ import tests from '../data/tests.json';
 import { SamplePoolCard } from '../components/samplePool';
 import { REQUIREMENTS } from '../data/requirements';
 import selfRelay from '../../evidence/v4/e2e/self-relay-v5.json';
+import delta from '../../evidence/v4/e2e/delta-run-2026-11-26.json';
 import { COSTS_NOTE, RELAY_COSTS, deliveryCostUqor, deliveryFeeWei } from '../lib/fees';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
@@ -153,6 +154,25 @@ export default function JudgesPage() {
           <p className="mt-2 text-xs text-zinc-500">Test accounts, Diana testnet. Re-checked by <code>reverify.mjs</code> section 11 (window scope and caps, submitter = that account, window closed now). Script: <code>contracts-v4/script/self-relay-v5.mjs</code>.</p>
         </Item>
 
+        <Item n={7} title="Measured delta: claim by link vs. a direct transfer to a fresh account" action={<SourceBadge kind="RECORDED" />}>
+          <p data-testid="judges-delta">{delta.n} fresh test accounts (0 QOR, no key) each opened a {delta.amountQor} QOR Pocket Drop link: <b>{delta.pathA.filter((r) => r.spent).length} of {delta.n}</b> registered their ML-DSA-87 key, claimed and made a first post-quantum signed spend (median {delta.summary.medianSecondsToFirstSpend} s from opening the link). {delta.n} other fresh test accounts got the same {delta.amountQor} QOR by a direct transfer: <b>{delta.pathB.filter((r) => r.spent).length} of {delta.n}</b> could spend it. The chain refused both an EVM transfer (no registered post-quantum key, so no EVM window) and a classical Cosmos send.</p>
+          <div className="mt-2 overflow-x-auto">
+            <table className="w-full min-w-[36rem] border-collapse text-left text-xs" data-testid="judges-delta-table">
+              <thead><tr className="border-b border-zinc-200 text-zinc-500"><th className="py-1.5 pr-3 font-medium">Path A test account</th><th className="py-1.5 pr-3 font-medium">Claim</th><th className="py-1.5 pr-3 font-medium">First spend</th><th className="py-1.5 pr-3 font-medium">Path B test account</th><th className="py-1.5 font-medium">Direct transfer</th></tr></thead>
+              <tbody>{delta.pathA.map((a, i) => { const b = delta.pathB[i]; return (
+                <tr key={a.id} className="border-b border-zinc-100 last:border-0">
+                  <td className="py-1.5 pr-3 font-mono">{a.account.slice(0, 10)}…</td>
+                  <td className="py-1.5 pr-3"><Link className="font-mono underline" to={`/check/${a.txs.claim}`}>{a.txs.claim.slice(0, 8)}…</Link></td>
+                  <td className="py-1.5 pr-3"><Link className="font-mono underline" to={`/check/${a.txs.firstSpend}`}>{a.txs.firstSpend.slice(0, 8)}…</Link> ({a.secondsToFirstSpend} s)</td>
+                  <td className="py-1.5 pr-3 font-mono">{b ? `${b.account.slice(0, 10)}…` : ''}</td>
+                  <td className="py-1.5">{b && <><Link className="font-mono underline" to={`/check/${b.txs.directSend}`}>{b.txs.directSend.slice(0, 8)}…</Link> <span className="text-zinc-500">spend refused</span></>}</td>
+                </tr>); })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">TEAM-RUN test accounts on Diana testnet; counts are accounts, not people, and none is counted as an external user. Every hash and the refusal texts are in <code>docs/DELTA_RUN.md</code>. Re-check: <code>node scripts/delta-verify.mjs</code>. Re-run: <code>node scripts/delta-run.mjs --n 5</code>.</p>
+        </Item>
+
         <section id="costs" className="scroll-mt-20 rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5" data-testid="cost-table">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-sm font-semibold leading-snug text-zinc-900">What each action costs, and who pays</h2>
@@ -176,7 +196,7 @@ export default function JudgesPage() {
           </div>
         </section>
 
-        <Item n={7} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
+        <Item n={8} title="Tests and coverage" action={<SourceBadge kind="RECORDED" title="Verified by the orchestrator; see contracts-v4/COVERAGE.md" />}>
           <ul className="grid gap-2 sm:grid-cols-3">
             {[[String(t.total), 'Foundry tests pass', `${t.unit} unit, ${t.fuzz} fuzz, ${t.invariantFns} invariant functions`], ['100%', 'line, statement, branch, function', 'coverage on every file in src/'], ['CI profile', 'fuzz 10,000 runs', 'invariants 256 runs x depth 50']].map(([big, a, b]) => (
               <li key={a} className="rounded-xl bg-stoneBg p-3"><div className="font-money text-3xl leading-none" data-testid={`test-${a.split(' ')[0]}`}>{big}</div><div className="mt-1 text-xs">{a}</div><div className="text-xs text-zinc-500">{b}</div></li>
@@ -186,7 +206,7 @@ export default function JudgesPage() {
           <p className="text-xs text-zinc-500">{t.verifiedBy}. Foundry cannot fork the native precompiles, so the live suite (<code>contracts-v4/test/live/*.mjs</code>) is the end-to-end proof. <a className="underline" href={blob('contracts-v4/COVERAGE.md')} target="_blank" rel="noopener noreferrer">COVERAGE.md</a></p>
         </Item>
 
-        <Item n={8} title="QCAI audit (three stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
+        <Item n={9} title="QCAI audit (three stages)" action={<SourceBadge kind="RECORDED" title="Read from docs/AUDIT.md when this build was made" />}>
           {q.stage1 === 'complete' ? (
             <div data-testid="qcai" className="space-y-1">
               <p><b>Stage 1 (v4):</b> score {q.score}, {q.findings}. <b>Stage 2 (v4):</b> {q.stage2 === 'complete' ? <>score {q.stage2Score}.</> : 'not run yet.'} <b>Stage 3 (v5):</b> {q.stage3 === 'complete' ? <>score {q.stage3Score}{q.stage3Findings ? `, ${q.stage3Findings}` : ''}.</> : 'not run yet.'} All are automated QCAI audits; there was no human audit.</p>
@@ -196,18 +216,18 @@ export default function JudgesPage() {
           ) : <p data-testid="qcai"><b>Stage 1 in progress.</b> <a className="underline" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md</a> appears when the report is in.</p>}
         </Item>
 
-        <Item n={9} title="Re-verify it yourself in one command" >
+        <Item n={10} title="Re-verify it yourself in one command" >
           <p><code className="rounded bg-stoneBg px-1.5 py-0.5 font-mono text-xs">node frontend/scripts/reverify.mjs</code> reads the chain (no key, no dependency beyond Node 20) and checks: every v4 contract has code and its recorded keccak, the router points at the factory, drop and pool, the timelock constants match, and every recorded live transaction is mined with the status we claim.</p>
           <a className="inline-block text-xs underline" href={blob('frontend/scripts/reverify.mjs')} target="_blank" rel="noopener noreferrer">reverify.mjs on GitHub</a>
         </Item>
 
-        <Item n={10} title="Try the whole thing yourself">
+        <Item n={11} title="Try the whole thing yourself">
           <p>Send creates a real drop from your Pocket (a quantum-safe key made in your browser); open the link in another browser to receive into that browser&apos;s Pocket, no wallet. The Pocket tab has the limit, veto, guardians, freeze, recovery and Q-Day Rescue. /radar shows the effect, counted from chain events.</p>
           <div className="flex flex-wrap gap-2"><Link className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-white" to="/send">Send a drop</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/pocket">Open the Pocket</Link><Link className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-xs font-medium" to="/radar">Radar</Link></div>
           <SamplePoolCard compact />
         </Item>
 
-        <Item n={11} title="What it does not do">
+        <Item n={12} title="What it does not do">
           <ul className="space-y-1.5">
             {[
               `No human audit. Automated QCAI audits: Stage 1 (v4) ${q.score ?? ''}, Stage 2 (v4) ${q.stage2Score ?? 'not run'}, Stage 3 (v5) ${q.stage3Score ?? 'not run'} (findings and triage in docs/AUDIT.md). Testnet only.`,
