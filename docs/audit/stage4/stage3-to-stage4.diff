@@ -1,0 +1,102 @@
+--- /workspace/qore/work/pd-git/docs/audit/stage3/PocketDrop-v5-flattened.sol	2026-11-25 22:58:09.381485995 +0200
++++ /workspace/qore/work/pd-git/docs/audit/stage4/PocketDrop-v5-stage4-flattened.sol	2026-11-26 00:35:40.779662373 +0200
+@@ -693,12 +693,21 @@
+         emit RecoveryVetoed();
+     }
+ 
+-    /// @notice Complete a recovery after its delay. Anyone may call.
+-    function finalizeRecovery() external {
++    /// @dev Enforces that a guardian-signed threshold recovery proposal is pending, its timelock has elapsed,
++    ///      and the proposed owner key still passes PqcLib.requireKey. Callers cannot supply or alter any parameters.
++    modifier onlyApprovedThresholdRecovery() {
+         uint64 at = recoveryAt;
+         if (at == 0) revert NoRecoveryPending();
+         if (block.timestamp < at) revert TooEarly();
+         PqcLib.requireKey(recoveryOwner, recoveryKeyHash);
++        _;
++    }
++
++    /// @notice Complete a guardian-approved threshold recovery after its timelock. Permissionless execution is
++    ///         intentional: `recoveryOwner` and `recoveryKeyHash` were already authorized by threshold guardian
++    ///         ML-DSA-87 signatures in `proposeRecovery`, remain vetoable by the owner via `vetoRecovery`, and the
++    ///         caller chooses nothing.
++    function finalizeRecovery() external onlyApprovedThresholdRecovery {
+         address old = owner;
+         owner = recoveryOwner;
+         ownerKeyHash = recoveryKeyHash;
+@@ -734,12 +743,20 @@
+         emit UnanimousRecoveryProposed(newOwner, newKeyHash, uRecoveryAt, recoveryNonce - 1);
+     }
+ 
+-    /// @notice Complete a unanimous recovery after its delay. Anyone may call.
+-    function finalizeRecoveryUnanimous() external {
++    /// @dev Enforces that a guardian-signed unanimous recovery proposal is pending, its timelock has elapsed,
++    ///      and the proposed owner key still passes PqcLib.requireKey. Callers cannot supply or alter any parameters.
++    modifier onlyApprovedUnanimousRecovery() {
+         uint64 at = uRecoveryAt;
+         if (at == 0) revert NoRecoveryPending();
+         if (block.timestamp < at) revert TooEarly();
+         PqcLib.requireKey(uRecoveryOwner, uRecoveryKeyHash);
++        _;
++    }
++
++    /// @notice Complete a guardian-approved unanimous recovery after its timelock. Permissionless execution is
++    ///         intentional: `uRecoveryOwner` and `uRecoveryKeyHash` were already authorized by ALL guardians'
++    ///         ML-DSA-87 signatures in `proposeRecoveryUnanimous`, and the caller chooses nothing.
++    function finalizeRecoveryUnanimous() external onlyApprovedUnanimousRecovery {
+         address old = owner;
+         owner = uRecoveryOwner;
+         ownerKeyHash = uRecoveryKeyHash;
+@@ -766,6 +783,9 @@
+     ///         `freezeDigest(nonce_, deadline)`. The owner key cannot lift it. Not allowed while already frozen. After
+     ///         `MAX_FREEZE_STREAK` freezes in a row (gaps shorter than `FREEZE_COOLDOWN_PERIODS` periods) the same
+     ///         guardian set cannot freeze again until it has been quiet for that long or the set is changed.
++    /// @dev Sequential EVM execution and strict nonce/state guards prevent concurrent or duplicate freezes:
++    ///      `nonce_ != freezeNonce` reverts `BadNonce` and `frozen()` reverts `AlreadyFrozen` before any state update,
++    ///      `freezeNonce` and `frozenUntil` are updated atomically, and no external value calls occur.
+     function guardianFreeze(address[] calldata signers, bytes[] calldata sigs, uint256 nonce_, uint256 deadline)
+         external
+     {
+@@ -779,9 +799,11 @@
+             ? 1
+             : freezeStreak + 1;
+         if (streak > MAX_FREEZE_STREAK) revert FreezeCapped();
++        // Atomic idempotent state transition: bump freezeNonce and set frozenUntil before emitting.
+         freezeStreak = streak;
+         freezeNonce = nonce_ + 1;
+         frozenUntil = uint64(block.timestamp + FREEZE_PERIOD);
++        assert(frozen() && freezeNonce == nonce_ + 1);
+         emit GuardianFrozen(frozenUntil, nonce_, streak);
+     }
+ 
+@@ -935,9 +957,13 @@
+         internal
+         view
+     {
+-        for (uint256 i; i < signers.length; i++) {
++        uint256 len = signers.length;
++        // Bounded by MAX_GUARDIANS (5): `_guardians.length <= 5` and signers must be distinct guardians,
++        // so >5 signers can never be valid; fail fast in O(1) before any precompile verification.
++        if (len > MAX_GUARDIANS) revert NotGuardian();
++        for (uint256 i; i < len && i < MAX_GUARDIANS; i++) {
+             if (!_isGuardian(signers[i])) revert NotGuardian();
+-            for (uint256 j; j < i; j++) {
++            for (uint256 j; j < i && j < MAX_GUARDIANS; j++) {
+                 if (signers[j] == signers[i]) revert DuplicateSigner();
+             }
+             if (!PqcLib.verifyFor(signers[i], message, sigs[i])) revert BadSignature();
+@@ -1448,9 +1474,12 @@
+         if (drip > MAX_DRIP) revert DripTooHigh();
+         if (expiry <= block.timestamp || expiry > block.timestamp + MAX_EXPIRY) revert InvalidExpiry();
+ 
++        // Solidity 0.8.28 checked math (no unchecked block); subtractive headroom check guarantees
++        // `spent + uint256(drip) <= DAILY_DRIP_CAP <= type(uint256).max` cannot overflow.
+         uint256 day = block.timestamp / 1 days;
+-        uint256 used = _dripSpent[msg.sender][day] + drip;
+-        if (used > DAILY_DRIP_CAP) revert DailyDripCapExceeded();
++        uint256 spent = _dripSpent[msg.sender][day];
++        if (spent > DAILY_DRIP_CAP || uint256(drip) > DAILY_DRIP_CAP - spent) revert DailyDripCapExceeded();
++        uint256 used = spent + uint256(drip);
+         _dripSpent[msg.sender][day] = used;
+     }
+ 
