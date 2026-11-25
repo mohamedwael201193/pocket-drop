@@ -134,7 +134,7 @@ export default function SendPage() {
 
         <StepCard n={2} title="Amount and mode" done={!dropProblem && ready} locked={!ready}>
           <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Mode">
-            {([['Confirmed', 'Someone I know', ShieldCheck, 'Confirmed mode: you compare 4 words with them before any money moves. The safest choice.'], ['Open', 'First to open it', Gift, 'Giveaway mode: whoever opens the link first gets it, with no check.']] as const).map(([m, t, Icon, line]) => (
+            {([['Confirmed', 'Someone I know', ShieldCheck, 'Confirmed mode: you compare 4 words with them before any money moves. The safest choice.'], ['Open', 'First to open it', Gift, 'Giveaway mode, like cash: whoever opens the link first gets it, with no check. For small gifts.']] as const).map(([m, t, Icon, line]) => (
               <button key={m} type="button" role="radio" aria-checked={mode === m} data-testid={`mode-${m}`} onClick={() => setMode(m)}
                 className={cx('rounded-2xl border p-4 text-left transition', mode === m ? 'border-zinc-900 bg-stoneBg ring-1 ring-zinc-900' : 'border-zinc-200 bg-white hover:bg-stoneBg')}>
                 <span className="flex items-center gap-2 text-sm font-semibold text-zinc-900"><Icon className="h-4 w-4" aria-hidden />{t}{m === 'Confirmed' && <Pill tone="dark">default</Pill>}</span>
