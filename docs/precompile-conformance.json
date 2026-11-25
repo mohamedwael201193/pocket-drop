@@ -1,0 +1,526 @@
+{
+  "rpc": "https://evm-testnet.qore.host",
+  "chainIdEvm": 9800,
+  "generatedAt": "2026-11-25T19:49:27.988Z",
+  "verify": [
+    {
+      "case": "valid: 99-byte intent-shaped message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746287,
+      "retBytes": 32,
+      "gas": 315020,
+      "anomaly": false
+    },
+    {
+      "case": "valid: empty message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 0,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746287,
+      "retBytes": 32,
+      "gas": 311250,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 1-byte message 0x00",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 1,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746287,
+      "retBytes": 32,
+      "gas": 311060,
+      "anomaly": false
+    },
+    {
+      "case": "empty-message signature checked against 0x00",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 1,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "wrong key (valid signature by another key)",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature first byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature middle byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature last byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "public key first byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "public key last byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "message last byte flipped",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature truncated to 4626 bytes",
+      "pkLen": 2592,
+      "sigLen": 4626,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature + 1 trailing zero byte (4628)",
+      "pkLen": 2592,
+      "sigLen": 4628,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature + 32 trailing zero bytes (4659)",
+      "pkLen": 2592,
+      "sigLen": 4659,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "empty signature",
+      "pkLen": 2592,
+      "sigLen": 0,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "all-zero 4627-byte signature",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "public key truncated to 2591 bytes",
+      "pkLen": 2591,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746287,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "public key + 1 trailing zero byte (2593)",
+      "pkLen": 2593,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "empty public key",
+      "pkLen": 0,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "all-zero 2592-byte public key",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "signature with non-empty context \"pd\"",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "ML-DSA internal signature (no FIPS 204 message wrapper)",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "valid ML-DSA-65 key + signature (1952 / 3309 bytes)",
+      "pkLen": 1952,
+      "sigLen": 3309,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "valid ML-DSA-44 key + signature (1312 / 2420 bytes)",
+      "pkLen": 1312,
+      "sigLen": 2420,
+      "msgLen": 99,
+      "expected": false,
+      "live": false,
+      "pqcLibResult": false,
+      "block": 10746288,
+      "retBytes": 32,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 1024-byte message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 1024,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746288,
+      "retBytes": 32,
+      "gas": 351550,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 16384-byte message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 16384,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746288,
+      "retBytes": 32,
+      "gas": 966400,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 32768-byte message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 32768,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746288,
+      "retBytes": 32,
+      "gas": 1621910,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 49152-byte message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 49152,
+      "expected": true,
+      "live": true,
+      "pqcLibResult": true,
+      "block": 10746288,
+      "retBytes": 32,
+      "gas": 2277270,
+      "anomaly": false
+    },
+    {
+      "case": "valid: 65536-byte message",
+      "pkLen": 2592,
+      "sigLen": 4627,
+      "msgLen": 65536,
+      "expected": true,
+      "live": "not reached (RPC size limit)",
+      "pqcLibResult": null,
+      "block": 10746288,
+      "retBytes": null,
+      "error": "RPC gateway answered HTTP 403 (not JSON-RPC)",
+      "notReached": true,
+      "gas": null,
+      "anomaly": false
+    }
+  ],
+  "keyStatus": [
+    {
+      "case": "registered account (deployer)",
+      "address": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "block": 10746288,
+      "reverted": false,
+      "retBytes": 2752,
+      "registered": true,
+      "algoId": 1,
+      "pubkeyLen": 2592,
+      "possessionProven": true,
+      "pubkeyOffset": 128
+    },
+    {
+      "case": "registered account (relayer)",
+      "address": "0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
+      "block": 10746288,
+      "reverted": false,
+      "retBytes": 2752,
+      "registered": true,
+      "algoId": 1,
+      "pubkeyLen": 2592,
+      "possessionProven": true,
+      "pubkeyOffset": 128
+    },
+    {
+      "case": "never-registered random address",
+      "address": "0x90b40c1ae929c6114678f3adf98e83ee7ec5dfcc",
+      "block": 10746288,
+      "reverted": false,
+      "retBytes": 160,
+      "registered": false,
+      "algoId": 0,
+      "pubkeyLen": 0,
+      "possessionProven": false,
+      "pubkeyOffset": 128
+    },
+    {
+      "case": "zero address",
+      "address": "0x0000000000000000000000000000000000000000",
+      "block": 10746288,
+      "reverted": false,
+      "retBytes": 160,
+      "registered": false,
+      "algoId": 0,
+      "pubkeyLen": 0,
+      "possessionProven": false,
+      "pubkeyOffset": 128
+    },
+    {
+      "case": "the precompile address itself",
+      "address": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": false,
+      "retBytes": 160,
+      "registered": false,
+      "algoId": 0,
+      "pubkeyLen": 0,
+      "possessionProven": false,
+      "pubkeyOffset": 128
+    }
+  ],
+  "abi": [
+    {
+      "case": "pqcKeyStatus: empty calldata",
+      "to": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a02: unknown method (no selector)"
+    },
+    {
+      "case": "pqcKeyStatus: selector only",
+      "to": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a02: input is not canonically ABI-encoded: head out of bounds"
+    },
+    {
+      "case": "pqcKeyStatus: address word with dirty high bits",
+      "to": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": false,
+      "ret": "2752 bytes"
+    },
+    {
+      "case": "pqcKeyStatus: 32 trailing bytes",
+      "to": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": false,
+      "ret": "2752 bytes"
+    },
+    {
+      "case": "pqcKeyStatus: unknown selector",
+      "to": "0x0000000000000000000000000000000000000a02",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a02: unknown method selector deadbeef"
+    },
+    {
+      "case": "pqcVerify: empty calldata",
+      "to": "0x0000000000000000000000000000000000000a01",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a01: unknown method (no selector)"
+    },
+    {
+      "case": "pqcVerify: valid call + 32 trailing bytes",
+      "to": "0x0000000000000000000000000000000000000a01",
+      "block": 10746288,
+      "reverted": false,
+      "ret": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "case": "pqcVerify: calldata cut by 32 bytes",
+      "to": "0x0000000000000000000000000000000000000a01",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a01: input is not canonically ABI-encoded: 99 bytes at 7392 do not fit"
+    },
+    {
+      "case": "pqcVerify: unknown selector",
+      "to": "0x0000000000000000000000000000000000000a01",
+      "block": 10746288,
+      "reverted": true,
+      "ret": null,
+      "error": "rpc error: code = Internal desc = 0x0000000000000000000000000000000000000a01: unknown method selector deadbeef"
+    }
+  ],
+  "historical": [
+    {
+      "case": "valid: empty message",
+      "block": 10654000,
+      "live": false
+    },
+    {
+      "case": "valid: empty message",
+      "block": 10654799,
+      "live": false
+    },
+    {
+      "case": "valid: empty message",
+      "block": 10654800,
+      "live": true
+    },
+    {
+      "case": "valid: empty message",
+      "block": 10655000,
+      "live": true
+    }
+  ],
+  "summary": {
+    "verifyCases": 29,
+    "keyStatusCases": 5,
+    "abiCases": 9,
+    "anomalies": []
+  }
+}
