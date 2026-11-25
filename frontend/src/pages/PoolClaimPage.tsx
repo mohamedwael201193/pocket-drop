@@ -7,7 +7,7 @@ import { Celebrate } from '../components/alive';
 import { ActivationCard, KEY_ACCOUNT_MIN_WEI } from '../components/account';
 import { claimPoolSlot, linkId4, parseLinkId, poolClaimed, readPool } from '../lib/claim4';
 import { useAccount, useKeyAccount } from '../lib/account';
-import { defaultCfg, genOf, isProdLike, predictPocket } from '../lib/v4';
+import { currentOf, defaultCfg, genOf, isProdLike, predictPocket } from '../lib/v4';
 import { explainError } from '../lib/api';
 import { fmtQor, pub } from '../lib/chain';
 import { addrUrl } from '../lib/config';
@@ -33,15 +33,18 @@ export default function PoolClaimPage() {
   const [tx, setTx] = useState<string | null>(null);
   const qc = useQueryClient();
   const { data: sponsor } = useSponsorStatus();
-  // the slot is paid into the Pocket this key uses in the app (a custom or recovered one), else its default Pocket (P5)
+  // the slot is paid into the Pocket this key uses in the app (a custom or recovered one), else its default Pocket (P5).
+  // A pool on the previous v4 contracts still pays into the CURRENT (v5) Pocket: payTo is any address the claimer signs, and
+  // the app works on v5, so a newcomer's first QOR lands where Send and Pocket read it.
+  const payEnv = currentOf(env);
   useEffect(() => {
     let live = true; setPocket(null);
     if (a.acct) {
-      if (a.env === env && a.activePocket) setPocket(a.activePocket);
-      else void predictPocket(env, defaultCfg(a.acct.evm as Hex)).then((x) => { if (live) setPocket(x); }).catch(() => undefined);
+      if (a.env === payEnv && a.activePocket) setPocket(a.activePocket);
+      else void predictPocket(payEnv, defaultCfg(a.acct.evm as Hex)).then((x) => { if (live) setPocket(x); }).catch(() => undefined);
     }
     return () => { live = false; };
-  }, [a.acct, a.env, a.activePocket, env]);
+  }, [a.acct, a.env, a.activePocket, payEnv]);
   const { data: bal } = useBalance(pocket ?? undefined, 3000);
   const { data: took } = useQuery({ queryKey: ['pool4-claimed', env, pid.toString(), a.acct?.evm], enabled: !!a.acct && !!p && p.v === 4, queryFn: () => poolClaimed(env, pid, a.acct!.evm as Hex), refetchInterval: 4000 });
 
@@ -106,7 +109,10 @@ export default function PoolClaimPage() {
               {tx && <div>Claim transaction: <TxLink hash={tx} testId="tx-pool-claim" check /></div>}
             </div>
             <p className="mt-3 text-sm text-zinc-800" data-testid="pool-backup-cta"><b>Back up your key.</b> It lives in this browser only (in a private window it is gone when you close it). Save the backup key on the Pocket page.</p>
-            <Link to="/pocket" className="mt-3 inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50">Open my Pocket and back up</Link>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link to="/pocket" className="inline-flex min-h-[44px] items-center rounded-full bg-zinc-900 px-5 text-sm font-medium text-stone-50">Open my Pocket and back up</Link>
+              <Link to="/send" data-testid="pool-next-send" className="inline-flex min-h-[44px] items-center rounded-full border border-zinc-300 bg-white px-5 text-sm font-medium text-zinc-900 hover:border-zinc-400">Next: send some to a friend</Link>
+            </div>
           </div>
         )}
       </div>

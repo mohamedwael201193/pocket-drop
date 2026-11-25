@@ -16,6 +16,8 @@ export const LINK_PREFIX: Record<Env, string> = { prod: 'q', lab: 'k', prodV4: '
 export const CURRENT_VERSION = 'v5';
 export const genOf = (e: Env): 'v5' | 'v4' => (e === 'prodV4' || e === 'labV4' ? 'v4' : 'v5');
 export const previousOf = (e: Env): Env => (e === 'prod' ? 'prodV4' : e === 'lab' ? 'labV4' : e);
+/** The current-generation instance of the same kind: where new Pockets live and where payouts from old links should land. */
+export const currentOf = (e: Env): 'prod' | 'lab' => (e === 'prod' || e === 'prodV4' ? 'prod' : 'lab');
 export const isProdLike = (e: Env) => e === 'prod' || e === 'prodV4';
 export const envLabel = (e: Env) => `${isProdLike(e) ? 'production' : 'lab'} (${genOf(e)}${genOf(e) === 'v4' ? ', previous contracts' : ''})`;
 const addr = (x: string) => x as Hex;
