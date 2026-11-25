@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { mldsa } from '@qorechain/pqc';
 import { evmToQor, bank } from '@qorechain/sdk';
-import { keccak256, toHex, parseEther, encodeFunctionData, formatEther, getAddress, createWalletClient, http } from 'viem';
+import { keccak256, toHex, parseEther, encodeFunctionData, formatEther, getAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import {
   loadMain, loadDeployer, pub, chain, artifact, readDeployments, readSecrets, writeSecrets, newAccountRecord, registerWithPoP, keyStatus,
@@ -120,6 +120,17 @@ for (let i = 0; i < N; i++) {
   await sleep(4000);
 }
 
+/** Sign a 0.05 QOR legacy transfer to the funder with `pk` and broadcast it raw; returns the attempt record with the node's message. */
+async function evmTransferAttempt(pk, gp) {
+  const a = privateKeyToAccount(pk);
+  const nonce = await pub.getTransactionCount({ address: a.address });
+  const raw = await a.signTransaction({ to: main.evm, value: SPEND, gas: 21000n, gasPrice: gp, nonce, chainId: 9800, type: 'legacy' });
+  const r = await fetch(chain.rpcUrls.default.http[0], { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_sendRawTransaction', params: [raw] }) }).then((x) => x.json());
+  if (r.error) return { kind: 'EVM transfer', accepted: false, at: new Date().toISOString(), error: String(r.error.message).replace(/ \[cosmossdk[^\]]*\]/, '').slice(0, 300) };
+  const rc = await pub.waitForTransactionReceipt({ hash: r.result, timeout: 60_000 }).catch(() => null);
+  return { kind: 'EVM transfer', accepted: true, hash: r.result, status: rc?.status ?? 'not mined' };
+}
+
 // ---- Path B ----
 const gp = await gasPrice();
 for (let i = 0; i < N; i++) {
@@ -131,13 +142,8 @@ for (let i = 0; i < N; i++) {
   row.txs.directSend = r.transactionHash;
   await sleep(2500);
   row.balanceAfterSendQor = formatEther(await pub.getBalance({ address: B.evm }));
-  // attempt 1: an ordinary EVM transfer signed with the account's key
-  try {
-    const w = createWalletClient({ account: privateKeyToAccount(B.privateKey), chain, transport: http() });
-    const h = await w.sendTransaction({ to: main.evm, value: SPEND, gas: 21000n, type: 'legacy', gasPrice: gp });
-    const rc = await pub.waitForTransactionReceipt({ hash: h, timeout: 60_000 }).catch(() => null);
-    row.attempts.push({ kind: 'EVM transfer', accepted: true, hash: h, status: rc?.status ?? 'not mined' });
-  } catch (e) { row.attempts.push({ kind: 'EVM transfer', accepted: false, error: String(e.shortMessage ?? e.details ?? e.message).split('\n')[0].slice(0, 240) }); }
+  // attempt 1: an ordinary EVM transfer signed with the account's key, sent raw so the node's own refusal text is kept
+  row.attempts.push(await evmTransferAttempt(record.secp256k1PrivateKey, gp));
   // attempt 2: a classical-signed Cosmos MsgSend
   try {
     const t = await cosmosTx(B, 'classical', [bank.send({ fromAddress: B.cosmos, toAddress: main.cosmos, amount: [{ denom: 'uqor', amount: String(SPEND / 10n ** 12n) }] })], { gas: '200000', fee: '30000' });
