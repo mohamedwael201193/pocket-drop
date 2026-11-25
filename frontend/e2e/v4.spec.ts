@@ -116,7 +116,7 @@ async function sendFlow(browser: Browser, opts: Record<string, unknown>, project
     await sp.getByTestId('create-drop').click();
     await expect(sp.getByTestId('share-card')).toBeVisible({ timeout: T });
     const url = (await sp.getByTestId('claim-link').getAttribute('data-url'))!;
-    const id = /\/c\/(p\d+)#k=/.exec(url)![1];
+    const id = /\/c\/([pq]\d+)#k=/.exec(url)![1];
     run.txs['sender Pocket createDrop (intent, lazy-deploys the Pocket)'] = await hashAttr(sp, 'create-tx');
     await shot(sp, run, '1-sender-link');
 

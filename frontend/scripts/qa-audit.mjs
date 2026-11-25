@@ -39,7 +39,8 @@ for (const [n, vp, mob] of sizes) {
     if (/\bv4\b/.test(info.text)) flags.push('mentions v4');
     if (/\bv5\b/.test(info.text)) flags.push('mentions v5');
     fs.writeFileSync(`${out}/${name}-${n}.txt`, info.text);
-    await p.addStyleTag({ content: '[data-testid=tabbar]{position:static !important}' }).catch(() => {});
+    // CSSOM, not a <style> tag: the app's CSP (style-src 'self') rightly blocks injected style elements.
+    await p.evaluate(() => { const t = document.querySelector('[data-testid=tabbar]'); if (t) t.style.setProperty('position', 'static', 'important'); }).catch(() => {});
     await p.screenshot({ path: `${out}/${name}-${n}.png`, fullPage: true });
     report.push({ size: n, route: path, ms, overflow: info.overflow, title: info.title, h1: info.h1, skeletonsLeft: info.loading, emptyBtns: info.emptyBtns, smallTap: info.smallTap, flags, errs: [...new Set(errs)].slice(0, 8), failed: [...new Set(failed)].slice(0, 8), internalLinks: [...new Set(info.links.filter((l) => l.startsWith('/')))] });
     await p.close();
