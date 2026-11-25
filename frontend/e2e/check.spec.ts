@@ -57,7 +57,7 @@ test('a LAB Pocket address shows who can do what, with the delays read from the 
   await expect(delays).toHaveAttribute('data-recovery', '60');
   await expect(delays).toHaveAttribute('data-freeze', '120');
   await expect(delays).toHaveAttribute('data-unanimous', '180');
-  await expect(page.getByTestId('power-map')).toContainText('lab instance');
+  await expect(page.getByTestId('power-map')).toContainText(/ on the lab( \(v[45][^)]*\))? instance/);
   await expect(page.getByTestId('power-freeze')).toContainText('2 of 3 guardians');
   await expect(page.getByTestId('power-classical-state')).toHaveText('not possible');
   await noSideScroll(page);
@@ -67,7 +67,7 @@ test('a guarded prod Q-Day bait from the examples; a non-Pocket address is expla
   await page.goto(`${BASE}/check`);
   await page.getByTestId('check-example-pocket').click();
   await expect(page.getByTestId('power-delays')).toHaveAttribute('data-timelock', '86400', { timeout: 90_000 });
-  await expect(page.getByTestId('power-map')).toContainText('production instance');
+  await expect(page.getByTestId('power-map')).toContainText(/ on the production( \(v[45][^)]*\))? instance/);
   await page.getByTestId('check-input').fill('0x392f50b1955a827458A320205e19acf7C664f116');
   await page.getByTestId('check-submit').click();
   await expect(page.getByTestId('check-not-pocket')).toBeVisible({ timeout: 60_000 });

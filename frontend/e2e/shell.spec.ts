@@ -1,5 +1,6 @@
 // The sidebar dashboard shell and the Overview wiring (read-only, spends nothing).
 //   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/shell.spec.ts
+import fs from 'node:fs';
 import { test, expect } from './fixtures';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
@@ -61,7 +62,7 @@ test('overview: every card carries a source label and the numbers match the live
 
 test('/proof shows the CBOM run date from the data; page headers carry the light glass Pocket', async ({ page }) => {
   await page.goto(`${BASE}/proof`);
-  await expect(page.getByTestId('proof-cbom-date')).toHaveText('Last run: 23 Nov 2026.');
+  await expect(page.getByTestId('proof-cbom-date')).toHaveText(`Last run: ${new Date((JSON.parse(fs.readFileSync('src/data/cbom-meta.json', 'utf8')) as { timestamp: string }).timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}.`);
   await expect(page.getByTestId('pocket-object').first()).toHaveAttribute('data-mode', 'svg');
 });
 
