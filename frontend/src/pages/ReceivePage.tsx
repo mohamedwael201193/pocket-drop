@@ -80,7 +80,7 @@ export default function ReceivePage() {
         <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="claim-entry">
           <label htmlFor="claim-input" className="text-sm font-semibold text-zinc-900">Paste your link</label>
           <div className="mt-2 flex gap-2">
-            <input id="claim-input" value={text} onChange={(e) => { setText(e.target.value); setErr(null); }} placeholder="https://…/c/p12#k=…" aria-invalid={!!err} aria-describedby="claim-input-error" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+            <input id="claim-input" value={text} onChange={(e) => { setText(e.target.value); setErr(null); }} placeholder="https://…/c/q12#k=…" aria-invalid={!!err} aria-describedby="claim-input-error" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
             <Button onClick={open} data-testid="claim-open">Open</Button>
           </div>
           {err && <p id="claim-input-error" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="claim-input-error">{err}</p>}
