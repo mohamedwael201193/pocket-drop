@@ -29,7 +29,7 @@ const QCAI = v4.qcai as { score?: string; stage2Score?: string; stage3Score?: st
 const scoreOf = (s?: string) => (s ?? '').split(' ')[0];
 
 type Item = { key: string; label: string; to: string; Icon: ComponentType<IconProps>; match: (p: string) => boolean };
-const OVERVIEW: Item = { key: 'overview', label: 'Overview', to: '/', Icon: LayoutGrid, match: (p) => p === '/' };
+const OVERVIEW: Item = { key: 'overview', label: 'Overview', to: '/app', Icon: LayoutGrid, match: (p) => p === '/app' };
 /** The primary navigation: exactly Send, Receive, Pocket, Proof. */
 export const TABS: Item[] = [
   { key: 'send', label: 'Send', to: '/send', Icon: Send, match: (p) => p.startsWith('/send') },
@@ -51,7 +51,7 @@ const SECONDARY: Item[] = [
   { key: 'judges', label: 'Judges', to: '/judges', Icon: Scale, match: (p) => p.startsWith('/judges') },
   { key: 'lab', label: 'Lab', to: '/lab', Icon: FlaskConical, match: (p) => p.startsWith('/lab') },
   { key: 'radar', label: 'Radar', to: '/radar', Icon: Radio, match: (p) => p.startsWith('/radar') },
-  { key: 'about', label: 'How it works', to: '/about', Icon: Compass, match: (p) => p.startsWith('/about') },
+  { key: 'about', label: 'How it works', to: '/', Icon: Compass, match: () => false },
 ];
 const proofFamily = (p: string) => ['/proof', '/lab', '/radar', '/judges', '/qday', '/check'].some((x) => p.startsWith(x));
 
@@ -147,7 +147,7 @@ function SidebarNav({ collapsed, onToggle, overlay }: { collapsed: boolean; onTo
     <motion.aside data-testid="sidebar" aria-label="Sidebar" initial={false} animate={{ width: collapsed ? 76 : 256 }} transition={{ type: 'spring', stiffness: 380, damping: 38 }}
       className={cx('fixed inset-y-0 left-0 z-40 flex flex-col border-r border-zinc-200/80 bg-white/95 backdrop-blur', overlay && !collapsed && 'shadow-2xl')}>
       <div className={cx('flex h-[68px] shrink-0 items-center gap-2.5', collapsed ? 'justify-center px-2' : 'px-5')}>
-        <Link to="/" className="group flex min-h-[44px] items-center gap-2.5" aria-label="Pocket Drop overview" data-testid="logo">
+        <Link to="/" className="group flex min-h-[44px] items-center gap-2.5" aria-label="Pocket Drop home page" title="Back to the Pocket Drop home page" data-testid="logo">
           <LogoMark size={32} pulse={pathname} />
           {!collapsed && <Wordmark />}
         </Link>
@@ -197,7 +197,7 @@ function MobileTop() {
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-[#F7F7F5]/85 backdrop-blur-md">
       <div className="flex h-14 items-center justify-between gap-3 px-4">
-        <Link to="/" className="flex min-h-[44px] items-center gap-2" aria-label="Pocket Drop overview" data-testid="logo">
+        <Link to="/" className="flex min-h-[44px] items-center gap-2" aria-label="Pocket Drop home page" title="Back to the Pocket Drop home page" data-testid="logo">
           <LogoMark size={28} pulse={pathname} /><Wordmark className="text-[17px]" />
         </Link>
         <NetChip compact />

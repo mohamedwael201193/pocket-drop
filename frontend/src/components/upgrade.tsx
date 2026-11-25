@@ -97,7 +97,7 @@ export function LegacyKeyBanner() {
 /** Thin site-wide strip for a legacy key, pointing to the move on the Pocket page (hidden there and on the landing page). */
 export function LegacyKeyStrip({ path }: { path: string }) {
   const a = useAccount();
-  if (!a.root || !isLegacyRoot(a.root) || path === '/about' || path.startsWith('/pocket')) return null;
+  if (!a.root || !isLegacyRoot(a.root) || path.startsWith('/pocket')) return null;
   return (
     <div className="border-b border-red-300 bg-red-50 px-4 py-2 text-center text-sm text-red-900" data-testid="legacy-key-strip">
       <b>Your Pocket is not quantum-safe</b> (older browser key). <Link to="/pocket" className="underline">Move your funds to a new key</Link>.
