@@ -4,8 +4,8 @@ import { Notice, SourceBadge, TxLink, cx } from '../components/ui';
 import { Dash, Reveal } from '../components/bits';
 import { Stage } from '../components/stage';
 import { CountUp } from '../components/alive';
-import { compareWithApi, envStats, pqSample, V2_RELEASE_BLOCK, type EnvStats, type Split } from '../lib/radar';
-import { addrUrl } from '../lib/config';
+import { compareWithApi, distinctExternal, envStats, pqSample, V2_RELEASE_BLOCK, type EnvStats, type Split } from '../lib/radar';
+import { API_BASE, addrUrl } from '../lib/config';
 import { INST, genOf, isProdLike, type Env } from '../lib/v4';
 import { useHealth } from '../lib/queries';
 import { fetchStats } from '../lib/api';
@@ -102,6 +102,7 @@ export default function RadarPage() {
   const { data: h } = useHealth();
   const ext = (s?: EnvStats) => (s ? s.pocketsOwn.external + s.dropSenders.external + s.dropRecipients.external + s.poolHosts.external + s.poolClaimers.external : 0);
   const extTotal = all.reduce((n, x) => n + ext(x.data), 0);
+  const extDistinct = distinctExternal(all.map((x) => x.data));
   const api = useQuery({ queryKey: ['api-stats'], queryFn: fetchStats, refetchInterval: 120_000, retry: 1 });
   const apiV4 = api.data?.v4 as Record<string, Parameters<typeof compareWithApi>[1]> | undefined;
   const diffs = allIn && apiV4 ? (['prod', 'lab', 'prodV4', 'labV4'] as const).flatMap((e, i) => compareWithApi(all[i].data!, apiV4[e]).map((d) => `${e} ${d}`)) : null;
@@ -126,7 +127,9 @@ export default function RadarPage() {
       <Reveal>
         <div className={cx(card, 'mt-5')} data-testid="external-usage">
           <h2 className="font-serif text-2xl text-zinc-900">Outside use</h2>
-          <p className="mt-1 text-sm text-zinc-700"><span className="font-mono text-2xl" data-testid="external-total">{allIn ? extTotal : '…'}</span> external account roles across all four instances (v5 and v4, production and lab). {allIn && extTotal === 0 && 'No outside account has used Pocket Drop yet. The team accounts are the only users so far, and this page says so on purpose.'}</p>
+          <p className="mt-1 text-sm text-zinc-700"><span className="font-mono text-2xl" data-testid="external-distinct">{allIn ? extDistinct : '…'}</span> distinct external accounts across all four instances (v5 and v4, production and lab). One account that, say, owns a Pocket and also claimed a pool slot counts once.</p>
+          <p className="mt-1 text-xs text-zinc-600"><span className="font-mono" data-testid="external-total">{allIn ? extTotal : '…'}</span> external account roles in total (the same account counted once per role: Pocket owner, drop sender, drop recipient, pool host, pool claimer).{api.data && typeof (api.data as { distinctAccounts?: unknown }).distinctAccounts !== 'undefined' && <> The API&apos;s own count is in <a className="underline" href={`${API_BASE}/api/stats`} target="_blank" rel="noopener noreferrer">/api/stats</a> (<code className="font-mono">distinctAccounts</code>).</>}</p>
+          {allIn && extDistinct === 0 && <p className="mt-2 text-sm text-zinc-700">No outside account has used Pocket Drop yet. The team accounts are the only users so far, and this page says so on purpose.</p>}
         </div>
       </Reveal>
 

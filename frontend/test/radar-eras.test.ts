@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 vi.mock('../src/lib/chain', () => ({ pub: {} }));
 vi.mock('../src/lib/claim4', () => ({ keyStatus: async () => null }));
-import { compareWithApi, keyEras, V2_RELEASE_BLOCK, type EnvStats } from '../src/lib/radar';
+import { compareWithApi, distinctExternal, keyEras, V2_RELEASE_BLOCK, type EnvStats } from '../src/lib/radar';
 import own from '../src/data/own.json';
 
 const ownAddr = Object.values((own as { accounts: Record<string, string> }).accounts)[0];
@@ -26,5 +26,13 @@ describe('API agreement', () => {
     expect(compareWithApi(mine, { pockets: 3, drops: { created: 2, claimed: 1 }, pools: { created: 1 }, pocketsOwn: { own: 2, external: 1 } })).toEqual([]);
     expect(compareWithApi(mine, { pockets: 4, drops: { created: 2, claimed: 0 }, pools: { created: 1 }, pocketsOwn: { own: 2, external: 1 } })).toEqual(['pockets', 'drops claimed']);
     expect(compareWithApi(mine, undefined)).toEqual(['missing']);
+  });
+});
+
+describe('distinct external accounts', () => {
+  it('counts one account once across roles and instances, case-insensitive', () => {
+    const a = '0x00000000000000000000000000000000000000aa', b = '0x00000000000000000000000000000000000000bb';
+    expect(distinctExternal([{ externalAccounts: [a, b] }, { externalAccounts: [a] }, undefined])).toBe(2);
+    expect(distinctExternal([{ externalAccounts: [] }])).toBe(0);
   });
 });

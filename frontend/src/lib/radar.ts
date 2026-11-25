@@ -51,7 +51,13 @@ export interface EnvStats {
   eventBlocks?: number[];
   /** legacy-key telemetry (item 10): deployed Pockets by deploy block against the v2 key release */
   keyEras: KeyEras;
+  /** Distinct external accounts (lowercase) behind any role here: Pocket owner, drop sender or recipient, pool host or claimer.
+   *  One account in several roles counts once. */
+  externalAccounts: string[];
 }
+
+/** Distinct external accounts across several instances: the union of their `externalAccounts`. */
+export const distinctExternal = (xs: (Pick<EnvStats, 'externalAccounts'> | undefined)[]) => new Set(xs.flatMap((x) => x?.externalAccounts ?? [])).size;
 
 /** First Diana block after the v2 browser key derivation went live in production (2026-11-20 04:24:18 UTC). Same constant as backend/src/statsv4.ts. */
 export const V2_RELEASE_BLOCK = 10412597n;
@@ -113,6 +119,13 @@ export async function envStats(env: Env): Promise<EnvStats> {
   const dropRecipients: Split = { own: 0, external: 0 }; for (const b of bound) bump(dropRecipients, String(b.args.recipient));
   const poolHosts: Split = { own: 0, external: 0 }; for (const p of poolsMade) bump(poolHosts, viaPocket(p.args.host));
   const poolClaimers: Split = { own: 0, external: 0 }; for (const c of poolClaims) bump(poolClaimers, String(c.args.recipient));
+  const ext = new Set<string>();
+  const seen = (who: string) => { if (who && !isOwnAddress(who)) ext.add(who.toLowerCase()); };
+  for (const d of deployed) seen(String(d.args.owner));
+  for (const c of created) seen(viaPocket(c.args.sender));
+  for (const x of bound) seen(String(x.args.recipient));
+  for (const x of poolsMade) seen(viaPocket(x.args.host));
+  for (const x of poolClaims) seen(String(x.args.recipient));
   const tag = (who: string) => ({ who, own: isOwnAddress(who) });
   const recipientOf = new Map<string, string>(bound.map((b) => [String(b.args.linkId), String(b.args.recipient)]));
   const idOf = (p: string, n: unknown) => `${p}${n}`;
@@ -132,7 +145,7 @@ export async function envStats(env: Env): Promise<EnvStats> {
   })).sort((a, b) => (a.block < b.block ? 1 : -1));
   const eras = await keyEras(deployed, (a) => pub.getBalance({ address: a }));
   return {
-    keyEras: eras,
+    keyEras: eras, externalAccounts: [...ext].sort(),
     env, pockets: deployed.length, pocketsOwn,
     drops: { created: created.length, bound: bound.length, confirmed: confirmed.length, claimed: claimed.length, cancelled: cancelled.length },
     dropSenders, dropRecipients, pools: { created: poolsMade.length, slotsClaimed: poolClaims.length }, poolHosts, poolClaimers, recent, claimers,
