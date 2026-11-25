@@ -312,6 +312,22 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^self-relay-
   mark('relay it yourself', b);
 }
 
+// 12. measured delta (evidence/v4/e2e/delta-run-*.json): every Path A tx (create, bind, PoP registration, claim, first spend)
+//     and every Path B direct transfer is on chain with code 0, and LIVE each Path B test account still holds the amount.
+for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^delta-run-.*\.json$/.test(f)).sort()) {
+  section(`measured delta (${f})`);
+  b = { e: evmTxs, c: cosmosTxs };
+  const J = JSON.parse(fs.readFileSync(path.join(ev, 'e2e', f), 'utf8'));
+  const rows = [...J.funding.map((x) => [x.hash, x.step]), ...J.pathA.flatMap((r) => Object.entries(r.txs).map(([k, h]) => [h, `${r.id} ${k}`])), ...J.pathB.map((r) => [r.txs.directSend, `${r.id} direct transfer`])];
+  await inBatches(rows.filter(([h]) => !seenHash.has(h.toLowerCase())), ([h, l]) => (isEvmHash(h) ? receiptCheck(h, 'success', l) : cosmosCheck(h, l)));
+  const want = BigInt(Math.round(Number(J.amountQor) * 1e6)) * 10n ** 12n;
+  for (const r of J.pathB) {
+    try { const bal = BigInt(await rpc('eth_getBalance', [r.account, 'latest'])); check(bal >= want && r.spent === false, `LIVE: ${r.id} ${r.account.slice(0, 10)}… still holds ${Number(bal) / 1e18} QOR (spend refused)`); }
+    catch (e) { check(false, `${r.id} balance not readable (${e.message})`); }
+  }
+  mark('measured delta', b);
+}
+
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
   section(name);
