@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@cosmjs/stargate": "^0.39.0",
+    "@noble/post-quantum": "^0.7.1",
     "@qorechain/evm": "^0.14.0",
     "@qorechain/pqc": "^0.2.3",
     "@qorechain/qoresign": "^0.2.0",

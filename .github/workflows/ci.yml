@@ -21,6 +21,30 @@ jobs:
       - run: forge test -vv
       - name: committed ABIs (read by the Node attack script) match the build
         run: node script/export-abi.mjs --check
+  contracts-realcrypto:
+    # Real ML-DSA-87 at test time (vm.ffi -> script/ffi/mldsa.mjs); pqcVerify replaced by the real algorithm, no mock.
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: contracts-v4 } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: contracts-v4/package-lock.json }
+      - run: npm ci
+      - run: FOUNDRY_PROFILE=realcrypto forge test -vv
+      - name: the suite catches an accept-all verifier (not vacuous)
+        run: ./script/ffi/mutation-check.sh
+  contracts-live:
+    # Same contracts against the LIVE Diana precompiles 0x0A01 / 0x0A02, eth_call only (no key, no QOR).
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: contracts-v4 } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: contracts-v4/package-lock.json }
+      - run: npm ci
+      - run: FOUNDRY_PROFILE=live forge test -vv
   frontend:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: frontend } }

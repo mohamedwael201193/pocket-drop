@@ -46,3 +46,19 @@ optimizer = false
 [lint]
 severity = ["high", "med"]
 exclude_lints = ["unsafe-typecast", "block-timestamp", "arbitrary-send-eth"]
+
+# Real-crypto profile: ML-DSA-87 keys and signatures made at test time and a pqcVerify stand-in that runs the real
+# algorithm (vm.ffi -> script/ffi/mldsa.mjs). Needs Node 20+ and `npm ci` in contracts-v4.
+# Run with: FOUNDRY_PROFILE=realcrypto forge test
+[profile.realcrypto]
+test = "test-real"
+ffi = true
+
+# Live profile: Foundry tests that reach the LIVE Diana precompiles 0x0A01 / 0x0A02 (eth_call only, spends nothing).
+# Run with: FOUNDRY_PROFILE=live forge test   (needs network access to the Diana EVM RPC)
+[profile.live]
+test = "test-live"
+ffi = true
+
+[rpc_endpoints]
+diana = "https://evm-testnet.qore.host"
