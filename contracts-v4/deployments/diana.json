@@ -2527,5 +2527,256 @@
     },
     "deployerNetQor": "1.4984275",
     "relayerNetQor": "1.81292655375"
+  },
+  "v5": {
+    "windowTx": "C9274AF90111E8C1FD5D1E8A075E58B35FCA49F2BCB27897DBB89D583B8B1CE8",
+    "prod": {
+      "params": {
+        "timelockSeconds": "86400",
+        "recoverySeconds": "172800",
+        "freezeSeconds": "259200",
+        "unanimousRecoverySeconds": "259200",
+        "bindTimeoutSeconds": "3600"
+      },
+      "vaultImpl": {
+        "contract": "PocketVault",
+        "address": "0x8603937464a48c18ebede4de1149e8e7dc4e91b4",
+        "deployTx": "0x7f3edd9af1f07bad87071e6ceb5106c5b81b039b4a7d0f48634e3d5940558f12",
+        "deployTxUrl": "https://explore.qore.network/tx/0x7f3edd9af1f07bad87071e6ceb5106c5b81b039b4a7d0f48634e3d5940558f12",
+        "blockNumber": "10746804",
+        "gasUsedReceipt": "3810839",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x0000000000000000000000000000000000000000000000000000000000015180000000000000000000000000000000000000000000000000000000000002a300000000000000000000000000000000000000000000000000000000000003f480000000000000000000000000000000000000000000000000000000000003f480",
+        "constructorArgs": [
+          "86400",
+          "172800",
+          "259200",
+          "259200"
+        ],
+        "runtimeCodeBytes": 17262,
+        "runtimeCodeKeccak": "0x237b596e5e439cdfb1f80f59bf0c1e98005b96bdc14de7e72559af07d35d6d7e",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "factory": {
+        "contract": "PocketFactory",
+        "address": "0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f",
+        "deployTx": "0x235d9aed4407a82e9c2f7996a09806d356659f2d7cf4d77c97e4c2892620c5bf",
+        "deployTxUrl": "https://explore.qore.network/tx/0x235d9aed4407a82e9c2f7996a09806d356659f2d7cf4d77c97e4c2892620c5bf",
+        "blockNumber": "10746805",
+        "gasUsedReceipt": "356270",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x0000000000000000000000008603937464a48c18ebede4de1149e8e7dc4e91b4",
+        "constructorArgs": [
+          "0x8603937464a48c18ebede4de1149e8e7dc4e91b4"
+        ],
+        "runtimeCodeBytes": 1380,
+        "runtimeCodeKeccak": "0xbb1415bdebe2a913446570d9a82d8356c8b20a612414e4aef7e53ff30aa748b7",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "drop": {
+        "contract": "PocketDrop",
+        "address": "0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798",
+        "deployTx": "0xb07dcc3501f6dd86323462fa68fbea678f1d21b76239fe5d5eb47583ff957913",
+        "deployTxUrl": "https://explore.qore.network/tx/0xb07dcc3501f6dd86323462fa68fbea678f1d21b76239fe5d5eb47583ff957913",
+        "blockNumber": "10746806",
+        "gasUsedReceipt": "2109143",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000000000000000000000000002b5e3af16b18800000000000000000000000000000000000000000000000000000853a0d2313c00000000000000000000000000000000000000000000000000008ac7230489e800000000000000000000000000000000000000000000000000000000000000000e100000000000000000000000000000000000000000000000000000000000278d00",
+        "constructorArgs": [
+          "100000000000000000",
+          "50000000000000000000",
+          "600000000000000000",
+          "10000000000000000000",
+          "3600",
+          "2592000"
+        ],
+        "runtimeCodeBytes": 9389,
+        "runtimeCodeKeccak": "0xc5b46b02f33058191dbedb25606033d6b110e7575c899ff3d18da4e42621b9af",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "pool": {
+        "contract": "DropPool",
+        "address": "0xdb67b9881b37c0e9a4988a56089c05c221c0a26f",
+        "deployTx": "0x0d93303d343bc130896f7e064994cc8efbab2e99cf93294e20972556facddcda",
+        "deployTxUrl": "https://explore.qore.network/tx/0x0d93303d343bc130896f7e064994cc8efbab2e99cf93294e20972556facddcda",
+        "blockNumber": "10746807",
+        "gasUsedReceipt": "1589234",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000004563918244f4000000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000278d00",
+        "constructorArgs": [
+          "10000000000000000",
+          "5000000000000000000",
+          "20",
+          "2592000"
+        ],
+        "runtimeCodeBytes": 6989,
+        "runtimeCodeKeccak": "0x43a804052a63803e8a443c3a0c35e780b456530eb2217c1dd56dec4f03848d9d",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "router": {
+        "contract": "PocketRouter",
+        "address": "0x13b8e379e50da657b943781d2816fc17473ae376",
+        "deployTx": "0x72cd976af4effc18cc04fc09e3487688516912d51ebc8689b2bde0b776bb8393",
+        "deployTxUrl": "https://explore.qore.network/tx/0x72cd976af4effc18cc04fc09e3487688516912d51ebc8689b2bde0b776bb8393",
+        "blockNumber": "10746808",
+        "gasUsedReceipt": "565165",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x00000000000000000000000087b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f000000000000000000000000cd52c8d2e812ca386fa2f864ba69c1cf63d5d798000000000000000000000000db67b9881b37c0e9a4988a56089c05c221c0a26f",
+        "constructorArgs": [
+          "0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f",
+          "0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798",
+          "0xdb67b9881b37c0e9a4988a56089c05c221c0a26f"
+        ],
+        "runtimeCodeBytes": 2359,
+        "runtimeCodeKeccak": "0xf1064c1c05798496ac4e5f02a15d109ace2d62121877e772fa7049c5cc7fd258",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "readBack": {
+        "TIMELOCK": "86400",
+        "RECOVERY_DELAY": "172800",
+        "FREEZE_PERIOD": "259200",
+        "UNANIMOUS_RECOVERY_DELAY": "259200",
+        "BIND_TIMEOUT": "3600"
+      }
+    },
+    "lab": {
+      "params": {
+        "timelockSeconds": "60",
+        "recoverySeconds": "60",
+        "freezeSeconds": "120",
+        "unanimousRecoverySeconds": "180",
+        "bindTimeoutSeconds": "60"
+      },
+      "vaultImpl": {
+        "contract": "PocketVault",
+        "address": "0x5c17c28b7c000e302a7ac67c87562aa767439584",
+        "deployTx": "0x3c54308f770440884a940e7a3b0137b780430161351642f25f929bae72a628df",
+        "deployTxUrl": "https://explore.qore.network/tx/0x3c54308f770440884a940e7a3b0137b780430161351642f25f929bae72a628df",
+        "blockNumber": "10746809",
+        "gasUsedReceipt": "3810755",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000000000000000003c000000000000000000000000000000000000000000000000000000000000003c000000000000000000000000000000000000000000000000000000000000007800000000000000000000000000000000000000000000000000000000000000b4",
+        "constructorArgs": [
+          "60",
+          "60",
+          "120",
+          "180"
+        ],
+        "runtimeCodeBytes": 17262,
+        "runtimeCodeKeccak": "0xd261837ea1d2fa16f374046dbd69f0176a9d9722f6ed9bc8162737af06262640",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "factory": {
+        "contract": "PocketFactory",
+        "address": "0xf00a2ce5945dd6bf762105d03d00b6cb91639443",
+        "deployTx": "0x80555a94b55fc249dda48738adcaade0c788fb926e25a31bcd64dd03fb594c5f",
+        "deployTxUrl": "https://explore.qore.network/tx/0x80555a94b55fc249dda48738adcaade0c788fb926e25a31bcd64dd03fb594c5f",
+        "blockNumber": "10746810",
+        "gasUsedReceipt": "356258",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x0000000000000000000000005c17c28b7c000e302a7ac67c87562aa767439584",
+        "constructorArgs": [
+          "0x5c17c28b7c000e302a7ac67c87562aa767439584"
+        ],
+        "runtimeCodeBytes": 1380,
+        "runtimeCodeKeccak": "0xd45a0b3b3be8bcff8c5de76d5ae9c819a3687eecb4ca7822f82c04bf6c389800",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "drop": {
+        "contract": "PocketDrop",
+        "address": "0xb4a6b993e7aaa450b729fbc1f1b05048d093169a",
+        "deployTx": "0x3a765512da9bfe9e3232ac857ef79d9096cbe876a905b85518788a1d1a8bd6df",
+        "deployTxUrl": "https://explore.qore.network/tx/0x3a765512da9bfe9e3232ac857ef79d9096cbe876a905b85518788a1d1a8bd6df",
+        "blockNumber": "10746811",
+        "gasUsedReceipt": "2109131",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000016345785d8a0000000000000000000000000000000000000000000000000002b5e3af16b18800000000000000000000000000000000000000000000000000000853a0d2313c00000000000000000000000000000000000000000000000000008ac7230489e80000000000000000000000000000000000000000000000000000000000000000003c0000000000000000000000000000000000000000000000000000000000278d00",
+        "constructorArgs": [
+          "100000000000000000",
+          "50000000000000000000",
+          "600000000000000000",
+          "10000000000000000000",
+          "60",
+          "2592000"
+        ],
+        "runtimeCodeBytes": 9389,
+        "runtimeCodeKeccak": "0x56f569d0236ed6f1b2a49d787648856e1c7bf0de5e2fde8b7dff23e24b17528b",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "pool": {
+        "contract": "DropPool",
+        "address": "0xd358dd2e8bcd1db502bfefd99b2795f3e81aa3d6",
+        "deployTx": "0xe0d167501df691ccaaa76137e6933d035f521591b0c6c72a04f9f422aa44b84e",
+        "deployTxUrl": "https://explore.qore.network/tx/0xe0d167501df691ccaaa76137e6933d035f521591b0c6c72a04f9f422aa44b84e",
+        "blockNumber": "10746812",
+        "gasUsedReceipt": "1589234",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000004563918244f4000000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000278d00",
+        "constructorArgs": [
+          "10000000000000000",
+          "5000000000000000000",
+          "20",
+          "2592000"
+        ],
+        "runtimeCodeBytes": 6989,
+        "runtimeCodeKeccak": "0x43a804052a63803e8a443c3a0c35e780b456530eb2217c1dd56dec4f03848d9d",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "router": {
+        "contract": "PocketRouter",
+        "address": "0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75",
+        "deployTx": "0xe66b229a5e017614f5dce0db4083303fc175ecb85882d4f2455de2588922683f",
+        "deployTxUrl": "https://explore.qore.network/tx/0xe66b229a5e017614f5dce0db4083303fc175ecb85882d4f2455de2588922683f",
+        "blockNumber": "10746813",
+        "gasUsedReceipt": "565153",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x000000000000000000000000f00a2ce5945dd6bf762105d03d00b6cb91639443000000000000000000000000b4a6b993e7aaa450b729fbc1f1b05048d093169a000000000000000000000000d358dd2e8bcd1db502bfefd99b2795f3e81aa3d6",
+        "constructorArgs": [
+          "0xf00a2ce5945dd6bf762105d03d00b6cb91639443",
+          "0xb4a6b993e7aaa450b729fbc1f1b05048d093169a",
+          "0xd358dd2e8bcd1db502bfefd99b2795f3e81aa3d6"
+        ],
+        "runtimeCodeBytes": 2359,
+        "runtimeCodeKeccak": "0x79dfbe82763dac7167cbfdd936a9e77b88c854b9642dea16f21b27ebbd69b40c",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      },
+      "readBack": {
+        "TIMELOCK": "60",
+        "RECOVERY_DELAY": "60",
+        "FREEZE_PERIOD": "120",
+        "UNANIMOUS_RECOVERY_DELAY": "180",
+        "BIND_TIMEOUT": "60"
+      }
+    },
+    "shared": {
+      "counter": {
+        "contract": "PqGuardedCounter",
+        "address": "0x4b8bef69fe7264851f263f6fcf02db3985f43ac9",
+        "deployTx": "0x42f8f7a3d32baef94c4ad6c8c0eea17012674dee0b1b2d6377f65fd9bd4749d9",
+        "deployTxUrl": "https://explore.qore.network/tx/0x42f8f7a3d32baef94c4ad6c8c0eea17012674dee0b1b2d6377f65fd9bd4749d9",
+        "blockNumber": "10746814",
+        "gasUsedReceipt": "697514",
+        "effectiveGasPrice": "146250000000",
+        "constructorArgsAbiEncoded": "0x",
+        "constructorArgs": [],
+        "runtimeCodeBytes": 2979,
+        "runtimeCodeKeccak": "0xa1b1eb9ff35c808ef03bfd89a05ec28d57b5ee22a27403599d3ffb23757f17cd",
+        "runtimeMatchesBuildArtifactModuloImmutables": true
+      }
+    },
+    "note": "v5 = v4 + strict PqcLib (sizes and key-status layout enforced in the contract). v4 is the previous version and stays recorded under v4.",
+    "deployedAt": "2026-11-25T20:01:58.610Z",
+    "deploySpentQorEvm": "2.56795929",
+    "build": {
+      "solc": "0.8.28",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "evmVersion": "cancun",
+      "bytecodeHash": "none",
+      "cborMetadata": false,
+      "reproduce": "cd contracts-v4 && forge build && node script/deploy-v5.mjs --check"
+    }
   }
 }
