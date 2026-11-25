@@ -1,0 +1,142 @@
+{
+  "note": "TEAM-RUN test accounts on Diana testnet. Someone who intercepts a Confirmed link can bind it but cannot claim it; the sender cancels and gets the amount back.",
+  "instance": "v5.prod",
+  "drop": "0xcD52c8D2E812Ca386fA2F864ba69C1Cf63d5d798",
+  "router": "0x13B8E379E50DA657b943781D2816FC17473AE376",
+  "api": "https://pocketdrop-api.vercel.app",
+  "startedAt": "2026-11-25T23:54:02.230Z",
+  "amountQor": "0.1",
+  "dripQor": "0.1",
+  "deliveryFeeQor": "0.38",
+  "rows": [
+    {
+      "step": "main test wallet funds the sender Pocket (0.55 QOR, hybrid MsgSend)",
+      "hash": "EB1C2B0192A2B2FCF182D9D4952FC492E5B4ECC45939B34ADEA198761B3B9748",
+      "lane": "native",
+      "code": 0
+    },
+    {
+      "step": "main test wallet funds the interceptor test account (0.35 QOR for its own window and two EVM txs, hybrid MsgSend)",
+      "hash": "55908E4FECAC798D309958945D47EFA1948C40A1B3CA34FD050B9CD887CAC107",
+      "lane": "native",
+      "code": 0
+    },
+    {
+      "step": "1 sender Pocket creates Confirmed link 11 (0.1 QOR), relayed by the public API",
+      "hash": "B0E6A1A7883DC0AB9A4444EB0CF6F4C3849D6919B6C2E07DD732D6C2D5C0C04A",
+      "lane": "hybrid",
+      "state": "Open"
+    },
+    {
+      "step": "2 interceptor binds its own ML-DSA-87 key with the intercepted link key (the bind pays it the drip)",
+      "hash": "D509C6017E5D05405F5DE55295A15F3DA59A6E598317C5743305A6858CCC1A37",
+      "lane": "hybrid",
+      "state": "Bound",
+      "recipientKeyHash": "0xe9f0b139bc17af31568df0d241e563d34831873619b1a87b741bc7a47d84200a"
+    },
+    {
+      "step": "interceptor registers its ML-DSA-87 key with proof of possession",
+      "hash": "74B6CC53E1C6D631DB06521614B36738B455F40BDE227D342EBCC745BF854BA3",
+      "lane": "native"
+    },
+    {
+      "step": "3 interceptor asks the public API to relay its claim: refused before broadcast, nothing sent",
+      "result": "HTTP 422",
+      "response": {
+        "network": "diana-testnet",
+        "ok": false,
+        "sent": false,
+        "env": "prod",
+        "action": "relay",
+        "error": {
+          "name": "InvalidState",
+          "message": "The link is not in a state that allows this action. (current state: Bound)",
+          "selector": "0xd07e8976",
+          "known": true,
+          "args": [
+            2
+          ]
+        },
+        "hint": "Simulated with eth_call through the router before sending; nothing was submitted."
+      }
+    },
+    {
+      "step": "interceptor opens its own EVM window, hybrid-signed, scoped to the v5 PocketRouter only (3 txs, 400 blocks)",
+      "hash": "A6AE014973639A6074A7F44A41012C8EA76B0611DFAE372EFAFF1C6D01303A7E",
+      "lane": "native",
+      "code": 0,
+      "window": {
+        "live": true,
+        "blocks": 400,
+        "maxTxs": 3,
+        "openedNearHeight": "10756603",
+        "allowedTargets": [
+          "0x13B8E379E50DA657b943781D2816FC17473AE376"
+        ],
+        "height": "10756605",
+        "expiryHeight": "10757005",
+        "pqcHybridVerify": "verified",
+        "source": "read back from the MsgOpenEVMWindow tx"
+      }
+    },
+    {
+      "step": "4 interceptor submits its claim itself through its own window: mined and reverted",
+      "hash": "0xe83979b1c34beac28df888c20bb732b9f58b897d448c46d0dd091f318bf439a9",
+      "lane": "evm",
+      "submitter": "0x75dDBaA8b36b9BDd56f42B236c0bD8ABA1570c7C",
+      "to": "0x13B8E379E50DA657b943781D2816FC17473AE376",
+      "status": "reverted",
+      "block": "10756610",
+      "decodedError": "InvalidState(Bound)",
+      "linkState": "Bound",
+      "interceptorPocketQor": "0"
+    },
+    {
+      "step": "5 sender sees 4 words that are not the friend's and cancels (ML-DSA-87 intent, public API relay)",
+      "hash": "B4CA6735A5ABFEA17804B0CD1A7EB2285E59F26D7AEFFD16E8336B7009CA128F",
+      "lane": "hybrid",
+      "state": "Cancelled",
+      "senderPocketGainQor": "0.1"
+    },
+    {
+      "step": "6 interceptor tries its claim again after the cancel: mined and reverted",
+      "hash": "0xd06dc5d49bab8e5d508783a6703af5cd12486513ca1889b4391ac4852198de53",
+      "lane": "evm",
+      "submitter": "0x75dDBaA8b36b9BDd56f42B236c0bD8ABA1570c7C",
+      "to": "0x13B8E379E50DA657b943781D2816FC17473AE376",
+      "status": "reverted",
+      "block": "10756623",
+      "decodedError": "InvalidState(Cancelled)",
+      "linkState": "Cancelled",
+      "interceptorPocketQor": "0"
+    },
+    {
+      "step": "interceptor closes its window (hybrid-signed); live after: false",
+      "hash": "2A5D60A5CCDF58B43F7445DA04368DB06A6A8A29F59BE5612EF3F94C31924120",
+      "lane": "native",
+      "code": 0
+    }
+  ],
+  "accounts": {
+    "senderOwner": "0x392f50b1955a827458A320205e19acf7C664f116",
+    "senderPocket": "0x02eD40525851A7EF003B9379DA10fF62aB77bDC1",
+    "interceptor": "0x75dDBaA8b36b9BDd56f42B236c0bD8ABA1570c7C",
+    "interceptorPocket": "0x6299C2BA5e45Ee36B4c7D837987d3BC8181FBe58",
+    "interceptorPocketCfg": [
+      "0x75dDBaA8b36b9BDd56f42B236c0bD8ABA1570c7C",
+      "",
+      "0",
+      "1000000000000000000",
+      "0x7e81aa0aa71818db8407a8009fbce284537692b76e16e582287e12c14d2388f8"
+    ]
+  },
+  "linkId": "11",
+  "finishedAt": "2026-11-25T23:55:11.623Z",
+  "summary": {
+    "interceptorGotAmount": false,
+    "interceptorKeptDripQor": "0.1",
+    "senderRecoveredQor": "0.1",
+    "finalLinkState": "Cancelled",
+    "interceptorPocketQor": "0"
+  }
+}

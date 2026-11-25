@@ -370,6 +370,8 @@
     "TEAM-RUN delta run B2 test account, control (delta-run-2026-11-26.json)": "0xBD6cc76a957A66B2C1eA0Bd5047BE6876bc4c493",
     "TEAM-RUN delta run B3 test account, control (delta-run-2026-11-26.json)": "0x9F88dD18153cFDf8D97a98bc3836B6097dE05920",
     "TEAM-RUN delta run B4 test account, control (delta-run-2026-11-26.json)": "0x71B8155C4aA788237243684034A9B405BA261D7e",
-    "TEAM-RUN delta run B5 test account, control (delta-run-2026-11-26.json)": "0xc30D36bd5b408Ad7Ca9D8F5020b97Aa6222C7886"
+    "TEAM-RUN delta run B5 test account, control (delta-run-2026-11-26.json)": "0xc30D36bd5b408Ad7Ca9D8F5020b97Aa6222C7886",
+    "TEAM-RUN intercept v5 interceptor test account (intercept-confirmed-v5.json)": "0x75dDBaA8b36b9BDd56f42B236c0bD8ABA1570c7C",
+    "TEAM-RUN intercept v5 interceptor Pocket, never deployed (intercept-confirmed-v5.json)": "0x6299C2BA5e45Ee36B4c7D837987d3BC8181FBe58"
   }
 }
