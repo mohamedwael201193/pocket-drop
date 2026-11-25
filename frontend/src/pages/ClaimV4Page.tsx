@@ -16,6 +16,7 @@ import { addrUrl } from '../lib/config';
 import { modeLine } from '../lib/copy';
 import { fingerprint, parseClaimFragment } from '../lib/protocol';
 import { useBalance } from '../lib/queries';
+import { OpenInQorex } from '../components/openInQorex';
 
 type StepId = 'key' | 'bind' | 'register' | 'verify' | 'claim';
 type Status = 'idle' | 'running' | 'done' | 'error' | 'skipped';
@@ -206,6 +207,7 @@ export default function ClaimV4Page({ env, id }: { env: Env; id: bigint }) {
             <h1 className="font-serif text-3xl text-zinc-900">Open your Pocket</h1>
             <p className="text-sm leading-relaxed text-zinc-600">Your money is safe and waiting. One tap makes a quantum-safe key inside this browser and a Pocket for it, and Pocket Drop pays the network fees. No wallet, no extension, no seed phrase. {link?.mode === 'Confirmed' && 'Because the sender wants to be sure it is you, they compare 4 words with you first; you will see them here.'}</p>
             <Button block onClick={() => void run()} data-testid="start-claim" className="min-h-[52px] text-base">Receive {amount ?? ''} QOR into my Pocket</Button>
+            <OpenInQorex />
           </div>
         )}
 
