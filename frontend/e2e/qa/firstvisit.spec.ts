@@ -10,20 +10,20 @@ const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 const fits = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
 
-test('landing: three plain steps, the Q-Day Drill section, test counts from evidence, jargon only under Technical details', async ({ page }) => {
-  await page.goto(`${BASE}/about`);
-  await expect(page).toHaveTitle(/Pocket Drop/);
-  await expect(page.getByTestId('how-it-works')).toContainText('Send a link');
-  await expect(page.getByTestId('how-it-works')).toContainText('quantum-safe Pocket');
-  await expect(page.getByTestId('how-it-works')).toContainText('Guardians if the phone is lost');
-  await expect(page.getByTestId('hero-tests')).toContainText(/\d+ contract \+ \d+ app tests pass/);
-  await expect(page.getByTestId('hero-tests')).not.toContainText('117');
-  const hero = await page.locator('[data-testid=landing] > div').first().innerText();
-  for (const jargon of ['0x0A01', '0x0A02', 'PoP', '/api/bind']) expect(hero).not.toContain(jargon);
-  await expect(page.getByTestId('landing-tech')).not.toHaveAttribute('open', '');
-  await expect(page.getByTestId('landing-qday')).toContainText('Q-DAY DRILL');
-  await expect(page.getByTestId('landing-qday-holding')).toContainText(/\d+ of \d+/, { timeout: 60_000 });
-  await expect(page.getByTestId('footer-audit')).toContainText('no human audit');
+test('landing: plain hero, every number labelled, the drill and the sample pool one click away, honest footer', async ({ page }) => {
+  await page.goto(`${BASE}/`);
+  await expect(page).toHaveTitle('Send QOR by link, guarded by ML-DSA-87 · Pocket Drop');
+  const hero = page.locator('.pd-hero');
+  await expect(hero).toContainText('Send QOR by link.');
+  await expect(page.getByTestId('hero-live')).toContainText(/Live|Recorded snapshot/, { timeout: 60_000 });
+  const heroText = await hero.innerText();
+  for (const jargon of ['0x0A01', '0x0A02', 'PoP', '/api/bind']) expect(heroText).not.toContain(jargon);
+  await expect(page.getByTestId('hero-sample')).toHaveAttribute('href', new RegExp(`^/pool/p${sample.poolId}#k=[0-9a-f]{64}$`));
+  await expect(page.getByTestId('qday-cta')).toHaveAttribute('href', '/qday');
+  await expect(page.getByTestId('qday-refused')).toHaveAttribute('data-value', /^\d+$/, { timeout: 60_000 });
+  await expect(page.getByTestId('proof-link')).toHaveAttribute('href', '/proof');
+  for (const [i, to] of [[1, '/qday'], [3, '/check'], [4, '/judges']] as const) await expect(page.getByTestId(`judge-step-${i}`)).toHaveAttribute('href', to);
+  await expect(page.getByTestId('landing-audit')).toContainText('no human audit');
   await fits(page);
   await page.screenshot({ path: `${SHOTS}/landing-${page.viewportSize()!.width}.png`, fullPage: true });
 });

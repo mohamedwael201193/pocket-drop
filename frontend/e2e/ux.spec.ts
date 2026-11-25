@@ -9,7 +9,7 @@ const sample = JSON.parse(fs.readFileSync('src/data/sample-pool.json', 'utf8')) 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
 
 test('overview: a first-time visitor gets a three-step guide with one primary action, and can hide it', async ({ page }) => {
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/app`);
   const g = page.getByTestId('start-here');
   await expect(g).toBeVisible();
   await expect(g).toContainText('0 of 3 done');
@@ -25,14 +25,14 @@ test('overview: a first-time visitor gets a three-step guide with one primary ac
 test('overview: the drill step ticks after the drill page was opened', async ({ page }) => {
   await page.goto(`${BASE}/qday`);
   await expect(page.getByTestId('qday-page')).toBeVisible();
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/app`);
   await expect(page.getByTestId('start-drill')).toHaveAttribute('data-done', '1');
 });
 
 test('sidebar: every Verify item is visible without scrolling at 1280 x 800', async ({ page }) => {
   test.skip(page.viewportSize()!.width < 1024, 'desktop sidebar only');
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/app`);
   for (const k of ['qday', 'check', 'judges', 'lab', 'radar', 'about']) await expect(page.getByTestId(`side-${k}`)).toBeInViewport();
   await page.getByTestId('sidebar-toggle').click();
   await expect(page.getByTestId('sidebar-toggle')).toHaveAttribute('aria-label', 'Expand sidebar');

@@ -8,7 +8,7 @@ const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
 const noSideScroll = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
 
 test('shell: the primary navigation is Send, Receive, Pocket, Proof; the rest sits under Verify or More', async ({ page }) => {
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/app`);
   await expect(page).toHaveTitle('Overview · Pocket Drop');
   await expect(page.getByTestId('logo')).toBeVisible();
   const mobile = page.viewportSize()!.width < 768;
@@ -37,7 +37,7 @@ test('shell: the primary navigation is Send, Receive, Pocket, Proof; the rest si
 
 test('overview: every card carries a source label and the numbers match the live API', async ({ page, request }) => {
   const [h, s] = await Promise.all([request.get(`${API}/api/health`).then((r) => r.json()), request.get(`${API}/api/stats`).then((r) => r.json())]);
-  await page.goto(`${BASE}/`);
+  await page.goto(`${BASE}/app`);
   await expect(page.getByTestId('overview')).toBeVisible();
   for (const id of ['ov-safety', 'ov-proof', 'ov-activity', 'ov-relayer']) await expect(page.getByTestId(id)).toContainText('LIVE');
   await expect(page.getByTestId('ov-tests')).toContainText('RECORDED');
@@ -49,7 +49,8 @@ test('overview: every card carries a source label and the numbers match the live
     await expect(page.getByTestId('ov-gauge-ratio')).toHaveText('1 of 3');
   }
   await expect(page.getByTestId('ov-create-key')).toHaveAttribute('href', '/send');
-  const hybrid = s.v4?.prod?.hybridRelayEvents;
+  const [p5, p4] = [s.v4?.prod?.hybridRelayEvents, s.v4?.prodV4?.hybridRelayEvents]; // the card sums the v5 and v4 production instances
+  const hybrid = typeof p5 === 'number' && typeof p4 === 'number' ? p5 + p4 : undefined;
   if (typeof hybrid === 'number') await expect(page.getByTestId('ov-hybrid')).toHaveAttribute('data-value', String(hybrid), { timeout: 60_000 });
   await expect(page.getByTestId('ov-relayer-balance')).toContainText(Number(h.relayer.balance).toFixed(2).slice(0, -1), { timeout: 60_000 });
   await expect(page.getByTestId('ov-activity-rows').locator('a[href^="/check/"]').first()).toBeVisible({ timeout: 120_000 });
@@ -66,9 +67,29 @@ test('/proof shows the CBOM run date from the data; page headers carry the light
   await expect(page.getByTestId('pocket-object').first()).toHaveAttribute('data-mode', 'svg');
 });
 
-test('the landing story lives on /about and keeps its sections', async ({ page }) => {
+test('the landing lives on /, /about redirects there, and the app logo returns to it', async ({ page }) => {
   await page.goto(`${BASE}/about`);
-  await expect(page.getByTestId('how-it-works')).toContainText('Send a link');
-  await expect(page.getByTestId('landing-qday')).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`${BASE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}/$`));
+  await expect(page.getByTestId('landing')).toBeVisible();
+  await expect(page).toHaveTitle('Send QOR by link, guarded by ML-DSA-87 · Pocket Drop');
+  await expect(page.getByTestId('sidebar')).toHaveCount(0); // the landing is not inside the dashboard
+  await expect(page.getByTestId('hero-open')).toHaveAttribute('href', '/app');
+  await expect(page.getByTestId('hero-sample')).toHaveAttribute('href', /^\/pool\/p\d+#k=[0-9a-f]{64}$/);
   await noSideScroll(page);
+  await page.getByTestId('hero-open').click();
+  await expect(page).toHaveURL(/\/app$/);
+  await expect(page.getByTestId('overview')).toBeVisible();
+  await expect(page).toHaveTitle('Overview · Pocket Drop');
+  await page.getByTestId('logo').first().click();
+  await expect(page).toHaveURL(new RegExp(`${BASE.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}/$`));
+  await expect(page.getByTestId('landing')).toBeVisible();
+});
+
+test('old links keep working: /claim/<id> keeps its key fragment, /overview and /stats redirect', async ({ page }) => {
+  await page.goto(`${BASE}/claim/p1#k=${'0'.repeat(64)}`);
+  await expect(page).toHaveURL(new RegExp(`/c/p1#k=0{64}$`));
+  await page.goto(`${BASE}/overview`);
+  await expect(page).toHaveURL(/\/app$/);
+  await page.goto(`${BASE}/stats`);
+  await expect(page).toHaveURL(/\/radar$/);
 });

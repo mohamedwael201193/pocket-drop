@@ -12,7 +12,7 @@ const OUT = process.env.QA_OUT || 'test-results/qa/crawl';
 fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(SHOTS, { recursive: true });
 const AXE = process.env.QA_AXE && fs.existsSync(process.env.QA_AXE) ? fs.readFileSync(process.env.QA_AXE, 'utf8') : '';
 const ROUTES: [string, string][] = [
-  ['overview', '/'], ['landing', '/about'], ['send', '/send'], ['inbox', '/send/inbox'], ['receive', '/receive'],
+  ['landing', '/'], ['overview', '/app'], ['about-redirect', '/about'], ['claim-alias', '/claim/p12'], ['send', '/send'], ['inbox', '/send/inbox'], ['receive', '/receive'],
   ['claim-v3-17', '/c/17'], ['claim-v4-p12-claimed', '/c/p12'], ['claim-v4-p12-badkey', '/c/p12#k=' + '00'.repeat(32)],
   ['claim-v4-missing', '/c/p99999#k=' + 'ab'.repeat(32)], ['claim-garbage', '/c/zzz'],
   ['pool-p5', '/pool/p5'], ['pool-missing', '/pool/p99999#k=' + 'ab'.repeat(32)],

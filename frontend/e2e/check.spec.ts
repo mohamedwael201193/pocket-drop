@@ -2,6 +2,7 @@
 // re-verified in the browser (hybrid native lane and EVM lane). Also the relayer line on /proof and the hybrid note on /radar.
 import { test, expect } from './fixtures';
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
 const CLAIM = 'E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8';
 
 async function noSideScroll(page: import('@playwright/test').Page) {
@@ -74,8 +75,9 @@ test('a guarded prod Q-Day bait from the examples; a non-Pocket address is expla
 });
 
 test('with the EVM window closed and hybrid relays, the app shows the relayer as live (no paused banner)', async ({ page }) => {
-  await page.goto(`${BASE}/about`);
-  await expect(page.getByTestId('landing-window')).toContainText(/ECDSA-only path closed|ECDSA window still open|Window live/, { timeout: 90_000 });
+  await page.goto(`${BASE}/`);
+  await expect(page.getByTestId('hero-live')).toContainText(/ECDSA-only path closed|Classical path open/, { timeout: 90_000 });
+  await page.goto(`${BASE}/app`);
   await expect(page.getByText('Diana 9800 · live').first()).toBeVisible();
   await expect(page.getByTestId('relayer-banner')).toHaveCount(0);
 });
@@ -101,9 +103,9 @@ test('/judges: the relayer item reads the live relay lane, the table has the hyb
   await noSideScroll(page);
 });
 
-test('the landing card and /lab agree on how many v4 attacks the chain refused', async ({ page }) => {
-  await page.goto(`${BASE}/lab`);
-  const n = (await page.getByRole('heading', { level: 1 }).textContent())!.match(/(\d+) attacks/)![1];
-  await page.goto(`${BASE}/about`);
-  await expect(page.getByRole('link', { name: new RegExp(`All ${n} v4 attacks`) })).toBeVisible();
+test('the landing Q-Day count equals the refused attempts in the live /api/qday log', async ({ page, request }) => {
+  const q = await request.get(`${API}/api/qday`, { timeout: 90_000 }).then((r) => r.json());
+  const n = ((q.log?.onChain?.rows ?? []) as { failed: boolean }[]).filter((r) => r.failed).length;
+  await page.goto(`${BASE}/`);
+  await expect(page.getByTestId('qday-refused')).toHaveAttribute('data-value', String(n), { timeout: 90_000 });
 });

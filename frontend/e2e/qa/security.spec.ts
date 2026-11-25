@@ -5,7 +5,7 @@ import { test, expect, previewHeaders } from '../fixtures';
 import { isSealed, readRoot } from '../vault';
 
 const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
-const ROUTES = ['/', '/send', '/send/inbox', '/receive', '/c/p12', '/c/p12#k=' + '00'.repeat(32), '/pool/p5', '/pocket', '/pocket?env=lab', '/proof', '/lab', '/radar', '/judges', '/qday', '/nope-404'];
+const ROUTES = ['/', '/app', '/send', '/send/inbox', '/receive', '/c/p12', '/c/p12#k=' + '00'.repeat(32), '/pool/p5', '/pocket', '/pocket?env=lab', '/proof', '/lab', '/radar', '/judges', '/qday', '/nope-404'];
 
 test('headers: strict CSP with only the two backends, no framing, Permissions-Policy', async ({ request }) => {
   const r = await request.get(`${BASE}/qday`, { headers: previewHeaders });
