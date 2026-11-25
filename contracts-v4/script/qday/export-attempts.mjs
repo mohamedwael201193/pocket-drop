@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const C4 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const API = process.env.PD_API_URL ?? 'https://pocketdrop-api.vercel.app';
+const API = process.env.PD_API_URL ?? 'https://pocket-drop-api.vercel.app';
 const f = path.join(C4, 'deployments', 'qday-attempts.json');
 const prev = fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : { attempts: [] };
 const q = await (await fetch(`${API}/api/qday`)).json();

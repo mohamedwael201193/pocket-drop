@@ -1,10 +1,10 @@
 // The sidebar dashboard shell and the Overview wiring (read-only, spends nothing).
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/shell.spec.ts
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/shell.spec.ts
 import fs from 'node:fs';
 import { test, expect } from './fixtures';
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
-const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
+const API = process.env.E2E_API || 'https://pocket-drop-api.vercel.app';
 const noSideScroll = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
 
 test('shell: the primary navigation is Send, Receive, Pocket, Proof; the rest sits under Verify or More', async ({ page }) => {

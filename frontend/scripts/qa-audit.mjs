@@ -1,7 +1,7 @@
 // Audit crawl: every route at 1280 and 390; console errors, failed requests, overflow, v4-only addresses, dead links, load time.
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
-const [base = 'https://pocketdrop-app.vercel.app', out = 'before'] = process.argv.slice(2);
+const [base = 'https://pocket-drop.vercel.app', out = 'before'] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const routes = [['overview', '/'], ['about', '/about'], ['send', '/send'], ['send-inbox', '/send/inbox'], ['receive', '/receive'], ['pocket', '/pocket'], ['proof', '/proof'], ['lab', '/lab'], ['radar', '/radar'], ['judges', '/judges'], ['qday', '/qday'], ['check', '/check'], ['claim-bad', '/c/abc'], ['pool-bad', '/pool/zzz'], ['notfound', '/nope']];
 const sizes = [['1280', { width: 1280, height: 800 }, false], ['390', { width: 390, height: 844 }, true]];

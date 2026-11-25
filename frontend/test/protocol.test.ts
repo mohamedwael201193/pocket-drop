@@ -38,7 +38,7 @@ describe('fingerprint', () => {
 
 describe('link url + whatsapp', () => {
   const seed = Uint8Array.from({ length: 32 }, (_, i) => (i * 7 + 3) & 255);
-  const link = buildClaimUrl('https://pocketdrop-app.vercel.app', 12n, seed);
+  const link = buildClaimUrl('https://pocket-drop.vercel.app', 12n, seed);
   it('carries the seed only in the #fragment and parses back', () => {
     const u = new URL(link);
     expect(u.pathname).toBe('/c/12');

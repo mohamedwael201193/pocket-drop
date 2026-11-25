@@ -7,7 +7,7 @@ import { QDAY, tryBait } from '../src/lib/qday';
 async function keys(): Promise<Record<string, Hex>> {
   if (process.env.QDAY_BAIT_KEYS) return JSON.parse(process.env.QDAY_BAIT_KEYS);
   try {
-    const j = await (await fetch('https://pocketdrop-api.vercel.app/api/qday')).json();
+    const j = await (await fetch('https://pocket-drop-api.vercel.app/api/qday')).json();
     return Object.fromEntries((j.baits ?? []).filter((b: { classicalKey: string | null }) => b.classicalKey).map((b: { id: string; classicalKey: Hex }) => [b.id, b.classicalKey]));
   } catch { return {}; }
 }

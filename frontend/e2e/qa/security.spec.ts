@@ -4,7 +4,7 @@
 import { test, expect, previewHeaders } from '../fixtures';
 import { isSealed, readRoot } from '../vault';
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const ROUTES = ['/', '/app', '/send', '/send/inbox', '/receive', '/c/p12', '/c/p12#k=' + '00'.repeat(32), '/pool/p5', '/pocket', '/pocket?env=lab', '/proof', '/lab', '/radar', '/judges', '/qday', '/nope-404'];
 
 test('headers: strict CSP with only the two backends, no framing, Permissions-Policy', async ({ request }) => {
@@ -17,7 +17,7 @@ test('headers: strict CSP with only the two backends, no framing, Permissions-Po
   expect(csp).not.toContain("'unsafe-inline'");
   expect(csp).not.toContain("'unsafe-eval'");
   const connect = /connect-src ([^;]+)/.exec(csp)![1].trim().split(/\s+/);
-  expect(connect.sort()).toEqual(["'self'", 'https://evm-testnet.qore.host', 'https://pocketdrop-api.vercel.app'].sort());
+  expect(connect.sort()).toEqual(["'self'", 'https://evm-testnet.qore.host', 'https://pocket-drop-api.vercel.app'].sort());
   expect(h['permissions-policy']).toContain('camera=()');
   expect(h['x-frame-options']).toBe('DENY');
 });

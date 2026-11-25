@@ -4,8 +4,8 @@ import { baitShare, samplePoolShare, shareMessage, whatsappUrl } from '../src/li
 
 describe('share texts', () => {
   it('the sample pool link carries its key and says testnet', () => {
-    const s = samplePoolShare('https://pocketdrop-app.vercel.app', 3);
-    expect(s.url).toBe(`https://pocketdrop-app.vercel.app${sample.path}`);
+    const s = samplePoolShare('https://pocket-drop.vercel.app', 3);
+    expect(s.url).toBe(`https://pocket-drop.vercel.app${sample.path}`);
     expect(s.url).toMatch(/\/pool\/p\d+#k=[0-9a-f]{64}$/);
     expect(s.text).toContain('3 slots left');
     expect(s.text).toContain('testnet');
@@ -13,8 +13,8 @@ describe('share texts', () => {
     expect(samplePoolShare('https://x', null).text).not.toContain('left');
   });
   it('the bait challenge points at /qday and names the check', () => {
-    const b = baitShare('https://pocketdrop-app.vercel.app', 5);
-    expect(b.url).toBe('https://pocketdrop-app.vercel.app/qday');
+    const b = baitShare('https://pocket-drop.vercel.app', 5);
+    expect(b.url).toBe('https://pocket-drop.vercel.app/qday');
     expect(b.text).toMatch(/5 testnet Pockets .* ML-DSA-87/);
   });
   it('one-field apps get text and link in one message, URL-encoded for WhatsApp', () => {

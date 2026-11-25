@@ -1,6 +1,6 @@
 // Pocket > Send out: checks on the "send to" address before signing (no funds needed: a fresh key and its counterfactual Pocket).
 import { test, expect } from './fixtures';
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const FRIEND = '0x392f50b1955a827458A320205e19acf7C664f116';
 const TWIN = '0x392f0000000000000000000000000000c664f116';
 const PROD_DROP = '0xbc13b9EE91f31eD56932abDb796693515C351f00';

@@ -1,8 +1,8 @@
 // Proof > Check a transaction: recorded Diana transactions are fetched from the chain and their ML-DSA-87 signatures are
 // re-verified in the browser (hybrid native lane and EVM lane). Also the relayer line on /proof and the hybrid note on /radar.
 import { test, expect } from './fixtures';
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
-const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
+const API = process.env.E2E_API || 'https://pocket-drop-api.vercel.app';
 const CLAIM = 'E64662F8E0503C8A2C18E267A52ABE2670958E22A8BF6B10C6563FEFB9864FC8';
 
 async function noSideScroll(page: import('@playwright/test').Page) {

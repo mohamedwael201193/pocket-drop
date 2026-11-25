@@ -1,8 +1,8 @@
 // Sponsored onboarding, no funds needed: what a brand-new sender sees while the sponsor is on, and the fallback.
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/sponsor.spec.ts --project=chromium-390
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/qa/sponsor.spec.ts --project=chromium-390
 import { test, expect } from '@playwright/test';
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const ON = { ok: true, enabled: true, remainingToday: 20, amountWei: '60000000000000000', senderMinPocketWei: '100000000000000000' };
 
 test('sponsor on: a new sender is asked to fund only the Pocket; the key setup is covered, the faucet stays as a fallback', async ({ page }) => {

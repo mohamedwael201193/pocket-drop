@@ -1,12 +1,12 @@
 // First-run UX on the deployed app (read-only, spends nothing): the start guide, the sidebar fit, the radar distinct count,
 // the v4 sample pool paying into the v5 Pocket, and the CSP staying clean.
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/ux.spec.ts
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/ux.spec.ts
 import { test, expect } from './fixtures';
 import fs from 'node:fs';
 
 const sample = JSON.parse(fs.readFileSync('src/data/sample-pool.json', 'utf8')) as { path: string };
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 
 test('overview: a first-time visitor gets a three-step guide with one primary action, and can hide it', async ({ page }) => {
   await page.goto(`${BASE}/app`);

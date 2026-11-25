@@ -12,7 +12,7 @@ export const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const C4 = path.resolve(HERE, '..', '..');
 export const QORE_DIR = process.env.QORE_DIR ?? 'D:/route/QORE';
 export const SECRETS_DIR = path.join(QORE_DIR, '.secrets');
-export const API = process.env.PD_API_URL ?? 'https://pocketdrop-api.vercel.app';
+export const API = process.env.PD_API_URL ?? 'https://pocket-drop-api.vercel.app';
 export const net = getNetwork('testnet');
 if (net.chainId !== 'qorechain-diana') throw new Error('testnet only');
 export const REST = net.endpoints.rest;

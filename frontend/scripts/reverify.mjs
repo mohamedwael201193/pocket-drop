@@ -26,7 +26,7 @@ const readJson = (...p) => JSON.parse(fs.readFileSync(path.join(repo, ...p), 'ut
 const v4 = readJson('frontend', 'src', 'data', 'v4.json');
 const RPC = process.env.EVM_RPC_URL ?? 'https://evm-testnet.qore.host';
 const REST = process.env.REST_URL ?? 'https://api-testnet.qore.host';
-const API = process.env.PD_API_URL ?? 'https://pocketdrop-api.vercel.app';
+const API = process.env.PD_API_URL ?? 'https://pocket-drop-api.vercel.app';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function retry(fn, tries = 4) { for (let i = 1; ; i++) { try { return await fn(); } catch (e) { if (i >= tries) throw e; await sleep(600 * i); } } }
 

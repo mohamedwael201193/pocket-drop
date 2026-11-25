@@ -1,6 +1,6 @@
 // (e) Guardian unanimous recovery of a LAB Pocket on the DEPLOYED URL: all 3 guardians sign, the Pocket moves to a NEW key after the
 // (lab) 180 s delay, and the new key sweeps the funds. Needs E2E_RECOVER_POCKET (the LAB Pocket whose guardians are the E2E guardians).
-//   E2E_RECOVER_POCKET=0x... E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/recover.spec.ts --project=chromium-390
+//   E2E_RECOVER_POCKET=0x... E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/recover.spec.ts --project=chromium-390
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { readRoot } from './vault';
 import fs from 'node:fs';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import type { Hex } from 'viem';
 import { balanceOf, deployerAddress, fund, guardians, keyProven, qor, recovered, txOk, vaultRead } from './chain4';
 
-const URL = (process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app').replace(/\/$/, '');
+const URL = (process.env.E2E_URL ?? 'https://pocket-drop.vercel.app').replace(/\/$/, '');
 const POCKET = process.env.E2E_RECOVER_POCKET as Hex | undefined;
 const EVID = path.resolve('evidence/v4/e2e');
 const T = 240_000;

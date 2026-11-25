@@ -1,12 +1,12 @@
 // Static crawl of every route: console errors, network 4xx/5xx, overflow, axe, links, screenshots. Spends nothing.
-//   E2E_URL=https://pocketdrop-app.vercel.app QA_AXE=/path/to/axe.min.js npx playwright test e2e/qa/crawl.spec.ts --project=chromium-390
+//   E2E_URL=https://pocket-drop.vercel.app QA_AXE=/path/to/axe.min.js npx playwright test e2e/qa/crawl.spec.ts --project=chromium-390
 // Results: one JSON per route and width in $QA_OUT (default test-results/qa/crawl), screenshots at 390 and 1440 in $QA_SHOTS.
 // axe-core is not a dependency of the app: point QA_AXE at axe.min.js (npm i axe-core in any folder) or the axe field is skipped.
 // With QA_AXE the crawl contexts bypass the strict CSP so axe can be injected (security.spec checks the CSP itself).
 import { test, type Page } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-const URL = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const URL = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 const OUT = process.env.QA_OUT || 'test-results/qa/crawl';
 fs.mkdirSync(OUT, { recursive: true }); fs.mkdirSync(SHOTS, { recursive: true });

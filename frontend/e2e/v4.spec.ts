@@ -1,5 +1,5 @@
 // v4 flows against a DEPLOYED URL, each user in their own browser context (own key, own storage). Testnet only.
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/v4.spec.ts --project=chromium-390
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/v4.spec.ts --project=chromium-390
 // Every hash shown by the app is verified on the chain; every account is funded from the deployer (>= 0.8 QOR for a Pocket).
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { readRoot } from './vault';
@@ -11,7 +11,7 @@ import { keyMaterial, parseRoot } from '../src/lib/keyderive';
 import { deliveryFeeWei } from '../src/lib/fees';
 import { INST, balanceOf, deployerAddress, dropLink, fund, guardians, pub, poolOf, qor, recovered, spentQor, txOk, vaultRead } from './chain4';
 
-const URL = (process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app').replace(/\/$/, '');
+const URL = (process.env.E2E_URL ?? 'https://pocket-drop.vercel.app').replace(/\/$/, '');
 const EVID = path.resolve('evidence/v4/e2e');
 fs.mkdirSync(EVID, { recursive: true });
 const POCKET_FUND = Number(process.env.E2E_POCKET_FUND ?? '0.8');

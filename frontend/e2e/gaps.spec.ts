@@ -1,8 +1,8 @@
 // Gaps closed on 22 Nov 2026 (RESCORE items 2-6): v3 hybrid claims in /api/stats, current API names on the landing cards,
 // and the smaller UX items. (The old landing's technical cards were replaced by the 26 Nov 2026 landing.) Runs against the deployed app and API.
 import { test, expect } from './fixtures';
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
-const API = process.env.E2E_API || 'https://pocketdrop-api.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
+const API = process.env.E2E_API || 'https://pocket-drop-api.vercel.app';
 
 test('/api/stats counts v3 link #29, which was bound and claimed through hybrid relays', async ({ request }) => {
   const r = await request.get(`${API}/api/stats`, { timeout: 90_000 });

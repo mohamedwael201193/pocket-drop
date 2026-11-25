@@ -2,7 +2,7 @@
 // (never "Confirmed by the sender" while waiting) and v4 ids (p12) route to the v4 claim page.
 import { test, expect } from '@playwright/test';
 
-const URL = (process.env.E2E_URL ?? 'https://pocketdrop-app.vercel.app').replace(/\/$/, '');
+const URL = (process.env.E2E_URL ?? 'https://pocket-drop.vercel.app').replace(/\/$/, '');
 
 for (const id of ['17', '5']) {
   test(`v3 link #${id} still resolves with the corrected header copy`, async ({ page }) => {

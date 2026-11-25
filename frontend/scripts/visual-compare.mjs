@@ -1,6 +1,6 @@
 // Screenshots every route of the app (APP_URL) and, if DESIGN_HTML is set, the same views of the original design file,
 // at 390x844 and 1440x900, into evidence/v2/screens/. Usage:
-//   APP_URL=https://pocketdrop-app.vercel.app DESIGN_HTML=D:/path/design.html node scripts/visual-compare.mjs [chromium|webkit] [only-design|only-app]
+//   APP_URL=https://pocket-drop.vercel.app DESIGN_HTML=D:/path/design.html node scripts/visual-compare.mjs [chromium|webkit] [only-design|only-app]
 import { chromium, webkit } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';

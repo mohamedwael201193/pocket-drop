@@ -2,7 +2,7 @@
 //   E2E_URL=https://<preview> QDAY_KEYS_EXPECTED=1 npx playwright test e2e/qday.spec.ts --project=chromium-390 --project=chromium-1440
 import { test, expect } from './fixtures';
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 
 test('The Q-Day Drill shows the testnet warning, five live baits, the alarm and the log', async ({ page }, info) => {

@@ -30,9 +30,9 @@ describe('fetchHealth', () => {
 describe('parseClaimInput', () => {
   const k = 'a'.repeat(64);
   it('accepts full links and bare paths, rejects links without a key', () => {
-    expect(parseClaimInput(`https://pocketdrop-app.vercel.app/c/17#k=${k}`)).toBe(`/c/17#k=${k}`);
+    expect(parseClaimInput(`https://pocket-drop.vercel.app/c/17#k=${k}`)).toBe(`/c/17#k=${k}`);
     expect(parseClaimInput(`  /c/3#k=${k.toUpperCase()} `)).toBe(`/c/3#k=${k}`);
-    expect(parseClaimInput('https://pocketdrop-app.vercel.app/c/17')).toBeNull();
+    expect(parseClaimInput('https://pocket-drop.vercel.app/c/17')).toBeNull();
     expect(parseClaimInput(`/c/x#k=${k}`)).toBeNull();
   });
 });

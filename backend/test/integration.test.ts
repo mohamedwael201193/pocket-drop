@@ -1,5 +1,5 @@
 // Hits the DEPLOYED endpoints. Skipped unless PD_API_URL is set, e.g.
-//   PD_API_URL=https://pocketdrop-api.vercel.app npx vitest run test/integration.test.ts
+//   PD_API_URL=https://pocket-drop-api.vercel.app npx vitest run test/integration.test.ts
 // Optional: PD_LINK_ID=<existing link id> to also check GET /api/link/:id.
 import { describe, expect, it } from 'vitest';
 

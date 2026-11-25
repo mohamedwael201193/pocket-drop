@@ -12,7 +12,7 @@ $QS scan --network testnet --name "Pocket Drop (Diana testnet)" \
   --address qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl \
   --address qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh \
   --address qor1ppxmr9ek5yex76uy4x4j726029he0zg5kcfe2e \
-  --tls pocketdrop-app.vercel.app:443 --tls pocketdrop-api.vercel.app:443 --tls evm-testnet.qore.host:443 \
+  --tls pocket-drop.vercel.app:443 --tls pocket-drop-api.vercel.app:443 --tls evm-testnet.qore.host:443 \
   --solidity contracts-v4/src --solidity contracts/src \
   --out docs/cbom/cbom.json
 $QS template agility --cbom docs/cbom/cbom.json --out docs/cbom/agility.md

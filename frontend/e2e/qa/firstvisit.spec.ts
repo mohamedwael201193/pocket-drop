@@ -1,12 +1,12 @@
 // First visit, no key, no funds (read-only): plain landing, the drill surfaced, the sample pool, titles, Pocket's Advanced fold.
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/firstvisit.spec.ts --project=chromium-390
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/qa/firstvisit.spec.ts --project=chromium-390
 import { test, expect } from '../fixtures';
 import fs from 'node:fs';
 import { REQUIREMENTS } from '../../src/data/requirements';
 
 const sample = JSON.parse(fs.readFileSync(new URL('../../src/data/sample-pool.json', import.meta.url), 'utf8')) as { poolId: number };
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const SHOTS = process.env.QA_SHOTS || 'test-results/qa/shots';
 const fits = async (page: import('@playwright/test').Page) => expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
 

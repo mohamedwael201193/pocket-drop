@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { buildClaimUrl, parseClaimFragment, shareMessage, whatsappUrl, hexToBytes } from '../src/lib/protocol';
 
 const seed = crypto.getRandomValues(new Uint8Array(32));
-const link = buildClaimUrl('https://pocketdrop-app.vercel.app', 42n, seed);
+const link = buildClaimUrl('https://pocket-drop.vercel.app', 42n, seed);
 const msg = shareMessage('0.3');
 
 describe('wa.me URL', () => {

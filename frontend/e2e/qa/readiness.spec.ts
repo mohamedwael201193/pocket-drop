@@ -1,8 +1,8 @@
 // P1, P2 and UX-1 regressions (no funds needed).
-//   E2E_URL=https://pocketdrop-app.vercel.app npx playwright test e2e/qa/readiness.spec.ts --project=chromium-390
+//   E2E_URL=https://pocket-drop.vercel.app npx playwright test e2e/qa/readiness.spec.ts --project=chromium-390
 import { test, expect } from '@playwright/test';
 
-const BASE = process.env.E2E_URL || 'https://pocketdrop-app.vercel.app';
+const BASE = process.env.E2E_URL || 'https://pocket-drop.vercel.app';
 const K = 'ab'.repeat(32);
 
 test('P2: a pool id that does not exist says so instead of loading forever', async ({ page }) => {
