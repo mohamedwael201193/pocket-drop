@@ -1,0 +1,76 @@
+{
+  "stage": 3,
+  "version": "v5",
+  "auditId": null,
+  "publicReportUrl": null,
+  "note": "No report ID or public link was created by the dashboard for this run; PDF export and screenshots are archived alongside this JSON.",
+  "generatedAtCairo": "2026-11-26T00:26:43+02:00",
+  "generatedAtUtc": "2026-11-25T22:26:43Z",
+  "contractName": "PocketDrop v5 (strict PqcLib)",
+  "network": "Testnet",
+  "auditCost": "150 QOR",
+  "blockchain": "Ethereum (EVM/Solidity)",
+  "language": "solidity",
+  "source": {
+    "path": "docs/audit/stage3/PocketDrop-v5-flattened.sol",
+    "lines": 1617,
+    "sha256": "2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610"
+  },
+  "overallScore": 85,
+  "riskLevel": "MEDIUM",
+  "quantumSafe": "Not scored",
+  "totalVulnerabilities": 5,
+  "executiveSummary": "The PocketDrop v5 contract implements a robust post-quantum secure smart account system with multiple security features including ML-DSA-87 signature verification, guardian-based recovery mechanisms, and reentrancy protection. However, there are several medium-severity issues related to access control and potential logic flaws that need attention. The contract follows best practices for post-quantum cryptography and includes comprehensive error handling.",
+  "findings": [
+    {
+      "index": 1,
+      "severity": "HIGH",
+      "title": "Missing Access Control on Critical Functions",
+      "location": "src/PocketVault.sol:750, src/PocketVault.sol:780",
+      "description": "The 'finalizeRecovery' and 'finalizeRecoveryUnanimous' functions in PocketVault lack proper access control checks. These functions can be called by anyone, potentially allowing unauthorized key recovery.",
+      "recommendation": "Add access control modifiers to ensure these functions can only be called by authorized parties, such as the current owner or a specific recovery mechanism.",
+      "triage": "False positive"
+    },
+    {
+      "index": 2,
+      "severity": "MEDIUM",
+      "title": "Potential Overflow in Daily Drip Calculation",
+      "location": "src/PocketDrop.sol:360",
+      "description": "In PocketDrop.sol, the calculation of daily drip spending may overflow if multiple large drips are processed within the same day.",
+      "recommendation": "Use safe math operations or add explicit overflow checks when calculating daily drip spending.",
+      "triage": "False positive"
+    },
+    {
+      "index": 3,
+      "severity": "MEDIUM",
+      "title": "Potential Race Condition in Guardian Freeze",
+      "location": "src/PocketVault.sol:620",
+      "description": "The guardian freeze functionality in PocketVault.sol has a potential race condition where multiple freeze requests could be processed simultaneously, leading to inconsistent freeze states.",
+      "recommendation": "Implement proper locking mechanisms or state validation to prevent concurrent freeze operations.",
+      "triage": "False positive"
+    },
+    {
+      "index": 4,
+      "severity": "LOW",
+      "title": "Unbounded Loop in Guardian Signature Validation",
+      "location": "src/PocketVault.sol:660",
+      "description": "The '_checkGuardianSigs' function in PocketVault.sol contains nested loops that iterate over guardian arrays, which could be exploited to cause gas exhaustion.",
+      "recommendation": "Consider using a more efficient data structure or limiting the number of iterations further.",
+      "triage": "Informational"
+    },
+    {
+      "index": 5,
+      "severity": "INFO",
+      "title": "ERC-1271 Implementation",
+      "location": "src/PocketVault.sol:270",
+      "description": "The PocketVault contract implements ERC-1271 correctly with the 'isValidSignature' function.",
+      "recommendation": "None required.",
+      "triage": "Informational"
+    }
+  ],
+  "artifacts": {
+    "pdf": "docs/audit/stage3/QCAI-stage3-v5.pdf",
+    "summaryScreenshot": "docs/audit/stage3/QCAI-stage3-v5-summary.png",
+    "findingsScreenshot": "docs/audit/stage3/QCAI-stage3-v5-findings.png"
+  }
+}
