@@ -338,3 +338,22 @@ The link's `relayerFee` read back from the chain was 0.38 QOR (the new delivery 
 | burner funds the refill wallet `qor17ur48…fg2r` with 3 QOR | `7982974FFCE83475CF1660BC71A5AB3C4D9D48E403A0782020364C18A6FC367D` | code 0 |
 | refill wallet registers its ML-DSA-87 key (PoP) | `6539F50705728FA08FC07D644E2A037D666875FD5D8FD11E2D300864BB1B5195` | code 0 |
 | first relayer refill, 0.8 QOR | `2C3D0A59D299C953A94EC68280CA6C6FCC11424A8580765C5C4905D0DFED87C8` | code 0, relayer 3.227 → 4.027 QOR |
+
+## v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)
+
+v5 = v4 with a stricter PqcLib (exact 2592-byte ML-DSA-87 keys and 4627-byte signatures before the precompile is called, exact key-status layout); see docs/V5.md. v5 PROD: router `0x13b8e379e50da657b943781d2816fc17473ae376`, factory `0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f`, vault implementation `0x8603937464a48c18ebede4de1149e8e7dc4e91b4`, PocketDrop `0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798`, DropPool `0xdb67b9881b37c0e9a4988a56089c05c221c0a26f`. Run: `node script/smoke-v5.mjs` (2026-11-25T20:17:39.013Z). Submitter: the deployer EVM account (any account may submit router calls; it holds no user authority). Sender Pocket owner: the deployer key. Recipient: a fresh account that started with 0 QOR; the drip paid its key registration. These relays went through the EVM lane from the box, not through the app API; the app moves to v5 with the next API and frontend deploy. Deployer spend for the whole smoke: 0.8124 QOR (fees plus the 0.45 QOR Pocket funding, of which 0.25 QOR went to the recipient and 0.2 QOR stays in the Pocket).
+
+| step | status | outcome / custom error | tx |
+|---|---|---|---|
+| recipient account (fresh, empty) | info | 0xA91a05730f75c5B9170E5414374ec532ee38c8EA balance 0 QOR, key registered: false | none (not mined) |
+| S1 fund the sender Pocket address before it exists (0.45 QOR) | success | gas 21000, fee 0.00307 QOR | [0xfe443c8444...](https://explore.qore.network/tx/0xfe443c84440ecce06a8fb6cd58501a881afeadaef108a3dc19217de7298fc605) |
+| D1 router.deployAndRelay: deploys the v5 Pocket and creates an Open drop link by ML-DSA-87 intent | success | gas 627361, fee 0.09175 QOR | [0xd098f67aee...](https://explore.qore.network/tx/0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea) |
+| link created | info | v5 prod link id 1 (app link id q1), sender 0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6 | none (not mined) |
+| D2 bind: the link key signs the recipient; the 0.1 QOR drip lands in the empty recipient account | success | gas 388746, fee 0.05685 QOR | [0x6500b810ec...](https://explore.qore.network/tx/0x6500b810ec99b2f4fd6d8340586b9aafa683662a4817789a7f7c3b64df80d092) |
+| D3 recipient registers its ML-DSA-87 key with proof of possession (native tx, fee paid from the drip) | success | possessionProven=true | [B46BC6955AC6...](https://explore.qore.network/tx/B46BC6955AC6EE94A8456D0EF463AFCDEACFFE3074C461797077218D6E197F42) |
+| D4 claim: the recipient signs with its registered ML-DSA-87 key; 0.1 QOR paid | success | gas 264198, fee 0.03864 QOR | [0x08438baf17...](https://explore.qore.network/tx/0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a) |
+| check: claim paid | info | recipient +0.1 QOR, link state 4 (4 = Claimed) | none (not mined) |
+| P1 the sender Pocket hosts a Drop Pool (2 slots x 0.05 QOR) by intent | success | gas 378354, fee 0.05533 QOR | [0x6d81af0a87...](https://explore.qore.network/tx/0x6d81af0a87d03ebeb03e286b3524c9bb7cdc2df0df5bf003ea5363fb0bf10e30) |
+| P2 the recipient claims a slot of pool q1 (link-key signature + its own signature) | success | gas 518181, fee 0.07578 QOR | [0x0c260ee46f...](https://explore.qore.network/tx/0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef) |
+| P3 the host Pocket closes the pool; the unclaimed slot returns to the Pocket | success | gas 280350, fee 0.04100 QOR | [0xc9dcbf655d...](https://explore.qore.network/tx/0xc9dcbf655d1772f96c68d92347b3e64c7f17cee198881ddf4eaa3f9abe073923) |
+| check: pool refund | info | Pocket +0.05 QOR | none (not mined) |

@@ -2777,6 +2777,122 @@
       "bytecodeHash": "none",
       "cborMetadata": false,
       "reproduce": "cd contracts-v4 && forge build && node script/deploy-v5.mjs --check"
+    },
+    "smoke": {
+      "startedAt": "2026-11-25T20:17:39.013Z",
+      "instance": "v5.prod",
+      "router": "0x13b8e379e50da657b943781d2816fc17473ae376",
+      "submitter": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "rows": [
+        {
+          "step": "recipient account (fresh, empty)",
+          "hash": null,
+          "status": "info",
+          "outcome": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA balance 0 QOR, key registered: false"
+        },
+        {
+          "step": "S1 fund the sender Pocket address before it exists (0.45 QOR)",
+          "hash": "0xfe443c84440ecce06a8fb6cd58501a881afeadaef108a3dc19217de7298fc605",
+          "url": "https://explore.qore.network/tx/0xfe443c84440ecce06a8fb6cd58501a881afeadaef108a3dc19217de7298fc605",
+          "status": "success",
+          "block": "10747475",
+          "gasUsed": "21000",
+          "feeQor": "0.00307125",
+          "valueQor": "0.45"
+        },
+        {
+          "step": "D1 router.deployAndRelay: deploys the v5 Pocket and creates an Open drop link by ML-DSA-87 intent",
+          "hash": "0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea",
+          "url": "https://explore.qore.network/tx/0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea",
+          "status": "success",
+          "block": "10747476",
+          "gasUsed": "627361",
+          "feeQor": "0.09175154625",
+          "valueQor": "0"
+        },
+        {
+          "step": "link created",
+          "hash": null,
+          "status": "info",
+          "outcome": "v5 prod link id 1 (app link id q1), sender 0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6"
+        },
+        {
+          "step": "D2 bind: the link key signs the recipient; the 0.1 QOR drip lands in the empty recipient account",
+          "hash": "0x6500b810ec99b2f4fd6d8340586b9aafa683662a4817789a7f7c3b64df80d092",
+          "url": "https://explore.qore.network/tx/0x6500b810ec99b2f4fd6d8340586b9aafa683662a4817789a7f7c3b64df80d092",
+          "status": "success",
+          "block": "10747477",
+          "gasUsed": "388746",
+          "feeQor": "0.0568541025",
+          "valueQor": "0"
+        },
+        {
+          "step": "D3 recipient registers its ML-DSA-87 key with proof of possession (native tx, fee paid from the drip)",
+          "hash": "B46BC6955AC6EE94A8456D0EF463AFCDEACFFE3074C461797077218D6E197F42",
+          "status": "success",
+          "native": true,
+          "outcome": "possessionProven=true"
+        },
+        {
+          "step": "D4 claim: the recipient signs with its registered ML-DSA-87 key; 0.1 QOR paid",
+          "hash": "0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a",
+          "url": "https://explore.qore.network/tx/0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a",
+          "status": "success",
+          "block": "10747482",
+          "gasUsed": "264198",
+          "feeQor": "0.0386389575",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: claim paid",
+          "hash": null,
+          "status": "info",
+          "outcome": "recipient +0.1 QOR, link state 4 (4 = Claimed)"
+        },
+        {
+          "step": "P1 the sender Pocket hosts a Drop Pool (2 slots x 0.05 QOR) by intent",
+          "hash": "0x6d81af0a87d03ebeb03e286b3524c9bb7cdc2df0df5bf003ea5363fb0bf10e30",
+          "url": "https://explore.qore.network/tx/0x6d81af0a87d03ebeb03e286b3524c9bb7cdc2df0df5bf003ea5363fb0bf10e30",
+          "status": "success",
+          "block": "10747483",
+          "gasUsed": "378354",
+          "feeQor": "0.0553342725",
+          "valueQor": "0"
+        },
+        {
+          "step": "P2 the recipient claims a slot of pool q1 (link-key signature + its own signature)",
+          "hash": "0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef",
+          "url": "https://explore.qore.network/tx/0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef",
+          "status": "success",
+          "block": "10747484",
+          "gasUsed": "518181",
+          "feeQor": "0.07578397125",
+          "valueQor": "0"
+        },
+        {
+          "step": "P3 the host Pocket closes the pool; the unclaimed slot returns to the Pocket",
+          "hash": "0xc9dcbf655d1772f96c68d92347b3e64c7f17cee198881ddf4eaa3f9abe073923",
+          "url": "https://explore.qore.network/tx/0xc9dcbf655d1772f96c68d92347b3e64c7f17cee198881ddf4eaa3f9abe073923",
+          "status": "success",
+          "block": "10747485",
+          "gasUsed": "280350",
+          "feeQor": "0.0410011875",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: pool refund",
+          "hash": null,
+          "status": "info",
+          "outcome": "Pocket +0.05 QOR"
+        }
+      ],
+      "finishedAt": "2026-11-25T20:17:54.784Z",
+      "pocket": "0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6",
+      "recipient": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA",
+      "linkId": "1",
+      "poolId": "1",
+      "deployerSpentQor": "0.8124352875",
+      "note": "deployerSpentQor = EVM fees + the 0.45 QOR Pocket funding; of that, 0.1 QOR (claim) + 0.1 QOR (drip) + 0.05 QOR (slot) went to the recipient and the rest stays in the Pocket."
     }
   }
 }

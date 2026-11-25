@@ -337,6 +337,8 @@
     "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 332": "0x42284Ae871f3CDEb0721238D567Fc3026D093803",
     "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 333": "0xbc13b9EE91f31eD56932abDb796693515C351f00",
     "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 334": "0xfff383D7F73c91E36b9697d60C05d47EF2805453",
-    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 335": "0x6645B49FF192A11F9a18b702A88CFc7A03626275"
+    "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 335": "0x6645B49FF192A11F9a18b702A88CFc7A03626275",
+    "TEAM-RUN v5 smoke sender Pocket (deployments/diana.json v5.smoke)": "0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6",
+    "TEAM-RUN v5 smoke recipient (deployments/diana.json v5.smoke)": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA"
   }
 }

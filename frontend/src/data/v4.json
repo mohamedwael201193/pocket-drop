@@ -1050,6 +1050,102 @@
    "outcome": "NoRecoveryPending",
    "url": "https://explore.qore.network/tx/0xaa7e5a3015ce3ab7e563eafe1bb480e9f85ece801f75c58a1706e924a4545b68",
    "hash": "0xaa7e5a3015ce3ab7e563eafe1bb480e9f85ece801f75c58a1706e924a4545b68"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "recipient account (fresh, empty)",
+   "status": "info",
+   "outcome": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA balance 0 QOR, key registered: false",
+   "url": null,
+   "hash": null
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "S1 fund the sender Pocket address before it exists (0.45 QOR)",
+   "status": "success",
+   "outcome": "gas 21000, fee 0.00307 QOR",
+   "url": "https://explore.qore.network/tx/0xfe443c84440ecce06a8fb6cd58501a881afeadaef108a3dc19217de7298fc605",
+   "hash": "0xfe443c84440ecce06a8fb6cd58501a881afeadaef108a3dc19217de7298fc605"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "D1 router.deployAndRelay: deploys the v5 Pocket and creates an Open drop link by ML-DSA-87 intent",
+   "status": "success",
+   "outcome": "gas 627361, fee 0.09175 QOR",
+   "url": "https://explore.qore.network/tx/0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea",
+   "hash": "0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "link created",
+   "status": "info",
+   "outcome": "v5 prod link id 1 (app link id q1), sender 0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6",
+   "url": null,
+   "hash": null
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "D2 bind: the link key signs the recipient; the 0.1 QOR drip lands in the empty recipient account",
+   "status": "success",
+   "outcome": "gas 388746, fee 0.05685 QOR",
+   "url": "https://explore.qore.network/tx/0x6500b810ec99b2f4fd6d8340586b9aafa683662a4817789a7f7c3b64df80d092",
+   "hash": "0x6500b810ec99b2f4fd6d8340586b9aafa683662a4817789a7f7c3b64df80d092"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "D3 recipient registers its ML-DSA-87 key with proof of possession (native tx, fee paid from the drip)",
+   "status": "success",
+   "outcome": "possessionProven=true",
+   "url": "https://explore.qore.network/tx/B46BC6955AC6EE94A8456D0EF463AFCDEACFFE3074C461797077218D6E197F42",
+   "hash": "B46BC6955AC6EE94A8456D0EF463AFCDEACFFE3074C461797077218D6E197F42"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "D4 claim: the recipient signs with its registered ML-DSA-87 key; 0.1 QOR paid",
+   "status": "success",
+   "outcome": "gas 264198, fee 0.03864 QOR",
+   "url": "https://explore.qore.network/tx/0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a",
+   "hash": "0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "check: claim paid",
+   "status": "info",
+   "outcome": "recipient +0.1 QOR, link state 4 (4 = Claimed)",
+   "url": null,
+   "hash": null
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "P1 the sender Pocket hosts a Drop Pool (2 slots x 0.05 QOR) by intent",
+   "status": "success",
+   "outcome": "gas 378354, fee 0.05533 QOR",
+   "url": "https://explore.qore.network/tx/0x6d81af0a87d03ebeb03e286b3524c9bb7cdc2df0df5bf003ea5363fb0bf10e30",
+   "hash": "0x6d81af0a87d03ebeb03e286b3524c9bb7cdc2df0df5bf003ea5363fb0bf10e30"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "P2 the recipient claims a slot of pool q1 (link-key signature + its own signature)",
+   "status": "success",
+   "outcome": "gas 518181, fee 0.07578 QOR",
+   "url": "https://explore.qore.network/tx/0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef",
+   "hash": "0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "P3 the host Pocket closes the pool; the unclaimed slot returns to the Pocket",
+   "status": "success",
+   "outcome": "gas 280350, fee 0.04100 QOR",
+   "url": "https://explore.qore.network/tx/0xc9dcbf655d1772f96c68d92347b3e64c7f17cee198881ddf4eaa3f9abe073923",
+   "hash": "0xc9dcbf655d1772f96c68d92347b3e64c7f17cee198881ddf4eaa3f9abe073923"
+  },
+  {
+   "section": "v5 deploy and live smoke (25 Nov 2026, TEAM-RUN, Diana testnet, v5 prod instance)",
+   "step": "check: pool refund",
+   "status": "info",
+   "outcome": "Pocket +0.05 QOR",
+   "url": null,
+   "hash": null
   }
  ],
  "qcai": {
@@ -1065,13 +1161,13 @@
   "stage2PublicReport": "https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427"
  },
  "tests": {
-  "total": 178,
-  "unit": 154,
-  "fuzz": 20,
+  "total": 185,
+  "unit": 160,
+  "fuzz": 21,
   "invariantFns": 18,
-  "passed": 178,
+  "passed": 185,
   "failed": 0,
   "coverage": "100% line, statement, branch and function on src/",
-  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 178 passed, 0 failed (contracts-v4/COVERAGE.md)"
+  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 185 passed, 0 failed (contracts-v4/COVERAGE.md)"
  }
 }

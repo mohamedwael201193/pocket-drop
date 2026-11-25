@@ -10,7 +10,7 @@ export const REQUIREMENTS: Requirement[] = [
     id: 'pqc-verify',
     requirement: 'Solidity PQC signature check (pqcVerify, 0x0A01) on every action that moves money',
     code: [
-      { label: 'PqcLib.verify', path: 'contracts-v4/src/PqcLib.sol#L37-L40' },
+      { label: 'PqcLib.verify', path: 'contracts-v4/src/PqcLib.sol#L44-L54' },
       { label: 'PocketVault._auth', path: 'contracts-v4/src/PocketVault.sol#L598-L602' },
       { label: 'PocketDrop bind / claim', path: 'contracts-v4/src/PocketDrop.sol#L184' },
     ],
@@ -25,7 +25,7 @@ export const REQUIREMENTS: Requirement[] = [
     id: 'pqc-key-status',
     requirement: 'Solidity PQC key status (pqcKeyStatus, 0x0A02): registered ML-DSA-87 key with proof of possession, pinned by hash',
     code: [
-      { label: 'PqcLib.keyStatus / requireKey', path: 'contracts-v4/src/PqcLib.sol#L51-L54' },
+      { label: 'PqcLib.keyStatus / requireKey', path: 'contracts-v4/src/PqcLib.sol#L59-L99' },
       { label: 'PocketDrop claim', path: 'contracts-v4/src/PocketDrop.sol#L237-L238' },
       { label: 'DropPool claim', path: 'contracts-v4/src/DropPool.sol#L109-L110' },
     ],
@@ -173,5 +173,50 @@ export const REQUIREMENTS: Requirement[] = [
     ],
     liveHealth: true,
     tests: ['backend test/refill.test.ts (caps, reserve, 24 h sum, health block)'],
+  },
+  {
+    id: 'real-crypto-tests',
+    requirement: 'Foundry tests with real ML-DSA-87 signatures (not a mock verifier), and the same tests against the live Diana precompile',
+    code: [
+      { label: 'RealCrypto.t.sol (22 tests)', path: 'contracts-v4/test-real/RealCrypto.t.sol' },
+      { label: 'mldsa.mjs (two independent ML-DSA-87 implementations must agree)', path: 'contracts-v4/script/ffi/mldsa.mjs' },
+      { label: 'LiveDiana.t.sol (live profile, 27 tests)', path: 'contracts-v4/test-live/LiveDiana.t.sol' },
+      { label: 'mutation-check.sh (accept-all verifier must fail the suite)', path: 'contracts-v4/script/ffi/mutation-check.sh' },
+    ],
+    live: [
+      { label: 'live profile: pqcVerify answered by the Diana precompile through eth_call (no transaction)', note: 'FOUNDRY_PROFILE=live forge test, CI job contracts-live' },
+      { label: 'accept-all mutation: 18 of 22 real-crypto tests fail, as they must', note: 'CI job contracts-realcrypto' },
+    ],
+    tests: ['test-real: test_spend_one_flipped_signature_bit_refused', 'test-real: test_spend_truncated_oversized_and_empty_signature_refused', 'test-real: test_owner_key_rotated_in_registry_old_and_new_key_both_refused', 'test-real: test_drop_open_mode_full_flow_real_signatures', 'test-real: test_pool_claim_real_signatures_and_domain_separation', 'test-live: test_live_verify_real_signature_through_pqclib', 'test-live: test_fork_of_diana_has_no_precompile_code_and_pqclib_fails_closed'],
+  },
+  {
+    id: 'precompile-conformance',
+    requirement: 'The two precompiles measured against FIPS 204: 43 eth_call cases, 0 anomalies, and PqcLib kept consistent with the recorded answers',
+    code: [
+      { label: 'probe-precompiles.mjs', path: 'contracts-v4/script/probe-precompiles.mjs' },
+      { label: 'PRECOMPILE_CONFORMANCE.md (findings)', path: 'docs/PRECOMPILE_CONFORMANCE.md' },
+      { label: 'recorded answers (JSON)', path: 'docs/precompile-conformance.json' },
+    ],
+    live: [
+      { label: 'recorded 25 Nov 2026 19:49 UTC: wrong sizes, ML-DSA-65 / 44, context and internal-API signatures return false; key-status offset always 0x80; empty message refused at block 10,654,799, accepted from 10,654,800', note: 'eth_call only, no transaction' },
+    ],
+    tests: ['test_pqcLib_verify_matches_fips204_on_every_recorded_live_answer', 'test_pqcLib_keyStatus_decodes_every_recorded_live_answer', 'test_recorded_key_answers_have_the_layout_the_strict_v5_lib_requires'],
+  },
+  {
+    id: 'v5-strict-pqclib',
+    requirement: 'v5: PqcLib requires exact ML-DSA-87 sizes (2,592-byte keys, 4,627-byte signatures) and the exact key-status layout; deployed and smoke-tested on Diana',
+    code: [
+      { label: 'PqcLib.verify (sizes before the precompile)', path: 'contracts-v4/src/PqcLib.sol#L44-L54' },
+      { label: 'PqcLib.checkKey (BadKeyLength)', path: 'contracts-v4/src/PqcLib.sol#L148-L169' },
+      { label: 'docs/V5.md (changes, gas, cost)', path: 'docs/V5.md' },
+      { label: 'smoke-v5.mjs', path: 'contracts-v4/script/smoke-v5.mjs' },
+    ],
+    live: [
+      { label: 'v5 prod router deployed at block 10,746,808', note: 'deploy tx 0x72cd976af4effc18cc04fc09e3487688516912d51ebc8689b2bde0b776bb8393, re-checked with the code hash of every v5 contract by reverify.mjs' },
+      { label: 'v5 Pocket lazily deployed and an Open drop created by ML-DSA-87 intent', hash: '0xd098f67aeebce5e013c65639a3d492343181ea72ac6905c700746689c96980ea' },
+      { label: 'drop claimed by a newcomer with its own registered key', hash: '0x08438baf17ecdb80692eb8ed8a393e222ef1cadd67727c91b82ec18263a87a1a' },
+      { label: 'pool slot claimed (link-key and claimer signatures)', hash: '0x0c260ee46f71ab773de52868e6cb22ed8c90a91e10bc6e11be357a19064537ef' },
+    ],
+    tests: ['test_v5_verify_refuses_wrong_sizes_before_the_precompile', 'testFuzz_v5_verify_true_only_at_exact_sizes', 'test_v5_keyStatus_refuses_trailing_data', 'test_v5_keyStatus_refuses_gap_between_head_and_tail', 'test_v5_checkKey_refuses_ml_dsa_87_key_of_wrong_length', 'test-real: test_pocket_with_truncated_owner_key_cannot_be_created'],
   },
 ];

@@ -1,14 +1,17 @@
-# Pocket Drop v4 - QCAI audit
+# Pocket Drop - QCAI audit (v4 audited in two stages; v5 = v4 + strict PqcLib)
 
 **Summary (one line, reused in the README and the project page):** two QCAI runs on the v4 contracts. Stage 1 scored 82 on 19 Nov 2026 and Stage 2 scored 78 on 20 Nov 2026. Both runs found the same 5 items. One is real and already bounded (ETH-004, at most 5 guardians); the rest are false positives. Each item maps to named Foundry tests below. The only change between the stages is a comment, and the bytecode is identical.
 
-All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary value. No audit was run after Stage 2.
+All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary value.
+
+**v5 (25 Nov 2026).** v5 changes one library, `PqcLib`, to close the hygiene item that used to be listed at the end of section 5.1 (exact ML-DSA-87 sizes and the exact key-status layout are now checked in the contract). The rest of `src/` is byte-for-byte the audited Stage 2 source. v5 is deployed on Diana and is the current version; v4 stays deployed as the previous version. A Stage 3 QCAI run on the v5 source has **not been run yet**: the audit is started from a signed-in dashboard account, not from a chain key (section 8). The v5 flattened source is ready in [`docs/audit/stage3/`](audit/stage3/). Details: [`docs/V5.md`](V5.md).
 
 ## 1. Reports
 
 | Stage | Date (UTC) | Audit ID | Score / risk | PDF | JSON | Audited source |
 |---|---|---|---|---|---|---|
 | 1 | 2026-11-19 23:28 | `QCAIA-1795130931306-3D8DAA40` | 82 / MEDIUM | [`docs/audit/stage1/QCAI-stage1-2026-11-19.pdf`](audit/stage1/QCAI-stage1-2026-11-19.pdf) | [`.json`](audit/stage1/QCAI-stage1-2026-11-19.json) | [`stage1/PocketDrop-v4-flattened.sol`](audit/stage1/PocketDrop-v4-flattened.sol), 1601 lines, SHA-256 `a4fdacc97a798149c6ce0b15e46b9944c94fb5ecb11ab68d235440692ad32cd4` |
+| 3 (v5) | not run yet | n/a | n/a | n/a | n/a | [`stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610` |
 | 2 | 2026-11-20 01:32 | `QCAIA-1795138339351-F6A93427` | 78 / MEDIUM | [`docs/audit/stage2/QCAI-stage2-2026-11-20.pdf`](audit/stage2/QCAI-stage2-2026-11-20.pdf) | [`.json`](audit/stage2/QCAI-stage2-2026-11-20.json), SHA-256 `a1d587ebb749c6cd8601b47bbcf63f6cf4f5709e0b72f6168c114ba2eb30bbc7` | [`stage2/PocketDrop-v4-flattened.sol`](audit/stage2/PocketDrop-v4-flattened.sol), 1605 lines, SHA-256 `c4b19a8d00879b64417aece0d7dd65a20e1398285c4fbf895f19e78cdfe1b0cf` |
 
 Public reports:
@@ -77,10 +80,10 @@ QCAI only computes its "Quantum readiness" score for QoreChain-native contracts.
 
 | Call site | Precompile | What it guarantees | Tests (PqcLib.t.sol) |
 |---|---|---|---|
-| [`PqcLib.verify`](../contracts-v4/src/PqcLib.sol#L37-L40) | `pqcVerify` at `0x0A01` | True only if the call succeeds and returns exactly one 32-byte word equal to 1. Anything else (failure, no code, short or extra data, any other value) is false, never a revert. | `test_verify_true_only_for_exactly_one_word_equal_one`, `test_verify_false_variants`, `test_verify_false_when_precompile_has_no_code`, `test_verify_passes_exact_calldata`, `testFuzz_verify_never_reverts` |
-| [`PqcLib.keyStatus`](../contracts-v4/src/PqcLib.sol#L51-L54) | `pqcKeyStatus` at `0x0A02` | Strict ABI decode of `(registered, algoId, pubkey, possessionProven)`. Non-boolean flags, a bad offset, an oversize key or short data all return `ok = false` (fail closed). | `test_keyStatus_valid_decode`, `test_keyStatus_fail_closed_on_call_failure`, `test_keyStatus_fail_closed_on_no_code`, `test_keyStatus_fail_closed_on_short_data`, `test_keyStatus_fail_closed_on_non_bool_flags`, `test_keyStatus_fail_closed_on_bad_offsets`, `test_keyStatus_fail_closed_on_bad_length`, `test_keyStatus_cap_boundary`, `testFuzz_keyStatus_never_reverts`, `testFuzz_keyStatus_mutated_word` |
-| [`PqcLib.checkKey` / `requireKey`](../contracts-v4/src/PqcLib.sol#L137-L156) | `pqcKeyStatus` | The key must be registered, ML-DSA-87, have possession proven and, when a hash is pinned, match it. `requireKey` reverts with `KeyUnavailable`, `NotRegistered`, `UnsupportedAlgo`, `PossessionNotProven` or `KeyMismatch`. | `test_checkKey_codes`, `test_requireKey_reverts_per_code` |
-| [`PqcLib.verifyFor` / `verifyForKey`](../contracts-v4/src/PqcLib.sol#L160-L174) | both | Reads the account's registered key with `checkKey`, then verifies with `verify`. Returns false (no revert) if the key is missing, unproven, of another algorithm, mismatched with the pinned hash, or the signature is wrong. | `test_verifyFor_uses_registered_key_and_exact_message` |
+| [`PqcLib.verify`](../contracts-v4/src/PqcLib.sol#L44-L54) | `pqcVerify` at `0x0A01` | True only if the call succeeds and returns exactly one 32-byte word equal to 1. Anything else (failure, no code, short or extra data, any other value) is false, never a revert. | `test_verify_true_only_for_exactly_one_word_equal_one`, `test_verify_false_variants`, `test_verify_false_when_precompile_has_no_code`, `test_verify_passes_exact_calldata`, `testFuzz_verify_never_reverts` |
+| [`PqcLib.keyStatus`](../contracts-v4/src/PqcLib.sol#L59-L99) | `pqcKeyStatus` at `0x0A02` | Strict ABI decode of `(registered, algoId, pubkey, possessionProven)`. Non-boolean flags, a bad offset, an oversize key or short data all return `ok = false` (fail closed). | `test_keyStatus_valid_decode`, `test_keyStatus_fail_closed_on_call_failure`, `test_keyStatus_fail_closed_on_no_code`, `test_keyStatus_fail_closed_on_short_data`, `test_keyStatus_fail_closed_on_non_bool_flags`, `test_keyStatus_fail_closed_on_bad_offsets`, `test_keyStatus_fail_closed_on_bad_length`, `test_keyStatus_cap_boundary`, `testFuzz_keyStatus_never_reverts`, `testFuzz_keyStatus_mutated_word` |
+| [`PqcLib.checkKey` / `requireKey`](../contracts-v4/src/PqcLib.sol#L148-L169) | `pqcKeyStatus` | The key must be registered, ML-DSA-87, have possession proven and, when a hash is pinned, match it. `requireKey` reverts with `KeyUnavailable`, `NotRegistered`, `UnsupportedAlgo`, `PossessionNotProven` or `KeyMismatch`. | `test_checkKey_codes`, `test_requireKey_reverts_per_code` |
+| [`PqcLib.verifyFor` / `verifyForKey`](../contracts-v4/src/PqcLib.sol#L173-L186) | both | Reads the account's registered key with `checkKey`, then verifies with `verify`. Returns false (no revert) if the key is missing, unproven, of another algorithm, mismatched with the pinned hash, or the signature is wrong. | `test_verifyFor_uses_registered_key_and_exact_message` |
 
 **Added 23 Nov 2026 (tests only, no source change, the audited bytecode is unchanged).**
 
@@ -93,7 +96,7 @@ QCAI only computes its "Quantum readiness" score for QoreChain-native contracts.
 | No permanent lock: every live link and every pool unwinds after expiry from any reachable state | `PocketDrop.refund`, `DropPool.close`, `Payout.withdraw` | `invariant_every_live_link_can_be_unwound_after_expiry`, `invariant_every_pool_can_be_closed_after_expiry` |
 | Signed bytes identical across the contracts' fixtures, the app and `@qorechain/qoresign`; all 596 fixture signatures reproduced byte for byte by qoresign | `PqcLib.pqMessage`, `frontend/src/lib/intents.ts` | `frontend/test/qoresign.diff.test.ts` |
 
-Known limit (hygiene, not a finding we can exploit): `PqcLib` leaves the 4,627 / 2,592 byte sizes to the precompile and the pinned key hash, and accepts a key-status offset above 0x80. The API checks the sizes before relaying (`backend/src/pqPreflight.ts`). Changing `PqcLib` would need a redeploy and a new QCAI run; see `docs/THREAT_MODEL.md` section 5.
+**Fixed in v5 (25 Nov 2026).** Formerly listed here as a known limit (hygiene, not a finding we could exploit): the v4 `PqcLib` left the 4,627 / 2,592 byte sizes to the precompile and the pinned key hash, and accepted a key-status offset above 0x80. v5 checks both sizes before calling the precompile, requires a 2,592-byte registered key (`BadKeyLength`), and requires offset 0x80 with no trailing data. Tests: `test_v5_verify_refuses_wrong_sizes_before_the_precompile`, `testFuzz_v5_verify_true_only_at_exact_sizes`, `test_v5_keyStatus_refuses_trailing_data`, `test_v5_keyStatus_refuses_gap_between_head_and_tail`, `test_v5_checkKey_refuses_ml_dsa_87_key_of_wrong_length`. v4 text, kept for history: The API checks the sizes before relaying (`backend/src/pqPreflight.ts`). Changing `PqcLib` would need a redeploy and a new QCAI run; see `docs/THREAT_MODEL.md` section 5.
 
 ### 5.2 PocketVault (the smart account)
 
@@ -141,7 +144,7 @@ The project page can only show "Solidity PQC signature check" and "Solidity PQC 
 
 | Feature | Source | Deployed on Diana (v4 PROD, deployer `qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq`) | Deployment tx (status 1) |
 |---|---|---|---|
-| pqcVerify `0x…0a01` and pqcKeyStatus `0x…0a02` | [`PqcLib.sol` L14-L16](../contracts-v4/src/PqcLib.sol#L14-L16) (constants), `verify` L37-L40, `keyStatus` L51-L54 | PocketVault implementation `0x899b289ef60444ac74d82dea5cacc6637a2a29c3` (every Pocket is an EIP-1167 clone of it) | `0x220d854be6d942af2e0f32bb8ca47794ee027967b2df27c95d91c0ec6ca245bc` |
+| pqcVerify `0x…0a01` and pqcKeyStatus `0x…0a02` | [`PqcLib.sol` L14-L16](../contracts-v4/src/PqcLib.sol#L14-L16) (constants), `verify` L44-L54, `keyStatus` L59-L99 | PocketVault implementation `0x899b289ef60444ac74d82dea5cacc6637a2a29c3` (every Pocket is an EIP-1167 clone of it) | `0x220d854be6d942af2e0f32bb8ca47794ee027967b2df27c95d91c0ec6ca245bc` |
 | same | [`PocketDrop.sol`](../contracts-v4/src/PocketDrop.sol) bind / claim | PocketDrop `0xbc13b9ee91f31ed56932abdb796693515c351f00` | `0x5c69b08bd9d8201c56d9a54ee76cfaafe766460b29e6f06412c5299f2500aa7c` |
 | same | [`DropPool.sol`](../contracts-v4/src/DropPool.sol) claim | DropPool `0xaa981588e5430e3db9a789a3754e108cc01e3d00` | `0xf44405b57d8bb41c15e6e59cc9ec84c65e936cdf5f7c5da7050473983d2e360a` |
 
@@ -151,7 +154,33 @@ Bytecode check (read 23 Nov 2026, 19:40 Cairo): the runtime code of all three co
 
 ```bash
 cd contracts-v4
-forge test                       # 167 tests
-forge coverage --report summary  # 100% on src/
-node ../frontend/scripts/reverify.mjs   # re-checks every recorded live hash on Diana
+forge test                                   # 185 tests (v5), mock precompiles
+FOUNDRY_PROFILE=realcrypto forge test        # 22 tests, real ML-DSA-87 via vm.ffi (needs npm ci in contracts-v4)
+FOUNDRY_PROFILE=live forge test              # 27 tests, eth_call against the live Diana precompiles
+sh script/ffi/mutation-check.sh              # accept-all verifier must break the real-crypto suite
+node script/probe-precompiles.mjs            # precompile conformance probe (eth_call only)
+forge coverage --report summary              # 100% on src/
+node ../frontend/scripts/reverify.mjs        # re-checks every recorded live hash and both deployments on Diana
 ```
+
+## 7. Testing beyond mocks (added 25 Nov 2026)
+
+The default suite replaces the two precompiles with Solidity mocks. Three further layers check the real thing.
+
+| Layer | What it proves | Where | Count |
+|---|---|---|---|
+| Real-crypto suite | Every signature in these tests is a real ML-DSA-87 signature. The `pqcVerify` stand-in calls out (`vm.ffi`) to two independent ML-DSA-87 implementations and accepts only when both agree. Covers spend, replay, tamper, a single flipped bit, wrong key, truncated / oversized / empty signatures, wrong domain, chain id, nonce and deadline, a rotated registry key, truncated keys, ERC-1271, guardian freeze, both drop modes and pool domain separation. | `contracts-v4/test-real/`, `contracts-v4/script/ffi/mldsa.mjs` | 22 tests |
+| Mutation check | With the verifier forced to accept everything, the real-crypto suite must fail. It does: 18 of 22 tests fail (the 4 that pass do not depend on a signature being rejected). | `contracts-v4/script/ffi/mutation-check.sh`, CI job `contracts-realcrypto` | 18 / 22 fail as required |
+| Live profile | The same 22 tests rerun with `pqcVerify` answered by the live Diana precompile (eth_call), plus 5 tests on live key status and on a fork (a fork has no precompile code, and `PqcLib` fails closed there). | `contracts-v4/test-live/`, CI job `contracts-live` | 27 tests |
+| Precompile conformance | 43 eth_call cases against 0x0A01 / 0x0A02, compared with FIPS 204: 0 anomalies in 28 reached verify cases. Wrong sizes, ML-DSA-65 / 44, context and internal-API signatures return false (no revert). The key-status bytes offset is always 0x80. An empty message is refused at block 10,654,799 and accepted from 10,654,800 (archive query), an independent reproduction of a chain change; Pocket Drop never signs an empty message. The recorded answers are replayed against `PqcLib` in CI. | [`docs/PRECOMPILE_CONFORMANCE.md`](PRECOMPILE_CONFORMANCE.md), `contracts-v4/test/PrecompileConformance.t.sol` | 3 tests over the recorded answers |
+
+v5 on chain: the deploy transactions of all 11 contracts and their runtime code hashes are in `contracts-v4/deployments/diana.json` (`v5`), re-checked by `reverify.mjs`. A live smoke on the v5 production instance (one drop sent, bound, claimed by a newcomer whose key registration was paid by the drip; one pool hosted, claimed and closed) is in [`contracts-v4/LIVE_RESULTS.md`](../contracts-v4/LIVE_RESULTS.md), section "v5 deploy and live smoke".
+
+## 8. Stage 3 (v5): how to run it
+
+The QCAI auditor runs from the dashboard (`dashboard.qorechain.io/audit`, sidebar Build > AI Audit) and needs a signed-in dashboard account (email or identity provider). It cannot be started from a chain key or an API. Per the QoreChain docs, the first audit each UTC day is free; on testnet, extra audits are paid in test QOR from the dashboard's own test wallet after a "Confirm Security Audit" dialog (earlier runs showed 150 QOR).
+
+1. Sign in, open AI Audit, set Blockchain to **Ethereum (EVM/Solidity)** (the setting used for Stages 1 and 2).
+2. Name: `PocketDrop v5 (strict PqcLib)`. Paste `docs/audit/stage3/PocketDrop-v5-flattened.sol` (SHA-256 above).
+3. Run Security Audit, then confirm. Make the report public.
+4. Save the JSON from `https://dashboard.qorechain.io/api/proxy/audits/<id>` as `docs/audit/stage3/QCAI-stage3-<date>.json`, fill the Stage 3 row in section 1, and triage the findings like sections 2 and 3.

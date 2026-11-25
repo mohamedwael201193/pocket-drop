@@ -31,11 +31,14 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 
 | Number | Label | Source |
 |---|---|---|
-| 483 checks passed, 0 failed: 318 EVM and 106 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`) | RECORDED, 23 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| 178 Foundry tests (unit, fuzz and invariant); 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
-| 185 frontend and 203 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 23 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
-| 103 recorded live steps on the v4 contracts, 31 of them attacks that reverted on chain or were refused by the chain | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
-| QCAI audit: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives) | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
+| 547 checks passed, 0 failed: 325 EVM and 121 Cosmos transactions re-checked against Diana (status, contract, decoded error, and for hybrid relays `pqc_hybrid_verify`), plus the code hash of every v5 and v4 contract | RECORDED, 25 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| 185 Foundry tests (unit, fuzz and invariant) on v5; 100% line, statement, branch and function coverage of `contracts-v4/src` | RECORDED, 25 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md) |
+| 22 real-crypto Foundry tests: every signature is a real ML-DSA-87 signature, checked by two independent implementations through `vm.ffi`; with an accept-all verifier 18 of them fail, as they must | RECORDED, 25 Nov 2026 | `contracts-v4/test-real/`, CI job `contracts-realcrypto`, [docs/AUDIT.md section 7](docs/AUDIT.md#7-testing-beyond-mocks-added-25-nov-2026) |
+| 27 live-precompile tests: the real-crypto suite rerun against the Diana `pqcVerify` precompile by eth_call, plus live key-status and fork checks | RECORDED, 25 Nov 2026 | `contracts-v4/test-live/`, CI job `contracts-live` |
+| Precompile conformance: 43 eth_call cases on 0x0A01 / 0x0A02, 0 anomalies against FIPS 204 | RECORDED, 25 Nov 2026 | [`docs/PRECOMPILE_CONFORMANCE.md`](docs/PRECOMPILE_CONFORMANCE.md) |
+| 202 frontend and 215 backend unit tests passed (9 backend tests skipped: they run only against a deployed API, with `PD_API_URL` set) | RECORDED, 25 Nov 2026 | [`frontend/src/data/tests.json`](frontend/src/data/tests.json), from `node frontend/scripts/count-tests.mjs` |
+| 115 recorded live rows: 103 on the v4 contracts (31 of them attacks that reverted on chain or were refused by the chain) and 12 from the v5 deploy smoke (one drop sent and claimed, one pool) | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
+| QCAI audit of v4: Stage 1 scored 82, Stage 2 scored 78 (same 5 findings; 1 real and bounded, 4 false positives). A Stage 3 run on the v5 source has not been run yet | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 | Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
 | Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
@@ -68,11 +71,23 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 
 The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects, with tests) is in [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
 
-## Contracts on Diana (v4)
+## Contracts on Diana
 
-From [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json). PROD uses a 24 h timelock, 48 h recovery, 72 h freeze and 72 h unanimous recovery. LAB uses the same bytecode with short delays (60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery), so the flows can be demonstrated in minutes.
+**Current: v5** (deployed 25 Nov 2026). v5 is v4 with a stricter `PqcLib`: exact ML-DSA-87 key and signature sizes are checked before the precompile is called, and the key-status reply must have the exact layout. Nothing else in `src/` changed. See [docs/V5.md](docs/V5.md).
 
-| Contract | PROD | LAB |
+| Contract | v5 PROD | v5 LAB |
+|---|---|---|
+| PocketRouter | `0x13b8e379e50da657b943781d2816fc17473ae376` | `0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75` |
+| PocketFactory | `0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f` | `0xf00a2ce5945dd6bf762105d03d00b6cb91639443` |
+| PocketVault (implementation) | `0x8603937464a48c18ebede4de1149e8e7dc4e91b4` | `0x5c17c28b7c000e302a7ac67c87562aa767439584` |
+| PocketDrop | `0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798` | `0xb4a6b993e7aaa450b729fbc1f1b05048d093169a` |
+| DropPool | `0xdb67b9881b37c0e9a4988a56089c05c221c0a26f` | `0xd358dd2e8bcd1db502bfefd99b2795f3e81aa3d6` |
+
+- v5 PqGuard example (`PqGuardedCounter`): `0x4b8bef69fe7264851f263f6fcf02db3985f43ac9`
+
+**Previous: v4** (still deployed and readable; links and Pockets made on v4 keep working there). From [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json). PROD uses a 24 h timelock, 48 h recovery, 72 h freeze and 72 h unanimous recovery. LAB uses the same bytecode with short delays (60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery), so the flows can be demonstrated in minutes.
+
+| Contract | v4 PROD | v4 LAB |
 |---|---|---|
 | PocketRouter | `0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209` | `0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d` |
 | PocketFactory | `0x74b604e8f1bb729a6e43dcd893f01747688e3e8f` | `0x864cf0278a24c1b27d1ac66c883c3e74ff8d5a0c` |
@@ -80,7 +95,7 @@ From [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json
 | PocketDrop | `0xbc13b9ee91f31ed56932abdb796693515c351f00` | `0x42da108a4e8bf5d152600b470f1abd28debdee59` |
 | DropPool | `0xaa981588e5430e3db9a789a3754e108cc01e3d00` | `0x1858193617bc2f2e2570a137320e1a1cb3a7ce5b` |
 
-- PqGuard example (`PqGuardedCounter`): `0x5ae81c71b7ff0c93886df8fe7502f3c846c3835f`
+- v4 PqGuard example (`PqGuardedCounter`): `0x5ae81c71b7ff0c93886df8fe7502f3c846c3835f`
 - Legacy v3 PocketDrop (still readable, used by old links): `0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97`
 - Relayer: `0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD` / `qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl`
 
@@ -99,12 +114,14 @@ Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL
 
 ## Audit
 
-Two-stage QCAI audit: Stage 1 scored 82 (19 Nov 2026) and Stage 2 scored 78 (20 Nov 2026). Every finding is mapped to a resolution and tests, the lower Stage 2 score is explained, and the deployed bytecode is identical to the Stage 2 source. Details: [docs/AUDIT.md](docs/AUDIT.md). PDFs: [`docs/audit/`](docs/audit/).
+Two-stage QCAI audit of v4: Stage 1 scored 82 (19 Nov 2026) and Stage 2 scored 78 (20 Nov 2026). Every finding is mapped to a resolution and tests, the lower Stage 2 score is explained, and the v4 bytecode is identical to the Stage 2 source. v5 changes only `PqcLib`; its Stage 3 run has not been run yet (steps and the flattened source: docs/AUDIT.md section 8). Details: [docs/AUDIT.md](docs/AUDIT.md). PDFs: [`docs/audit/`](docs/audit/).
 
 ## Run it
 
 ```bash
-cd contracts-v4 && forge test                  # 178 tests
+cd contracts-v4 && forge test                  # 185 tests
+cd contracts-v4 && npm ci && FOUNDRY_PROFILE=realcrypto forge test   # 22 real ML-DSA-87 tests
+cd contracts-v4 && FOUNDRY_PROFILE=live forge test                  # 27 tests against the live precompiles
 cd backend && npm ci && npm test               # relayer unit tests
 cd frontend && npm ci && npm test              # app unit tests
 cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on Diana
@@ -114,7 +131,7 @@ cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on
 
 | Path | What |
 |---|---|
-| [`contracts-v4/`](contracts-v4/) | v4 contracts, Foundry tests, deploy scripts, [LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md), [KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md), [SECURITY.md](contracts-v4/SECURITY.md) |
+| [`contracts-v4/`](contracts-v4/) | v5 contracts (v4 + strict PqcLib), Foundry tests (default, `test-real/`, `test-live/`), deploy scripts, [LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md), [KNOWN_ISSUES.md](contracts-v4/KNOWN_ISSUES.md), [SECURITY.md](contracts-v4/SECURITY.md) |
 | [`backend/`](backend/) | Relayer API (bind, claim, route, sponsor, stats, health, qday) |
 | [`frontend/`](frontend/) | Web app, e2e and QA specs, evidence, re-verification scripts |
 | [`docs/`](docs/) | [AUDIT.md](docs/AUDIT.md), [THREAT_MODEL.md](docs/THREAT_MODEL.md), [qday/FEASIBILITY.md](docs/qday/FEASIBILITY.md), [cbom/](docs/cbom/README.md) |
