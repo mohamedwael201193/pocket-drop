@@ -19,6 +19,7 @@ import { useBalance } from '../lib/queries';
 import { checkRecipient, recentRecipients, rememberRecipient } from '../lib/recipientCheck';
 import { pocketEnv } from '../components/powers';
 import { pub } from '../lib/chain';
+import { SelfRelaySetting } from '../components/selfRelayOffer';
 
 /** busy / error / last tx for one action button. */
 function useAct() {
@@ -231,6 +232,7 @@ export default function PocketPage() {
             <Section title="Q-Day Rescue" testId="rescue-section" badge={<Pill tone="warn">legacy accounts</Pill>}>
               <RescuePanel />
             </Section>
+            <Section title="Relay it yourself" testId="self-relay-section" badge={<Pill>advanced</Pill>}><SelfRelaySetting /></Section>
           </>
         ) : (
           // a first-time visitor sees one thing to do: create the key. Guardian tools and Rescue wait under Advanced.
