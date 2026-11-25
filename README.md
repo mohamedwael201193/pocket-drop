@@ -57,6 +57,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | Every relay carries a post-quantum signature, checked by the chain | `GET /api/health`: `relay.mode` is `hybrid` and `relay.classicalPathOpen` is `false`. Relay [`04AA1783…D445`](https://pocketdrop-app.vercel.app/check/04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445) is a `MsgCrossVMCall` with `pqc_hybrid_verify=verified`; the relayer's ECDSA-only EVM window is closed, so an ECDSA-only relay is refused at broadcast (`contracts-v4/LIVE_RESULTS.md`, "Hybrid relay lane"). |
 | You can re-check a signature without trusting us | Open [`/check`](https://pocketdrop-app.vercel.app/check): it fetches a transaction from Diana and re-verifies its ML-DSA-87 signatures in your browser with `@qorechain/qoresign`, including a [refused Q-Day attack](https://pocketdrop-app.vercel.app/check/FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3). |
 | A QoreX wallet signature can spend a Pocket | Tx [`0xf98daf5e…6d1a`](https://explore.qore.network/tx/0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a) (TEAM-RUN), evidence in `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`. |
+| The relayer is optional: a user's own scoped EVM window can claim and spend | TEAM-RUN on v5 prod, 26 Nov 2026: a fresh test account (0 QOR at start; the drip paid its fees) opened its own window scoped to the v5 router, 400 blocks and 3 txs, expiry height 10,755,999 ([`A6C998D7…63FD`](https://pocketdrop-app.vercel.app/check/A6C998D75F07A78F260EB64CC6AB597D30A842599265D5D8627F514E5ED663FD)), sent its own claim [`0xb7941d40…2663`](https://explore.qore.network/tx/0xb7941d40569f7e45217980137a3120c7690bdb0c4aa17e9d2df150c718fd2663) and its own first spend [`0x3abed0a3…03b6`](https://explore.qore.network/tx/0x3abed0a3672504bf026a2e104e03ce917c4c2ddcfe2735430096d92ea88403b6), then closed the window (`3DAFE5B7…8CD5`). Evidence `frontend/evidence/v4/e2e/self-relay-v5.json`, script `contracts-v4/script/self-relay-v5.mjs`, `reverify.mjs` section 11. |
 | Every recorded hash is real | Run `cd frontend && npm ci && node scripts/reverify.mjs`. |
 
 ## How it works
@@ -68,6 +69,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 - **PocketRouter** relays signed intents and can deploy a Pocket on first use. Funds sent to a Pocket's address before it exists are kept.
 - **PocketDrop** (send by link) and **DropPool** (one link, many claimers). The link key binds one recipient (`pqcVerify`). The claim needs the recipient's registered, proven key (`pqcKeyStatus`) and a signature from it (`pqcVerify`).
 - **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents as hybrid-signed `MsgCrossVMCall`s (secp256k1 + ML-DSA-87, both checked by the chain before the EVM runs). It cannot forge any intent.
+- **Relay it yourself.** `PocketRouter.relay` has no caller check, so the relayer is optional. When it is down or slow (or always, with the Advanced setting on `/pocket`), the user's own account opens a hybrid-signed EVM window scoped to the one v5 router (about 9 minutes, 3 transactions) and submits the call it signed. Inside that window the classical key can only call the router, and the router only forwards calls whose authority is an ML-DSA-87 signature. The account pays its own fees, so it needs some QOR (a link's drip covers it). The native window transaction goes through the app's key-less `/rpc` proxy because Diana's public REST and RPC send no CORS headers; the proxy holds no keys. Code: [`frontend/src/lib/selfRelay.ts`](frontend/src/lib/selfRelay.ts).
 
 The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects, with tests) is in [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
 
@@ -149,7 +151,7 @@ cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on
 | Cryptographic bill of materials ([docs/cbom](docs/cbom/README.md)) | QoreScan Community | QoreChain tool |
 | Wallet connection and signing | QoreX wallet | QoreChain product |
 | QoreX provider types, testnet ids, capability and chain-error checks (`frontend/src/lib/qorex.ts`) | `@qorechain/qorex-types` | Apache-2.0 |
-| Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, hybrid `MsgCrossVMCall`, scoped EVM window (closed) | QoreChain network |
+| Network and precompiles | QoreChain Diana testnet, `pqcVerify` / `pqcKeyStatus`, hybrid `MsgCrossVMCall`, scoped EVM windows (per user and router-only for relay it yourself; the relayer's fallback window is closed) | QoreChain network |
 | Contract audit | QCAI (QoreChain AI audit) | QoreChain service |
 | Cosmos transactions | `@cosmjs/stargate`, `cosmjs-types` | Apache-2.0 |
 | EVM client, ABI encoding | `viem` | MIT |
