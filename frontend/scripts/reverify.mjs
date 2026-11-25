@@ -328,6 +328,31 @@ for (const f of fs.readdirSync(path.join(ev, 'e2e')).filter((f) => /^delta-run-.
   mark('measured delta', b);
 }
 
+// 13. intercepted Confirmed link (evidence/v4/e2e/intercept-confirmed-v5.json): the interceptor's bind succeeded, both of
+//     its claims (before and after the sender's cancel) were mined and REVERTED, sent from its own account to the router
+//     inside a window scoped to that router; the cancel succeeded.
+{
+  const f = path.join(ev, 'e2e', 'intercept-confirmed-v5.json');
+  if (fs.existsSync(f)) {
+    section('intercepted Confirmed link (intercept-confirmed-v5.json)');
+    b = { e: evmTxs, c: cosmosTxs };
+    const J = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const router = String(J.router).toLowerCase();
+    for (const r of J.rows.filter((x) => x.hash)) {
+      if (r.lane !== 'evm') { await cosmosCheck(r.hash, r.step); continue; }
+      evmTxs++; seenHash.add(r.hash.toLowerCase());
+      try {
+        const [tx, rc] = await Promise.all([rpc('eth_getTransactionByHash', [r.hash]), rpc('eth_getTransactionReceipt', [r.hash])]);
+        check(!!rc && rc.status === '0x0' && String(tx.to).toLowerCase() === router && String(tx.from).toLowerCase() === String(r.submitter).toLowerCase(),
+          `tx ${r.hash.slice(0, 12)}… from the interceptor to the router is ${rc?.status === '0x0' ? 'reverted' : 'NOT reverted'} (recorded ${r.decodedError}): ${r.step.slice(0, 50)}`);
+      } catch (e) { check(false, `tx ${r.hash.slice(0, 12)}… not readable (${e.message})`); }
+    }
+    const w = J.rows.find((x) => x.window)?.window;
+    check(!!w && w.allowedTargets?.length === 1 && String(w.allowedTargets[0]).toLowerCase() === router && w.pqcHybridVerify === 'verified', `interceptor window scoped to the router only, pqc_hybrid_verify ${w?.pqcHybridVerify}`);
+    mark('intercepted link', b);
+  }
+}
+
 evidenceSets.push(['spend ledger (evidence/v4/spend.json)', JSON.parse(fs.readFileSync(path.join(ev, 'spend.json'), 'utf8')).entries.map((e) => [e.hash, `spend: ${e.note}`])]);
 for (const [name, list] of evidenceSets) {
   section(name);
