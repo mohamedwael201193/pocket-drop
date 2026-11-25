@@ -339,6 +339,12 @@
     "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 334": "0xfff383D7F73c91E36b9697d60C05d47EF2805453",
     "TEAM-RUN hybrid QA (hybrid-relay-isolated-signer.json) 335": "0x6645B49FF192A11F9a18b702A88CFc7A03626275",
     "TEAM-RUN v5 smoke sender Pocket (deployments/diana.json v5.smoke)": "0xa1FAdF60970353bDf497D943C51bBE01a8b1c6d6",
-    "TEAM-RUN v5 smoke recipient (deployments/diana.json v5.smoke)": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA"
+    "TEAM-RUN v5 smoke recipient (deployments/diana.json v5.smoke)": "0xA91a05730f75c5B9170E5414374ec532ee38c8EA",
+    "TEAM-RUN v5 e2e chromium-390 a-confirmed sender key (chromium-390-a-confirmed.json, createDrop 354AFC4F)": "0x874406CbcD2009a3e1853dE6794F2Cec8366F11B",
+    "TEAM-RUN v5 e2e chromium-390 a-confirmed sender Pocket (chromium-390-a-confirmed.json)": "0xA3148011d411d56265028F7Fd56c803ed85DB4f4",
+    "TEAM-RUN v5 e2e chromium-390 a-confirmed recipient key (bind 42E08642 in chromium-390-a-confirmed.json)": "0x71A50B0E3ca7ce94A5A95E3265D0dDCC653DF6CD",
+    "TEAM-RUN v5 e2e chromium-390 a-confirmed recipient Pocket (chromium-390-a-confirmed.json)": "0x87A803a28A0F21b7891D32b0514a3Db5Cd4C6d0e",
+    "TEAM-RUN v4 e2e webkit-390 a-confirmed recipient key (bind C3A70D84 in webkit-390-a-confirmed.json)": "0x43Dce76e6e73f4dD617C7F989776F335A1d92484",
+    "TEAM-RUN v3 link 29 WebKit 390 recipient (bind 1806B21C, claim CAFECB9A in hybrid-relay-v3-live-2026-11-22.json)": "0x718b9e52fD791d93589Eb174965c7A73F9405146"
   }
 }
