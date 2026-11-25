@@ -1,7 +1,7 @@
 // Recipient side, all in the browser tab. Mirrors the proven phone spike (spike/page/src/main.ts): keygen, PoP registration
 // through the key-less proxy, hybrid scoped EVM window, ML-DSA signing. Lazy-loaded: it pulls the heavy QoreChain SDK.
-import { unifiedAccountFromSeed, getNetwork, EthNativeSigner, buildRegisterPqcKeyMsg, signProofOfPossession } from '@qorechain/sdk';
-import { evmWindowStatus } from '@qorechain/evm';
+import { unifiedAccountFromSeed, getNetwork, EthNativeSigner, buildRegisterPqcKeyMsg, signProofOfPossession, openEvmWindowMsg } from '@qorechain/sdk';
+import { evmWindowCost, evmWindowStatus } from '@qorechain/evm';
 import { mldsa } from '@qorechain/pqc';
 import { StargateClient } from '@cosmjs/stargate';
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
@@ -83,8 +83,24 @@ export async function windowState(acct: RecipientAccount) {
 }
 export async function windowLive(acct: RecipientAccount): Promise<boolean> { return (await windowState(acct)).live; }
 
-// No browser flow opens an EVM window any more (20 Nov 2026): every action goes through the relayer, and while a window
-// is live the classical key alone can send EVM txs inside its scope. windowState stays for read-only checks.
+// The normal flows open no EVM window (20 Nov 2026): every action goes through the relayer, and while a window is live the
+// classical key alone can send EVM txs inside its scope. The one exception is "Relay it yourself" (selfRelay.ts), which the
+// user starts: a window scoped to the one PocketRouter, about 9 minutes, 3 txs. Inside it the classical key can only call
+// the router, and the router only forwards calls whose authority is an ML-DSA-87 signature, so funds still move only on a
+// PQ signature.
+
+/** Window status with its scope (allowed targets), for the self-relay reuse check. */
+export async function windowScope(acct: RecipientAccount) {
+  try { const w = await evmWindowStatus({ rest: COSMOS_REST, address: acct.cosmos }); return { live: !!w.live, remainingTxs: w.remainingTxs, allowedTargets: w.allowedTargets }; }
+  catch { return null; }
+}
+
+/** Hybrid-signed MsgOpenEVMWindow scoped to `router` only (self-relay). Returns the native tx hash. */
+export async function openRouterWindow(acct: RecipientAccount, router: Hex, o: { blocks: number; maxTxs: number; txGasCap: bigint }): Promise<string> {
+  const gp = ((await pub.getGasPrice()) * 13n) / 10n;
+  const maxValue = evmWindowCost({ gas: o.txGasCap, maxFeePerGas: gp }) * BigInt(o.maxTxs) + 100_000n;
+  return cosmosTx(acct, 'hybrid', [openEvmWindowMsg({ sender: acct.cosmos, blocks: o.blocks, maxTxs: o.maxTxs, maxValue, allowedTargets: [router] })], '100000', '800000');
+}
 
 /** Link-key signature authorising exactly this (link, recipient, recipient key) binding. */
 export function signBind(seed: Uint8Array, linkId: bigint, recipient: Hex, recipientKeyHash: Hex) {
