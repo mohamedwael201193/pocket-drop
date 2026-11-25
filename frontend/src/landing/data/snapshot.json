@@ -1,0 +1,197 @@
+{
+ "capturedAt": "2026-11-25T22:12:54.764Z",
+ "health": {
+  "headBlock": "10752321",
+  "relay": {
+   "mode": "hybrid",
+   "classicalPathOpen": false
+  }
+ },
+ "stats": {
+  "v4": {
+   "prod": {
+    "pockets": 2,
+    "drops": {
+     "created": 2,
+     "bound": 2,
+     "confirmed": 1,
+     "claimed": 2,
+     "cancelled": 0
+    },
+    "pools": {
+     "created": 1,
+     "slotsClaimed": 1
+    },
+    "hybridRelayEvents": 5,
+    "distinctAccounts": {
+     "all": {
+      "own": 2,
+      "external": 2
+     }
+    }
+   },
+   "lab": {
+    "pockets": 0,
+    "drops": {
+     "created": 0,
+     "bound": 0,
+     "confirmed": 0,
+     "claimed": 0,
+     "cancelled": 0
+    },
+    "pools": {
+     "created": 0,
+     "slotsClaimed": 0
+    },
+    "hybridRelayEvents": 0,
+    "distinctAccounts": {
+     "all": {
+      "own": 0,
+      "external": 0
+     }
+    }
+   },
+   "prodV4": {
+    "pockets": 54,
+    "drops": {
+     "created": 33,
+     "bound": 30,
+     "confirmed": 14,
+     "claimed": 22,
+     "cancelled": 4
+    },
+    "pools": {
+     "created": 16,
+     "slotsClaimed": 26
+    },
+    "hybridRelayEvents": 25,
+    "distinctAccounts": {
+     "all": {
+      "own": 97,
+      "external": 1
+     }
+    }
+   },
+   "labV4": {
+    "pockets": 14,
+    "drops": {
+     "created": 0,
+     "bound": 0,
+     "confirmed": 0,
+     "claimed": 0,
+     "cancelled": 0
+    },
+    "pools": {
+     "created": 0,
+     "slotsClaimed": 0
+    },
+    "hybridRelayEvents": 1,
+    "distinctAccounts": {
+     "all": {
+      "own": 13,
+      "external": 0
+     }
+    }
+   }
+  }
+ },
+ "qday": {
+  "baits": [
+   {
+    "id": "B1",
+    "description": "Plain: no guardians, daily limit 0.05 QOR",
+    "pocket": "0xCE272e8c261202C4c4e38479763c8892C64C2B1F",
+    "pocketWei": "200000000000000000",
+    "deployed": true,
+    "alarm": []
+   },
+   {
+    "id": "B2",
+    "description": "Guarded: 2 team guardians, threshold 2, daily limit 0.05 QOR",
+    "pocket": "0x31368D55a0fD1983397ffc5D85dB3bdd482a11cE",
+    "pocketWei": "200000000000000000",
+    "deployed": true,
+    "alarm": []
+   },
+   {
+    "id": "B3",
+    "description": "Queued: the owner queued a 0.1 QOR spend to a team address (24 h timelock); nobody else can veto, redirect or add one",
+    "pocket": "0x5e08A3308f60b512d6958A46629E1EE3FEC8Bd06",
+    "pocketWei": "200000000000000000",
+    "deployed": true,
+    "alarm": []
+   },
+   {
+    "id": "B4",
+    "description": "Recipient: bound and confirmed recipient of a 0.1 QOR Confirmed drop; only its ML-DSA key can claim it",
+    "pocket": "0xb5056dC92734cdA2162D76E74Aaba3D338E6C28F",
+    "pocketWei": "200000000000000000",
+    "deployed": true,
+    "alarm": []
+   },
+   {
+    "id": "B5",
+    "description": "Counterfactual: not deployed yet, 0.2 QOR waits at the predicted address; deploying it pins the real registered key",
+    "pocket": "0xa5BFb1edE77C41d91450a0a918D3d5775a178f24",
+    "pocketWei": "200000000000000000",
+    "deployed": false,
+    "alarm": []
+   }
+  ],
+  "alarm": {
+   "raised": false,
+   "reasons": []
+  },
+  "log": {
+   "onChain": {
+    "rows": [
+     {
+      "tx": "FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3",
+      "height": 10531327,
+      "bait": "B1",
+      "call": "spend",
+      "failed": true,
+      "lane": "hybrid",
+      "time": "2026-11-22T03:34:46Z"
+     },
+     {
+      "tx": "BB29C5D702311A1666613C66F52F68F3C54DAA454BCDEC5B2D46C92E0340BFED",
+      "height": 10531318,
+      "bait": "B1",
+      "call": "spend",
+      "failed": true,
+      "lane": "hybrid",
+      "time": "2026-11-22T03:34:33Z"
+     },
+     {
+      "tx": "BC011B9E894932C8BCDF97D7AA1DCCAD87EB4D4FD72568741C5E19F3953E2621",
+      "height": 10531305,
+      "bait": "B2",
+      "call": "spend",
+      "failed": true,
+      "lane": "hybrid",
+      "time": "2026-11-22T03:34:14Z"
+     },
+     {
+      "tx": "0xd0aede1a9056a76ea3b1ea477984646f59c94e8a6ce04dac509a9bc1e5fb7a0a",
+      "height": 10414161,
+      "bait": "B1",
+      "call": "spend",
+      "failed": true,
+      "lane": "evm",
+      "time": "2026-11-20T05:01:21.000Z"
+     },
+     {
+      "tx": "0xe5f5586b8d75cdd4cef27e99b26cf97605e5dcabb30d4bd16769523f3f1fdec6",
+      "height": 10413190,
+      "bait": "B4",
+      "call": "drop.bind",
+      "failed": false,
+      "lane": "evm",
+      "time": "2026-11-20T04:38:20.000Z"
+     }
+    ]
+   }
+  }
+ }
+}
