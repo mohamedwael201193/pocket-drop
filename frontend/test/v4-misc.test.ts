@@ -15,15 +15,21 @@ describe('link ids: v3 numbers keep working, v4 and v5 carry the instance', () =
     // links shared before v5.1 keep resolving to the v5 contracts
     expect(parseLinkId('q12')).toEqual({ v: 4, env: 'prodV5', id: 12n });
     expect(parseLinkId('k3')).toEqual({ v: 4, env: 'labV5', id: 3n });
-    // v5.1 (current) links
-    expect(parseLinkId('r12')).toEqual({ v: 4, env: 'prod', id: 12n });
-    expect(parseLinkId('m3')).toEqual({ v: 4, env: 'lab', id: 3n });
+    // links shared before v5.2 keep resolving to the v5.1 contracts
+    expect(parseLinkId('r12')).toEqual({ v: 4, env: 'prodV51', id: 12n });
+    expect(parseLinkId('m3')).toEqual({ v: 4, env: 'labV51', id: 3n });
+    // v5.2 (current) links
+    expect(parseLinkId('s12')).toEqual({ v: 4, env: 'prod', id: 12n });
+    expect(parseLinkId('n3')).toEqual({ v: 4, env: 'lab', id: 3n });
+    expect(parseLinkId('s0')).toBeNull();
     expect(parseLinkId('r0')).toBeNull();
     expect(parseLinkId('p0')).toBeNull();
     expect(parseLinkId('q0')).toBeNull();
     expect(parseLinkId('x1')).toBeNull();
-    expect(linkId4('prod', 5n)).toBe('r5');
-    expect(linkId4('lab', 5n)).toBe('m5');
+    expect(linkId4('prod', 5n)).toBe('s5');
+    expect(linkId4('lab', 5n)).toBe('n5');
+    expect(linkId4('prodV51', 5n)).toBe('r5');
+    expect(linkId4('labV51', 5n)).toBe('m5');
     expect(linkId4('prodV5', 5n)).toBe('q5');
     expect(linkId4('labV5', 5n)).toBe('k5');
     expect(linkId4('prodV4', 5n)).toBe('p5');
@@ -32,8 +38,9 @@ describe('link ids: v3 numbers keep working, v4 and v5 carry the instance', () =
   it('builds and re-parses claim URLs', () => {
     const seed = new Uint8Array(32).fill(7);
     const u = claimUrl4('https://app.test', 'lab', 4n, seed, 'pool');
-    expect(u).toBe(`https://app.test/pool/m4#k=${'07'.repeat(32)}`);
-    expect(parseClaimInput(u)).toBe(`/pool/m4#k=${'07'.repeat(32)}`);
+    expect(u).toBe(`https://app.test/pool/n4#k=${'07'.repeat(32)}`);
+    expect(parseClaimInput(u)).toBe(`/pool/n4#k=${'07'.repeat(32)}`);
+    expect(parseClaimInput(`https://app.test/c/r9#k=${'07'.repeat(32)}`)).toBe(`/c/r9#k=${'07'.repeat(32)}`);
     const old = claimUrl4('https://app.test', 'labV4', 4n, seed, 'pool');
     expect(old).toBe(`https://app.test/pool/l4#k=${'07'.repeat(32)}`);
     expect(parseClaimInput(old)).toBe(`/pool/l4#k=${'07'.repeat(32)}`);

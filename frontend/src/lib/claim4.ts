@@ -1,5 +1,5 @@
 // Recipient side of drops and pools. v3 link ids are plain numbers (/c/17). v4 ids: p12 = prod, l12 = lab. v5 ids: q12 = prod,
-// k12 = lab. v5.1 (current contracts) ids: r12 = prod, m12 = lab. Old links keep working against the contracts they were made on.
+// k12 = lab. v5.1 ids: r12 = prod, m12 = lab. v5.2 (current contracts) ids: s12 = prod, n12 = lab. Old links keep working against the contracts they were made on.
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
 import { dropAbi, poolAbi } from './abi4';
 import { pub } from './chain';
@@ -13,10 +13,10 @@ import { postRoute, type RouteResult } from './api';
 export type ParsedId = { v: 3; id: string } | { v: 4; env: Env; id: bigint };
 export function parseLinkId(raw: string): ParsedId | null {
   if (/^\d+$/.test(raw)) return { v: 3, id: raw };
-  const m = /^([plqkrm])(\d{1,18})$/.exec(raw);
+  const m = /^([plqkrmsn])(\d{1,18})$/.exec(raw);
   return m && BigInt(m[2]) > 0n ? { v: 4, env: PREFIX_ENV[m[1]], id: BigInt(m[2]) } : null;
 }
-const PREFIX_ENV: Record<string, Env> = { r: 'prod', m: 'lab', q: 'prodV5', k: 'labV5', p: 'prodV4', l: 'labV4' };
+const PREFIX_ENV: Record<string, Env> = { s: 'prod', n: 'lab', r: 'prodV51', m: 'labV51', q: 'prodV5', k: 'labV5', p: 'prodV4', l: 'labV4' };
 export const linkId4 = (env: Env, id: bigint | string) => `${LINK_PREFIX[env]}${id}`;
 export const claimUrl4 = (origin: string, env: Env, id: bigint | string, seed: Uint8Array, kind: 'c' | 'pool' = 'c') =>
   `${origin}/${kind}/${linkId4(env, id)}#k=${bytesToHex(seed).slice(2)}`;

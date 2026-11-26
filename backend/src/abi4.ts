@@ -22,10 +22,6 @@ export const routerAbi = [
     "stateMutability": "nonpayable"
   },
   {
-    "type": "receive",
-    "stateMutability": "payable"
-  },
-  {
     "type": "function",
     "name": "deployAndRelay",
     "inputs": [
@@ -188,7 +184,7 @@ export const routerAbi = [
   },
   {
     "type": "error",
-    "name": "SweepFailed",
+    "name": "ZeroAddress",
     "inputs": []
   }
 ] as const;
@@ -272,6 +268,11 @@ export const v4ErrorsAbi = [
   },
   {
     "type": "error",
+    "name": "NotAuthorized",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "NotEnoughSigners",
     "inputs": []
   },
@@ -312,6 +313,11 @@ export const v4ErrorsAbi = [
   },
   {
     "type": "error",
+    "name": "Reentrancy",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "SendFailed",
     "inputs": []
   },
@@ -340,6 +346,11 @@ export const v4ErrorsAbi = [
         "internalType": "uint256"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "BadFeeTo",
+    "inputs": []
   },
   {
     "type": "error",
@@ -419,12 +430,12 @@ export const v4ErrorsAbi = [
   },
   {
     "type": "error",
-    "name": "RecipientChanged",
+    "name": "PayoutOutsideLock",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "Reentrancy",
+    "name": "RecipientChanged",
     "inputs": []
   },
   {
@@ -515,7 +526,7 @@ export const v4ErrorsAbi = [
   },
   {
     "type": "error",
-    "name": "SweepFailed",
+    "name": "ZeroAddress",
     "inputs": []
   },
   {

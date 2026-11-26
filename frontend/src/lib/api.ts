@@ -169,4 +169,4 @@ const xvmSchema = z.object({
   events: z.array(z.object({ eventName: z.string(), args: z.record(z.unknown()), blockNumber: z.string(), transactionHash: z.string(), lane: z.literal('hybrid') })),
 }).passthrough();
 /** GET /api/xvm: hybrid relays into the PocketRouter of `env`, decoded into the events they stand for. */
-export const fetchXvm = (env: 'prod' | 'lab' | 'prodV5' | 'labV5' | 'prodV4' | 'labV4') => getJson(`/api/xvm?env=${env}`, xvmSchema).then((r) => r.events as XvmEvent[]);
+export const fetchXvm = (env: 'prod' | 'lab' | 'prodV51' | 'labV51' | 'prodV5' | 'labV5' | 'prodV4' | 'labV4') => getJson(`/api/xvm?env=${env}`, xvmSchema).then((r) => r.events as XvmEvent[]);

@@ -10,9 +10,115 @@
   "cosmosChainId": "qorechain-diana",
   "explorer": "https://explore.qore.network"
  },
- "current": "v5.1",
+ "current": "v5.2",
  "instances": {
   "prod": {
+   "router": {
+    "address": "0xe0a2679ae760a843880489c8cf8da15c00559a88",
+    "deployTx": "0x10f37198698de1a852103feedcf3094e70f062c904101826d1edca332116f655",
+    "blockNumber": "10761520",
+    "codeKeccak": "0x3f2c165c0fb760ca0ff08652608ac23b4656c94afee52f3e941ac64cf3cd0004"
+   },
+   "factory": {
+    "address": "0x8aa57c26fb2ce4389c7732ab7876265dbb9e5278",
+    "deployTx": "0x075fa33cf19ed03c8d6725b3de6567b2273d33e055280262f57cd397260e92a8",
+    "blockNumber": "10761513",
+    "codeKeccak": "0xcbf4e8c29a40f70abe2ec38734449fe31e1986456a5f83fdce984a47465ff4f9"
+   },
+   "drop": {
+    "address": "0xf0103854937897d6d117f947046d53fbc66a2639",
+    "deployTx": "0x906c10641b3e1bd502a18cece57e2b56fb6c4d8979b1629549ea141ad12c23aa",
+    "blockNumber": "10761515",
+    "codeKeccak": "0xf78f079bd5c3bfe4ae68585aa572ac0e5b372c62fc86d5dcc6c815fbac2d4bd7"
+   },
+   "pool": {
+    "address": "0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9",
+    "deployTx": "0x6abe2007a34831db698eb4dde1cf2da8df8c76b3a7bccfeede217379a8865dfe",
+    "blockNumber": "10761519",
+    "codeKeccak": "0x552a3c8627e8dc3da598d3b0890c9ace7f3021bbfe628ab8dd4ca5fd5536599e"
+   },
+   "vaultImpl": {
+    "address": "0x02375366fc06356e0020c93fbe9d5d8fcbeb4f16",
+    "deployTx": "0x4124b04fd7e7432bedd3ad50a618e6c825382e09f93fe6d4f91c215ce75dbc4a",
+    "blockNumber": "10761512",
+    "codeKeccak": "0xa3f971365f12341da5cc4a239f329c9729bfb237afd9dca0fd11cbb7e444f5cb"
+   },
+   "readBack": {
+    "TIMELOCK": "86400",
+    "RECOVERY_DELAY": "172800",
+    "FREEZE_PERIOD": "259200",
+    "UNANIMOUS_RECOVERY_DELAY": "259200",
+    "BIND_TIMEOUT": "3600"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "3600",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "lab": {
+   "router": {
+    "address": "0xa52d5c5eeb65e564f5a76cc6cc8f518c735c7bee",
+    "deployTx": "0xe66fd919cbb233404846f88e5b4e1a34e0015ae476e628edf8c25e1d550dee8c",
+    "blockNumber": "10761530",
+    "codeKeccak": "0x218812eb4ed866904400053f12c37ded88d2eef087fe07b622ece4b05e9391e7"
+   },
+   "factory": {
+    "address": "0x40e163c011197ea2de23bcbffc64e7150a8e2a20",
+    "deployTx": "0x180882340dbe1e22f4561c1fb9635c84a03ef57c8042690c4db767a77642680e",
+    "blockNumber": "10761526",
+    "codeKeccak": "0x6400cb9ebd08b677d7aff1c5e1101bd86f30776351182154b955f83b159a562d"
+   },
+   "drop": {
+    "address": "0x87560569b9dd7aaa294d52f0f3fee0a1d5d88db6",
+    "deployTx": "0x4977f66674be6a9107874f77d81a53a321cb62a434efaa33da69d20e56c8c177",
+    "blockNumber": "10761527",
+    "codeKeccak": "0x98caa3f1de7886f26abacc372a83d23c712639b664c6c03d3884460fd28c8014"
+   },
+   "pool": {
+    "address": "0xaf0b4976796085f420dc51481a58e2658298792c",
+    "deployTx": "0x3fe06a98a3facbdbcd2566033c2d67cbbe0fc490b86c3e50b7c4fcd27646dd31",
+    "blockNumber": "10761528",
+    "codeKeccak": "0x552a3c8627e8dc3da598d3b0890c9ace7f3021bbfe628ab8dd4ca5fd5536599e"
+   },
+   "vaultImpl": {
+    "address": "0x5ca64d1ace94fc727856bf1adb1c48963a23a5d0",
+    "deployTx": "0x0828b1677e00e9a1743d083137b6ea0d7a1fef300736b56286427321303dac9d",
+    "blockNumber": "10761522",
+    "codeKeccak": "0xc978cc53f5738b8c9ed89c0e36e175be2cc24a703c323549970b8ab6b1727002"
+   },
+   "readBack": {
+    "TIMELOCK": "60",
+    "RECOVERY_DELAY": "60",
+    "FREEZE_PERIOD": "120",
+    "UNANIMOUS_RECOVERY_DELAY": "180",
+    "BIND_TIMEOUT": "60"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "60",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "prodV51": {
    "router": {
     "address": "0x99711daaa39f2f03901950486c70641eca5261cb",
     "deployTx": "0x7c63522f49343b12cd8a3ce7c81836b020150af6eeffe71c0b19222ba9474f0b",
@@ -65,7 +171,7 @@
     "2592000"
    ]
   },
-  "lab": {
+  "labV51": {
    "router": {
     "address": "0x007dd2b3d907e6924e3ad7d3f5281cacebabab07",
     "deployTx": "0xbaa8a228effe41383445a4b1bdbcb7f583a31d1eaac1a0cfaf26966023a2b838",
@@ -1462,13 +1568,13 @@
   "stage4Triage": "docs/audit/stage4/QCAI_V5_1_TRIAGE.md"
  },
  "tests": {
-  "total": 205,
-  "unit": 177,
+  "total": 217,
+  "unit": 189,
   "fuzz": 24,
   "invariantFns": 18,
-  "passed": 205,
+  "passed": 217,
   "failed": 0,
   "coverage": "100% line, statement, branch and function on src/",
-  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 205 passed, 0 failed (contracts-v4/COVERAGE.md)"
+  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 217 passed, 0 failed (contracts-v4/COVERAGE.md)"
  }
 }

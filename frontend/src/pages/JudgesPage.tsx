@@ -27,8 +27,10 @@ const CONTRACTS = [
   ['pool', 'DropPool'],
 ] as const;
 const ENVS = [
-  ['prod', 'v5.1 production'],
-  ['lab', 'v5.1 lab'],
+  ['prod', 'v5.2 production'],
+  ['lab', 'v5.2 lab'],
+  ['prodV51', 'v5.1 production (previous)'],
+  ['labV51', 'v5.1 lab (previous)'],
   ['prodV5', 'v5 production (previous)'],
   ['labV5', 'v5 lab (previous)'],
   ['prodV4', 'v4 production (previous)'],
@@ -40,7 +42,7 @@ function useFacts() {
     queryKey: ['v4-facts'], refetchInterval: 30_000,
     queryFn: async () => {
       // production counts on the current v5 contracts and on the previous v4 contracts, read separately
-      const one = async (e: 'prod' | 'prodV5' | 'prodV4') => {
+      const one = async (e: 'prod' | 'prodV51' | 'prodV5' | 'prodV4') => {
         const [links, pools, escrow, poolEscrow] = await Promise.all([
           pub.readContract({ address: INST[e].drop, abi: dropAbi, functionName: 'linkCount' }) as Promise<bigint>,
           pub.readContract({ address: INST[e].pool, abi: poolAbi, functionName: 'poolCount' }) as Promise<bigint>,
@@ -48,8 +50,8 @@ function useFacts() {
         ]);
         return { links, pools, escrow, poolEscrow };
       };
-      const [v51, v5, v4p] = await Promise.all([one('prod'), one('prodV5'), one('prodV4')]);
-      return { v51, v5, v4: v4p };
+      const [v52, v51, v5, v4p] = await Promise.all([one('prod'), one('prodV51'), one('prodV5'), one('prodV4')]);
+      return { v52, v51, v5, v4: v4p };
     },
   });
 }
@@ -126,8 +128,9 @@ export default function JudgesPage() {
           </div>
           {!f ? <Skeleton className="h-12 w-full" /> : (
             <dl className="grid grid-cols-1 gap-x-4 gap-y-1.5 rounded-xl bg-stoneBg p-3 font-mono text-xs sm:grid-cols-2" data-testid="v4-facts">
-              <dt className="text-zinc-500">drops created, production v5.1 / v5 / v4 <SourceBadge kind="LIVE" /></dt><dd className="min-w-0 [overflow-wrap:anywhere]" data-testid="fact-links">{f.v51.links.toString()} / {f.v5.links.toString()} / {f.v4.links.toString()}</dd>
-              <dt className="text-zinc-500">pools created, production v5.1 / v5 / v4</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{f.v51.pools.toString()} / {f.v5.pools.toString()} / {f.v4.pools.toString()}</dd>
+              <dt className="text-zinc-500">drops created, production v5.2 / v5.1 / v5 / v4 <SourceBadge kind="LIVE" /></dt><dd className="min-w-0 [overflow-wrap:anywhere]" data-testid="fact-links">{f.v52.links.toString()} / {f.v51.links.toString()} / {f.v5.links.toString()} / {f.v4.links.toString()}</dd>
+              <dt className="text-zinc-500">pools created, production v5.2 / v5.1 / v5 / v4</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{f.v52.pools.toString()} / {f.v51.pools.toString()} / {f.v5.pools.toString()} / {f.v4.pools.toString()}</dd>
+              <dt className="text-zinc-500">escrow held v5.2 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v52.escrow)} / {fmtQor(f.v52.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">escrow held v5.1 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v51.escrow)} / {fmtQor(f.v51.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">escrow held v5 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v5.escrow)} / {fmtQor(f.v5.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">escrow held v4 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v4.escrow)} / {fmtQor(f.v4.poolEscrow)} QOR</dd>

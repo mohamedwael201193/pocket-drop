@@ -100,11 +100,11 @@ function forgeTests() {
 const out = {
   generatedFrom: ['contracts-v4/deployments/diana.json', 'contracts-v4/LIVE_RESULTS.md', 'contracts-v4/COVERAGE.md'],
   network: dep.network,
-  // prod / lab = the CURRENT contracts (v5.1). prodV5 / labV5 = the v5 contracts and prodV4 / labV4 = the v4 contracts, kept
+  // prod / lab = the CURRENT contracts (v5.2). prodV51 / labV51 = the v5.1 contracts, prodV5 / labV5 = the v5 contracts and prodV4 / labV4 = the v4 contracts, kept
   // for history, for links and Pockets made on them, and for the recorded evidence.
-  current: 'v5.1',
+  current: 'v5.2',
   instances: {
-    prod: inst('v5_1', 'prod'), lab: inst('v5_1', 'lab'), prodV5: inst('v5', 'prod'), labV5: inst('v5', 'lab'), prodV4: inst('v4', 'prod'), labV4: inst('v4', 'lab'),
+    prod: inst('v5_2', 'prod'), lab: inst('v5_2', 'lab'), prodV51: inst('v5_1', 'prod'), labV51: inst('v5_1', 'lab'), prodV5: inst('v5', 'prod'), labV5: inst('v5', 'lab'), prodV4: inst('v4', 'prod'), labV4: inst('v4', 'lab'),
   },
   relayer: dep.relayer.address,
   liveRows: rows,

@@ -24,13 +24,13 @@ import { StartHere } from '../components/startHere';
 const qorNum = (wei: bigint) => Number(wei) / 1e18;
 const fmtBal = (n: number) => (n >= 100 ? n.toFixed(2) : n >= 1 ? n.toFixed(2) : n.toFixed(4));
 
-/** Production activity: the current v5.1 contracts and the previous v5 and v4 contracts, each read from contract logs. v5.1
+/** Production activity: the current v5.2 contracts and the previous v5.1, v5 and v4 contracts, each read from contract logs. v5.1
  *  covers few blocks and arrives first, so the table fills at once; the longer histories are merged in when they land.
  *  `complete` is true only when all three are in, and only then are totals shown. */
 function useActivity() {
-  const q = (env: 'prod' | 'prodV5' | 'prodV4') => ({ queryKey: ['radar', env], refetchInterval: 60_000, retry: 1, staleTime: 30_000, queryFn: async () => (await import('../lib/radar')).envStats(env) });
-  const res = useQueries({ queries: [q('prod'), q('prodV5'), q('prodV4')] });
-  const gens = ['v5.1', 'v5', 'v4'];
+  const q = (env: 'prod' | 'prodV51' | 'prodV5' | 'prodV4') => ({ queryKey: ['radar', env], refetchInterval: 60_000, retry: 1, staleTime: 30_000, queryFn: async () => (await import('../lib/radar')).envStats(env) });
+  const res = useQueries({ queries: [q('prod'), q('prodV51'), q('prodV5'), q('prodV4')] });
+  const gens = ['v5.2', 'v5.1', 'v5', 'v4'];
   const parts = res.map((r, i) => r.data && { s: r.data, gen: gens[i] }).filter(Boolean) as { s: EnvStats; gen: string }[];
   const complete = res.every((r) => !!r.data);
   const hy = res.map((r) => r.data?.hybridEvents);
@@ -125,8 +125,8 @@ function SafetyCard() {
 function ProofCard() {
   const { data: s } = useStats();
   const { data: act } = useActivity();
-  const v4 = s?.v4 as Record<'prod' | 'prodV5' | 'prodV4', { hybridRelayEvents?: number } | undefined> | undefined;
-  const hyApi = (['prod', 'prodV5', 'prodV4'] as const).map((e) => v4?.[e]?.hybridRelayEvents);
+  const v4 = s?.v4 as Record<'prod' | 'prodV51' | 'prodV5' | 'prodV4', { hybridRelayEvents?: number } | undefined> | undefined;
+  const hyApi = (['prod', 'prodV51', 'prodV5', 'prodV4'] as const).map((e) => v4?.[e]?.hybridRelayEvents);
   const apiHybrid = hyApi.every((h) => h != null) ? hyApi.reduce((n: number, h) => n + (h as number), 0) : null;
   const hybrid = apiHybrid ?? act?.hybridEvents ?? null;
   const series = cumulativeSeries(act?.complete ? act.eventBlocks : [], 28);
