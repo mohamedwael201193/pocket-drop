@@ -1,6 +1,6 @@
-# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3)
+# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3; v5.1 Stage 4)
 
-**Summary (one line, reused in the README and the project page):** three QCAI runs across v4 and v5. Stage 1 (v4) scored 82 on 19 Nov 2026, Stage 2 (v4) scored 78 on 20 Nov 2026, and Stage 3 (v5) scored 85 on 25 Nov 2026 UTC (26 Nov 2026 00:26 Cairo). Stage 3 reported 5 items (1 high, 2 medium, 1 low, 1 info): 3 false positives, 1 real pattern already bounded at 5 guardians, and 1 informational confirmation of ERC-1271. Every finding maps to named Foundry tests below.
+**Summary (one line, reused in the README and the project page):** four QCAI runs across v4, v5 and v5.1. Stage 1 (v4) scored 82 on 19 Nov 2026, Stage 2 (v4) 78 on 20 Nov 2026, Stage 3 (v5) 85 on 25 Nov 2026 UTC, and Stage 4 (v5.1, the deployed code) 82 on 26 Nov 2026 01:09 UTC (03:09 Cairo). Stage 4 reported 0 critical and 5 items (1 high, 2 medium, 1 low, 1 info): 3 false positives, 1 pattern bounded at 5 guardians, and 1 informational confirmation of ERC-1271. Every finding maps to named Foundry tests ([Stage 4 triage](audit/stage4/QCAI_V5_1_TRIAGE.md)).
 
 All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary value.
 
@@ -12,14 +12,16 @@ All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary
 |---|---|---|---|---|---|---|
 | 1 | 2026-11-19 23:28 | `QCAIA-1795130931306-3D8DAA40` | 82 / MEDIUM | [`docs/audit/stage1/QCAI-stage1-2026-11-19.pdf`](audit/stage1/QCAI-stage1-2026-11-19.pdf) | [`.json`](audit/stage1/QCAI-stage1-2026-11-19.json) | [`stage1/PocketDrop-v4-flattened.sol`](audit/stage1/PocketDrop-v4-flattened.sol), 1601 lines, SHA-256 `a4fdacc97a798149c6ce0b15e46b9944c94fb5ecb11ab68d235440692ad32cd4` |
 | 3 (v5) | 2026-11-25 22:26 | `QCAIA-1795645590445-DF0CEDA6` | 85 / MEDIUM | [`docs/audit/stage3/QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf) | [`.json`](audit/stage3/qcai-stage3-v5.json) | [`stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610` |
+| 4 (v5.1) | 2026-11-26 01:09 | `QCAIA-1795655356279-BA1C1020` | 82 / HIGH | [`docs/audit/stage4/QCAI-stage4-v5.1.pdf`](audit/stage4/QCAI-stage4-v5.1.pdf) | [`.json`](audit/stage4/QCAI-stage4-v5.1-api.json), [record](audit/stage4/qcai-stage4-v5.1.json) | [`stage4/PocketDrop-v5.1-flattened.sol`](audit/stage4/PocketDrop-v5.1-flattened.sol), 1944 lines, SHA-256 `22faf22b3aa59124a3cc19fa77f8dcc9d65e924a98ea147918deee02cdd61b8a` |
 | 2 | 2026-11-20 01:32 | `QCAIA-1795138339351-F6A93427` | 78 / MEDIUM | [`docs/audit/stage2/QCAI-stage2-2026-11-20.pdf`](audit/stage2/QCAI-stage2-2026-11-20.pdf) | [`.json`](audit/stage2/QCAI-stage2-2026-11-20.json), SHA-256 `a1d587ebb749c6cd8601b47bbcf63f6cf4f5709e0b72f6168c114ba2eb30bbc7` | [`stage2/PocketDrop-v4-flattened.sol`](audit/stage2/PocketDrop-v4-flattened.sol), 1605 lines, SHA-256 `c4b19a8d00879b64417aece0d7dd65a20e1398285c4fbf895f19e78cdfe1b0cf` |
 
 Public reports:
 - Stage 1: https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795130931306-3D8DAA40
 - Stage 2: https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427
 - Stage 3 (v5): https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6
+- Stage 4 (v5.1): https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020
 
-All three runs use the blockchain setting "Ethereum (EVM/Solidity)". The dashboard showed a cost of 150 QOR (testnet) for each run.
+All four runs use the blockchain setting "Ethereum (EVM/Solidity)". The dashboard showed a cost of 150 QOR (testnet) for each run.
 
 The flattened file joins IPocket (interfaces), PqcLib, Payout, PqGuard, PocketVault, PocketFactory, PocketRouter, PocketDrop and DropPool. Imports, repeated pragmas and SPDX lines are removed. Stage 1 audited repo HEAD `ca9a5e7`. The file compiles with `forge build` (solc 0.8.28, cancun). The example consumer `src/examples/PqGuardedCounter.sol` is not part of the audited file.
 
@@ -209,9 +211,9 @@ Executive summary (verbatim from the report):
 
 Counts: 5 findings (1 high, 2 medium, 1 low, 1 info). 0 valid unmitigated bugs; no contract source changes required.
 
-## 10. Stage 4 (prepared, not yet run)
+## 10. Stage 4 on the v5 source (superseded)
 
-The Stage 4 flattened source is in [`docs/audit/stage4/`](audit/stage4/) (`PocketDrop-v5-stage4-flattened.sol`, SHA-256 `0716a307935475256cf1fd813e9317abbd567715f89481778a9e4770a251fc47`). A paid testnet re-run of that source failed twice on the dashboard side (HTTP 402 "Send failed"). No QOR was charged. Stage 4 will run on the next free daily audit.
+The Stage 4 flattened source is in [`docs/audit/stage4/`](audit/stage4/) (`PocketDrop-v5-stage4-flattened.sol`, SHA-256 `0716a307935475256cf1fd813e9317abbd567715f89481778a9e4770a251fc47`). A paid testnet re-run of that source failed twice on the dashboard side (HTTP 402 "Send failed"). No QOR was charged. Stage 4 then ran on the v5.1 source instead (section 12).
 
 ## 11. v5.1 (deployed 26 Nov 2026): open items fixed
 
@@ -225,3 +227,17 @@ v5.1 fixes the items still open after Stage 3 and folds in the Stage 4 cleanups;
 | Stage 4 cleanups (`audit/stage4/STAGE4_DIFF.md`) | recovery modifiers, subtractive drip headroom, `guardianFreeze` assert, `len > MAX_GUARDIANS` fail-fast | `test_stage3_six_signers_always_revert_in_checkGuardianSigs` (now `NotGuardian` first) and the existing suites |
 
 Audit source for the next QCAI run: `docs/audit/stage4/PocketDrop-v5.1-flattened.sol` (1,944 lines, SHA-256 `22faf22b3aa59124a3cc19fa77f8dcc9d65e924a98ea147918deee02cdd61b8a`). `node contracts-v4/script/flatten-v51.mjs --check` proves it compiles alone and equals the deployed v5.1 runtime code (immutables masked).
+
+## 12. Stage 4 (v5.1) findings: resolution and tests
+
+QCAI ran on the v5.1 flattened source (the deployed code) on 26 Nov 2026 01:09 UTC (03:09 Cairo): `QCAIA-1795655356279-BA1C1020`, 82/100, risk HIGH, 0 critical. Cost 150 QOR (testnet). Full triage with the reasoning: [`audit/stage4/QCAI_V5_1_TRIAGE.md`](audit/stage4/QCAI_V5_1_TRIAGE.md). Evidence tests: `contracts-v4/test/QcaiV51AuditRegression.t.sol` (11 tests, run against the unchanged v5.1 `src/`). The report's line numbers do not point at the code they name (for example flattened line 410 is `contract PocketVault is IERC1271 {`).
+
+| # | Severity | Finding | Resolution | Tests |
+|---|---|---|---|---|
+| 1 | HIGH | Missing access control on `finalizeRecovery` / `finalizeRecoveryUnanimous` | **False positive.** Finalize takes no arguments; the new owner and key were fixed by guardian ML-DSA-87 signatures at proposal time, the timelock and owner veto apply, the key is re-checked, and no value moves. | `test_qcai51_h1_attacker_cannot_propose_itself_with_guardian_sigs`, `test_qcai51_h1_third_party_finalize_reverts_without_pending_before_timelock_and_after_veto`, `testFuzz_qcai51_h1_finalize_outcome_is_independent_of_caller`, `testFuzz_qcai51_h1_unanimous_finalize_outcome_is_independent_of_caller`, `test_qcai51_h1_finalize_rechecks_the_approved_key` |
+| 2 | MEDIUM | Overflow in `spent + drip <= DAILY_DRIP_CAP` | **False positive.** The quoted text is a comment; the code checks the headroom by subtraction before adding, and 0.8.28 checked math is a second guard. | `testFuzz_qcai51_m2_drip_sum_never_wraps_at_extreme_bounds`, `test_qcai51_m2_cap_is_exact_and_drip_is_bounded` |
+| 3 | MEDIUM | Reentrancy in `Payout._pay` | **False positive.** Every entry point that pays is `nonReentrant` and CEI; `withdraw` zeroes the balance before the call; a failed push becomes a pull balance. | `test_qcai51_m3_reentry_into_every_entry_point_is_refused`, `test_qcai51_m3_deferred_balance_is_paid_exactly_once` |
+| 4 | LOW | Gas limit in `_checkGuardianSigs` with large guardian sets | **Not exploitable.** `MAX_GUARDIANS = 5` at init and in `setGuardians`; more than 5 signers fails fast; worst case measured. | `test_qcai51_l4_six_guardians_rejected_at_deploy`, `test_qcai51_l4_worst_case_five_signer_check_is_bounded` |
+| 5 | INFO | ERC-1271 implemented correctly | **Informational.** | `test_v51_real_erc1271_is_domain_separated_from_intents` (real crypto) |
+
+Counts: 5 findings (1 high, 2 medium, 1 low, 1 info), 0 critical. 0 valid unmitigated bugs; the deployed v5.1 contracts are unchanged.
