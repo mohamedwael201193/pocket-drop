@@ -183,6 +183,29 @@ contract V52HardeningTest is V4Base {
         assertEq(SINK.balance, 1.6 ether);
     }
 
+    /// @dev While the lock is held (slot 23, forced here), every locked function refuses to run.
+    function test_v52_vault_lock_refuses_every_locked_function_while_held() public {
+        vm.store(address(v), bytes32(uint256(23)), bytes32(uint256(1)));
+        bytes memory sig = new bytes(4627);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.spend(SINK, 1, DL, sig);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.executeQueued(1);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.createDrop(DROP, keccak256("k"), 0, uint64(block.timestamp + 1 days), 0, 0, 1 ether, DL, sig);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.confirmDrop(DROP, 1, bytes32(0), DL, sig);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.cancelDrop(DROP, 1, DL, sig);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.createPool(POOL, keccak256("k"), 1, 1 ether, uint64(block.timestamp + 1 days), DL, sig);
+        vm.expectRevert(PocketVault.Reentrancy.selector);
+        v.closePool(POOL, 1, DL, sig);
+        // receive is not locked: refunds still land
+        (bool ok,) = address(v).call{value: 1}("");
+        assertTrue(ok);
+    }
+
     function test_v52_vault_drop_and_pool_targets_must_be_contracts() public {
         bytes memory sig = new bytes(4627);
         address[3] memory bad = [address(0), address(v), mallory];
