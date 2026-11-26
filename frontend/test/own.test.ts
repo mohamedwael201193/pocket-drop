@@ -20,4 +20,19 @@ describe('own accounts', () => {
   it('the frontend copy equals backend/config/own-accounts.json', () => {
     expect(JSON.parse(fs.readFileSync(path.join(repo, 'backend/config/own-accounts.json'), 'utf8'))).toEqual(own);
   });
+  it('every account in the v5.2 first-run reconstruction is listed as own', () => {
+    const ev = JSON.parse(fs.readFileSync(path.join(repo, 'frontend/evidence/v4/e2e/chromium-390-v52-first-run-2026-11-26.json'), 'utf8')) as {
+      ownAccountKeys: Record<string, string>;
+      runs: { id: string; accounts: Record<string, string> }[];
+    };
+    for (const [k, a] of Object.entries(ev.ownAccountKeys)) {
+      expect(ownSet.has(a.toLowerCase()), `${k} ${a}`).toBe(true);
+      expect((own as { accounts: Record<string, string> }).accounts[k].toLowerCase(), k).toBe(a.toLowerCase());
+    }
+    for (const run of ev.runs) {
+      for (const [role, a] of Object.entries(run.accounts)) {
+        expect(ownSet.has(a.toLowerCase()), `${run.id} ${role} ${a}`).toBe(true);
+      }
+    }
+  });
 });

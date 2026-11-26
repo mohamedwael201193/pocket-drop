@@ -1,6 +1,6 @@
 {
   "note": "Addresses that belong to the Pocket Drop team/test setup. Everything else is reported as external. Public addresses only.",
-  "sources": "Team wallets (deployer, relayer, main test wallet, burner); v3 live-test, v4 live-suite, spike and E2E accounts from the address fields of the local key files (addresses only); senders, Pockets, guardians and claimers recorded in frontend/evidence/**/*.json; recipients whose bind tx is recorded in an E2E run file or whose link was created by a deployer-funded E2E sender a few blocks earlier; every account funded by the deployer in frontend/evidence/**/spend.json; Pockets named in contracts-v4/deployments/diana.json. The v3 link #17 recipient is the WhatsApp self-test link (frontend/WHATSAPP_TEST.md) that was only sent to the owner. QA runs: every key and Pocket created by a QA run, listed in frontend/evidence/v4/qa/*.json. Hybrid-lane QA runs (22 Nov 2026): every address in frontend/evidence/v4/e2e/hybrid-*.json that is not a contract. v5.1 TEAM-RUN smoke and self-relay (26 Nov 2026): the team test accounts and Pockets in contracts-v4/deployments/diana.json v5_1.smoke and v5_1.selfRelay.",
+  "sources": "Team wallets (deployer, relayer, main test wallet, burner); v3 live-test, v4 live-suite, spike and E2E accounts from the address fields of the local key files (addresses only); senders, Pockets, guardians and claimers recorded in frontend/evidence/**/*.json; recipients whose bind tx is recorded in an E2E run file or whose link was created by a deployer-funded E2E sender a few blocks earlier; every account funded by the deployer in frontend/evidence/**/spend.json; Pockets named in contracts-v4/deployments/diana.json. The v3 link #17 recipient is the WhatsApp self-test link (frontend/WHATSAPP_TEST.md) that was only sent to the owner. QA runs: every key and Pocket created by a QA run, listed in frontend/evidence/v4/qa/*.json. Hybrid-lane QA runs (22 Nov 2026): every address in frontend/evidence/v4/e2e/hybrid-*.json that is not a contract. v5.1 TEAM-RUN smoke and self-relay (26 Nov 2026): the team test accounts and Pockets in contracts-v4/deployments/diana.json v5_1.smoke and v5_1.selfRelay. v5.2 Playwright e2e on 26 Nov 2026: the completed rerun accounts in frontend/evidence/v4/e2e/chromium-390-*.json, plus the first-run accounts (02:19-02:24 UTC) and the rerun recipient keys reconstructed in frontend/evidence/v4/e2e/chromium-390-v52-first-run-2026-11-26.json from the spend ledger and the live v5.2 links.",
   "accounts": {
     "relayer": "0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD",
     "burner": "0x664a2B7d5541B31C5C8A17849B5e85618309359E",
@@ -403,6 +403,22 @@
     "v52-e2e-c-claimer2-key-87986C": "0x87986C9298045Cf758512FC91477F3B43Db21d40",
     "v52-e2e-d-owner-pocket-a8B41f": "0xa8B41faCA941667E9D40B8c0f4f407c4666Aa0b0",
     "v52-e2e-d-owner-key-825BE5": "0x825BE5e0D3471dE4d21Af6dC49A580811359A7E1",
-    "v52-e2e-e-new-owner-FC9aF4": "0xFC9aF4605fE5c0709D6a1ac86C730D10C5943b25"
+    "v52-e2e-e-new-owner-FC9aF4": "0xFC9aF4605fE5c0709D6a1ac86C730D10C5943b25",
+    "v52-e2e-first-a1-sender-key-8BA34f": "0x8BA34fd55528A0789dd695D0e4A294759Df17E6A",
+    "v52-e2e-first-a1-sender-pocket-C71C9d": "0xC71C9deE3Ea8EA44209CE27cbb4269be9d8a2048",
+    "v52-e2e-first-a2-sender-key-0cDe91": "0x0cDe91d4BB9E8CCAcFD36cC91BFB917E6DFcE91E",
+    "v52-e2e-first-a2-sender-pocket-994e3d": "0x994e3ddd89125832ba5eeC54E674547206EEb3b7",
+    "v52-e2e-first-a2-recipient-key-D149D4": "0xD149D4d7249bc75E40f040468374E9021F5e13cC",
+    "v52-e2e-first-a2-recipient-pocket-FfCf40": "0xFfCf4058A2B43c71bD97fb08A13396E3d8D618A2",
+    "v52-e2e-first-b-sender-key-718821": "0x7188210790bE787f35fc748e5B16D9B2A2131d2C",
+    "v52-e2e-first-b-sender-pocket-F3839d": "0xF3839d25072bA4fe42160BE9ff0814799a398912",
+    "v52-e2e-first-b-recipient-key-16287c": "0x16287ca4dC03f890d3a4Ded1a0400F9cd5DF38C3",
+    "v52-e2e-first-b-recipient-pocket-001956": "0x001956d7C1C6fc971Bc2c2528ac1D483897D0605",
+    "v52-e2e-first-c-sender-key-2d772D": "0x2d772D9344F34CC7700D0a80cf39bBbE762eb04E",
+    "v52-e2e-first-c-sender-pocket-9e75CF": "0x9e75CFE1A5Ca9B677305c7763C95eb1734208856",
+    "v52-e2e-first-c-claimer1-key-24aa42": "0x24aa421a1137b920d03669b2a0065fBFd5E39BA8",
+    "v52-e2e-first-c-claimer2-key-a84CC3": "0xa84CC37b24C93431793dCD9a43efedFC92e038BE",
+    "v52-e2e-a-recipient-key-A6B721": "0xA6B7210DF3ce9794F337AE7308566f8BBBAd0E4b",
+    "v52-e2e-b-recipient-key-c6a014": "0xc6a01495F9A8dbe5beF60a4d4C45A1eb31b6179D"
   }
 }
