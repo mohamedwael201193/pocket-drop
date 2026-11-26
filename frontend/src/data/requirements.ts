@@ -193,14 +193,14 @@ export const REQUIREMENTS: Requirement[] = [
     id: 'real-crypto-tests',
     requirement: 'Foundry tests with real ML-DSA-87 signatures (not a mock verifier), and the same tests against the live Diana precompile',
     code: [
-      { label: 'RealCrypto.t.sol (22 tests)', path: 'contracts-v4/test-real/RealCrypto.t.sol' },
+      { label: 'RealCrypto.t.sol (26 tests)', path: 'contracts-v4/test-real/RealCrypto.t.sol' },
       { label: 'mldsa.mjs (two independent ML-DSA-87 implementations must agree)', path: 'contracts-v4/script/ffi/mldsa.mjs' },
-      { label: 'LiveDiana.t.sol (live profile, 27 tests)', path: 'contracts-v4/test-live/LiveDiana.t.sol' },
+      { label: 'LiveDiana.t.sol (live profile, 31 tests)', path: 'contracts-v4/test-live/LiveDiana.t.sol' },
       { label: 'mutation-check.sh (accept-all verifier must fail the suite)', path: 'contracts-v4/script/ffi/mutation-check.sh' },
     ],
     live: [
       { label: 'live profile: pqcVerify answered by the Diana precompile through eth_call (no transaction)', note: 'FOUNDRY_PROFILE=live forge test, CI job contracts-live' },
-      { label: 'accept-all mutation: 18 of 22 real-crypto tests fail, as they must', note: 'CI job contracts-realcrypto' },
+      { label: 'accept-all mutation: 19 of 26 real-crypto tests fail, as they must', note: 'CI job contracts-realcrypto' },
     ],
     tests: ['test-real: test_spend_one_flipped_signature_bit_refused', 'test-real: test_spend_truncated_oversized_and_empty_signature_refused', 'test-real: test_owner_key_rotated_in_registry_old_and_new_key_both_refused', 'test-real: test_drop_open_mode_full_flow_real_signatures', 'test-real: test_pool_claim_real_signatures_and_domain_separation', 'test-live: test_live_verify_real_signature_through_pqclib', 'test-live: test_fork_of_diana_has_no_precompile_code_and_pqclib_fails_closed'],
   },
