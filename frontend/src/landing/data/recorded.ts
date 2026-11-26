@@ -7,7 +7,7 @@
 // test/landing.test.ts checks every hash below against requirements.ts / v4.json and the counts against their sources.
 import appTests from '../../data/tests.json';
 
-export const FOUNDRY = { passed: 190, failed: 0 } as const;
+export const FOUNDRY = { passed: 205, failed: 0 } as const;
 export const REVERIFY = { passed: 674, failed: 0, evm: 348, cosmos: 177, ranOn: '26 Nov 2026' } as const;
 export const RECORDED_ON = '26 Nov 2026';
 export const COUNTS = {

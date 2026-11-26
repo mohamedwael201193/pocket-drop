@@ -62,8 +62,10 @@ if (fs.existsSync(auditFile)) {
   const [, id1, score1] = row(1);
   const [, id2, score2] = row(2);
   const [, id3, score3] = row('3 \\(v5\\)');
+  const [, id4, score4] = row('4 \\(v5\\.1\\)');
   const stage2Done = !!id2;
   const stage3Done = !!score3 && score3.trim() !== 'n/a';
+  const stage4Done = !!score4 && score4.trim() !== 'n/a';
   qcai = {
     stage1: 'complete', stage2: stage2Done ? 'complete' : 'pending',
     stage3: stage3Done ? 'complete' : 'pending',
@@ -76,6 +78,12 @@ if (fs.existsSync(auditFile)) {
     stage3Score: stage3Done ? score3.trim() : null,
     stage3Findings: stage3Done ? g(/## 9\. Stage 3[\s\S]*?Counts: (\d+ findings[^.]*)\./) : null,
     stage3PublicReport: stage3Done ? g(/^- Stage 3 \(v5\): (https:\/\/\S+)/m) : null,
+    stage4: stage4Done ? 'complete' : 'pending',
+    stage4AuditId: stage4Done ? id4 : null,
+    stage4Score: stage4Done ? score4.trim() : null,
+    stage4Findings: stage4Done ? g(/## 12\. Stage 4[\s\S]*?Counts: (\d+ findings[^.]*)\./) : null,
+    stage4PublicReport: stage4Done ? g(/^- Stage 4 \(v5\.1\): (https:\/\/\S+)/m) : null,
+    stage4Triage: stage4Done ? 'docs/audit/stage4/QCAI_V5_1_TRIAGE.md' : null,
   };
 }
 
