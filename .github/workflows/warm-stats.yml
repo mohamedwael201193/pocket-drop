@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Read the slow endpoints
         run: |
-          for u in https://pocketdrop-api.vercel.app/api/stats https://pocketdrop-api.vercel.app/api/qday https://pocketdrop-api.vercel.app/api/health; do
+          for u in https://pocket-drop-api.vercel.app/api/stats https://pocket-drop-api.vercel.app/api/qday https://pocket-drop-api.vercel.app/api/health; do
             s=$(date +%s%N)
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 90 "$u" || echo 000)
             echo "$u -> $code in $(( ($(date +%s%N) - s) / 1000000 )) ms"

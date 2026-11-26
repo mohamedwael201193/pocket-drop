@@ -42,4 +42,4 @@ jobs:
           node scripts/renew-window.mjs --blocks 17280 --txs 500 --if-below "$THRESHOLD"
       - name: Check public health
         run: |
-          curl -fsS https://pocketdrop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('live',h.window?.live,'remainingBlocks',h.window?.remainingBlocks);if(!h.window?.live)process.exit(1)})"
+          curl -fsS https://pocket-drop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('live',h.window?.live,'remainingBlocks',h.window?.remainingBlocks);if(!h.window?.live)process.exit(1)})"

@@ -49,4 +49,4 @@ jobs:
           if [ "$DRY" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           node scripts/.refill-run.mjs $ARGS
       - name: Public health after the run
-        run: curl -fsS https://pocketdrop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('relayer',h.relayer?.balance,'low',h.relayer?.lowBalance,'refill',JSON.stringify(h.relayer?.refill??null))})"
+        run: curl -fsS https://pocket-drop-api.vercel.app/api/health | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const h=JSON.parse(s);console.log('relayer',h.relayer?.balance,'low',h.relayer?.lowBalance,'refill',JSON.stringify(h.relayer?.refill??null))})"
