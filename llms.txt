@@ -2,8 +2,8 @@
 
 > Send QOR by link to someone with no wallet. Their browser creates a Pocket: a smart account on QoreChain that only an ML-DSA-87 (post-quantum) key can move. Diana testnet only (EVM chain id 9800); QOR there has no monetary value. MIT license.
 
-Live app: https://pocketdrop-app.vercel.app (Send, Receive, Pocket, Proof)
-Relayer API: https://pocketdrop-api.vercel.app (/api/health, /api/stats, /api/qday)
+Live app: https://pocket-drop.vercel.app (Send, Receive, Pocket, Proof)
+Relayer API: https://pocket-drop-api.vercel.app (/api/health, /api/stats, /api/qday)
 Judge path: /qday (published classical keys of five bait Pockets, attacked hourly by our own bot), then /receive, then /judges.
 
 ## Docs
