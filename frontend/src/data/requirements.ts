@@ -1,6 +1,7 @@
 // /judges requirement table: each Post-Quantum dApp requirement -> code -> live transaction -> test.
 // Every hash below is mined on Diana testnet and is re-checked by `node frontend/scripts/reverify.mjs`
 // (EVM hashes against evm-testnet.qore.host, Cosmos hashes against the REST API). Line anchors point at main.
+import v4data from './v4.json';
 export interface ReqLink { label: string; path: string }
 export interface ReqTx { label: string; hash?: string; note?: string }
 export interface Requirement { id: string; requirement: string; code: ReqLink[]; live: ReqTx[]; liveHealth?: boolean; tests: string[] }
@@ -167,7 +168,7 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'reverify.mjs', path: 'frontend/scripts/reverify.mjs' },
     ],
     live: [{ label: 'CI runs on GitHub Actions', note: 'see the Actions tab of the repository' }],
-    tests: ['forge test (178, 100% line and branch coverage of src/)', 'node frontend/scripts/reverify.mjs'],
+    tests: [`forge test (${v4data.tests.total}, 100% line and branch coverage of src/)`, 'node frontend/scripts/reverify.mjs'],
   },
   {
     id: 'qoreseal',
