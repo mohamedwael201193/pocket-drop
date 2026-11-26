@@ -2,13 +2,13 @@
 //  - Foundry total: FOUNDRY below, equal to data/v4.json "tests.passed" (contracts-v4/COVERAGE.md, FOUNDRY_PROFILE=ci forge test;
 //    re-run 26 Nov 2026: 190 passed, 0 failed). A constant, not an import, so the landing does not download v4.json.
 //  - app + API unit tests: data/tests.json (node frontend/scripts/count-tests.mjs)
-//  - reverify: the last full run of node frontend/scripts/reverify.mjs (REVERIFY below; re-run 26 Nov 2026: 547 passed, 0 failed)
+//  - reverify: the last full run of node frontend/scripts/reverify.mjs (REVERIFY below; re-run 26 Nov 2026: 672 passed, 0 failed)
 //  - real-crypto and live-precompile counts: README "Numbers" table (contracts-v4/test-real, contracts-v4/test-live, CI jobs)
 // test/landing.test.ts checks every hash below against requirements.ts / v4.json and the counts against their sources.
 import appTests from '../../data/tests.json';
 
 export const FOUNDRY = { passed: 190, failed: 0 } as const;
-export const REVERIFY = { passed: 547, failed: 0, evm: 325, cosmos: 121, ranOn: '26 Nov 2026' } as const;
+export const REVERIFY = { passed: 672, failed: 0, evm: 348, cosmos: 175, ranOn: '26 Nov 2026' } as const;
 export const RECORDED_ON = '26 Nov 2026';
 export const COUNTS = {
   foundry: FOUNDRY.passed,
