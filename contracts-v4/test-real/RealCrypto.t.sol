@@ -459,6 +459,71 @@ contract RealCryptoTest is V4Base {
         assertEq(mallory.balance, mb);
     }
 
+    /*---------------- v5.2: finalize authorization with real ML-DSA-87 ----------------*/
+
+    function _gPair() internal pure returns (address[] memory s) {
+        s = new address[](2);
+        s[0] = GA;
+        s[1] = GB;
+    }
+
+    function _gAll() internal pure returns (address[] memory s) {
+        s = new address[](3);
+        s[0] = GA;
+        s[1] = GB;
+        s[2] = GC;
+    }
+
+    function _finAuth(string memory name, bool unanimous, address authorizer) internal returns (bytes memory) {
+        bytes32 act = unanimous ? pv.ACT_FINALIZE_RECOVERY_UNANIMOUS() : pv.ACT_FINALIZE_RECOVERY();
+        return _signDigest(name, pv.finalizeDigest(act, authorizer, DL));
+    }
+
+    /// @dev Threshold recovery to BOB: an account with no role is refused, a guardian authorization signed with another
+    ///      key is refused, a real guardian authorization relayed by anyone finalizes.
+    function test_v52_real_threshold_finalize_needs_a_real_authorization() public {
+        bytes32 d = pv.recoveryDigest(BOB, keccak256(pk("bob")), DL);
+        bytes[] memory sigs = new bytes[](2);
+        sigs[0] = _signDigest("ga", d);
+        sigs[1] = _signDigest("gb", d);
+        pv.proposeRecovery(BOB, keccak256(pk("bob")), DL, _gPair(), sigs);
+        vm.warp(block.timestamp + RECOVERY_DELAY);
+
+        bytes memory carol = _finAuth("carol", false, CAROL);
+        vm.expectRevert(PocketVault.NotAuthorized.selector);
+        router.relay(address(pv), abi.encodeCall(PocketVault.finalizeRecovery, (CAROL, DL, carol)));
+
+        bytes memory wrongKey = _finAuth("gb", false, GA);
+        vm.expectRevert(PocketVault.BadSignature.selector);
+        router.relay(address(pv), abi.encodeCall(PocketVault.finalizeRecovery, (GA, DL, wrongKey)));
+
+        bytes memory ga = _finAuth("ga", false, GA);
+        vm.prank(mallory);
+        router.relay(address(pv), abi.encodeCall(PocketVault.finalizeRecovery, (GA, DL, ga)));
+        assertEq(pv.owner(), BOB);
+        assertEq(pv.ownerKeyHash(), keccak256(pk("bob")));
+    }
+
+    /// @dev Unanimous recovery to BOB: the old owner's real authorization is refused (it has no say on this path);
+    ///      the new owner's real authorization finalizes.
+    function test_v52_real_unanimous_finalize_refuses_old_owner_accepts_new_owner() public {
+        bytes32 d = pv.unanimousDigest(BOB, keccak256(pk("bob")), DL);
+        bytes[] memory sigs = new bytes[](3);
+        sigs[0] = _signDigest("ga", d);
+        sigs[1] = _signDigest("gb", d);
+        sigs[2] = _signDigest("gc", d);
+        pv.proposeRecoveryUnanimous(BOB, keccak256(pk("bob")), DL, _gAll(), sigs);
+        vm.warp(block.timestamp + UNANIMOUS_DELAY);
+
+        bytes memory oldOwner = _finAuth("alice", true, ALICE);
+        vm.expectRevert(PocketVault.NotAuthorized.selector);
+        pv.finalizeRecoveryUnanimous(ALICE, DL, oldOwner);
+
+        bytes memory bob = _finAuth("bob", true, BOB);
+        pv.finalizeRecoveryUnanimous(BOB, DL, bob);
+        assertEq(pv.owner(), BOB);
+    }
+
     /*---------------- helpers ----------------*/
 
     /// @dev Lets this test contract receive QOR (refunds, payouts).

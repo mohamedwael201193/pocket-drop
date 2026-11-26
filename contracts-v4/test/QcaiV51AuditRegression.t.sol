@@ -10,7 +10,8 @@ import {HostileReceiver} from "./mocks/Hostile.sol";
 
 /// @notice Evidence for the triage of the QCAI report on the v5.1 source (QCAIA-1795655356279-BA1C1020, 82/100).
 ///         Each test is named after the finding it answers (h1, m2, m3, l4). The tests run against the deployed v5.1
-///         src/ unchanged. See docs/audit/stage4/QCAI_V5_1_TRIAGE.md.
+///         src/ unchanged on main; on the v5.2 branch the finalize calls carry the authorization v5.2 requires.
+///         See docs/audit/stage4/QCAI_V5_1_TRIAGE.md.
 contract QcaiV51VaultTest is V4Base {
     function _pair(address a, address b) internal pure returns (address[] memory s) {
         s = new address[](2);
