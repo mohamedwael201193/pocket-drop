@@ -16,6 +16,8 @@ import { REQUIREMENTS } from '../data/requirements';
 import selfRelay from '../../evidence/v4/e2e/self-relay-v5.json';
 import delta from '../../evidence/v4/e2e/delta-run-2026-11-26.json';
 import intercept from '../../evidence/v4/e2e/intercept-confirmed-v5.json';
+import { AUDIT_MATRIX, QCAI_RUNS } from '../data/auditMatrix';
+import type { Health } from '../lib/api';
 import { COSTS_NOTE, RELAY_COSTS, deliveryCostUqor, deliveryFeeWei } from '../lib/fees';
 
 const blob = (p: string) => `${SOURCE_URL}/blob/main/${p}`;
@@ -56,6 +58,49 @@ function useFacts() {
   });
 }
 
+const qor3 = (v: string | null | undefined) => (v ? `${Number(v).toFixed(3)} QOR` : '…');
+function ago(iso: string) {
+  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60_000));
+  return m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`;
+}
+/** The wallets that keep the free lane running, and the warm-up job, as the API reads them now. */
+function OpsStatus({ h }: { h: Health | undefined }) {
+  const w = h?.warmUp;
+  return (
+    <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-700" data-testid="ops-status">
+      <SourceBadge kind="LIVE" title="Read from /api/health when you opened this page (refreshes every 30 s)" />
+      <span>Relayer <b className="font-mono" data-testid="ops-relayer">{qor3(h?.relayer?.balance)}</b></span>
+      <span>Gas sponsor <b className="font-mono" data-testid="ops-sponsor">{qor3(h?.sponsor?.balance)}</b></span>
+      <span>Refill wallet <b className="font-mono" data-testid="ops-refill">{qor3(h?.relayer?.refill?.funderBalance)}</b></span>
+      <span data-testid="ops-warmup">Last warm-up {!h ? '…' : w?.lastRunAt ? <>{w.url ? <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={w.url} target="_blank" rel="noopener noreferrer">{new Date(w.lastRunAt).toISOString().slice(11, 16)} UTC</a> : `${new Date(w.lastRunAt).toISOString().slice(11, 16)} UTC`}, {ago(w.lastRunAt)}, {w.conclusion ?? 'unknown'}</> : `not readable now${w?.error ? ` (${w.error})` : ''}`}</span>
+    </p>
+  );
+}
+
+function AuditMatrix() {
+  return (
+    <div className="overflow-x-auto rounded-xl bg-stoneBg p-2" data-testid="qcai-matrix">
+      <table className="w-full border-collapse text-left text-xs">
+        <thead><tr className="border-b border-zinc-200 text-zinc-500">
+          <th className="py-1.5 pr-2 font-medium">Finding class</th>
+          {QCAI_RUNS.map((r) => <th key={r.id} className="px-1 py-1.5 text-center font-medium" title={`${r.id}: ${r.code}, score ${r.score}`}>{r.id}<span className="block font-mono text-[10px] font-normal">{r.code} · {r.score}</span></th>)}
+          <th className="py-1.5 pl-2 pr-2 font-medium">Status on v5.2</th><th className="py-1.5 pr-2 font-medium">Code</th><th className="py-1.5 font-medium">Test</th>
+        </tr></thead>
+        <tbody>{AUDIT_MATRIX.map((c) => (
+          <tr key={c.cls} className="border-b border-zinc-200/70 align-top last:border-0">
+            <td className="py-1.5 pr-2 text-zinc-900">{c.cls}</td>
+            {QCAI_RUNS.map((r) => <td key={r.id} className="px-1 py-1.5 text-center">{c.runs.includes(r.id) ? '●' : <span className="text-zinc-300">·</span>}</td>)}
+            <td className="py-1.5 pl-2 pr-2">{c.status}</td>
+            <td className="whitespace-nowrap py-1.5 pr-2 font-mono"><a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={`${blob(`contracts-v4/src/${c.code.file}`)}#L${c.code.line}`} target="_blank" rel="noopener noreferrer">{c.code.file}:{c.code.line}</a></td>
+            <td className="break-all py-1.5 font-mono text-[11px] text-zinc-500">{c.test}</td>
+          </tr>))}
+        </tbody>
+      </table>
+      <p className="px-1 pt-1.5 text-[11px] text-zinc-500">● raised in that run. 0 open, 0 real vulnerabilities. Full table with every test: docs/AUDIT.md section 0.</p>
+    </div>
+  );
+}
+
 function Item({ n, title, children, action }: { n: number; title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5">
@@ -82,6 +127,7 @@ export default function JudgesPage() {
         Every number says where it came from. <SourceBadge kind="LIVE" /> was read from the chain or the API when you opened this page. <SourceBadge kind="RECORDED" /> comes from files in the repository. {TESTNET_BADGE}.
       </PageTitle>
 
+      <OpsStatus h={h} />
       <div className="space-y-3">
         <Item n={1} title="Start here: the Q-Day Drill" action={<SourceBadge kind="LIVE" />}>
           <p>Five real Pockets on Diana have their classical (secp256k1) keys published on the page, as if a quantum computer had already broken them. Each Pocket holds a little QOR. Try to take it, from your own tab: the chain refuses, because only the post-quantum key can move funds. The page lists every attempt the chain refused (EVM reverts and hybrid relays that failed), and a live breach check.</p>
@@ -237,6 +283,7 @@ export default function JudgesPage() {
           {q.stage1 === 'complete' ? (
             <div data-testid="qcai" className="space-y-1">
               <p><b>Stage 1 (v4):</b> score {q.score}, {q.findings}. <b>Stage 2 (v4):</b> {q.stage2 === 'complete' ? <>score {q.stage2Score}.</> : 'not run yet.'} <b>Stage 3 (v5):</b> {q.stage3 === 'complete' ? <>score {q.stage3Score}{q.stage3Findings ? `, ${q.stage3Findings}` : ''}.</> : 'not run yet.'} <b>Stage 4 (v5.1):</b> {q.stage4 === 'complete' ? <>score {q.stage4Score}{q.stage4Findings ? `, ${q.stage4Findings}` : ''}; every finding triaged with tests (no real vulnerability found).</> : 'not run yet.'} <b>Stage 5 (v5.2, the deployed code):</b> {q.stage5 === 'complete' ? <>score {q.stage5Score}{q.stage5Findings ? `, ${q.stage5Findings}` : ''}; every finding triaged with tests (no real vulnerability found). The last three runs (v5, v5.1, v5.2) scored 85, 82 and 78 while the code got stricter; the same titles return after the checks they ask for exist, so each has a verdict and a test.</> : 'not run yet.'} The flattened source is in docs/audit/stage5 (SHA-256 ec71d762…1b7d). All are automated QCAI audits; there was no human audit.</p>
+              <AuditMatrix />
               {q.auditId && <p className="break-all font-mono text-xs">Stage 1 ID {q.auditId}{q.stage2AuditId ? ` · Stage 2 ID ${q.stage2AuditId}` : ''}{q.stage3AuditId ? ` · Stage 3 ID ${q.stage3AuditId}` : ''}{q.stage4AuditId ? ` · Stage 4 ID ${q.stage4AuditId}` : ''}{q.stage5AuditId ? ` · Stage 5 ID ${q.stage5AuditId}` : ''}</p>}
               <p className="flex flex-wrap gap-3 text-xs"><a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/AUDIT.md')} target="_blank" rel="noopener noreferrer">docs/AUDIT.md (triage and resolutions)</a>{q.publicReport && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={q.publicReport} target="_blank" rel="noopener noreferrer">Stage 1 public report</a>}{q.stage2PublicReport && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={q.stage2PublicReport} target="_blank" rel="noopener noreferrer">Stage 2 public report</a>}<a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/audit/stage1/QCAI-stage1-2026-11-19.pdf')} target="_blank" rel="noopener noreferrer">Stage 1 PDF</a>{q.stage3PublicReport && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={q.stage3PublicReport} target="_blank" rel="noopener noreferrer">Stage 3 public report</a>}{q.stage3 === 'complete' && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/audit/stage3/QCAI-stage3-v5.pdf')} target="_blank" rel="noopener noreferrer">Stage 3 PDF (v5)</a>}{q.stage4PublicReport && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={q.stage4PublicReport} target="_blank" rel="noopener noreferrer" data-testid="qcai-stage4-report">Stage 4 public report (v5.1)</a>}{q.stage4 === 'complete' && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/audit/stage4/QCAI-stage4-v5.1.pdf')} target="_blank" rel="noopener noreferrer">Stage 4 PDF (v5.1)</a>}<a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/audit/stage5/PocketDrop-v5.2-flattened.sol')} target="_blank" rel="noopener noreferrer" data-testid="qcai-stage5-source">Stage 5 source (v5.2, flattened)</a>{q.stage5PublicReport && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={q.stage5PublicReport} target="_blank" rel="noopener noreferrer" data-testid="qcai-stage5-report">Stage 5 public report (v5.2)</a>}{q.stage5 === 'complete' && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('docs/audit/stage5/QCAI-stage5-v5.2.pdf')} target="_blank" rel="noopener noreferrer">Stage 5 PDF (v5.2)</a>}{q.stage4Triage && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob(q.stage4Triage)} target="_blank" rel="noopener noreferrer" data-testid="qcai-stage4-triage">Stage 4 triage (finding, verdict, test)</a>}{q.stage5Triage && <a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob(q.stage5Triage)} target="_blank" rel="noopener noreferrer" data-testid="qcai-stage5-triage">Stage 5 triage (finding, verdict, test)</a>}</p>
             </div>
