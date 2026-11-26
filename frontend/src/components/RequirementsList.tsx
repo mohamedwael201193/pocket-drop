@@ -226,7 +226,7 @@ export function RequirementsList({
         />
       </div>
       <p className="mt-1.5 text-xs text-zinc-500">
-        Each hash opens the explorer. Items marked <span className="font-mono text-red-800">refused</span> are attacks the chain rejected. Test names are Foundry tests in <code className="font-mono">contracts-v4/test</code> unless marked.
+        Each hash opens its proof: EVM hashes in the checker, which re-reads them from the chain, native hashes in the explorer. Items marked <span className="font-mono text-red-800">refused</span> are attacks the chain rejected. Test names are Foundry tests in <code className="font-mono">contracts-v4/test</code> unless marked.
       </p>
       <div className="mt-4 space-y-3">
         {requirements.map((r, i) => (
