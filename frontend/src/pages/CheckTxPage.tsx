@@ -62,7 +62,7 @@ function ReportView({ r }: { r: Report }) {
     <div className="space-y-3" data-testid="check-report">
       <Notice tone={v === 'verified' || v === 'refused' || v === 'reverted' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
         {v === 'verified' && <>All {r.checks.length} post-quantum signature{r.checks.length > 1 ? 's' : ''} in this transaction verified in your browser, with keys read from the chain. A changed intent fails with the same signature.</>}
-        {v === 'reverted' && <>Refused on chain: this transaction reverted at block {r.tx.height.toString()}, so nothing it asked for happened. Its post-quantum signature{r.checks.length > 1 ? 's are' : ' is'} valid for the key that signed it: the contract refused the request itself. The chain does not keep the revert reason.</>}
+        {v === 'reverted' && <>Refused attempt: this transaction reverted at block {r.tx.height.toString()}, so nothing it asked for happened. Its post-quantum signature{r.checks.length > 1 ? 's are' : ' is'} valid for the key that signed it: the contract refused the request itself. The chain does not keep the revert reason.</>}
         {v === 'failed' && <>At least one signature did not check out in this browser. Details below.</>}
         {v === 'refused' && <>Refused attempt: this transaction reverted, and the signature it carried is not a valid ML-DSA-87 signature from the key on chain. The contract refused it for the reason shown below.</>}
         {v === 'none' && <>{r.note ?? 'Nothing to check.'}</>}
