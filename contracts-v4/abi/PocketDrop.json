@@ -141,6 +141,11 @@
      "internalType": "address"
     },
     {
+     "name": "feeTo",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
      "name": "linkPk",
      "type": "bytes",
      "internalType": "bytes"
@@ -175,6 +180,11 @@
     },
     {
      "name": "payTo",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "feeTo",
      "type": "address",
      "internalType": "address"
     }
@@ -517,7 +527,7 @@
      "internalType": "uint256"
     },
     {
-     "name": "relayer",
+     "name": "feeTo",
      "type": "address",
      "indexed": true,
      "internalType": "address"
@@ -801,6 +811,11 @@
      "internalType": "uint256"
     }
    ]
+  },
+  {
+   "type": "error",
+   "name": "BadFeeTo",
+   "inputs": []
   },
   {
    "type": "error",

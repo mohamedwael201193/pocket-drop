@@ -216,6 +216,19 @@
   },
   {
    "type": "function",
+   "name": "ERC1271_DOMAIN",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
    "name": "FREEZE_COOLDOWN_PERIODS",
    "inputs": [],
    "outputs": [
@@ -582,6 +595,25 @@
      "name": "",
      "type": "uint256",
      "internalType": "uint256"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "erc1271Digest",
+   "inputs": [
+    {
+     "name": "hash",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
     }
    ],
    "stateMutability": "view"
