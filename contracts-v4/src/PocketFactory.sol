@@ -21,7 +21,7 @@ contract PocketFactory {
 
     /// @param implementation_ The PocketVault implementation (must have code).
     constructor(address implementation_) {
-        if (implementation_.code.length == 0) revert NoImplementation();
+        if (implementation_ == address(0) || implementation_.code.length == 0) revert NoImplementation();
         implementation = implementation_;
     }
 

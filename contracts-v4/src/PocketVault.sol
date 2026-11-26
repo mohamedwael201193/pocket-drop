@@ -258,6 +258,7 @@ contract PocketVault is IERC1271 {
     /// @param dailyLimit_ Daily allowance in wei.
     function initialize(address owner_, address[] calldata guardians_, uint8 threshold_, uint256 dailyLimit_) external {
         if (factory != address(0)) revert AlreadyInitialized();
+        if (owner_ == address(0)) revert InvalidConfig();
         factory = msg.sender;
         _validateGuardians(owner_, guardians_, threshold_);
         bytes memory pk = PqcLib.requireKey(owner_, bytes32(0));
@@ -725,8 +726,8 @@ contract PocketVault is IERC1271 {
     ) external nonReentrant {
         _requireTarget(drop);
         _auth(ACT_CONFIRM_DROP, abi.encode(drop, linkId, expectedRecipientKeyHash), deadline, sig);
-        IPocketDropSender(drop).confirmRecipient(linkId, expectedRecipientKeyHash);
         emit DropConfirmed(drop, linkId);
+        IPocketDropSender(drop).confirmRecipient(linkId, expectedRecipientKeyHash);
     }
 
     /// @notice Sender intent: cancel a drop; the escrow returns to this Pocket.
@@ -737,8 +738,8 @@ contract PocketVault is IERC1271 {
     function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external nonReentrant {
         _requireTarget(drop);
         _auth(ACT_CANCEL_DROP, abi.encode(drop, linkId), deadline, sig);
-        IPocketDropSender(drop).cancel(linkId);
         emit DropCancelled(drop, linkId);
+        IPocketDropSender(drop).cancel(linkId);
     }
 
     /// @notice Host a DropPool from this Pocket; slots * perSlot is debited from today's allowance.
@@ -776,8 +777,8 @@ contract PocketVault is IERC1271 {
     function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external nonReentrant {
         _requireTarget(pool);
         _auth(ACT_CLOSE_POOL, abi.encode(pool, poolId), deadline, sig);
-        IDropPoolHost(pool).close(poolId);
         emit PoolClosed(pool, poolId);
+        IDropPoolHost(pool).close(poolId);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -853,7 +854,7 @@ contract PocketVault is IERC1271 {
         if (block.timestamp > deadline) revert Expired();
         if (authorizer == address(0)) revert NotAuthorized();
         bytes memory message = PqcLib.pqMessage(finalizeDigest(action, authorizer, deadline));
-        bool ok;
+        bool ok = false;
         if (authorizer == newOwner) {
             ok = PqcLib.verifyForKey(newOwner, newKeyHash, message, sig);
         } else if (ownerAllowed && authorizer == owner) {
@@ -883,16 +884,15 @@ contract PocketVault is IERC1271 {
         }
     }
 
-    /// @dev Every signer must be a distinct configured guardian with a valid ML-DSA signature over `message`.
-    ///      Gas bound: at most `MAX_GUARDIANS` (5) signers are accepted (more reverts before any work), the guardian set
+    /// @dev Every signer must be a distinct configured guardian with a valid ML-DSA signature over `message`. Callers
+    ///      check `signers.length == sigs.length` first. Gas bound: at most `MAX_GUARDIANS` (5) signers are accepted (more reverts before any work), the guardian set
     ///      itself is capped at `MAX_GUARDIANS` by `_validateGuardians`, and duplicates are detected with a bitmap of
     ///      guardian indexes, so the work is at most 5 index lookups of at most 5 steps plus 5 precompile calls.
     function _checkGuardianSigs(address[] calldata signers, bytes[] calldata sigs, bytes memory message) internal view {
         uint256 len = signers.length;
         if (len > MAX_GUARDIANS) revert NotGuardian();
-        if (len != sigs.length) revert NotEnoughSigners();
-        uint256 seen;
-        for (uint256 i; i < len; ++i) {
+        uint256 seen = 0;
+        for (uint256 i = 0; i < len; ++i) {
             uint256 bit = uint256(1) << _guardianIndex(signers[i]);
             if (seen & bit != 0) revert DuplicateSigner();
             seen |= bit;
@@ -933,7 +933,7 @@ contract PocketVault is IERC1271 {
     /// @dev Linear scan of at most MAX_GUARDIANS entries.
     function _isGuardian(address who) internal view returns (bool) {
         uint256 n = _guardians.length;
-        for (uint256 i; i < n && i < MAX_GUARDIANS; ++i) {
+        for (uint256 i = 0; i < n && i < MAX_GUARDIANS; ++i) {
             if (_guardians[i] == who) return true;
         }
         return false;
@@ -942,7 +942,7 @@ contract PocketVault is IERC1271 {
     /// @dev Index of `who` in the guardian set (at most MAX_GUARDIANS steps); reverts `NotGuardian` if absent.
     function _guardianIndex(address who) internal view returns (uint256) {
         uint256 n = _guardians.length;
-        for (uint256 i; i < n && i < MAX_GUARDIANS; ++i) {
+        for (uint256 i = 0; i < n && i < MAX_GUARDIANS; ++i) {
             if (_guardians[i] == who) return i;
         }
         revert NotGuardian();
