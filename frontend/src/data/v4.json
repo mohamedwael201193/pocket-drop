@@ -2029,16 +2029,20 @@
   "stage4Score": "82 / HIGH",
   "stage4Findings": "5 findings (1 high, 2 medium, 1 low, 1 info), 0 critical",
   "stage4PublicReport": "https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020",
-  "stage4Triage": "docs/audit/stage4/QCAI_V5_1_TRIAGE.md"
+  "stage4Triage": "docs/audit/stage4/QCAI_V5_1_TRIAGE.md",
+  "stage5": "complete",
+  "stage5Score": "78 / MEDIUM",
+  "stage5Findings": "7 findings (1 high, 3 medium, 2 low, 1 info), 0 critical",
+  "stage5Triage": "docs/audit/stage5/QCAI_V5_2_TRIAGE.md"
  },
  "tests": {
-  "total": 217,
-  "unit": 189,
-  "fuzz": 24,
+  "total": 241,
+  "unit": 210,
+  "fuzz": 27,
   "invariantFns": 18,
-  "passed": 217,
+  "passed": 241,
   "failed": 0,
   "coverage": "100% line, statement, branch and function on src/",
-  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 217 passed, 0 failed (contracts-v4/COVERAGE.md)"
+  "verifiedBy": "FOUNDRY_PROFILE=ci forge test: 241 passed, 0 failed (contracts-v4/COVERAGE.md)"
  }
 }

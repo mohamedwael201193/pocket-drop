@@ -136,7 +136,7 @@ export const REQUIREMENTS: Requirement[] = [
   },
   {
     id: 'qcai',
-    requirement: 'Four-stage QCAI audit (v4 Stages 1–2, v5 Stage 3, v5.1 Stage 4), every finding answered',
+    requirement: 'Five-stage QCAI audit (v4 Stages 1–2, v5 Stage 3, v5.1 Stage 4, v5.2 Stage 5), every finding answered',
     code: [
       { label: 'docs/AUDIT.md (finding -> resolution -> test)', path: 'docs/AUDIT.md' },
       { label: 'Stage 1 PDF (19 Nov, v4)', path: 'docs/audit/stage1/QCAI-stage1-2026-11-19.pdf' },
@@ -148,10 +148,13 @@ export const REQUIREMENTS: Requirement[] = [
       { label: 'Stage 4 evidence tests', path: 'contracts-v4/test/QcaiV51AuditRegression.t.sol' },
       { label: 'v5.2: each Stage 4 item answered in code (deployed 26 Nov)', path: 'docs/audit/stage4/V5_2_CHANGES.md' },
       { label: 'Stage 5 source (v5.2 flattened, SHA-256 in SHA256SUMS)', path: 'docs/audit/stage5/PocketDrop-v5.2-flattened.sol' },
+      { label: 'Stage 5 triage (v5.2: verdict and test per finding)', path: 'docs/audit/stage5/QCAI_V5_2_TRIAGE.md' },
+      { label: 'Stage 5 record (score and the 7 findings)', path: 'docs/audit/stage5/qcai-stage5-v5.2.json' },
+      { label: 'Stage 5 evidence tests', path: 'contracts-v4/test/QcaiV52AuditRegression.t.sol' },
       { label: 'v5.2 tests', path: 'contracts-v4/test/V52Hardening.t.sol' },
     ],
-    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 QCAIA-1795645590445-DF0CEDA6 (85), Stage 4 QCAIA-1795655356279-BA1C1020 (82, 0 critical, v5.1)', note: 'https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020' }],
-    tests: ['each finding names its regression tests in docs/AUDIT.md', 'testFuzz_qcai51_h1_finalize_outcome_is_independent_of_caller', 'testFuzz_qcai51_m2_drip_sum_never_wraps_at_extreme_bounds', 'test_qcai51_m3_reentry_into_every_entry_point_is_refused', 'test_qcai51_l4_six_guardians_rejected_at_deploy', 'test_v52_finalize_by_unrelated_account_is_not_authorized', 'test_v52_finalize_unanimous_rejects_the_old_owner_and_accepts_guardian_or_new_owner'],
+    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 QCAIA-1795645590445-DF0CEDA6 (85), Stage 4 QCAIA-1795655356279-BA1C1020 (82, 0 critical, v5.1), Stage 5 on v5.2 (78, MEDIUM, 0 critical; id and public URL pending)', note: 'https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020' }],
+    tests: ['each finding names its regression tests in docs/AUDIT.md', 'testFuzz_qcai51_h1_finalize_outcome_is_independent_of_caller', 'testFuzz_qcai51_m2_drip_sum_never_wraps_at_extreme_bounds', 'test_qcai51_m3_reentry_into_every_entry_point_is_refused', 'test_qcai51_l4_six_guardians_rejected_at_deploy', 'testFuzz_qcai52_f2_unrelated_authorizer_is_refused', 'test_qcai52_f1_pay_reverts_outside_lock_and_receiver_cannot_reenter_the_locked_path', 'test_qcai52_f5_front_running_the_signed_freeze_only_delivers_the_intended_freeze', 'test_v52_finalize_by_unrelated_account_is_not_authorized', 'test_v52_finalize_unanimous_rejects_the_old_owner_and_accepts_guardian_or_new_owner'],
   },
   {
     id: 'tests',

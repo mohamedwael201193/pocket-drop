@@ -1,13 +1,13 @@
 // RECORDED facts for the landing. Counts are read from the repo's data files where one exists, so they move with them:
 //  - Foundry total: FOUNDRY below, equal to data/v4.json "tests.passed" (contracts-v4/COVERAGE.md, FOUNDRY_PROFILE=ci forge test;
-//    re-run 26 Nov 2026: 217 passed, 0 failed). A constant, not an import, so the landing does not download v4.json.
+//    re-run 26 Nov 2026: 241 passed, 0 failed). A constant, not an import, so the landing does not download v4.json.
 //  - app + API unit tests: data/tests.json (node frontend/scripts/count-tests.mjs)
 //  - reverify: the last full run of node frontend/scripts/reverify.mjs (REVERIFY below; re-run 26 Nov 2026: 793 passed, 0 failed)
 //  - real-crypto and live-precompile counts: README "Numbers" table (contracts-v4/test-real, contracts-v4/test-live, CI jobs)
 // test/landing.test.ts checks every hash below against requirements.ts / v4.json and the counts against their sources.
 import appTests from '../../data/tests.json';
 
-export const FOUNDRY = { passed: 217, failed: 0 } as const;
+export const FOUNDRY = { passed: 241, failed: 0 } as const;
 export const REVERIFY = { passed: 793, failed: 0, evm: 402, cosmos: 202, ranOn: '26 Nov 2026' } as const;
 export const RECORDED_ON = '26 Nov 2026';
 export const COUNTS = {
