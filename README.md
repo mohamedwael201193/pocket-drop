@@ -29,13 +29,14 @@ Send QOR to a friend who has no wallet. They open a link, and their browser crea
 
 Each number is labelled. **LIVE** means it is read from the chain or the API when you open the link. **RECORDED** means it comes from a file in this repo, written by a named script on the date shown. TEAM-RUN rows use team test accounts; they are never counted as external users.
 
-| Number (deployed v5) | Label | Source |
+| Number (deployed v5.1) | Label | Source |
 |---|---|---|
-| v5 contracts on Diana: router `0x13b8e379…e376`, drop `0xcd52c8d2…d798` (all addresses under [Contracts on Diana](#contracts-on-diana)); each runtime code hash equals the one recorded at deploy | LIVE | `node frontend/scripts/reverify.mjs` |
-| 606 checks passed, 0 failed: 331 EVM and 166 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| v5.1 contracts on Diana: router `0x99711daa…61cb`, drop `0xf85e1d47…20ed` (all addresses under [Contracts on Diana](#contracts-on-diana)); each runtime code hash equals the one recorded at deploy, and the flattened audit file compiles to the same code | LIVE | `node frontend/scripts/reverify.mjs`, `node contracts-v4/script/flatten-v51.mjs --check` |
+| v5.1 fixes the open review items: a copied bind cannot take the delivery fee (live revert [`0x6700c859…`](https://explore.qore.network/tx/0x6700c859853889b3d060aa3833df7f03b7b7334eef86d8ff182502fab17feae8)), ERC-1271 and PqGuard approvals are tagged and bound to one account and chain, the router holds no value | TEAM-RUN, 26 Nov 2026 | [`docs/V5_1.md`](docs/V5_1.md), `node contracts-v4/script/smoke-v51.mjs` |
+| 674 checks passed, 0 failed: 348 EVM and 177 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
 | Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
 | QCAI Stage 3 on v5: 85 (`QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [Stage 3 public report](https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6), [`docs/AUDIT.md`](docs/AUDIT.md) |
-| Tests: 190 Foundry (unit, fuzz, invariant; 100% line, statement, branch and function coverage of `contracts-v4/src`), 22 real ML-DSA-87, 27 against the live precompiles; 252 frontend and 218 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
+| Tests: 194 Foundry (unit, fuzz, invariant, v5.1 regressions), 24 real ML-DSA-87, 29 against the live precompiles; 254 frontend and 219 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 
 <details>
@@ -95,7 +96,19 @@ The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects,
 
 ## Contracts on Diana
 
-**Current: v5** (deployed 25 Nov 2026). v5 is v4 with a stricter `PqcLib`: exact ML-DSA-87 key and signature sizes are checked before the precompile is called, and the key-status reply must have the exact layout. Nothing else in `src/` changed. See [docs/V5.md](docs/V5.md).
+**Current: v5.1** (deployed 26 Nov 2026). v5.1 is v5 with the open review items fixed: the bind signs `feeTo`, ERC-1271 and PqGuard approvals carry their own tag and are bound to the account and chain, the router holds no value, plus the Stage 4 cleanups and NatSpec. See [docs/V5_1.md](docs/V5_1.md).
+
+| Contract | v5.1 PROD | v5.1 LAB |
+|---|---|---|
+| PocketRouter | `0x99711daaa39f2f03901950486c70641eca5261cb` | `0x007dd2b3d907e6924e3ad7d3f5281cacebabab07` |
+| PocketFactory | `0x2783b00467e98498eb1ca2f980670d11f241c9f2` | `0x364062747767c0e94e5ed34d3a8ed2a76d59f90b` |
+| PocketVault (implementation) | `0x4d16e0effbf21764520de3dfafeaefbcec9915c5` | `0xfd81083bf8109f76c0b3c1d1976971bebde60965` |
+| PocketDrop | `0xf85e1d470b9e23ed632d8036adc37d66233e20ed` | `0x496342faa28e12b9afee8000793aac261d75d23f` |
+| DropPool | `0xeaf7b161c1d82615d96a01c3e32602be4b1c92e7` | `0xdb17f2d96817cfdd715e23c8d30214afd22a3052` |
+
+- v5.1 PqGuard example (`PqGuardedCounter`): `0xb6d4dc26188b7f90de2dd2e6ccdd943025fa1765`
+
+**Previous: v5** (deployed 25 Nov 2026; links and Pockets made on v5 keep working there). v5 is v4 with a stricter `PqcLib`: exact ML-DSA-87 key and signature sizes are checked before the precompile is called, and the key-status reply must have the exact layout. Nothing else in `src/` changed. See [docs/V5.md](docs/V5.md).
 
 | Contract | v5 PROD | v5 LAB |
 |---|---|---|
