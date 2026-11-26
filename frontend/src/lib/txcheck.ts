@@ -130,6 +130,12 @@ async function nonceBefore(d: CheckDeps, vault: Hex, height: bigint): Promise<bi
   return (await d.read(vault, vaultAbi, 'nonce', [], height - 1n)) as bigint;
 }
 
+/** Who sent an EVM-lane transaction: the Pocket Drop relayer, or the account's own scoped EVM window ("Relay it yourself",
+ *  a team script, or an attacker trying on its own). The relayer is not the only possible sender: the router has no caller check. */
+export function evmSender(from: string | undefined, relayer: string): 'relayer' | 'own' {
+  return from && from.toLowerCase() === relayer.toLowerCase() ? 'relayer' : 'own';
+}
+
 export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
   const hash = normalizeHash(hashIn);
   if (!hash) throw new Error('Paste a transaction hash: 64 hex characters (native lane) or 0x + 64 hex (EVM).');

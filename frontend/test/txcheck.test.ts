@@ -117,3 +117,15 @@ describe('checkTx', () => {
     await expect(checkTx('hello', deps(spendTx(4n)))).rejects.toThrow(/64 hex/);
   });
 });
+
+describe('EVM-lane sender label', () => {
+  it('names the relayer only when the relayer sent the transaction', async () => {
+    const { evmSender } = await import('../src/lib/txcheck');
+    const { RELAYER_ADDRESS } = await import('../src/lib/v4');
+    expect(RELAYER_ADDRESS.toLowerCase()).toBe('0xf6e6fb2d33bef3043682658e2b69f3a2f8616ccd');
+    expect(evmSender('0xF6E6FB2D33BEF3043682658E2B69F3A2F8616CCD', RELAYER_ADDRESS)).toBe('relayer');
+    // the "Relay it yourself" claim 0xb7941d40…2663 was sent by the recipient's own account
+    expect(evmSender('0x60c92d715f12e5dfc486bdf9f9053c472f38e91e', RELAYER_ADDRESS)).toBe('own');
+    expect(evmSender(undefined, RELAYER_ADDRESS)).toBe('own');
+  });
+});

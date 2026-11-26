@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Button, CopyButton, Mono, Notice, PageTitle, SourceBadge, TxLink } from '../components/ui';
 import { addrUrl, TESTNET_BADGE } from '../lib/config';
-import { checkTx, normalizeHash, verdict, type Report, type SigCheck } from '../lib/txcheck';
+import { checkTx, evmSender, normalizeHash, verdict, type Report, type SigCheck } from '../lib/txcheck';
 import { liveDeps, withQoresign } from '../lib/txcheckChain';
 import { PowerMap, pocketEnv } from '../components/powers';
 import { useQuery } from '@tanstack/react-query';
 import type { Hex } from 'viem';
-import { envLabel, isProdLike } from '../lib/v4';
+import { envLabel, isProdLike, RELAYER_ADDRESS } from '../lib/v4';
 
 const isAddr = (s: string) => /^0x[0-9a-fA-F]{40}$/.test(s.trim());
 
@@ -73,7 +73,9 @@ function ReportView({ r }: { r: Report }) {
           <Row k="Result">{r.tx.ok ? 'succeeded' : 'failed (reverted)'} at block {r.tx.height.toString()}</Row>
           <Row k="Relayer signature"><span data-testid="check-lane">{r.tx.lane === 'hybrid'
             ? <>Hybrid: secp256k1 + ML-DSA-87 on a native cross-VM call. The chain's own check: {r.tx.relayerHybridVerified ? <b>pqc_hybrid_verify = verified</b> : 'no pqc_hybrid_verify event'}.</>
-            : <>EVM transaction (secp256k1), sent inside the relayer's scoped window. The relayer only pays gas; the signatures below are what move funds.</>}</span></Row>
+            : evmSender(r.tx.relayer, RELAYER_ADDRESS) === 'relayer'
+              ? <>EVM transaction (secp256k1), sent inside the relayer&apos;s scoped window. The relayer only pays gas; the signatures below are what move funds.</>
+              : <>EVM transaction (secp256k1), sent by <Mono className="text-xs">{r.tx.relayer ? `${r.tx.relayer.slice(0, 10)}…${r.tx.relayer.slice(-4)}` : 'its sender'}</Mono> from its own scoped EVM window, not by the Pocket Drop relayer. The sender only pays gas; the signatures below are what move funds.</>}</span></Row>
           {r.env && <Row k="Instance">{envLabel(r.env)}{isProdLike(r.env) ? '' : ', 60 s timers'}</Row>}
           <Row k="Call"><Mono className="text-xs">router.{r.action}{r.fn ? ` → ${r.fn}` : ''}</Mono>{r.target && <> on <a className="font-mono text-xs underline" href={addrUrl(r.target)} target="_blank" rel="noopener noreferrer">{r.target.slice(0, 10)}…</a></>}</Row>
           {r.tx.memo && <Row k="Memo"><Mono className="text-xs">{r.tx.memo}</Mono></Row>}

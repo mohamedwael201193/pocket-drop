@@ -14,6 +14,8 @@ export const ALL_ENVS: Env[] = [...CURRENT_ENVS, ...PREVIOUS_ENVS];
 /** Link id prefixes: s / n = v5.2 prod / lab, r / m = v5.1, q / k = v5, p / l = v4 (links shared earlier keep their prefix). */
 export const LINK_PREFIX: Record<Env, string> = { prod: 's', lab: 'n', prodV51: 'r', labV51: 'm', prodV5: 'q', labV5: 'k', prodV4: 'p', labV4: 'l' };
 export const CURRENT_VERSION = 'v5.2';
+/** The Pocket Drop relayer's EVM address (data/v4.json). */
+export const RELAYER_ADDRESS = (data as { relayer: string }).relayer as Hex;
 export type Gen = 'v5.2' | 'v5.1' | 'v5' | 'v4';
 export const genOf = (e: Env): Gen =>
   e === 'prod' || e === 'lab' ? 'v5.2' : e === 'prodV51' || e === 'labV51' ? 'v5.1' : e === 'prodV5' || e === 'labV5' ? 'v5' : 'v4';
