@@ -14,7 +14,7 @@ import { claimUrl4, linkId4 } from '../lib/claim4';
 import { rememberNonce } from '../lib/links4';
 import { DEFAULTS, INST, REGISTRATION_FEE_WEI, createdId } from '../lib/v4';
 import { deliveryFeeWei, deliverySteps } from '../lib/fees';
-import { OPEN_ACK_ABOVE_WEI, openNeedsAck } from '../lib/sendMode';
+import { OPEN_ACK_ABOVE_WEI, openNeedsAck, justMadeDrop } from '../lib/sendMode';
 import { explainError } from '../lib/api';
 import { isCancelled } from '../lib/signReview';
 import { fmtQor, parseQor } from '../lib/chain';
@@ -31,7 +31,7 @@ export function SendTabs() {
   );
 }
 
-interface Made { url: string; id: string; kind: 'drop' | 'pool'; amountText: string; hash: string }
+interface Made { url: string; id: string; kind: 'drop' | 'pool'; amountText: string; hash: string; amountInput?: string }
 
 export default function SendPage() {
   const a = useAccount();
@@ -69,6 +69,10 @@ export default function SendPage() {
     : pv && pv.deployed && total! > pv.allowanceLeft ? `Your daily limit has ${fmtQor(pv.allowanceLeft)} QOR left; this drop needs ${fmtQor(total!)} QOR.`
     : pv && !pv.deployed && total! > DEFAULTS.dailyLimit ? `A new Pocket's daily limit is ${fmtQor(DEFAULTS.dailyLimit)} QOR.`
     : pv?.frozen ? 'This Pocket is frozen by its guardians.' : null;
+  // Right after a link is made the balance drops, so the same amount no longer fits. That is expected, not an error:
+  // say so plainly instead of a red "fix the amount" alert above the link the sender just made. Editing the amount brings the check back.
+  const justMade = justMadeDrop(made, amount);
+  const shownDropProblem = justMade ? null : dropProblem;
   const needsAck = openNeedsAck(mode, amt);
   const ackProblem = needsAck && !openAck ? `Above ${fmtQor(OPEN_ACK_ABOVE_WEI)} QOR, a first-to-open link needs your OK below, or switch to Someone I know.` : null;
   const ns = Number(slots);
@@ -91,7 +95,7 @@ export default function SendPage() {
       const r = await createDrop(a.actionCtx, a.root, { mode, amount: amt, drip: DEFAULTS.drip, relayerFee: fee, ttlSeconds: DEFAULTS.ttlSeconds });
       const linkId = await createdId(r.res, 'drop');
       rememberNonce(a.env, 'drop', linkId, r.nonce);
-      setMade({ url: claimUrl4(window.location.origin, a.env, linkId, r.seed), id: linkId4(a.env, linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash });
+      setMade({ url: claimUrl4(window.location.origin, a.env, linkId, r.seed), id: linkId4(a.env, linkId), kind: 'drop', amountText: fmtQor(amt), hash: r.res.txHash, amountInput: amount });
       await qc.invalidateQueries();
     } catch (e) { setErr(isCancelled(e) ? null : { where: 'drop', text: explainError(e) }); } finally { setBusy(null); }
   }
@@ -150,10 +154,10 @@ export default function SendPage() {
           )}
           <label htmlFor="amount" className="mt-4 block text-sm font-semibold text-zinc-900">Amount (QOR)</label>
           <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" data-testid="amount" disabled={!ready}
-            aria-invalid={ready && !!dropProblem} aria-describedby="drop-total drop-problem amount-lock"
+            aria-invalid={ready && !!shownDropProblem} aria-describedby="drop-total drop-problem amount-lock"
             className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-lg" />
           {lockReason && <p id="amount-lock" className="mt-2 text-xs font-medium text-zinc-700" data-testid="amount-lock">{lockReason}</p>}
-          {ready && dropProblem && <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{dropProblem}</p>}
+          {ready && shownDropProblem && <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{shownDropProblem}</p>}
           <div id="drop-total" className="mt-3 rounded-2xl border border-zinc-200 bg-white/70 p-3 text-xs text-zinc-700" data-testid="drop-total">
             <div className="mb-1 font-semibold text-zinc-900">What leaves your Pocket</div>
             <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
@@ -168,9 +172,9 @@ export default function SendPage() {
           </div>
         </StepCard>
 
-        <StepCard n={3} title="Create and share" done={made?.kind === 'drop'} locked={!ready || !!dropProblem}>
+        <StepCard n={3} title="Create and share" done={made?.kind === 'drop'} locked={!ready || !!shownDropProblem}>
           <Button block busy={busy === 'drop'} disabled={!ready || !!dropProblem || !!ackProblem || !!busy} onClick={() => void makeDrop()} data-testid="create-drop">Create drop link</Button>
-          {(lockReason || (ready && (dropProblem || ackProblem))) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-drop-reason">{lockReason ?? (dropProblem ? `Fix the amount first: ${dropProblem}` : ackProblem)}</p>}
+          {(lockReason || (ready && (dropProblem || ackProblem))) && !busy && <p className="mt-2 text-xs text-zinc-600" data-testid="create-drop-reason">{lockReason ?? (justMade ? 'Link created. To make another, enter a new amount.' : dropProblem ? `Fix the amount first: ${dropProblem}` : ackProblem)}</p>}
           {err?.where === 'drop' && <div className="mt-3"><Notice tone="error" testId="drop-error">{err.text}</Notice></div>}
           {made?.kind === 'drop' && <div className="mt-4 space-y-2"><ShareCard url={made.url} id={made.id} amountText={made.amountText} headline="Your link is ready" /><p className="font-mono text-xs text-zinc-600">Created in <TxLink hash={made.hash} testId="create-tx" check /> <SourceBadge kind="LIVE" /></p></div>}
         </StepCard>

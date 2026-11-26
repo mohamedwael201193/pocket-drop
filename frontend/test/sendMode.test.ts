@@ -15,3 +15,13 @@ describe('send mode: Confirmed by default, Open above a small amount needs an ex
   });
   it('an unparsable amount does not ask (the amount error shows instead)', () => expect(openNeedsAck('Open', null)).toBe(false));
 });
+
+describe('after a drop link is made', () => {
+  it('hides the amount problem until the amount is edited', async () => {
+    const { justMadeDrop } = await import('../src/lib/sendMode');
+    expect(justMadeDrop({ kind: 'drop', amountInput: '0.1' }, '0.1')).toBe(true);
+    expect(justMadeDrop({ kind: 'drop', amountInput: '0.1' }, '0.2')).toBe(false);
+    expect(justMadeDrop({ kind: 'pool', amountInput: '0.1' }, '0.1')).toBe(false);
+    expect(justMadeDrop(null, '0.1')).toBe(false);
+  });
+});

@@ -10,3 +10,9 @@ export type SendMode = 'Confirmed' | 'Open';
 export function openNeedsAck(mode: SendMode, amountWei: bigint | null): boolean {
   return mode === 'Open' && amountWei !== null && amountWei > OPEN_ACK_ABOVE_WEI;
 }
+
+/** Right after a drop link is made, the Pocket balance drops and the same amount usually no longer fits. That is the
+ *  expected result of sending, not an input error: the red "fix the amount" alert stays hidden until the amount is edited. */
+export function justMadeDrop(made: { kind: string; amountInput?: string } | null, amount: string): boolean {
+  return made?.kind === 'drop' && made.amountInput === amount;
+}
