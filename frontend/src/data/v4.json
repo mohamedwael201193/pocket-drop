@@ -10,9 +10,115 @@
   "cosmosChainId": "qorechain-diana",
   "explorer": "https://explore.qore.network"
  },
- "current": "v5",
+ "current": "v5.1",
  "instances": {
   "prod": {
+   "router": {
+    "address": "0x99711daaa39f2f03901950486c70641eca5261cb",
+    "deployTx": "0x7c63522f49343b12cd8a3ce7c81836b020150af6eeffe71c0b19222ba9474f0b",
+    "blockNumber": "10757687",
+    "codeKeccak": "0x87c8eb0efb71b91719d46c0b7fbb75e39c5d542aada9827244b08e6a3b3fb7a7"
+   },
+   "factory": {
+    "address": "0x2783b00467e98498eb1ca2f980670d11f241c9f2",
+    "deployTx": "0xc1d0040496508e9d3fdff3b5cb4f9feaaf55b123b8018aa6dc1634a8c1027b48",
+    "blockNumber": "10757678",
+    "codeKeccak": "0xb27073905a706346f498cc5ef4800f9134f11df88504508cdf0f5eda902b949f"
+   },
+   "drop": {
+    "address": "0xf85e1d470b9e23ed632d8036adc37d66233e20ed",
+    "deployTx": "0x7961f0ff66087691d67d1062c4e8a2b38045be4554e03a3689ac867fcabc1afb",
+    "blockNumber": "10757682",
+    "codeKeccak": "0x8cea1c031aed51de408dcc5b806292f50358ed8ca2efecd8c030c6924171bf36"
+   },
+   "pool": {
+    "address": "0xeaf7b161c1d82615d96a01c3e32602be4b1c92e7",
+    "deployTx": "0xb45e946b763335fb0cc20a68ae679e0f713392dbb557e13ab7b619455a633627",
+    "blockNumber": "10757686",
+    "codeKeccak": "0xe0859a0c5be547a1bb3003a6d2497045aca0b2fcd9910ba27d25af60a07214b4"
+   },
+   "vaultImpl": {
+    "address": "0x4d16e0effbf21764520de3dfafeaefbcec9915c5",
+    "deployTx": "0x486c1fc8d4ba25234e3d8d3cf688e7d350206fdcf50700407ed072d2f6a4b68a",
+    "blockNumber": "10757676",
+    "codeKeccak": "0x3195aa3d527487cbdefc2dc5bc7ee2151b505695aeccaa88b8d5cd0862ad3a08"
+   },
+   "readBack": {
+    "TIMELOCK": "86400",
+    "RECOVERY_DELAY": "172800",
+    "FREEZE_PERIOD": "259200",
+    "UNANIMOUS_RECOVERY_DELAY": "259200",
+    "BIND_TIMEOUT": "3600"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "3600",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "lab": {
+   "router": {
+    "address": "0x007dd2b3d907e6924e3ad7d3f5281cacebabab07",
+    "deployTx": "0xbaa8a228effe41383445a4b1bdbcb7f583a31d1eaac1a0cfaf26966023a2b838",
+    "blockNumber": "10757738",
+    "codeKeccak": "0xefcab9621c7b766bf0ffba39e7d1a4c23277a9daf775e5abe2d9a66f19085101"
+   },
+   "factory": {
+    "address": "0x364062747767c0e94e5ed34d3a8ed2a76d59f90b",
+    "deployTx": "0x9b7fdabfd6f711c33c871e555660825b9b0941ad65c623e73433ad910374bc72",
+    "blockNumber": "10757732",
+    "codeKeccak": "0x157ded08d7c5245084975ba47dc48a30f6b3d95110e99c5fccc7306bb9fe7d46"
+   },
+   "drop": {
+    "address": "0x496342faa28e12b9afee8000793aac261d75d23f",
+    "deployTx": "0x281318a39d57c40165fdec9b41b89c2a09e57e1ea63e4a7be59258ee82bb27df",
+    "blockNumber": "10757734",
+    "codeKeccak": "0x5885d32131412abd36eece93edef13488cb8e971f90b7d44a00055844873bcd1"
+   },
+   "pool": {
+    "address": "0xdb17f2d96817cfdd715e23c8d30214afd22a3052",
+    "deployTx": "0x3199bfc937176a946a1e731d21cd7719f1477dd5c223164bca24fa67ad71624d",
+    "blockNumber": "10757736",
+    "codeKeccak": "0xe0859a0c5be547a1bb3003a6d2497045aca0b2fcd9910ba27d25af60a07214b4"
+   },
+   "vaultImpl": {
+    "address": "0xfd81083bf8109f76c0b3c1d1976971bebde60965",
+    "deployTx": "0x744064e5d9ce0047af6d553121e20ff89de1899cebc4d10a57718ace9c4ca01b",
+    "blockNumber": "10757730",
+    "codeKeccak": "0xb11959401851328cb1cefad1a1bfe16c46b62e44a24ce9e3877e4dd3bdb09c3d"
+   },
+   "readBack": {
+    "TIMELOCK": "60",
+    "RECOVERY_DELAY": "60",
+    "FREEZE_PERIOD": "120",
+    "UNANIMOUS_RECOVERY_DELAY": "180",
+    "BIND_TIMEOUT": "60"
+   },
+   "dropLimits": [
+    "100000000000000000",
+    "50000000000000000000",
+    "600000000000000000",
+    "10000000000000000000",
+    "60",
+    "2592000"
+   ],
+   "poolLimits": [
+    "10000000000000000",
+    "5000000000000000000",
+    "20",
+    "2592000"
+   ]
+  },
+  "prodV5": {
    "router": {
     "address": "0x13b8e379e50da657b943781d2816fc17473ae376",
     "deployTx": "0x72cd976af4effc18cc04fc09e3487688516912d51ebc8689b2bde0b776bb8393",
@@ -65,7 +171,7 @@
     "2592000"
    ]
   },
-  "lab": {
+  "labV5": {
    "router": {
     "address": "0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75",
     "deployTx": "0xe66b229a5e017614f5dce0db4083303fc175ecb85882d4f2455de2588922683f",

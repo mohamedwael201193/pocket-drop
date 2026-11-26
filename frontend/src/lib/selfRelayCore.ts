@@ -6,7 +6,7 @@ import { encodeFunctionData, type Hex } from 'viem';
 import { routerAbi } from './abi4';
 
 export interface RouteBody {
-  env: 'prod' | 'lab' | 'prodV4' | 'labV4'; target?: string; data: string;
+  env: 'prod' | 'lab' | 'prodV5' | 'labV5' | 'prodV4' | 'labV4'; target?: string; data: string;
   pocket?: { owner: string; guardians: string[]; threshold: number; dailyLimit: string; userSalt: string };
 }
 

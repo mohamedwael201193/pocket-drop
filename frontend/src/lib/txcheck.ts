@@ -2,6 +2,7 @@
 // ML-DSA-87 signature inside it in the browser, with the public keys read from the chain. Nothing here trusts our API:
 // the tx comes from Cosmos REST (native hybrid lane) or EVM JSON-RPC, keys from the PQC precompile, state from eth_call.
 import { decodeFunctionData, keccak256, type Hex } from 'viem';
+import { BIND_V5_ABI } from './claim4';
 import { dropAbi, factoryAbi, poolAbi, routerAbi, vaultAbi } from './abi4';
 import { ACT, CHAIN_STR, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, pqMessageBytes, pqMessageText, recoveryDigest } from './intents';
 import { INST, type Env } from './v4';
@@ -151,9 +152,10 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
   const t = target.toLowerCase();
   const isDrop = t === inst.drop.toLowerCase();
   const isPool = t === inst.pool.toLowerCase();
-  const call = tryDecode(isDrop ? dropAbi : isPool ? poolAbi : vaultAbi, inner);
+  const innerAbi = isDrop ? [...dropAbi, ...BIND_V5_ABI] : isPool ? poolAbi : vaultAbi; // drops: v5.1 bind (feeTo) and the v5 / v4 bind
+  const call = tryDecode(innerAbi, inner);
   if (!call) return empty(rc.functionName, 'The inner call could not be decoded.', { target });
-  const fnAbi = ((isDrop ? dropAbi : isPool ? poolAbi : vaultAbi) as readonly { type: string; name?: string; inputs?: { name: string }[] }[])
+  const fnAbi = (innerAbi as readonly { type: string; name?: string; inputs?: { name: string }[] }[])
     .find((x) => x.type === 'function' && x.name === call.functionName && (x.inputs?.length ?? -1) === call.args.length);
   const args: Record<string, string> = {};
   (fnAbi?.inputs ?? []).forEach((inp, i) => { const v = str(call.args[i]); args[inp.name || `arg${i}`] = /^0x[0-9a-f]{200,}$/i.test(v) ? short(v) : v; });
@@ -198,10 +200,13 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
   }
 
   if (isDrop && call.functionName === 'bind') {
-    const [id, recipient, keyHash, payTo, linkPk, linkSig] = a as [bigint, Hex, Hex, Hex, Hex, Hex];
+    const withFee = a.length === 7; // v5.1: (id, recipient, keyHash, payTo, feeTo, linkPk, linkSig)
+    const [id, recipient, keyHash, payTo] = a as [bigint, Hex, Hex, Hex];
+    const feeTo = withFee ? (a[4] as Hex) : undefined;
+    const [linkPk, linkSig] = (withFee ? a.slice(5) : a.slice(4)) as [Hex, Hex];
     const link = (await d.read(inst.drop, dropAbi, 'getLink', [id], h)) as { linkKeyHash: Hex };
-    const digest = dropBindDigest({ drop: inst.drop, id, recipient, keyHash, payTo });
-    const tampered = dropBindDigest({ drop: inst.drop, id, recipient: payTo === recipient ? inst.drop : recipient, keyHash, payTo: inst.drop });
+    const digest = dropBindDigest({ drop: inst.drop, id, recipient, keyHash, payTo, feeTo });
+    const tampered = dropBindDigest({ drop: inst.drop, id, recipient: payTo === recipient ? inst.drop : recipient, keyHash, payTo: inst.drop, feeTo });
     out.checks.push(await runCheck(d, { who: 'link key', signer: recipient, fn: 'bind', digest, tampered, tamperedWhat: 'a different payout address', pk: linkPk, keySource: 'calldata', pinnedHash: link.linkKeyHash, sig: linkSig }));
   } else if (isDrop && call.functionName === 'claim') {
     const [id, sig] = a as [bigint, Hex];

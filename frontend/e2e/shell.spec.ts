@@ -49,8 +49,8 @@ test('overview: every card carries a source label and the numbers match the live
     await expect(page.getByTestId('ov-gauge-ratio')).toHaveText('1 of 3');
   }
   await expect(page.getByTestId('ov-create-key')).toHaveAttribute('href', '/send');
-  const [p5, p4] = [s.v4?.prod?.hybridRelayEvents, s.v4?.prodV4?.hybridRelayEvents]; // the card sums the v5 and v4 production instances
-  const hybrid = typeof p5 === 'number' && typeof p4 === 'number' ? p5 + p4 : undefined;
+  const hy = [s.v4?.prod?.hybridRelayEvents, s.v4?.prodV5?.hybridRelayEvents, s.v4?.prodV4?.hybridRelayEvents]; // the card sums the v5.1, v5 and v4 production instances
+  const hybrid = hy.every((x) => typeof x === 'number') ? hy.reduce((n, x) => n + (x as number), 0) : undefined;
   if (typeof hybrid === 'number') await expect(page.getByTestId('ov-hybrid')).toHaveAttribute('data-value', String(hybrid), { timeout: 60_000 });
   await expect(page.getByTestId('ov-relayer-balance')).toContainText(Number(h.relayer.balance).toFixed(2).slice(0, -1), { timeout: 60_000 });
   await expect(page.getByTestId('ov-activity-rows').locator('a[href^="/check/"]').first()).toBeVisible({ timeout: 120_000 });

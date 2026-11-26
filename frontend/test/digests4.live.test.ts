@@ -2,7 +2,8 @@
 // The vault views are read on each instance's PocketVault implementation (same code and constants as every Pocket clone;
 // the digest depends on address(this), which the test passes to the JS side as the same address).
 import { describe, expect, it } from 'vitest';
-import { keccak256, toBytes, type Hex } from 'viem';
+import { keccak256, parseAbi, toBytes, type Hex } from 'viem';
+const BIND_V5_DIGEST = parseAbi(['function bindDigest(uint256, address, bytes32, address) view returns (bytes32)']);
 import { dropAbi, poolAbi, vaultAbi } from '../src/lib/abi4';
 import { pub } from '../src/lib/chain';
 import { ACT, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, recoveryDigest } from '../src/lib/intents';
@@ -50,7 +51,10 @@ describe.each(['prod', 'lab'] as Env[])('digests equal the %s contracts', (env) 
   });
   it('drop bind and claim', async () => {
     for (const id of [1n, 7n, 123456n]) {
-      expect(dropBindDigest({ drop: i.drop, id, recipient: R, keyHash: KH, payTo: P })).toBe(await pub.readContract({ address: i.drop, abi: dropAbi, functionName: 'bindDigest', args: [id, R, KH, P] }));
+      expect(dropBindDigest({ drop: i.drop, id, recipient: R, keyHash: KH, payTo: P, feeTo: R })).toBe(await pub.readContract({ address: i.drop, abi: dropAbi, functionName: 'bindDigest', args: [id, R, KH, P, R] }));
+      // the v5 contracts (no feeTo) still answer the v5 bind digest
+      const v5 = INST.prodV5.drop;
+      expect(dropBindDigest({ drop: v5, id, recipient: R, keyHash: KH, payTo: P })).toBe(await pub.readContract({ address: v5, abi: BIND_V5_DIGEST, functionName: 'bindDigest', args: [id, R, KH, P] }));
       expect(dropClaimDigest({ drop: i.drop, id, recipient: R, payTo: P })).toBe(await pub.readContract({ address: i.drop, abi: dropAbi, functionName: 'claimDigest', args: [id, R, P] }));
     }
   });

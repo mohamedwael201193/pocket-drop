@@ -27,8 +27,10 @@ const CONTRACTS = [
   ['pool', 'DropPool'],
 ] as const;
 const ENVS = [
-  ['prod', 'v5 production'],
-  ['lab', 'v5 lab'],
+  ['prod', 'v5.1 production'],
+  ['lab', 'v5.1 lab'],
+  ['prodV5', 'v5 production (previous)'],
+  ['labV5', 'v5 lab (previous)'],
   ['prodV4', 'v4 production (previous)'],
   ['labV4', 'v4 lab (previous)'],
 ] as const;
@@ -38,7 +40,7 @@ function useFacts() {
     queryKey: ['v4-facts'], refetchInterval: 30_000,
     queryFn: async () => {
       // production counts on the current v5 contracts and on the previous v4 contracts, read separately
-      const one = async (e: 'prod' | 'prodV4') => {
+      const one = async (e: 'prod' | 'prodV5' | 'prodV4') => {
         const [links, pools, escrow, poolEscrow] = await Promise.all([
           pub.readContract({ address: INST[e].drop, abi: dropAbi, functionName: 'linkCount' }) as Promise<bigint>,
           pub.readContract({ address: INST[e].pool, abi: poolAbi, functionName: 'poolCount' }) as Promise<bigint>,
@@ -46,8 +48,8 @@ function useFacts() {
         ]);
         return { links, pools, escrow, poolEscrow };
       };
-      const [v5, v4p] = await Promise.all([one('prod'), one('prodV4')]);
-      return { v5, v4: v4p };
+      const [v51, v5, v4p] = await Promise.all([one('prod'), one('prodV5'), one('prodV4')]);
+      return { v51, v5, v4: v4p };
     },
   });
 }
@@ -87,8 +89,8 @@ export default function JudgesPage() {
 
         <RequirementsList requirements={REQUIREMENTS} health={h} />
 
-        <Item n={2} title="The contracts are on Diana: current v5 (strict PqcLib) and the previous v4, each with production and a 60 s lab" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
-          <p className="text-xs text-zinc-500">v5 changes only the signature library: exact ML-DSA-87 key and signature sizes are required before the precompile is called, and the key-status reply must have the exact canonical layout (<a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('contracts-v4/docs/V5.md')} target="_blank" rel="noopener noreferrer">docs/V5.md</a>). New Pockets, drops and pools use v5. Pockets, links and recorded evidence made on v4 stay on v4 and keep working.</p>
+        <Item n={2} title="The contracts are on Diana: current v5.1 and the previous v5 and v4, each with production and a 60 s lab" action={<SourceBadge kind="RECORDED" title="Addresses and deploy transactions from contracts-v4/deployments/diana.json" />}>
+          <p className="text-xs text-zinc-500">v5.1 (current, 26 Nov 2026) fixes the open review items: the bind signs the address paid the delivery fee (a copied bind cannot take it), ERC-1271 and PqGuard approvals carry their own tag and are bound to the account and chain (never usable as a Pocket intent), the router holds no value, plus the Stage 4 cleanups. New Pockets, drops and pools use v5.1; links and Pockets made on v5 and v4 stay there and keep working. v5 changed only the signature library: exact ML-DSA-87 key and signature sizes are required before the precompile is called, and the key-status reply must have the exact canonical layout (<a className="underline decoration-zinc-300 underline-offset-2 hover:text-black" href={blob('contracts-v4/docs/V5.md')} target="_blank" rel="noopener noreferrer">docs/V5.md</a>). New Pockets, drops and pools use v5. Pockets, links and recorded evidence made on v4 stay on v4 and keep working.</p>
           <div className="space-y-2.5 rounded-xl bg-stoneBg p-3" data-testid="v4-addresses">
             {CONTRACTS.map(([k, label]) => (
               <div key={k} className="rounded-lg border border-zinc-200/80 bg-white/85 p-3">
@@ -124,8 +126,9 @@ export default function JudgesPage() {
           </div>
           {!f ? <Skeleton className="h-12 w-full" /> : (
             <dl className="grid grid-cols-1 gap-x-4 gap-y-1.5 rounded-xl bg-stoneBg p-3 font-mono text-xs sm:grid-cols-2" data-testid="v4-facts">
-              <dt className="text-zinc-500">drops created, production v5 / v4 <SourceBadge kind="LIVE" /></dt><dd className="min-w-0 [overflow-wrap:anywhere]" data-testid="fact-links">{f.v5.links.toString()} / {f.v4.links.toString()}</dd>
-              <dt className="text-zinc-500">pools created, production v5 / v4</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{f.v5.pools.toString()} / {f.v4.pools.toString()}</dd>
+              <dt className="text-zinc-500">drops created, production v5.1 / v5 / v4 <SourceBadge kind="LIVE" /></dt><dd className="min-w-0 [overflow-wrap:anywhere]" data-testid="fact-links">{f.v51.links.toString()} / {f.v5.links.toString()} / {f.v4.links.toString()}</dd>
+              <dt className="text-zinc-500">pools created, production v5.1 / v5 / v4</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{f.v51.pools.toString()} / {f.v5.pools.toString()} / {f.v4.pools.toString()}</dd>
+              <dt className="text-zinc-500">escrow held v5.1 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v51.escrow)} / {fmtQor(f.v51.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">escrow held v5 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v5.escrow)} / {fmtQor(f.v5.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">escrow held v4 (drops / pools)</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{fmtQor(f.v4.escrow)} / {fmtQor(f.v4.poolEscrow)} QOR</dd>
               <dt className="text-zinc-500">timelock / recovery / freeze / unanimous</dt><dd className="min-w-0 [overflow-wrap:anywhere]">{Number(v4.instances.prod.readBack.TIMELOCK) / 3600} h / {Number(v4.instances.prod.readBack.RECOVERY_DELAY) / 3600} h / {Number(v4.instances.prod.readBack.FREEZE_PERIOD) / 3600} h / {Number(v4.instances.prod.readBack.UNANIMOUS_RECOVERY_DELAY) / 3600} h</dd>

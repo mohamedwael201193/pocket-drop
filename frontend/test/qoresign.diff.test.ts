@@ -44,8 +44,8 @@ describe('qoresign constants agree with the app and the contracts', () => {
 });
 
 describe.skipIf(!have)('every contracts-v4 fixture: app bytes == qoresign bytes, signatures byte-identical across libraries', () => {
-  it('covers all four fixture groups (599 real ML-DSA-87 signatures)', () => {
-    expect(all.length).toBe(599);
+  it('covers all four fixture groups (608 real ML-DSA-87 signatures)', () => {
+    expect(all.length).toBe(608);
     for (const g of GROUPS) expect(all.some((f) => f.group === g)).toBe(true);
   });
 
@@ -61,6 +61,7 @@ describe.skipIf(!have)('every contracts-v4 fixture: app bytes == qoresign bytes,
   // Three fixtures are deliberate negatives the contracts must refuse: a signature over the raw digest (no prefix) and
   // one over another chain string. They must NOT match the format.
   const NEG = /^(rawDigest_|wrongPrefix_|bindRaw_)/;
+  const TAGGED = /^(pocket-erc1271-v1|pqguard-v1):0x[0-9a-f]{64}$/;
   it('the deliberate wrong-format fixtures are not in the QoreX format', () => {
     const neg = all.filter((f) => NEG.test(f.name));
     expect(neg.map((f) => f.name).sort()).toEqual(['bindRaw_1_0.json', 'rawDigest_spendS_0.json', 'wrongPrefix_spendS_0.json']);
@@ -71,8 +72,11 @@ describe.skipIf(!have)('every contracts-v4 fixture: app bytes == qoresign bytes,
     for (const f of all.filter((x) => !NEG.test(x.name))) {
       const msg = unhex(f.msg);
       const text = Buffer.from(msg).toString('utf8');
+      const data = text.slice(text.lastIndexOf('|') + 1);
+      // v5.1 ERC-1271 / PqGuard approvals carry a purpose tag: data = "<tag>:0x<digest>", still the QoreX message format
+      if (TAGGED.test(data)) { expect(eq(qs.messagePqSignBytes(CHAIN_STR, data), msg), `${f.group}/${f.name} qoresign`).toBe(true); continue; }
       expect(text, `${f.group}/${f.name}`).toMatch(MSG_RE);
-      const digest = text.slice(text.lastIndexOf('|') + 1) as Hex;
+      const digest = data as Hex;
       expect(eq(pqMessageBytes(digest), msg), `${f.group}/${f.name} app`).toBe(true);
       expect(eq(qs.messagePqSignBytes(CHAIN_STR, digest), msg), `${f.group}/${f.name} qoresign`).toBe(true);
     }

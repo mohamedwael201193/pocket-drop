@@ -88,7 +88,7 @@ describe('relayer first, then the offer', () => {
 
 describe('recorded live self-relay run (TEAM-RUN, v5 prod)', () => {
   const rows = evidence.rows as { step: string; lane?: string; hash?: string; status?: string; code?: number; submitter?: string; to?: string; window?: { allowedTargets: string[]; maxTxs: number; blocks: number; expiryHeight: string } }[];
-  it('targets the deployed v5 prod router', () => expect(evidence.router.toLowerCase()).toBe(v4.instances.prod.router.address.toLowerCase()));
+  it('targets the deployed v5 prod router', () => expect(evidence.router.toLowerCase()).toBe(v4.instances.prodV5.router.address.toLowerCase()));
   it('both windows are router-only, short and hybrid-signed, and closed afterwards', () => {
     const opens = rows.filter((r) => r.window);
     expect(opens).toHaveLength(2);

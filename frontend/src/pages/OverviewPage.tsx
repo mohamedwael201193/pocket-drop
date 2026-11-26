@@ -24,22 +24,24 @@ import { StartHere } from '../components/startHere';
 const qorNum = (wei: bigint) => Number(wei) / 1e18;
 const fmtBal = (n: number) => (n >= 100 ? n.toFixed(2) : n >= 1 ? n.toFixed(2) : n.toFixed(4));
 
-/** Production activity: the current v5 contracts and the previous v4 contracts, each read from contract logs. v5 covers few
- *  blocks and arrives first, so the table fills at once; v4 (a longer history) is merged in when it lands. `complete` is true
- *  only when both are in, and only then are totals shown. */
+/** Production activity: the current v5.1 contracts and the previous v5 and v4 contracts, each read from contract logs. v5.1
+ *  covers few blocks and arrives first, so the table fills at once; the longer histories are merged in when they land.
+ *  `complete` is true only when all three are in, and only then are totals shown. */
 function useActivity() {
-  const q = (env: 'prod' | 'prodV4') => ({ queryKey: ['radar', env], refetchInterval: 60_000, retry: 1, staleTime: 30_000, queryFn: async () => (await import('../lib/radar')).envStats(env) });
-  const [v5, v4] = useQueries({ queries: [q('prod'), q('prodV4')] });
-  const parts = [v5.data && { s: v5.data, gen: 'v5' }, v4.data && { s: v4.data, gen: 'v4' }].filter(Boolean) as { s: EnvStats; gen: string }[];
-  const complete = !!v5.data && !!v4.data;
+  const q = (env: 'prod' | 'prodV5' | 'prodV4') => ({ queryKey: ['radar', env], refetchInterval: 60_000, retry: 1, staleTime: 30_000, queryFn: async () => (await import('../lib/radar')).envStats(env) });
+  const res = useQueries({ queries: [q('prod'), q('prodV5'), q('prodV4')] });
+  const gens = ['v5.1', 'v5', 'v4'];
+  const parts = res.map((r, i) => r.data && { s: r.data, gen: gens[i] }).filter(Boolean) as { s: EnvStats; gen: string }[];
+  const complete = res.every((r) => !!r.data);
+  const hy = res.map((r) => r.data?.hybridEvents);
   const data = parts.length ? {
     complete,
     pockets: parts.reduce((n, p) => n + p.s.pockets, 0),
-    hybridEvents: complete && v5.data!.hybridEvents != null && v4.data!.hybridEvents != null ? v5.data!.hybridEvents + v4.data!.hybridEvents : null,
+    hybridEvents: complete && hy.every((h) => h != null) ? hy.reduce((n: number, h) => n + (h as number), 0) : null,
     eventBlocks: parts.flatMap((p) => p.s.eventBlocks ?? []).sort((x, y) => x - y),
     recent: parts.flatMap((p) => p.s.recent.map((r) => ({ ...r, gen: p.gen }))).sort((x, y) => (x.block === y.block ? 0 : x.block > y.block ? -1 : 1)),
   } : undefined;
-  return { data, isLoading: v5.isLoading && v4.isLoading, error: v5.error && v4.error ? v5.error : null };
+  return { data, isLoading: res.every((r) => r.isLoading), error: res.every((r) => r.error) ? res[0].error : null };
 }
 
 function CardHead({ title, badge, to }: { title: string; badge?: ReactNode; to?: string }) {
@@ -123,8 +125,9 @@ function SafetyCard() {
 function ProofCard() {
   const { data: s } = useStats();
   const { data: act } = useActivity();
-  const v4 = s?.v4 as { prod?: { hybridRelayEvents?: number }; prodV4?: { hybridRelayEvents?: number } } | undefined;
-  const apiHybrid = v4?.prod?.hybridRelayEvents != null && v4?.prodV4?.hybridRelayEvents != null ? v4.prod.hybridRelayEvents + v4.prodV4.hybridRelayEvents : null;
+  const v4 = s?.v4 as Record<'prod' | 'prodV5' | 'prodV4', { hybridRelayEvents?: number } | undefined> | undefined;
+  const hyApi = (['prod', 'prodV5', 'prodV4'] as const).map((e) => v4?.[e]?.hybridRelayEvents);
+  const apiHybrid = hyApi.every((h) => h != null) ? hyApi.reduce((n: number, h) => n + (h as number), 0) : null;
   const hybrid = apiHybrid ?? act?.hybridEvents ?? null;
   const series = cumulativeSeries(act?.complete ? act.eventBlocks : [], 28);
   return (

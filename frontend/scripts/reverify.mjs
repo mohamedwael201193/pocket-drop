@@ -80,8 +80,8 @@ let pass = 0; let fail = 0;
 const check = (ok, label) => { if (ok) pass++; else fail++; console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}`); };
 const eq = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
 
-// prod / lab = current v5 contracts; prodV4 / labV4 = the previous v4 contracts (kept live, still checked)
-for (const env of ['prod', 'lab', 'prodV4', 'labV4']) {
+// prod / lab = current v5.1 contracts; prodV5 / labV5 and prodV4 / labV4 = the previous contracts (kept live, still checked)
+for (const env of ['prod', 'lab', 'prodV5', 'labV5', 'prodV4', 'labV4']) {
   const i = v4.instances[env];
   {
     const rc = await rpc('eth_getTransactionReceipt', [i.router.deployTx]);

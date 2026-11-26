@@ -92,10 +92,12 @@ function forgeTests() {
 const out = {
   generatedFrom: ['contracts-v4/deployments/diana.json', 'contracts-v4/LIVE_RESULTS.md', 'contracts-v4/COVERAGE.md'],
   network: dep.network,
-  // prod / lab = the CURRENT contracts (v5, strict PqcLib). prodV4 / labV4 = the previous v4 contracts, kept for history,
-  // for links and Pockets made on v4, and for the recorded v4 evidence.
-  current: 'v5',
-  instances: { prod: inst('v5', 'prod'), lab: inst('v5', 'lab'), prodV4: inst('v4', 'prod'), labV4: inst('v4', 'lab') },
+  // prod / lab = the CURRENT contracts (v5.1). prodV5 / labV5 = the v5 contracts and prodV4 / labV4 = the v4 contracts, kept
+  // for history, for links and Pockets made on them, and for the recorded evidence.
+  current: 'v5.1',
+  instances: {
+    prod: inst('v5_1', 'prod'), lab: inst('v5_1', 'lab'), prodV5: inst('v5', 'prod'), labV5: inst('v5', 'lab'), prodV4: inst('v4', 'prod'), labV4: inst('v4', 'lab'),
+  },
   relayer: dep.relayer.address,
   liveRows: rows,
   qcai,

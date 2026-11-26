@@ -44,8 +44,11 @@ export const recoveryDigest = (a: { vault: Hex; recNonce: bigint; newOwner: Hex;
 export const freezeDigest = (a: { vault: Hex; nonce: bigint; deadline: bigint }): Hex =>
   keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256'], [ACT.GUARDIAN_FREEZE, CHAIN_ID, a.vault, a.nonce, a.deadline]));
 
-export const dropBindDigest = (a: { drop: Hex; id: bigint; recipient: Hex; keyHash: Hex; payTo: Hex }): Hex =>
-  keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address'], ['POCKETDROP_BIND_V2', CHAIN_ID, a.drop, a.id, a.recipient, a.keyHash, a.payTo]));
+/** PocketDrop.bindDigest. With `feeTo` (v5.1): POCKETDROP_BIND_V3 and the fee address is signed. Without (v5, v4): POCKETDROP_BIND_V2. */
+export const dropBindDigest = (a: { drop: Hex; id: bigint; recipient: Hex; keyHash: Hex; payTo: Hex; feeTo?: Hex }): Hex =>
+  a.feeTo
+    ? keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address', 'address'], ['POCKETDROP_BIND_V3', CHAIN_ID, a.drop, a.id, a.recipient, a.keyHash, a.payTo, a.feeTo]))
+    : keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address'], ['POCKETDROP_BIND_V2', CHAIN_ID, a.drop, a.id, a.recipient, a.keyHash, a.payTo]));
 export const dropClaimDigest = (a: { drop: Hex; id: bigint; recipient: Hex; payTo: Hex }): Hex =>
   keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'address'], ['POCKETDROP_CLAIM_V2', CHAIN_ID, a.drop, a.id, a.recipient, a.payTo]));
 export const poolLinkDigest = (a: { pool: Hex; id: bigint; recipient: Hex; payTo: Hex }): Hex =>

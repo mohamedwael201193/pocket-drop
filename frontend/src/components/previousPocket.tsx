@@ -28,7 +28,7 @@ export function PreviousPocketCard() {
   const [err, setErr] = useState<string | null>(null);
   const [tx, setTx] = useState<string | null>(null);
   const prevEnv = previousOf(a.env);
-  const enabled = !!a.cfg && !!a.acct && genOf(a.env) === 'v5';
+  const enabled = !!a.cfg && !!a.acct && genOf(a.env) === 'v5.1';
   const { data: old } = useQuery({
     queryKey: ['previous-pocket', prevEnv, a.cfg?.owner, a.cfg?.userSalt], enabled, refetchInterval: 30_000, retry: 1,
     queryFn: async () => {

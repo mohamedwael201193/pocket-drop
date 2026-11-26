@@ -12,8 +12,8 @@ export const REVERIFY = { passed: 547, failed: 0, evm: 325, cosmos: 121, ranOn: 
 export const RECORDED_ON = '26 Nov 2026';
 export const COUNTS = {
   foundry: FOUNDRY.passed,
-  realCrypto: 22,
-  livePrecompile: 27,
+  realCrypto: 24,
+  livePrecompile: 29,
   reverify: REVERIFY.passed,
   appTests: appTests.frontend.passed + appTests.backend.passed,
 } as const;

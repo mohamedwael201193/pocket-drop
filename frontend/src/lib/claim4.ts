@@ -1,21 +1,22 @@
-// Recipient side of drops and pools. v3 link ids are plain numbers (/c/17). v4 (previous contracts) ids: p12 = prod, l12 = lab.
-// v5 (current contracts) ids: q12 = prod, k12 = lab. Old v4 links keep working against the v4 contracts.
+// Recipient side of drops and pools. v3 link ids are plain numbers (/c/17). v4 ids: p12 = prod, l12 = lab. v5 ids: q12 = prod,
+// k12 = lab. v5.1 (current contracts) ids: r12 = prod, m12 = lab. Old links keep working against the contracts they were made on.
 import { decodeFunctionResult, encodeFunctionData, parseAbi, type Hex } from 'viem';
 import { dropAbi, poolAbi } from './abi4';
 import { pub } from './chain';
 import { signDigest, keyHashOfAccount, type KeyAccount } from './identity';
 import { bytesToHex } from './protocol';
 import { dropBindDigest, dropClaimDigest, poolClaimDigest, poolLinkDigest } from './intents';
-import { INST, LINK_PREFIX, relayTo, type Env } from './v4';
+import { INST, LINK_PREFIX, bindSignsFeeTo, relayTo, type Env } from './v4';
+import v4data from '../data/v4.json';
 import { postRoute, type RouteResult } from './api';
 
 export type ParsedId = { v: 3; id: string } | { v: 4; env: Env; id: bigint };
 export function parseLinkId(raw: string): ParsedId | null {
   if (/^\d+$/.test(raw)) return { v: 3, id: raw };
-  const m = /^([plqk])(\d{1,18})$/.exec(raw);
+  const m = /^([plqkrm])(\d{1,18})$/.exec(raw);
   return m && BigInt(m[2]) > 0n ? { v: 4, env: PREFIX_ENV[m[1]], id: BigInt(m[2]) } : null;
 }
-const PREFIX_ENV: Record<string, Env> = { q: 'prod', k: 'lab', p: 'prodV4', l: 'labV4' };
+const PREFIX_ENV: Record<string, Env> = { r: 'prod', m: 'lab', q: 'prodV5', k: 'labV5', p: 'prodV4', l: 'labV4' };
 export const linkId4 = (env: Env, id: bigint | string) => `${LINK_PREFIX[env]}${id}`;
 export const claimUrl4 = (origin: string, env: Env, id: bigint | string, seed: Uint8Array, kind: 'c' | 'pool' = 'c') =>
   `${origin}/${kind}/${linkId4(env, id)}#k=${bytesToHex(seed).slice(2)}`;
@@ -61,13 +62,26 @@ export async function keyStatus(addr: Hex): Promise<KeyStatus> {
 
 async function linkKey(seed: Uint8Array) { const { mldsa } = await import('@qorechain/pqc'); return mldsa.keygen(seed); }
 
-/** bind(): signed by the LINK key (the seed in the URL fragment); the relayer submits; the drip lands in the recipient's key account. */
-export async function bindDrop(env: Env, id: bigint, seed: Uint8Array, acct: KeyAccount, payTo: Hex): Promise<RouteResult> {
+/** The v5 / v4 bind (no feeTo): the previous contracts still take it. */
+export const BIND_V5_ABI = parseAbi(['function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, bytes linkPk, bytes linkSig)']);
+/** The address a sponsored bind pays its delivery fee to: the relayer that submits it (the API refuses any other feeTo). */
+export const RELAYER_FEE_TO = v4data.relayer as Hex;
+
+/** Calldata of a bind signed by the link key. v5.1: `feeTo` is signed too, so a copied bind still pays the fee to `feeTo`. */
+export async function bindCall(env: Env, id: bigint, seed: Uint8Array, acct: KeyAccount, payTo: Hex, feeTo: Hex = RELAYER_FEE_TO): Promise<Hex> {
   const lk = await linkKey(seed);
   const keyHash = keyHashOfAccount(acct);
-  const digest = dropBindDigest({ drop: INST[env].drop, id, recipient: acct.evm as Hex, keyHash, payTo });
-  const sig = await signDigest(lk.secretKey, digest);
-  return relayTo(env, INST[env].drop, encodeFunctionData({ abi: dropAbi, functionName: 'bind', args: [id, acct.evm as Hex, keyHash, payTo, bytesToHex(lk.publicKey), sig] }));
+  const recipient = acct.evm as Hex;
+  if (bindSignsFeeTo(env)) {
+    const sig = await signDigest(lk.secretKey, dropBindDigest({ drop: INST[env].drop, id, recipient, keyHash, payTo, feeTo }));
+    return encodeFunctionData({ abi: dropAbi, functionName: 'bind', args: [id, recipient, keyHash, payTo, feeTo, bytesToHex(lk.publicKey), sig] });
+  }
+  const sig = await signDigest(lk.secretKey, dropBindDigest({ drop: INST[env].drop, id, recipient, keyHash, payTo }));
+  return encodeFunctionData({ abi: BIND_V5_ABI, functionName: 'bind', args: [id, recipient, keyHash, payTo, bytesToHex(lk.publicKey), sig] });
+}
+/** bind(): signed by the LINK key (the seed in the URL fragment); the relayer submits; the drip lands in the recipient's key account. */
+export async function bindDrop(env: Env, id: bigint, seed: Uint8Array, acct: KeyAccount, payTo: Hex): Promise<RouteResult> {
+  return relayTo(env, INST[env].drop, await bindCall(env, id, seed, acct, payTo));
 }
 /** claim(): signed by the recipient's ML-DSA key; the amount is paid into payTo (the recipient's Pocket). */
 export async function claimDrop(env: Env, id: bigint, acct: KeyAccount, payTo: Hex): Promise<RouteResult> {
