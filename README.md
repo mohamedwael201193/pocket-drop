@@ -102,7 +102,7 @@ More screens: [Pocket](docs/readme/screens/pocket.png) · [Proof](docs/readme/sc
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph Browser["Browser (or the QoreX wallet)"]
     K["ML-DSA-87 key<br/>made in this tab"]
     APP["Pocket Drop app<br/>React + Vite"]
