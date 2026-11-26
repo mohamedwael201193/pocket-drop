@@ -51,7 +51,7 @@ export default function ProofPage() {
             </div>
           ))}
         </dl>
-        <p className="text-xs text-zinc-600">Production instance of the current v5 contracts. The lab instance (60 s delays) and the previous v4 contracts (production and lab) are listed on the Judges page with their deploy transactions.</p>
+        <p className="text-xs text-zinc-600">Production instance of the current v5.2 contracts. The lab instance (60 s delays) and the previous v5.1, v5 and v4 contracts (production and lab) are listed on the Judges page with their deploy transactions.</p>
       </section>
 
       <section className="mt-5 space-y-3 rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="proof-relayer">

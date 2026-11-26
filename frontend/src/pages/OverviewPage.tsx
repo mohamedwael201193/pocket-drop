@@ -3,7 +3,7 @@
  *  - Your Pocket: balance of the active Pocket (chain), its address and whether its key is ML-DSA-87 protected (pqcKeyStatus).
  *  - Quantum safety: key registered, possession proven (pqcKeyStatus precompile) and the relay lane (/api/health).
  *  - Proof: hybrid-signed relays verified by the chain (/api/stats) and a sparkline of every v4 event by block (contract logs).
- *  - Recent activity: the latest production events on Diana (v5 and the previous v4) (contract logs), each opening in the transaction checker.
+ *  - Recent activity: the latest production events on Diana (v5.2 and the previous v5.1, v5 and v4) (contract logs), each opening in the transaction checker.
  * Test counts are RECORDED (frontend/src/data/tests.json). Nothing here is a mock.
  */
 import { useState, type FormEvent, type ReactNode } from 'react';
@@ -149,7 +149,7 @@ function ActivityCard() {
   const mine = new Set([a.acct?.evm, a.activePocket, ...a.adopted].filter(Boolean).map((x) => String(x).toLowerCase()));
   return (
     <Bento i={3} className="lg:col-span-8" testId="ov-activity">
-      <CardHead title="Recent activity" badge={<SourceBadge kind="LIVE" title="PocketFactory, PocketDrop and DropPool events on Diana (production, current v5 and previous v4), read just now" />} to="/radar" />
+      <CardHead title="Recent activity" badge={<SourceBadge kind="LIVE" title="PocketFactory, PocketDrop and DropPool events on Diana (production, current v5.2 and previous v5.1, v5 and v4), read just now" />} to="/radar" />
       <div className="overflow-hidden rounded-2xl border border-zinc-200/80">
         <table className="w-full text-left text-sm">
           <thead className="bg-zinc-50/80 text-xs text-zinc-500"><tr><th className="px-4 py-2.5 font-medium">Action</th><th className="hidden px-4 py-2.5 font-medium sm:table-cell">Ref</th><th className="px-4 py-2.5 font-medium">When</th><th className="px-4 py-2.5 text-right font-medium">Tx</th></tr></thead>

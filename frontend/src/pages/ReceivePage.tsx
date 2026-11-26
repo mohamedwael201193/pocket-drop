@@ -12,7 +12,7 @@ import { fmtQor } from '../lib/chain';
 import { LINK_PREFIX, type Env } from '../lib/v4';
 import { OpenInQorex } from '../components/openInQorex';
 
-/** Accepts a full link or a bare path: "/c/17#k=<64 hex>" (v3), "/c/q12#k=…" (v5 drop; p/l = v4) or "/pool/q3#k=…" (v5 pool). Returns the in-app path. */
+/** Accepts a full link or a bare path: "/c/17#k=<64 hex>" (v3), "/c/s12#k=…" (v5.2 drop; r/m = v5.1, q/k = v5, p/l = v4) or "/pool/s3#k=…" (v5.2 pool). Returns the in-app path. */
 export function parseClaimInput(raw: string): string | null {
   const m = /\/(c|pool)\/([plqkrmsn]?\d+)#k=([0-9a-fA-F]{64})\s*$/.exec(raw.trim());
   if (!m || (m[1] === 'pool' && !/^[plqkrmsn]/.test(m[2]))) return null;
@@ -81,7 +81,7 @@ export default function ReceivePage() {
         <section className="rounded-3xl border border-zinc-200 bg-white/90 p-5 shadow-sm sm:p-6" data-testid="claim-entry">
           <label htmlFor="claim-input" className="text-sm font-semibold text-zinc-900">Paste your link</label>
           <div className="mt-2 flex gap-2">
-            <input id="claim-input" value={text} onChange={(e) => { setText(e.target.value); setErr(null); }} placeholder="https://…/c/q12#k=…" aria-invalid={!!err} aria-describedby="claim-input-error" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+            <input id="claim-input" value={text} onChange={(e) => { setText(e.target.value); setErr(null); }} placeholder="https://…/c/s12#k=…" aria-invalid={!!err} aria-describedby="claim-input-error" data-testid="claim-input" className="min-w-0 flex-1 rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
             <Button onClick={open} data-testid="claim-open">Open</Button>
           </div>
           {err && <p id="claim-input-error" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="claim-input-error">{err}</p>}

@@ -136,7 +136,7 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
   const tx = await d.fetchTx(hash);
   const env = envOfRouter(tx.router);
   const empty = (action: string, note: string, extra: Partial<Report> = {}): Report => ({ tx, env, action, target: null, fn: null, args: {}, checks: [], note, ...extra });
-  if (!env) return empty('unknown', 'This transaction does not call a Pocket Drop router (v5 or the previous v4), so there is no Pocket intent to check.');
+  if (!env) return empty('unknown', 'This transaction does not call a Pocket Drop router (v5.2 or the previous v5.1, v5 and v4), so there is no Pocket intent to check.');
   const inst = INST[env];
   const rc = tryDecode(routerAbi, tx.payload);
   if (!rc) return empty('unknown', 'The router call could not be decoded.');

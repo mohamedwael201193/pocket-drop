@@ -48,7 +48,7 @@ export default function PoolClaimPage() {
   const { data: bal } = useBalance(pocket ?? undefined, 3000);
   const { data: took } = useQuery({ queryKey: ['pool4-claimed', env, pid.toString(), a.acct?.evm], enabled: !!a.acct && !!p && p.v === 4, queryFn: () => poolClaimed(env, pid, a.acct!.evm as Hex), refetchInterval: 4000 });
 
-  if (!p || p.v !== 4) return <PoolDeadEnd title="Not a pool link" testId="pool-invalid">This is not a Pocket Drop pool link. Pool links look like /pool/q12#k=…</PoolDeadEnd>;
+  if (!p || p.v !== 4) return <PoolDeadEnd title="Not a pool link" testId="pool-invalid">This is not a Pocket Drop pool link. Pool links look like /pool/s12#k=…</PoolDeadEnd>;
   if (error) return <PoolDeadEnd title="Could not read this pool" testId="pool-error">{explainError(error)} Reload the page to try again.</PoolDeadEnd>;
   if (pool === null) return <PoolDeadEnd title="Pool not found" testId="pool-missing">There is no pool {linkId4(env, pid)} on this instance. Check that you opened the whole link, or ask the host for a new one.</PoolDeadEnd>;
   if (!seed) return <PoolDeadEnd title="This link is incomplete" testId="no-key">The link is missing its key: the long part after the # is required. Open the full link exactly as the host shared it.</PoolDeadEnd>;

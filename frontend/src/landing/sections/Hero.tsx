@@ -5,7 +5,7 @@ import { ByteField } from '../ByteField';
 import { useLiveData } from '../live';
 import { APP_PATH, SAMPLE_PATH } from '../links';
 
-const LINK = 'pocket-drop.vercel.app/c/q12#k=7f3a…';
+const LINK = 'pocket-drop.vercel.app/c/s12#k=7f3a…';
 
 /** The link pill types itself, then drops into the mark. */
 function LinkPill() {
