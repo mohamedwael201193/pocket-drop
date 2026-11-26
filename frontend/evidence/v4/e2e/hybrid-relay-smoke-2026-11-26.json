@@ -1,0 +1,15 @@
+{
+ "note": "Relay smoke test after the isolated signer moved to the second Vercel account (pocket-drop-signer, same ML-DSA-87 key keccak 0xa9fd...659d): one owner-signed spend of 0.01 QOR from TEAM-RUN QA Pocket persona-5 (v4 prod) to its own key, through the public /api/route of pocket-drop-api. Hybrid MsgCrossVMCall signed by the new isolated signer (its signedThisHour went up; the old signer stayed at 0).",
+ "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
+ "signer": "https://pocket-drop-signer.vercel.app/api/pq-sign",
+ "txs": [
+  {
+   "hash": "329CDE6C4093A57D9436606C00A85139399634C4E5CD22428C7A5E6AFAA0A42C",
+   "height": 10759101,
+   "memo": "pd route prodV4 relay 0xc9e30bFbdBC9e23f58cA442f0CF48a943aA8472D",
+   "step": "Pocket 0xc9e3\u2026472D spends 0.01 QOR (daily limit, no timelock)",
+   "time": "2026-11-26T00:54:04Z",
+   "feeUqor": 105053
+  }
+ ]
+}
