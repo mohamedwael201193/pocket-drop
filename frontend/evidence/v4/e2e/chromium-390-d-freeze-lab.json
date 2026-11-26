@@ -1,0 +1,36 @@
+{
+ "project": "chromium-390",
+ "flow": "d-freeze-lab",
+ "txs": {
+  "fund owner key account 0.075 QOR": "0x1bef64fbbeb5f75110eaecfd1bab9a1afc1ef3fd8b9f06df567b23fe51d309c4",
+  "fund owner Pocket 0.8 QOR": "0xb7cfce38d2a9aee9d785f6e723d9eb427e9454da71468714650f2ff5ee73d9d2",
+  "owner Pocket lazy-deploys on its first intent (spend 0.01 QOR)": "67F727B996891748114B8FC0409AE5ACA02E24819B2A0114F3E9AC9CA6CF76B5",
+  "owner queues the guardian set (setGuardians intent)": "825567915CA637C9120C26DCE37073628B7043A7D910976FB1152A21BDA89082",
+  "anyone applies the guardian set after the timelock": "088D16204602367635833B0042A9854E8EED124AEE5778D084864EC9A51FD7CE",
+  "2 of 3 guardians freeze the Pocket (ML-DSA signatures checked on-chain)": "C86E7C5BC739DBEE0193609ED56334E314A7511C272F3A0ABE4C9B23C1EAAA8C",
+  "sweep owner Pocket back to the deployer": "C95FAEAA31976B6C6970A348FEA37B2E3E220503759B26FE706BBEF385093300"
+ },
+ "checks": {
+  "signReview:owner:0": "Send QOR from your Pocket",
+  "signReview:owner:1": "Change guardians",
+  "chain": {
+   "frozen": true,
+   "frozenUntil": "1795661088",
+   "guardians": [
+    "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175",
+    "0xc8379F3839E350da12E9FFacA978365801176AEF",
+    "0xa0D6ACbb2135a09c2266A3f92b1543594124b338"
+   ],
+   "threshold": 2
+  },
+  "signReview:owner:3": "Send QOR from your Pocket"
+ },
+ "accounts": {
+  "guardian1": "0xD9516C5cf46AE7031e5Bd2DF01E47Fb761a7E175",
+  "guardian2": "0xc8379F3839E350da12E9FFacA978365801176AEF",
+  "guardian3": "0xa0D6ACbb2135a09c2266A3f92b1543594124b338",
+  "owner.pocket": "0xa8B41faCA941667E9D40B8c0f4f407c4666Aa0b0",
+  "owner.key": "0x825BE5e0D3471dE4d21Af6dC49A580811359A7E1"
+ },
+ "finishedAt": "2026-11-26T02:45:01.980Z"
+}

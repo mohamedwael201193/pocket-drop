@@ -2,29 +2,29 @@
  "project": "chromium-390",
  "flow": "a-confirmed",
  "txs": {
-  "fund sender key account 0.075 QOR": "0xa7c033d117bd1759c37eefe0d8310c105342ef3911cfaefdb299507e843111d6",
-  "fund sender Pocket 0.65 QOR": "0xfac5407642a55094f97fe4a4188333c7bf1eb8cae012e89493a6e1fe418878f1",
-  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "354AFC4FB7EF3AB5E5CE501FD1668D2323E3560B0FC170B5F32F8B992C49E6FD",
-  "recipient bind (link-key signature, relayed)": "42E08642289F4C5EA6DCF0D9044A5ACC4011500BD7CE376E1E2C0238BDB33FF7",
-  "sender Pocket confirmDrop (one-tap intent)": "E19807E7DD600EAC8F8674B2819D8D92B95072ED6E688C24FA037009083B3BD4",
-  "recipient claim (ML-DSA signature, relayed)": "5F609138E151E8080228D62E00FCBE3665B5EAF773ABE2D33B69CAC29096D73C",
-  "recipient PQ key registration (paid from the drip)": "E07FB40D86A89713CB631B8061AE6A2C62192D415FA0F61006BE124A4D6411AF",
-  "sweep sender Pocket back to the deployer": "DFC254BAB2F3314C6641D2488EB144A1C2979A11BBEB78410B079DE1E9E89391"
+  "fund sender key account 0.075 QOR": "0x6a16bf64c856de2dc555c0432c546ea806d3fec6c9b84e2cd1779a92d7ffc375",
+  "fund sender Pocket 0.8 QOR": "0x8388c95f175a88d95526ff9835e575ce6f607af15760c1bf9b358398e21b4708",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "9B1FC3F69B392D5609F9E035028A49DCDB82590C18AED68086D83A48AEB6616D",
+  "recipient bind (link-key signature, relayed)": "1FF809EA05C6E1B8348B88AD4B52668056818640111A493EE3137D27BBE2C93A",
+  "sender Pocket confirmDrop (one-tap intent)": "E1A4ED9B80640E19A36DADF6DEEF93F8A3BCFEB3D383AAE3F87ED544E0654C30",
+  "recipient claim (ML-DSA signature, relayed)": "C2C4D1B9CC05D969E3AB3AAC77FA807FE97FD2827753F4189BE23E3EDF194124",
+  "recipient PQ key registration (paid from the drip)": "BDA996B859FC2DB6316AA18CB61B90BD58413B655265509FBB5F5752F8BA7E26",
+  "sweep sender Pocket back to the deployer": "3911AD495678B9EDDADD2DE79FFAFEFC364A1561EBACD293288896991D5057C4"
  },
  "checks": {
   "signReview:sender:0": "Create a payment link",
   "recipientWords": [
-   "goat",
-   "rack",
-   "prefer",
-   "farm"
+   "cool",
+   "long",
+   "thumb",
+   "offer"
   ],
   "senderWordsMatchRecipient": true,
   "signReview:sender:3": "Confirm who receives a link",
   "recipientPocketBalanceWei": "100000000000000000",
   "deliveryFeeWei": "380000000000000000",
   "chain": {
-   "dropId": "q2",
+   "dropId": "s7",
    "state": "Claimed",
    "senderIsPocket": true,
    "paidIntoRecipientPocket": true
@@ -33,9 +33,9 @@
   "signReview:sender:8": "Send QOR from your Pocket"
  },
  "accounts": {
-  "sender.pocket": "0xA3148011d411d56265028F7Fd56c803ed85DB4f4",
-  "sender.key": "0x874406CbcD2009a3e1853dE6794F2Cec8366F11B",
-  "recipient.pocket": "0x87A803a28A0F21b7891D32b0514a3Db5Cd4C6d0e"
+  "sender.pocket": "0xe9B4D54cf684f5B46E7Cc5Ece9eFC402Be853AA6",
+  "sender.key": "0xC2a67BF1E5f7dBa42434546e5291D63Fc8387649",
+  "recipient.pocket": "0x104C4Ab3Ee85cC63E3294e8D25ab34F9E6fB9fbF"
  },
- "finishedAt": "2026-11-25T21:25:18.521Z"
+ "finishedAt": "2026-11-26T02:46:28.916Z"
 }

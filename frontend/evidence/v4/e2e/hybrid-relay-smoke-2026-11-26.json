@@ -1,5 +1,5 @@
 {
- "note": "Relay smoke test after the isolated signer moved to the second Vercel account (pocket-drop-signer, same ML-DSA-87 key keccak 0xa9fd...659d): one owner-signed spend of 0.01 QOR from TEAM-RUN QA Pocket persona-5 (v4 prod) to its own key, through the public /api/route of pocket-drop-api. Hybrid MsgCrossVMCall signed by the new isolated signer (its signedThisHour went up; the old signer stayed at 0). Second relay: the same owner key on the v5.1 prod instance; the Pocket 0x901C\u2026A532 was funded with 0.05 QOR by the main test wallet (A344F4CEFC775AF5325A2E89B5BB1ACEAA18D8D98EF0791EC5917515B9C36BA2) and the API lazy-deployed it with router.deployAndRelay on the v5.1 router 0x99711daa\u2026.",
+ "note": "Relay smoke test after the isolated signer moved to the second Vercel account (pocket-drop-signer, same ML-DSA-87 key keccak 0xa9fd...659d): one owner-signed spend of 0.01 QOR from TEAM-RUN QA Pocket persona-5 (v4 prod) to its own key, through the public /api/route of pocket-drop-api. Hybrid MsgCrossVMCall signed by the new isolated signer (its signedThisHour went up; the old signer stayed at 0). Second relay: the same owner key on the v5.1 prod instance; the Pocket 0x901C\u2026A532 was funded with 0.05 QOR by the main test wallet (A344F4CEFC775AF5325A2E89B5BB1ACEAA18D8D98EF0791EC5917515B9C36BA2) and the API lazy-deployed it with router.deployAndRelay on the v5.1 router 0x99711daa\u2026. Third relay: the same owner key on the v5.2 prod instance; the Pocket 0xb76B\u2026d067 was funded with 0.05 QOR by the main test wallet (ED2D6813D9A88B2121F40C750313CDBEBD422BE1024F6F431D9524FE92FF5078) and the API lazy-deployed it with router.deployAndRelay on the v5.2 router 0xe0a2679a\u2026.",
  "relayer": "qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl",
  "signer": "https://pocket-drop-signer.vercel.app/api/pq-sign",
  "txs": [
@@ -18,6 +18,14 @@
    "step": "v5.1: Pocket 0x901C\u2026A532 is deployed and spends 0.01 QOR in one deployAndRelay",
    "time": "2026-11-26T01:00:11Z",
    "feeUqor": 144019
+  },
+  {
+   "hash": "05EC11A2E777AA25D5AB156A467C1FEA288BFBDD3641612702DCF4AAABCE1379",
+   "height": 10762701,
+   "memo": "pd route prod deployAndRelay 0xEB0D4556ecFc9DC2adea7E63Beb066EBfe6a3588",
+   "step": "v5.2: Pocket 0xb76B\u2026d067 is deployed and spends 0.01 QOR in one deployAndRelay",
+   "time": "2026-11-26T02:19:37Z",
+   "feeUqor": 148199
   }
  ]
 }

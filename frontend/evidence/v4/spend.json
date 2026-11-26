@@ -1,5 +1,5 @@
 {
- "totalQor": 28.73625,
+ "totalQor": 33.39125,
  "entries": [
   {
    "qor": 2,
@@ -1122,6 +1122,174 @@
    "note": "recovered: webkit-390 a-confirmed sweep",
    "hash": "5C0BD1D9543B1E22C2AADEDD39433F180BA855605A1A4611B4FB6C7489ECF2EE",
    "at": "2026-11-22T05:54:26.884Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0x8d553bb81ccf6608ce9ee8e046de83fdc46ef2e20354ed8ab845a092c6a4a40f",
+   "at": "2026-11-26T02:19:08.298Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0x10ded2f8754211e57184da1a531c7f3996d4f91980cd196bc3034a84efe6a651",
+   "at": "2026-11-26T02:19:11.324Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0xecdca91c38cd071506c0a3eed691110b3bca2204da2128f3f6be71467a04814d",
+   "at": "2026-11-26T02:20:29.536Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0xc3d02333a5ad09c2239b96bf6ee63047073115f47fe538e40641720d8ad82bae",
+   "at": "2026-11-26T02:20:30.850Z"
+  },
+  {
+   "qor": -0.22,
+   "note": "recovered: chromium-390 a-confirmed sweep",
+   "hash": "B89A2C6A9C328078FFDCBB69C7FF844F93011CF606D3C10C711C234673C6CC1C",
+   "at": "2026-11-26T02:21:16.647Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 b-giveaway sender key",
+   "hash": "0xc2978255c3e80e73cb40df5ac719eeb9ac764a9c09c610e2941e96d127ccf327",
+   "at": "2026-11-26T02:21:23.885Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 b-giveaway sender pocket",
+   "hash": "0x3eb9385a8136bb2248afe19ae4067c684c3ae406488926789c32ccd536eb29d1",
+   "at": "2026-11-26T02:21:26.824Z"
+  },
+  {
+   "qor": -0.34,
+   "note": "recovered: chromium-390 b-giveaway sweep",
+   "hash": "A4201B8021BEE0C80B51E9FAFE0CE1BEF06A53F910D0EB09EDADB34C21ED2A39",
+   "at": "2026-11-26T02:22:03.895Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 c-pool sender key",
+   "hash": "0x789dc5f25d7aada975ec851084340016bbc53178f6f88a5837b737d3cba06da6",
+   "at": "2026-11-26T02:22:10.804Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 c-pool sender pocket",
+   "hash": "0x8ed04baa01146db6f51b2549abd6d028f5118753363ef364a9a564f1d86e0990",
+   "at": "2026-11-26T02:22:12.490Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 pool claimer1",
+   "hash": "0x53f6e52ee02d05098b9822cf6bbe95a99b0a8c6aeec3d11a3cc94fd14ef9f189",
+   "at": "2026-11-26T02:22:32.630Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 pool claimer2",
+   "hash": "0x932e9edbeb01282f09a2c49877c9f18a7d78091f55caf1065384aee634a34faf",
+   "at": "2026-11-26T02:23:49.729Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 c-pool sender key",
+   "hash": "0xa02aafa8a2870fb76e4ca559defba4daa91bd2dbcd8e3cd269f7d1797e087f7d",
+   "at": "2026-11-26T02:30:18.588Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 c-pool sender pocket",
+   "hash": "0xf13835a6c58417d56287b44185459bf649fbe34358606f61d8d3a80512cf464d",
+   "at": "2026-11-26T02:30:21.175Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 pool claimer1",
+   "hash": "0xc7322bb52ed79a8902dcefc257a121cc70bc47355bc36cb2d8fad8c5a2c7d6aa",
+   "at": "2026-11-26T02:30:41.735Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 pool claimer2",
+   "hash": "0x0e09d433cd4e380194b520c150e5e1c5e421c7ef935b87d1c8147df7c7dc85ea",
+   "at": "2026-11-26T02:36:46.588Z"
+  },
+  {
+   "qor": -0.76,
+   "note": "recovered: chromium-390 c-pool sweep",
+   "hash": "7303BE65C2AB459BD5504410E3C9FA9175474B82485643AA6090F47DAB052574",
+   "at": "2026-11-26T02:41:05.149Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 d-freeze-lab owner key",
+   "hash": "0x1bef64fbbeb5f75110eaecfd1bab9a1afc1ef3fd8b9f06df567b23fe51d309c4",
+   "at": "2026-11-26T02:41:12.223Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 d-freeze-lab owner pocket",
+   "hash": "0xb7cfce38d2a9aee9d785f6e723d9eb427e9454da71468714650f2ff5ee73d9d2",
+   "at": "2026-11-26T02:41:13.555Z"
+  },
+  {
+   "qor": -0.79,
+   "note": "recovered: chromium-390 d-freeze-lab sweep",
+   "hash": "C95FAEAA31976B6C6970A348FEA37B2E3E220503759B26FE706BBEF385093300",
+   "at": "2026-11-26T02:45:01.979Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 a-confirmed sender key",
+   "hash": "0x6a16bf64c856de2dc555c0432c546ea806d3fec6c9b84e2cd1779a92d7ffc375",
+   "at": "2026-11-26T02:45:39.722Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 a-confirmed sender pocket",
+   "hash": "0x8388c95f175a88d95526ff9835e575ce6f607af15760c1bf9b358398e21b4708",
+   "at": "2026-11-26T02:45:41.108Z"
+  },
+  {
+   "qor": -0.22,
+   "note": "recovered: chromium-390 a-confirmed sweep",
+   "hash": "3911AD495678B9EDDADD2DE79FFAFEFC364A1561EBACD293288896991D5057C4",
+   "at": "2026-11-26T02:46:28.915Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e chromium-390 b-giveaway sender key",
+   "hash": "0xf4339f179a9cdd9e34fe03da0f715ffefa0b38e9b30775e592eb001ae1cc9141",
+   "at": "2026-11-26T02:46:35.828Z"
+  },
+  {
+   "qor": 0.8,
+   "note": "e2e chromium-390 b-giveaway sender pocket",
+   "hash": "0x8974bd9735640d476f532eebd3b9863a1ba36c9baa17774e01b07088bba5c31e",
+   "at": "2026-11-26T02:46:38.082Z"
+  },
+  {
+   "qor": -0.34,
+   "note": "recovered: chromium-390 b-giveaway sweep",
+   "hash": "595FC9F1858DEC5370D67537FED211066246ECC9B47EE3C61736FE834417DC45",
+   "at": "2026-11-26T02:47:13.765Z"
+  },
+  {
+   "qor": 0.075,
+   "note": "e2e recovery new key",
+   "hash": "0xdbd3b28513583d9ae0837c5bf00e1a1e5e4830aa260f594f5aa1a2e3d50fe303",
+   "at": "2026-11-26T02:48:40.671Z"
+  },
+  {
+   "qor": -0.05,
+   "note": "recovered: recovery sweep",
+   "hash": "BF0171A874335CC293AF79EFF14757CC1331F048263ACB87E311D11BC57743FE",
+   "at": "2026-11-26T02:52:21.331Z"
   }
  ]
 }

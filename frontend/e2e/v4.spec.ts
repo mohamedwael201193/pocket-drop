@@ -116,7 +116,7 @@ async function sendFlow(browser: Browser, opts: Record<string, unknown>, project
     await sp.getByTestId('create-drop').click();
     await expect(sp.getByTestId('share-card')).toBeVisible({ timeout: T });
     const url = (await sp.getByTestId('claim-link').getAttribute('data-url'))!;
-    const id = /\/c\/([pq]\d+)#k=/.exec(url)![1];
+    const id = /\/c\/([plqkrmsn]\d+)#k=/.exec(url)![1];
     run.txs['sender Pocket createDrop (intent, lazy-deploys the Pocket)'] = await hashAttr(sp, 'create-tx');
     await shot(sp, run, '1-sender-link');
 
@@ -201,7 +201,7 @@ test('c. Drop Pool with 2 claimers', async ({ browser }, info) => {
     await sp.getByTestId('create-pool').click();
     await expect(sp.getByTestId('share-card')).toBeVisible({ timeout: T });
     const url = (await sp.getByTestId('claim-link').getAttribute('data-url'))!;
-    const pid = BigInt(/\/pool\/p(\d+)#k=/.exec(url)![1]);
+    const pid = BigInt(/\/pool\/[plqkrmsn](\d+)#k=/.exec(url)![1]);
     run.txs['sender Pocket createPool (intent, 2 slots x 0.02 QOR)'] = await hashAttr(sp, 'pool-tx');
     await expect(sp.getByTestId('pool-card')).toContainText('distinct proof-of-possession account, not a person');
     await expect(sp.getByTestId('pool-card')).toContainText('self-funded');
@@ -215,7 +215,8 @@ test('c. Drop Pool with 2 claimers', async ({ browser }, info) => {
       run.accounts[`claimer${n}.key`] = keyAddr;
       run.txs[`fund claimer${n} key account ${KEY_FUND} QOR`] = await fund(keyAddr, KEY_FUND, `e2e ${run.project} pool claimer${n}`);
       await expect.poll(async () => BigInt((await c.page.getByTestId('key-balance').getAttribute('data-wei')) || '0'), { timeout: T }).toBeGreaterThanOrEqual(70_000_000_000_000_000n);
-      await c.page.getByTestId('register-key').click();
+      // the key card can re-render while the balance poll settles; if the key is already registered, go on to the claim
+      await c.page.getByTestId('register-key').click({ timeout: T }).catch(async (e) => { if (!(await c.page.getByTestId('pool-claim').isVisible())) throw e; });
       await expect(c.page.getByTestId('pool-claim')).toBeVisible({ timeout: T });
       await c.page.getByTestId('pool-claim').click();
       await expect(c.page.getByTestId('pool-yours')).toBeVisible({ timeout: T });
@@ -226,7 +227,7 @@ test('c. Drop Pool with 2 claimers', async ({ browser }, info) => {
     for (const [k, h] of Object.entries(run.txs)) if (!k.startsWith('sweep')) expect(await txOk(h), k).toBe(true);
     const pool = await poolOf('prod', pid);
     expect(pool.taken).toBe(2);
-    run.checks.chain = { poolId: `p${pid}`, taken: pool.taken, slots: pool.slots, perSlotWei: pool.perSlot.toString() };
+    run.checks.chain = { poolId: `s${pid}`, taken: pool.taken, slots: pool.slots, perSlotWei: pool.perSlot.toString() };
     await sweep(sp, run, 'sender', await balanceOf(pocket));
   } catch (e) { await failShots(run); throw e; } finally { PAGES.length = 0; save(run); await S.ctx.close(); for (const c of claimers) await c.ctx.close(); }
 });

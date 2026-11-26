@@ -2,28 +2,31 @@
  "project": "chromium-390",
  "flow": "b-giveaway",
  "txs": {
-  "fund sender key account 0.075 QOR": "0xf239e1dc619a9ae5fd26803676f3c92fd1e9bacaf69fc765158f9066e107c9e4",
-  "fund sender Pocket 0.3 QOR": "0x54753043b039d95af7826df6e3368b7bf2c09f75ebb8f1a5ed9098c223ec67fc",
-  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "0x0a2381a827130c892170926b852953ff467f9c602df8affb2eb10414ebea16e4",
-  "recipient claim (ML-DSA signature, relayed)": "0xa014e5afccb4cd6c1831a67461c56c1673b78f11bcc1aab55eb5ae96f993be5f",
-  "recipient bind (link-key signature, relayed)": "0x7fc540b628c1b1b4d5d16664ae95c62321d8f8dfd2be5384f47b056e898b3097",
-  "recipient PQ key registration (paid from the drip)": "C9D5DA3F629AAE77D3AD83A43D81887E4B442D76CA809D7D7FA4A8BF998548B9",
-  "sweep sender Pocket back to the deployer": "0x8350bc12def1379482e32af7773aeb944b0425e2dde87b63a821e29651898ffe"
+  "fund sender key account 0.075 QOR": "0xf4339f179a9cdd9e34fe03da0f715ffefa0b38e9b30775e592eb001ae1cc9141",
+  "fund sender Pocket 0.8 QOR": "0x8974bd9735640d476f532eebd3b9863a1ba36c9baa17774e01b07088bba5c31e",
+  "sender Pocket createDrop (intent, lazy-deploys the Pocket)": "23220BB256D8A2FDF1F442A1D2BF4C554C665D28EC59B7324A88257DDEEF0AF7",
+  "recipient claim (ML-DSA signature, relayed)": "2A5766371C090382A536550B2C949C0CF78D32D57E8BF54383D56DE8D86B43E7",
+  "recipient bind (link-key signature, relayed)": "23F631D1F8F70F2CCDB81EB174CE9EFF3B8AC7DC2392F3EA5D27E9BB62A30C3E",
+  "recipient PQ key registration (paid from the drip)": "FBFE560F857DB8DC3F3657EC1390EB2317CCD5EF7D677C39141904F2E8F253F7",
+  "sweep sender Pocket back to the deployer": "595FC9F1858DEC5370D67537FED211066246ECC9B47EE3C61736FE834417DC45"
  },
  "checks": {
+  "signReview:sender:0": "Create a payment link",
   "recipientPocketBalanceWei": "100000000000000000",
+  "deliveryFeeWei": "260000000000000000",
   "chain": {
-   "dropId": "p21",
+   "dropId": "s8",
    "state": "Claimed",
    "senderIsPocket": true,
    "paidIntoRecipientPocket": true
   },
-  "recipientKeyDerivation": "v2: pd2: master; EVM address = v2 secp key; bound recipientKeyHash = keccak(ML-DSA key from the independent v2 secret)"
+  "recipientKeyDerivation": "v2: pd2: master; EVM address = v2 secp key; bound recipientKeyHash = keccak(ML-DSA key from the independent v2 secret)",
+  "signReview:sender:5": "Send QOR from your Pocket"
  },
  "accounts": {
-  "sender.pocket": "0xcef4d6A66769446FbAd6A2523a2b2aEF85B655dB",
-  "sender.key": "0x7fdFBd6777EFebDb962D0be742e59393AFB5763F",
-  "recipient.pocket": "0xA5627D7B6Fc54b9D07E1085bF2127B1D15797980"
+  "sender.pocket": "0x82F8f1dCa18f17372FD2804B831b3F806BcD7Ab7",
+  "sender.key": "0x61c70E59b8b6683C5C2A29753F16f8d7B651b8A0",
+  "recipient.pocket": "0x849C346bED99Ac16a8e1d8fF7c7E3Ad95bC734EF"
  },
- "finishedAt": "2026-11-20T04:22:35.907Z"
+ "finishedAt": "2026-11-26T02:47:13.766Z"
 }

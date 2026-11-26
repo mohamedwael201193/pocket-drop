@@ -1,0 +1,31 @@
+{
+ "project": "chromium-390",
+ "flow": "c-pool",
+ "txs": {
+  "fund sender key account 0.075 QOR": "0xa02aafa8a2870fb76e4ca559defba4daa91bd2dbcd8e3cd269f7d1797e087f7d",
+  "fund sender Pocket 0.8 QOR": "0xf13835a6c58417d56287b44185459bf649fbe34358606f61d8d3a80512cf464d",
+  "sender Pocket createPool (intent, 2 slots x 0.02 QOR)": "BBAD6B13CB1CC488C4C783E835DD8D1D9D4F3D009A12E8886D67F8EE07E89C48",
+  "fund claimer1 key account 0.075 QOR": "0xc7322bb52ed79a8902dcefc257a121cc70bc47355bc36cb2d8fad8c5a2c7d6aa",
+  "claimer1 takes a slot (link-key + own signature, relayed)": "8B1C45CFF64C355589AD462CD91427934FC053FCD74CF03AA0EAA30C06B5791C",
+  "fund claimer2 key account 0.075 QOR": "0x0e09d433cd4e380194b520c150e5e1c5e421c7ef935b87d1c8147df7c7dc85ea",
+  "claimer2 takes a slot (link-key + own signature, relayed)": "22CF86DC18DFE960D840BE51D24B59003E180443D1FB5A74FB6E721AD146A151",
+  "sweep sender Pocket back to the deployer": "7303BE65C2AB459BD5504410E3C9FA9175474B82485643AA6090F47DAB052574"
+ },
+ "checks": {
+  "signReview:sender:0": "Create a shared pool link",
+  "chain": {
+   "poolId": "p3",
+   "taken": 2,
+   "slots": 2,
+   "perSlotWei": "20000000000000000"
+  },
+  "signReview:sender:2": "Send QOR from your Pocket"
+ },
+ "accounts": {
+  "sender.pocket": "0xbA209dD225Fc8F08D82767dF5f5c1721733bF1b8",
+  "sender.key": "0x158363259f52A58949D1C93664e7343907aB99D9",
+  "claimer1.key": "0x787cD1c92407e6720e55B5B5Cd754234aE3564B3",
+  "claimer2.key": "0x87986C9298045Cf758512FC91477F3B43Db21d40"
+ },
+ "finishedAt": "2026-11-26T02:41:05.150Z"
+}

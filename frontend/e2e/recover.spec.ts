@@ -23,6 +23,7 @@ test('e. Unanimous guardian recovery to a new key, then the new key moves the fu
   const G = await guardians(3);
   const N = await (browser as Browser).newContext(opts);
   const np = await N.newPage();
+  await np.addLocatorHandler(np.getByTestId('sign-review-approve'), async (btn) => { await btn.click(); });
   const open: { close: () => Promise<void> }[] = [N];
   try {
     // the new key: created in a fresh browser, funded for its registration, registered
