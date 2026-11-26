@@ -35,8 +35,8 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | v5.1 fixes the open review items: a copied bind cannot take the delivery fee (live revert [`0x6700c859…`](https://explore.qore.network/tx/0x6700c859853889b3d060aa3833df7f03b7b7334eef86d8ff182502fab17feae8)), ERC-1271 and PqGuard approvals are tagged and bound to one account and chain, the router holds no value | TEAM-RUN, 26 Nov 2026 | [`docs/V5_1.md`](docs/V5_1.md), `node contracts-v4/script/smoke-v51.mjs` |
 | 674 checks passed, 0 failed: 348 EVM and 177 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
 | Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
-| QCAI Stage 3 on v5: 85 (`QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info) | RECORDED | [Stage 3 public report](https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6), [`docs/AUDIT.md`](docs/AUDIT.md) |
-| Tests: 194 Foundry (unit, fuzz, invariant, v5.1 regressions), 24 real ML-DSA-87, 29 against the live precompiles; 254 frontend and 219 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
+| QCAI Stage 4 on the deployed v5.1 code: 82, 0 critical (`QCAIA-1795655356279-BA1C1020`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info; each answered by a test) | RECORDED | [Stage 4 public report](https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020), [triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md) |
+| Tests: 205 Foundry (unit, fuzz, invariant, v5.1 regressions, QCAI Stage 4 evidence), 24 real ML-DSA-87, 29 against the live precompiles; 254 frontend and 219 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 
 <details>
@@ -48,7 +48,7 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | 27 live-precompile tests: the real-crypto suite rerun against the Diana `pqcVerify` precompile by eth_call, plus live key-status and fork checks | RECORDED, 25 Nov 2026 | `contracts-v4/test-live/`, CI job `contracts-live` |
 | Precompile conformance: 43 eth_call cases on 0x0A01 / 0x0A02, 0 anomalies against FIPS 204 | RECORDED, 25 Nov 2026 | [`docs/PRECOMPILE_CONFORMANCE.md`](docs/PRECOMPILE_CONFORMANCE.md) |
 | 115 recorded live rows: 103 on the v4 contracts (31 of them attacks that reverted on chain or were refused by the chain) and 12 from the v5 deploy smoke (one drop sent and claimed, one pool) | RECORDED | [`contracts-v4/LIVE_RESULTS.md`](contracts-v4/LIVE_RESULTS.md), synced into `frontend/src/data/v4.json` |
-| QCAI Stage 1 (v4) 82 and Stage 2 (v4) 78, on the previous contracts | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
+| QCAI Stage 1 (v4) 82, Stage 2 (v4) 78 and Stage 3 (v5) 85, on the previous contracts | RECORDED | [`docs/AUDIT.md`](docs/AUDIT.md) |
 | Relay lane (`hybrid`: every relay a `MsgCrossVMCall` signed secp256k1 + ML-DSA-87), ECDSA-only path (closed), relayer balance, low-balance warning | LIVE | `/judges`, `/proof`, `GET /api/health` |
 | Every attempt against the five bait Pockets that the chain refused (EVM reverts and failed hybrid relays) | LIVE | `/qday` "Refused attempts" |
 | Drop counts and volume, split into team/test addresses and external addresses | LIVE | `/radar`, `GET /api/stats` |
@@ -149,7 +149,7 @@ Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL
 
 ## Audit
 
-Three-stage QCAI audit across v4 and v5: Stage 1 (v4) scored 82 (19 Nov 2026), Stage 2 (v4) scored 78 (20 Nov 2026), and Stage 3 (v5) scored 85 (25 Nov 2026 UTC / 26 Nov 2026 Cairo; audit `QCAIA-1795645590445-DF0CEDA6`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a resolution and named Foundry tests, and the deployed v5 bytecode is unchanged. Details: [docs/AUDIT.md](docs/AUDIT.md). Stage 3 public report: https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6. PDFs: [`docs/audit/`](docs/audit/).
+Four QCAI runs across v4, v5 and v5.1: Stage 1 (v4) 82 (19 Nov 2026), Stage 2 (v4) 78 (20 Nov 2026), Stage 3 (v5) 85 (25 Nov 2026 UTC), and Stage 4 on the deployed v5.1 code 82 (26 Nov 2026 01:09 UTC / 03:09 Cairo; audit `QCAIA-1795655356279-BA1C1020`; 0 critical; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a verdict and named Foundry tests that run against the deployed source ([Stage 4 triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md), `contracts-v4/test/QcaiV51AuditRegression.t.sol`). Details: [docs/AUDIT.md](docs/AUDIT.md). Stage 4 public report: https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020. PDFs: [`docs/audit/`](docs/audit/).
 
 ## Run it
 
