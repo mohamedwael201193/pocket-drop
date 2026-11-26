@@ -1,0 +1,142 @@
+{
+  "stage": 5,
+  "version": "v5.2",
+  "auditId": null,
+  "auditIdTodo": "TODO: add the QCAIA id from the dashboard (not recorded; the audit was run from a separate QCAI account)",
+  "publicReportUrl": null,
+  "publicReportUrlTodo": "TODO: add the public report URL once there is one (none was available when this record was made)",
+  "note": "Hand-transcribed record of the report text. The PDF export and the screenshot were not archived: they could not be checked here for personal data before commit. Titles, severities, locations and text below are verbatim from the report; ids ETH-V52-n are local numbering, not QCAI ids. The report names files only, no line numbers.",
+  "createdAtCairo": "2026-11-26 (time of day not recorded)",
+  "contractName": "PocketDrop v5.2",
+  "network": "Testnet",
+  "auditCost": "150 QOR",
+  "blockchain": "Ethereum (EVM/Solidity)",
+  "language": "solidity",
+  "source": {
+    "path": "docs/audit/stage5/PocketDrop-v5.2-flattened.sol",
+    "lines": 2168,
+    "sha256": "ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d"
+  },
+  "overallScore": 78,
+  "riskLevel": "MEDIUM",
+  "quantumSafe": "Not scored",
+  "counts": {
+    "findingsCount": 7,
+    "criticalCount": 0,
+    "highCount": 1,
+    "mediumCount": 3,
+    "lowCount": 2,
+    "infoCount": 1
+  },
+  "summary": "The PocketDrop v5.2 contract implements a sophisticated post-quantum secure smart account system with multi-signature capabilities, guardian recovery mechanisms, and escrow functionality. While the core security features appear robust, several medium-severity issues related to reentrancy protection, access control, and integer safety need attention. The contract follows good practices in using PQC libraries and implements proper signature verification mechanisms.",
+  "findings": [
+    {
+      "index": 1,
+      "id": "ETH-V52-1",
+      "severity": "HIGH",
+      "title": "Potential Reentrancy in Payout Contract",
+      "location": "src/Payout.sol",
+      "description": "The Payout contract implements a reentrancy guard using a lock variable, but there's a potential issue with the lock mechanism in the _pay function. The _pay function is called from multiple external functions that are protected by nonReentrant modifiers, but the _pay function itself doesn't have a reentrancy guard. If a malicious contract receives funds through _pay and tries to re-enter the contract before the lock is released, it could potentially cause issues.",
+      "recommendation": "Add a reentrancy guard to the _pay function to ensure it cannot be called recursively",
+      "triageVerdict": "false positive",
+      "evidenceTests": [
+        "test_qcai52_f1_pay_reverts_outside_lock_and_receiver_cannot_reenter_the_locked_path",
+        "test_qcai52_f1_vault_spend_receiver_cannot_reenter_spend",
+        "test_qcai52_f1_vault_executeQueued_receiver_cannot_reenter",
+        "test_qcai52_f1_claim_receiver_cannot_reenter_and_payout_is_recorded_once"
+      ]
+    },
+    {
+      "index": 2,
+      "id": "ETH-V52-2",
+      "severity": "MEDIUM",
+      "title": "Missing Access Control in Recovery Finalization",
+      "location": "src/PocketVault.sol",
+      "description": "In the finalizeRecovery and finalizeRecoveryUnanimous functions, the access control logic allows the proposed new owner to finalize the recovery, but there's no explicit check that prevents the old owner from finalizing a recovery they're trying to veto. This could lead to privilege escalation if not properly handled.",
+      "recommendation": "Add explicit checks to ensure that the old owner cannot finalize a recovery they've tried to veto",
+      "triageVerdict": "false positive",
+      "evidenceTests": [
+        "test_qcai52_f2_old_owner_cannot_finalize_a_recovery_it_vetoed",
+        "test_qcai52_f2_unanimous_path_never_accepts_the_old_owner",
+        "testFuzz_qcai52_f2_unrelated_authorizer_is_refused",
+        "test_qcai52_f2_threshold_owner_finalize_only_completes_the_guardian_approved_target"
+      ]
+    },
+    {
+      "index": 3,
+      "id": "ETH-V52-3",
+      "severity": "MEDIUM",
+      "title": "Potential Overflow in Daily Drip Calculation",
+      "location": "src/PocketDrop.sol",
+      "description": "In PocketDrop.sol, the drip calculation uses unchecked arithmetic operations that could potentially overflow when adding drip values to daily totals. The code checks for overflow conditions but relies on explicit bounds checking rather than safe math operations.",
+      "recommendation": "Use SafeMath or similar library for arithmetic operations to prevent integer overflow",
+      "triageVerdict": "false positive",
+      "evidenceTests": [
+        "test_qcai52_f3_constructor_bounds_cap_to_uint128_and_maxdrip_to_cap",
+        "testFuzz_qcai52_f3_exact_sum_up_to_the_cap_and_refusal_above",
+        "test_qcai52_f3_allowance_is_per_sender_and_resets_daily"
+      ]
+    },
+    {
+      "index": 4,
+      "id": "ETH-V52-4",
+      "severity": "LOW",
+      "title": "Unchecked Return Values in External Calls",
+      "location": "src/PocketVault.sol",
+      "description": "Several external calls in PocketVault.sol use low-level call syntax without proper return value checking. While some functions do check return values, others don't explicitly validate the success of external calls.",
+      "recommendation": "Ensure all external calls have proper return value validation",
+      "triageVerdict": "false positive",
+      "evidenceTests": [
+        "test_qcai52_f4_failed_send_reverts_spend_and_changes_nothing",
+        "test_qcai52_f4_failed_send_keeps_the_queued_spend_pending",
+        "test_qcai52_f4_refused_payout_is_deferred_not_lost",
+        "test_qcai52_f4_return_bomb_receiver_does_not_affect_the_claim",
+        "test_qcai52_f4_gas_burning_receiver_is_deferred"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "ETH-V52-5",
+      "severity": "MEDIUM",
+      "title": "Potential Front-Running in Guardian Freeze",
+      "location": "src/PocketVault.sol",
+      "description": "The guardian freeze functionality allows freezing based on a nonce that can be predicted. If an attacker knows the current freezeNonce, they could potentially front-run freeze proposals to disrupt legitimate guardian actions.",
+      "recommendation": "Implement additional randomness or time-based elements to prevent predictable nonce usage",
+      "triageVerdict": "false positive",
+      "evidenceTests": [
+        "test_qcai52_f5_attacker_who_knows_the_nonce_cannot_freeze",
+        "test_qcai52_f5_front_running_the_signed_freeze_only_delivers_the_intended_freeze",
+        "testFuzz_qcai52_f5_wrong_nonce_is_refused_and_changes_nothing",
+        "test_qcai52_f5_freeze_signature_is_bound_to_nonce_and_pocket"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "ETH-V52-6",
+      "severity": "LOW",
+      "title": "Potential Gas Limit Issues in Guardian Validation",
+      "location": "src/PocketVault.sol",
+      "description": "The _checkGuardianSigs function performs linear scans through guardian arrays with a maximum of 5 elements, but in worst-case scenarios, this could approach gas limits for large arrays or complex validations.",
+      "recommendation": "Consider implementing more efficient lookup mechanisms or limiting guardian set sizes further",
+      "triageVerdict": "not exploitable",
+      "evidenceTests": [
+        "test_qcai52_f6_six_signers_revert_before_any_signature_work",
+        "test_qcai52_f6_guardian_set_is_capped_at_deploy",
+        "test_qcai52_f6_five_of_five_unanimous_check_gas_is_bounded"
+      ]
+    },
+    {
+      "index": 7,
+      "id": "ETH-V52-7",
+      "severity": "INFO",
+      "title": "ERC-1271 Implementation",
+      "location": "src/PocketVault.sol",
+      "description": "The PocketVault contract correctly implements the ERC-1271 standard for signature verification, allowing external contracts to verify signatures through the isValidSignature function.",
+      "recommendation": "No action required - ERC-1271 compliance is properly implemented",
+      "triageVerdict": "informational",
+      "evidenceTests": [
+        "test_qcai52_f7_erc1271_accepts_only_the_owners_bound_approval"
+      ]
+    }
+  ]
+}
