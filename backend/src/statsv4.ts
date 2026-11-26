@@ -9,7 +9,8 @@ import { ranges } from './limit.js';
  *  (frontend deployment dpl_ELW885X5Vs2sNUwyzQwp1guDVtwR, ready 2026-11-20 04:24:18 UTC, commit 0643538 contains 43cc149). */
 export const V2_RELEASE_BLOCK = 10412597n;
 export const V4_FROM: Record<V4Env, { drop: bigint; pool: bigint }> = {
-  prod: { drop: 10746804n, pool: 10746804n }, lab: { drop: 10746809n, pool: 10746809n }, // v5 (current)
+  prod: { drop: 10757682n, pool: 10757686n }, lab: { drop: 10757734n, pool: 10757736n }, // v5.1 (current)
+  prodV5: { drop: 10746804n, pool: 10746804n }, labV5: { drop: 10746809n, pool: 10746809n }, // v5 (previous)
   prodV4: { drop: 10388441n, pool: 10388334n }, labV4: { drop: 10388447n, pool: 10388349n }, // v4 (previous)
 };
 
@@ -87,7 +88,7 @@ export async function keyEras(deployed: EvLog[], own: OwnMap, balance: (a: Addre
 export async function getV4Stats(r: V4Reader, own: OwnMap) {
   const head = await r.head();
   const out: Record<string, unknown> = {};
-  await Promise.all((['prod', 'lab', 'prodV4', 'labV4'] as V4Env[]).map(async (env) => {
+  await Promise.all((['prod', 'lab', 'prodV5', 'labV5', 'prodV4', 'labV4'] as V4Env[]).map(async (env) => {
     const i = V4_INSTANCES[env]; const f = V4_FROM[env];
     const names: [Address, EvName, bigint][] = [
       [i.factory, 'PocketDeployed', f.drop], [i.drop, 'LinkCreated', f.drop], [i.drop, 'LinkBound', f.drop], [i.drop, 'LinkConfirmed', f.drop],
@@ -100,7 +101,7 @@ export async function getV4Stats(r: V4Reader, own: OwnMap) {
     const merged = mergeHybrid(l, hy ?? []);
     out[env] = { ...buildV4Env(env, merged, own), keyEras: await keyEras(merged.PocketDeployed, own, r.balance), hybridRelayEvents: hy === null ? null : hy.length };
   }));
-  return { headBlock: head.toString(), prod: out.prod, lab: out.lab, prodV4: out.prodV4, labV4: out.labV4, current: 'v5', note: 'prod/lab = current v5 contracts, prodV4/labV4 = previous v4 contracts (reported separately, never summed here). Same method as /radar: factory, drop and pool logs since deployment, plus the events of hybrid relays (MsgCrossVMCall, which leaves no EVM log) rebuilt from the native lane; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
+  return { headBlock: head.toString(), prod: out.prod, lab: out.lab, prodV5: out.prodV5, labV5: out.labV5, prodV4: out.prodV4, labV4: out.labV4, current: 'v5.1', note: 'prod/lab = current v5.1 contracts, prodV5/labV5 = previous v5 contracts, prodV4/labV4 = previous v4 contracts (reported separately, never summed here). Same method as /radar: factory, drop and pool logs since deployment, plus the events of hybrid relays (MsgCrossVMCall, which leaves no EVM log) rebuilt from the native lane; own = listed in config/own-accounts.json. Counts are addresses, not people.' };
 }
 
 /** Add hybrid-relay events to the log lists. A PocketDeployed for a Pocket already in the logs is dropped (never counted twice). */

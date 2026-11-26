@@ -17,7 +17,7 @@ const pub = createPublicClient({ transport: http(cfg.evmRpc) }) as any;
 const r = makeV4Reader(pub, 9000n, (env) => hybridEventsFor(env, cfg, pub));
 const head = await r.head();
 const out: { version: string; role: string; address: string; tx: string; block: string }[] = [];
-for (const env of ['prod', 'lab', 'prodV4', 'labV4'] as V4Env[]) {
+for (const env of ['prod', 'lab', 'prodV5', 'labV5', 'prodV4', 'labV4'] as V4Env[]) {
   const i = V4_INSTANCES[env]; const f = V4_FROM[env];
   const ev = async (a: Address, n: string, from: bigint) => r.events(a, n as never, from, head);
   const l: any = {

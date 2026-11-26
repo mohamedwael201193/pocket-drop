@@ -9,6 +9,8 @@ import { getNetwork } from '@qorechain/sdk';
 import { PolicyError, pqKeyFor, pqSign, type PqPolicy, type PqSignRequest } from './pqSplit.js';
 
 export const TARGETS = [
+  '0x99711daaa39f2f03901950486c70641eca5261cb', // PocketRouter v5.1, production
+  '0x007dd2b3d907e6924e3ad7d3f5281cacebabab07', // PocketRouter v5.1, lab
   '0x13b8e379e50da657b943781d2816fc17473ae376', // PocketRouter v5, production
   '0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75', // PocketRouter v5, lab
   '0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209', // PocketRouter v4, production

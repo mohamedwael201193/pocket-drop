@@ -6,7 +6,7 @@ import { RULES, type Limiter } from './ratelimit.js';
 import type { Relayer, SendResult } from './relayer.js';
 import { relayMemo } from './hybridRelayer.js';
 import { reply, type HttpResult } from './handlers.js';
-import { V4_INSTANCES, type V4Env } from './v4.js';
+import { V4_INSTANCES, genOf, isProdLike, type V4Env } from './v4.js';
 import { formatIssues, routeSchema } from './validation.js';
 import { noteRouteRefusal } from './qday.js';
 import { pqPreflight } from './pqPreflight.js';
@@ -88,11 +88,13 @@ export async function handleRoute(rawBody: unknown, ip: string, d: RouteDeps): P
   const data = encodeRouterCall(v);
   const relayer = d.getRouterRelayer(v.env);
   const action = v.pocket ? 'deployAndRelay' : 'relay';
+  const feeIssue = bindFeeToIssue(v.env, v.target, v.data, relayer.address);
+  if (feeIssue) return reply(400, { ok: false, sent: false, error: { name: 'FeeToNotRelayer', message: feeIssue } });
 
   const sim = await relayer.simulate(data);
   if (!sim.ok) {
     log('warn', 'route.simulate_revert', { env: v.env, action, error: sim.revert.name });
-    if (v.env === 'prod' || v.env === 'prodV4') noteRouteRefusal(data, router, sim.revert.name);
+    if (isProdLike(v.env)) noteRouteRefusal(data, router, sim.revert.name);
     return reply(422, {
       ok: false, sent: false, env: v.env, action,
       error: { name: sim.revert.name, message: sim.revert.message, selector: sim.revert.selector, known: sim.revert.known, args: sim.revert.args?.map((a) => (typeof a === 'bigint' ? a.toString() : a)) },
@@ -146,4 +148,21 @@ export function decodeRouteReturn(action: 'relay' | 'deployAndRelay', innerData:
     out[RET_KEY[functionName]] = id.toString();
   } catch { /* not an id-returning vault call */ }
   return out;
+}
+
+const BIND_V51 = parseAbi(['function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, address feeTo, bytes linkPk, bytes linkSig)']);
+/**
+ * v5.1: a bind pays its relayer fee to the `feeTo` the link key signed. The relayer pays the gas of a bind it submits, so it
+ * submits only binds whose `feeTo` is its own address (anyone may still submit their own bind with their own feeTo, see
+ * "Relay it yourself"). Returns the refusal message, or null when the call is not a v5.1 bind or feeTo is the relayer.
+ */
+export function bindFeeToIssue(env: V4Env, target: string | undefined, data: Hex, relayer: string): string | null {
+  if (genOf(env) !== 'v5.1' || !target || target.toLowerCase() !== V4_INSTANCES[env].drop.toLowerCase()) return null;
+  let feeTo: string;
+  try {
+    const c = decodeFunctionData({ abi: BIND_V51, data });
+    feeTo = String(c.args[4]);
+  } catch { return null; }
+  if (feeTo.toLowerCase() === relayer.toLowerCase()) return null;
+  return `This bind pays its delivery fee to ${feeTo}, not to the relayer ${relayer}. Sign the bind with feeTo = the relayer, or submit it yourself. Nothing was simulated or sent.`;
 }

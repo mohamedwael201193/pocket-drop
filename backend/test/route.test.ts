@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import { decodeFunctionData, encodeErrorResult, getAddress } from 'viem';
+import { decodeFunctionData, encodeErrorResult, encodeFunctionData, getAddress } from 'viem';
 import { routerAbi, v4ErrorsAbi } from '../src/abi4.js';
 import { decodeRevert } from '../src/errors.js';
 import { encodeRouterCall, handleRoute, pickGas, type RouteDeps } from '../src/route.js';
@@ -160,11 +160,29 @@ describe('v4 instances', () => {
   const file = path.resolve(__dirname, '..', '..', 'contracts-v4', 'deployments', 'diana.json');
   it.skipIf(!fs.existsSync(file))('match contracts-v4/deployments/diana.json', () => {
     const all = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const pairs = [['prod', all.v5.prod], ['lab', all.v5.lab], ['prodV4', all.v4.prod], ['labV4', all.v4.lab]] as const;
+    const pairs = [['prod', all.v5_1.prod], ['lab', all.v5_1.lab], ['prodV5', all.v5.prod], ['labV5', all.v5.lab], ['prodV4', all.v4.prod], ['labV4', all.v4.lab]] as const;
     for (const [env, rec] of pairs) {
       for (const k of ['router', 'factory', 'drop', 'pool'] as const) {
         expect(V4_INSTANCES[env][k].toLowerCase()).toBe(rec[k].address.toLowerCase());
       }
     }
+  });
+});
+
+describe('v5.1 bind feeTo', () => {
+  const REL = '0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD';
+  const abi = [{ type: 'function', name: 'bind', stateMutability: 'nonpayable', outputs: [], inputs: [
+    { name: 'linkId', type: 'uint256' }, { name: 'recipient', type: 'address' }, { name: 'recipientKeyHash', type: 'bytes32' },
+    { name: 'payTo', type: 'address' }, { name: 'feeTo', type: 'address' }, { name: 'linkPk', type: 'bytes' }, { name: 'linkSig', type: 'bytes' }] }] as const;
+  const bind = (feeTo: `0x${string}`) => encodeFunctionData({ abi, functionName: 'bind', args: [1n, REL, `0x${'11'.repeat(32)}`, REL, feeTo, '0x', '0x'] });
+  it('the relayer submits a current-generation bind only when feeTo is the relayer', async () => {
+    const { bindFeeToIssue } = await import('../src/route.js');
+    const { V4_INSTANCES } = await import('../src/v4.js');
+    expect(bindFeeToIssue('prod', V4_INSTANCES.prod.drop, bind(REL), REL)).toBeNull();
+    expect(bindFeeToIssue('prod', V4_INSTANCES.prod.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toMatch(/not to the relayer/);
+    expect(bindFeeToIssue('lab', V4_INSTANCES.lab.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toMatch(/not to the relayer/);
+    // previous generations and other targets are not affected
+    expect(bindFeeToIssue('prodV5', V4_INSTANCES.prodV5.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toBeNull();
+    expect(bindFeeToIssue('prod', V4_INSTANCES.prod.pool, bind('0x000000000000000000000000000000000000dEaD'), REL)).toBeNull();
   });
 });

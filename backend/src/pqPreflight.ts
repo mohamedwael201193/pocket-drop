@@ -26,6 +26,8 @@ export const PQ_ARG_ABI = parseAbi([
   'function proposeRecoveryUnanimous(address newOwner, bytes32 newKeyHash, uint256 deadline, address[] signers, bytes[] sigs)',
   // PocketDrop
   'function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, bytes linkPk, bytes linkSig)',
+  // v5.1: the link key also signs feeTo, the address paid the relayer fee
+  'function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, address feeTo, bytes linkPk, bytes linkSig)',
   'function claim(uint256 linkId, bytes recipientSig)',
   // DropPool
   'function claim(uint256 poolId, address recipient, address payTo, bytes linkPk, bytes linkSig, bytes recipientSig)',

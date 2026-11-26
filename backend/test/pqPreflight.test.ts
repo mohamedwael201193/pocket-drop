@@ -26,8 +26,10 @@ describe.skipIf(!haveAbi)('PQ_ARG_ABI matches the deployed contract ABIs', () =>
       .filter((x) => x.type === 'function' && x.stateMutability !== 'view' && x.stateMutability !== 'pure');
   });
   const sel = (x: { name: string; inputs: { type: string }[] }) => toFunctionSelector(`${x.name}(${x.inputs.map((i) => i.type).join(',')})`);
+  const LEGACY = new Set([toFunctionSelector('bind(uint256,address,bytes32,address,bytes,bytes)')]);
   it('every listed function exists in a contract with the same selector and argument names', () => {
     for (const a of PQ_ARG_ABI) {
+      if (LEGACY.has(sel(a as never))) continue; // v5 / v4 bind (no feeTo): still relayed to the previous contracts
       const m = fns.find((f) => sel(f) === sel(a as never));
       expect(m, a.name).toBeTruthy();
       expect(m!.inputs.map((i) => i.name)).toEqual(a.inputs.map((i) => i.name));
@@ -37,7 +39,7 @@ describe.skipIf(!haveAbi)('PQ_ARG_ABI matches the deployed contract ABIs', () =>
     const want = new Set(fns.filter((f) => f.inputs.some((i) => i.type === 'bytes' || i.type === 'bytes[]')).map(sel));
     const have = new Set(PQ_ARG_ABI.map((a) => sel(a as never)));
     expect([...want].filter((s) => !have.has(s))).toEqual([]);
-    expect(have.size).toBe(17);
+    expect(have.size).toBe(18);
   });
 });
 

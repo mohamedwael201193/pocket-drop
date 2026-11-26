@@ -18,6 +18,8 @@ export const VAULT_CALLS = parseAbi([
 ]);
 export const DROP_CALLS = parseAbi([
   'function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, bytes linkPk, bytes linkSig)',
+  // v5.1: the link key also signs feeTo, the address paid the relayer fee
+  'function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, address feeTo, bytes linkPk, bytes linkSig)',
   'function claim(uint256 linkId, bytes recipientSig)',
 ]);
 export const POOL_CALLS = parseAbi(['function claim(uint256 poolId, address recipient, address payTo, bytes linkPk, bytes linkSig, bytes recipientSig)']);
