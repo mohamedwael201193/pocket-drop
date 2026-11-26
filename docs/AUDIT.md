@@ -212,3 +212,16 @@ Counts: 5 findings (1 high, 2 medium, 1 low, 1 info). 0 valid unmitigated bugs; 
 ## 10. Stage 4 (prepared, not yet run)
 
 The Stage 4 flattened source is in [`docs/audit/stage4/`](audit/stage4/) (`PocketDrop-v5-stage4-flattened.sol`, SHA-256 `0716a307935475256cf1fd813e9317abbd567715f89481778a9e4770a251fc47`). A paid testnet re-run of that source failed twice on the dashboard side (HTTP 402 "Send failed"). No QOR was charged. Stage 4 will run on the next free daily audit.
+
+## 11. v5.1 (deployed 26 Nov 2026): open items fixed
+
+v5.1 fixes the items still open after Stage 3 and folds in the Stage 4 cleanups; details, addresses and live txs in [`docs/V5_1.md`](V5_1.md).
+
+| Item | Fix | Regression tests |
+|---|---|---|
+| F1 a copied first bind collected `relayerFee` (`contracts-v4/KNOWN_ISSUES.md`) | the link key signs `feeTo` (`POCKETDROP_BIND_V3`); `BadFeeTo` for zero or self | `test_v51_F1_frontrunner_cannot_take_the_relayer_fee`, `test_v51_F1_feeTo_must_be_a_real_address`; live F1 revert `0x6700c859…` |
+| F2/F4 ERC-1271 and PqGuard approvals shared the intent message format | purpose tags `pocket-erc1271-v1` / `pqguard-v1`, digests bound to account and chainid | `test_v51_F2_outside_approvals_are_never_intents`, `test_v51_F2_untagged_plain_approval_refused`, `test_erc1271_real_signature` (real ML-DSA-87) |
+| F3 router could hold and sweep QOR | `receive()` and the sweep removed | `test_v51_router_rejects_plain_sends`, `test_v51_relay_from_reverting_caller_succeeds` |
+| Stage 4 cleanups (`audit/stage4/STAGE4_DIFF.md`) | recovery modifiers, subtractive drip headroom, `guardianFreeze` assert, `len > MAX_GUARDIANS` fail-fast | `test_stage3_six_signers_always_revert_in_checkGuardianSigs` (now `NotGuardian` first) and the existing suites |
+
+Audit source for the next QCAI run: `docs/audit/stage4/PocketDrop-v5.1-flattened.sol` (1,944 lines, SHA-256 `22faf22b3aa59124a3cc19fa77f8dcc9d65e924a98ea147918deee02cdd61b8a`). `node contracts-v4/script/flatten-v51.mjs --check` proves it compiles alone and equals the deployed v5.1 runtime code (immutables masked).
