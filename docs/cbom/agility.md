@@ -2,7 +2,7 @@
 
 > **Disclaimer.** QoreScan output is an inventory aid. It is not a certification, an audit or a legal opinion, and it does not establish conformity with any regulation or standard. This draft is pre-filled only with facts the scan recorded; the organisation is responsible for completing, checking and adopting it.
 
-Prepared from CBOM `urn:uuid:54b1740e-b061-5b37-a457-9e78a456a520` (2026-11-25T20:11:09Z). Statements are limited to what the scan recorded; everything else is marked to be completed.
+Prepared from CBOM `urn:uuid:e1788353-95d2-504c-9e1e-74d89ddc4a39` (2026-11-26T00:00:19Z). Statements are limited to what the scan recorded; everything else is marked to be completed.
 
 ## 1. Scope
 
@@ -21,7 +21,7 @@ Systems outside this scan: _To be completed._
 | ECDSA secp256k1 | quantum-vulnerable | EVM lane: transactions signed with ECDSA secp256k1 over Keccak-256; ecrecover (0x01), sha256 (0x02) and ripemd160 (0x03) precompiles; classical key of qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus (7 occurrences in the CBOM) |
 | ECDSA with SHA-256 | quantum-vulnerable | presented by the server |
 | ECDSA with SHA-384 | quantum-vulnerable | presented by the server |
-| Ed25519 | quantum-vulnerable | 4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10747201 |
+| Ed25519 | quantum-vulnerable | 4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10756844 |
 | RSA PKCS#1 v1.5 with SHA-256 | quantum-vulnerable | presented by the server (7 occurrences in the CBOM) |
 | RSA-2048 | quantum-vulnerable | presented by the server (4 occurrences in the CBOM) |
 | RSA-4096 | quantum-vulnerable | presented by the server (2 occurrences in the CBOM) |

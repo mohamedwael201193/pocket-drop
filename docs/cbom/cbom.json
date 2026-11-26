@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:54b1740e-b061-5b37-a457-9e78a456a520",
+  "serialNumber": "urn:uuid:e1788353-95d2-504c-9e1e-74d89ddc4a39",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-25T20:11:09Z",
+    "timestamp": "2026-11-26T00:00:19Z",
     "tools": {
       "components": [
         {
@@ -184,7 +184,7 @@
       },
       {
         "name": "qorescan:chain:protocol-features",
-        "value": "353 enabled at height 10747200 (33 PQC-related listed)"
+        "value": "353 enabled at height 10756843 (33 PQC-related listed)"
       },
       {
         "name": "qorescan:chain:pqc:hybrid-signature-mode",
@@ -265,12 +265,12 @@
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           }
@@ -611,7 +611,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10747201"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10756844"
           }
         ]
       },
@@ -664,12 +664,12 @@
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           }
@@ -1114,22 +1114,22 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           }
@@ -1179,12 +1179,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           }
@@ -1239,32 +1239,32 @@
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           }
@@ -1320,12 +1320,12 @@
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "cipher-suite",
             "additionalContext": "TLS_AES_128_GCM_SHA256"
           }
@@ -1379,12 +1379,12 @@
             "additionalContext": "hybrid key exchange X25519MLKEM768"
           },
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "key-exchange",
             "additionalContext": "hybrid key exchange X25519MLKEM768"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "key-exchange",
             "additionalContext": "hybrid key exchange X25519MLKEM768"
           }
@@ -1491,12 +1491,12 @@
     },
     {
       "type": "cryptographic-asset",
-      "bom-ref": "crypto/protocol/tls/pocketdrop-api.vercel.app:443",
-      "name": "TLS 1.3 at pocketdrop-api.vercel.app:443",
+      "bom-ref": "crypto/protocol/tls/pocket-drop-api.vercel.app:443",
+      "name": "TLS 1.3 at pocket-drop-api.vercel.app:443",
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "tls-handshake",
             "additionalContext": "negotiated by QoreScan's client with default key exchange preferences (hybrid ML-KEM groups offered first)"
           }
@@ -1544,18 +1544,18 @@
         },
         {
           "name": "qorescan:tls:server-name",
-          "value": "pocketdrop-api.vercel.app"
+          "value": "pocket-drop-api.vercel.app"
         }
       ]
     },
     {
       "type": "cryptographic-asset",
-      "bom-ref": "crypto/protocol/tls/pocketdrop-app.vercel.app:443",
-      "name": "TLS 1.3 at pocketdrop-app.vercel.app:443",
+      "bom-ref": "crypto/protocol/tls/pocket-drop.vercel.app:443",
+      "name": "TLS 1.3 at pocket-drop.vercel.app:443",
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "tls-handshake",
             "additionalContext": "negotiated by QoreScan's client with default key exchange preferences (hybrid ML-KEM groups offered first)"
           }
@@ -1603,7 +1603,7 @@
         },
         {
           "name": "qorescan:tls:server-name",
-          "value": "pocketdrop-app.vercel.app"
+          "value": "pocket-drop.vercel.app"
         }
       ]
     },
@@ -1690,12 +1690,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           }
@@ -1767,12 +1767,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           }
@@ -1808,12 +1808,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           }
@@ -2245,7 +2245,7 @@
           {
             "location": "https://api-testnet.qore.host/cosmos/base/tendermint/v1beta1/validatorsets/latest?pagination.limit=1000",
             "symbol": "validators[].pub_key",
-            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10747201"
+            "additionalContext": "4 active validators with /cosmos.crypto.ed25519.PubKey consensus keys at height 10756844"
           }
         ]
       },
@@ -2274,12 +2274,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[0]",
             "additionalContext": "presented by the server"
           }
@@ -2309,12 +2309,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[2]",
             "additionalContext": "presented by the server"
           }
@@ -2434,12 +2434,12 @@
       "evidence": {
         "occurrences": [
           {
-            "location": "pocketdrop-api.vercel.app:443",
+            "location": "pocket-drop-api.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           },
           {
-            "location": "pocketdrop-app.vercel.app:443",
+            "location": "pocket-drop.vercel.app:443",
             "symbol": "certificate[1]",
             "additionalContext": "presented by the server"
           }
@@ -2484,8 +2484,8 @@
         "crypto/algorithm/sha-256",
         "crypto/algorithm/x25519mlkem768",
         "crypto/protocol/tls/evm-testnet.qore.host:443",
-        "crypto/protocol/tls/pocketdrop-api.vercel.app:443",
-        "crypto/protocol/tls/pocketdrop-app.vercel.app:443",
+        "crypto/protocol/tls/pocket-drop-api.vercel.app:443",
+        "crypto/protocol/tls/pocket-drop.vercel.app:443",
         "crypto/certificate/1dfc1605fbad358d",
         "crypto/certificate/22cd45c412254fa4",
         "crypto/certificate/3ee0278df71fa3c1",
@@ -2526,7 +2526,7 @@
       ]
     },
     {
-      "ref": "crypto/protocol/tls/pocketdrop-api.vercel.app:443",
+      "ref": "crypto/protocol/tls/pocket-drop-api.vercel.app:443",
       "dependsOn": [
         "crypto/algorithm/x25519mlkem768",
         "crypto/certificate/b780bccea3104338",
@@ -2539,7 +2539,7 @@
       ]
     },
     {
-      "ref": "crypto/protocol/tls/pocketdrop-app.vercel.app:443",
+      "ref": "crypto/protocol/tls/pocket-drop.vercel.app:443",
       "dependsOn": [
         "crypto/algorithm/x25519mlkem768",
         "crypto/certificate/b780bccea3104338",
