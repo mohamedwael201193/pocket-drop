@@ -136,16 +136,19 @@ export const REQUIREMENTS: Requirement[] = [
   },
   {
     id: 'qcai',
-    requirement: 'Three-stage QCAI audit (v4 Stages 1–2, v5 Stage 3), every finding answered',
+    requirement: 'Four-stage QCAI audit (v4 Stages 1–2, v5 Stage 3, v5.1 Stage 4), every finding answered',
     code: [
       { label: 'docs/AUDIT.md (finding -> resolution -> test)', path: 'docs/AUDIT.md' },
       { label: 'Stage 1 PDF (19 Nov, v4)', path: 'docs/audit/stage1/QCAI-stage1-2026-11-19.pdf' },
       { label: 'Stage 2 PDF (20 Nov, v4)', path: 'docs/audit/stage2/QCAI-stage2-2026-11-20.pdf' },
       { label: 'Stage 3 PDF (26 Nov Cairo, v5)', path: 'docs/audit/stage3/QCAI-stage3-v5.pdf' },
       { label: 'Stage 3 JSON (26 Nov Cairo, v5)', path: 'docs/audit/stage3/qcai-stage3-v5.json' },
+      { label: 'Stage 4 PDF (26 Nov Cairo, v5.1)', path: 'docs/audit/stage4/QCAI-stage4-v5.1.pdf' },
+      { label: 'Stage 4 triage (v5.1: verdict and test per finding)', path: 'docs/audit/stage4/QCAI_V5_1_TRIAGE.md' },
+      { label: 'Stage 4 evidence tests', path: 'contracts-v4/test/QcaiV51AuditRegression.t.sol' },
     ],
-    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 QCAIA-1795645590445-DF0CEDA6 (85)', note: 'https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6' }],
-    tests: ['each finding names its regression tests in docs/AUDIT.md'],
+    live: [{ label: 'Stage 1 QCAIA-1795130931306-3D8DAA40 (82), Stage 2 QCAIA-1795138339351-F6A93427 (78), Stage 3 QCAIA-1795645590445-DF0CEDA6 (85), Stage 4 QCAIA-1795655356279-BA1C1020 (82, 0 critical, v5.1)', note: 'https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020' }],
+    tests: ['each finding names its regression tests in docs/AUDIT.md', 'testFuzz_qcai51_h1_finalize_outcome_is_independent_of_caller', 'testFuzz_qcai51_m2_drip_sum_never_wraps_at_extreme_bounds', 'test_qcai51_m3_reentry_into_every_entry_point_is_refused', 'test_qcai51_l4_six_guardians_rejected_at_deploy'],
   },
   {
     id: 'tests',
