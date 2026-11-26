@@ -136,7 +136,7 @@ Summary: {
 }
 
 ## Q-Day drill: "Steal this Pocket" baits (PROD instance, 20 Nov 2026, TEAM-RUN)
-Five bait Pockets whose classical secp256k1 keys are published on `/qday` (owner-approved, testnet). Each ML-DSA-87 secret is independent random entropy. Record: `deployments/qday-baits.json`; attack script: `script/qday/attack.mjs`; page: https://pocketdrop-app.vercel.app/qday.
+Five bait Pockets whose classical secp256k1 keys are published on `/qday` (owner-approved, testnet). Each ML-DSA-87 secret is independent random entropy. Record: `deployments/qday-baits.json`; attack script: `script/qday/attack.mjs`; page: https://pocket-drop.vercel.app/qday.
 
 | Bait | Setup | Key account | Pocket |
 |---|---|---|---|
