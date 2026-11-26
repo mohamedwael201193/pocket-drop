@@ -83,7 +83,7 @@ function AuditMatrix() {
       <table className="w-full border-collapse text-left text-xs">
         <thead><tr className="border-b border-zinc-200 text-zinc-500">
           <th className="py-1.5 pr-2 font-medium">Finding class</th>
-          {QCAI_RUNS.map((r) => <th key={r.id} className="px-1 py-1.5 text-center font-medium" title={`${r.id}: ${r.code}, score ${r.score}`}>{r.id}<span className="block font-mono text-[10px] font-normal">{r.code} · {r.score}</span></th>)}
+          {QCAI_RUNS.map((r) => <th key={r.id} className="px-1 py-1.5 text-center font-medium" title={`${r.id}: ${r.code}, score ${r.score}`}>{r.id}<span className="block whitespace-nowrap font-mono text-[10px] font-normal">{r.code}</span><span className="block font-mono text-[10px] font-normal">{r.score}</span></th>)}
           <th className="py-1.5 pl-2 pr-2 font-medium">Status on v5.2</th><th className="py-1.5 pr-2 font-medium">Code</th><th className="py-1.5 font-medium">Test</th>
         </tr></thead>
         <tbody>{AUDIT_MATRIX.map((c) => (
