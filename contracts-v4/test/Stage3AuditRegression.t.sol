@@ -124,7 +124,7 @@ contract Stage3AuditRegressionTest is V4Base {
     }
 
     /// @dev Stage 3 #4 (LOW): Guardians are capped at MAX_GUARDIANS = 5, so _checkGuardianSigs loops are strictly bounded;
-    ///      passing 6 signers (even after 5 valid guardian signatures) always reverts by index 5.
+    ///      passing 6 signers always reverts (v5.1: up front, `len > MAX_GUARDIANS`).
     function test_stage3_six_signers_always_revert_in_checkGuardianSigs() public {
         address g4 = r(0);
         address[] memory g5 = new address[](5);
@@ -162,7 +162,8 @@ contract Stage3AuditRegressionTest is V4Base {
         }
         sixWithDuplicate[5] = G0;
 
-        vm.expectRevert(PocketVault.DuplicateSigner.selector);
+        // v5.1 (Stage 4 cleanup): more than MAX_GUARDIANS signers fails fast with NotGuardian, before any check
+        vm.expectRevert(PocketVault.NotGuardian.selector);
         v5.guardianFreeze(sixWithDuplicate, sixSigs, 0, DL);
     }
 }

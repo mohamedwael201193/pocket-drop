@@ -334,7 +334,7 @@ contract DropHandler is Fx {
         address pt = _payTo(i);
         PocketDrop.Link memory b = drop.getLink(id);
         vm.prank(who % 2 == 0 ? relayer : mallory);
-        try drop.bind(id, address(uint160(0xb0b01 + i)), rh, pt, lpk, s) {
+        try drop.bind(id, address(uint160(0xb0b01 + i)), rh, pt, address(uint160(0xfee0)), lpk, s) {
             bool legal = (b.state == PocketDrop.State.Open
                     || (b.state == PocketDrop.State.Bound && block.timestamp > b.bindDeadline))
                 && block.timestamp < b.expiry;

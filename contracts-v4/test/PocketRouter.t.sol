@@ -90,25 +90,20 @@ contract PocketRouterTest is V4Base {
         assertFalse(factory.isPocket(predict(k)));
     }
 
-    function test_sweep_failure_reverts() public {
-        vm.deal(address(router), 1 ether);
-        HostileReceiver h = new HostileReceiver();
-        h.setBehavior(HostileReceiver.B.Revert);
-        // relaying empty calldata to a Pocket hits receive() and succeeds; the sweep to a reverting caller then fails
-        bytes memory d = abi.encodeCall(router.relay, (address(v), ""));
-        (bool ok, bytes memory ret) = h.exec(address(router), d, 0);
+    /// @dev v5.1 (F3): the router holds no value. It has no receive(), so plain sends fail and no stray balance
+    ///      can build up for the next caller; a reverting caller cannot block a relay either.
+    function test_v51_router_rejects_plain_sends() public {
+        vm.deal(address(this), 1 ether);
+        (bool ok,) = address(router).call{value: 1 ether}("");
         assertFalse(ok);
-        assertEq(bytes4(ret), PocketRouter.SweepFailed.selector);
-        // an EOA caller receives the stray balance
-        uint256 b = relayer.balance;
-        vm.prank(relayer);
-        router.relay(address(v), "");
-        assertEq(relayer.balance, b + 1 ether);
         assertEq(address(router).balance, 0);
     }
 
-    function test_router_accepts_plain_sends() public {
-        (bool ok,) = address(router).call{value: 0}("");
-        assertTrue(ok);
+    function test_v51_relay_from_reverting_caller_succeeds() public {
+        HostileReceiver h = new HostileReceiver();
+        h.setBehavior(HostileReceiver.B.Revert);
+        bytes memory d = abi.encodeCall(router.relay, (address(v), ""));
+        (bool ok,) = h.exec(address(router), d, 0);
+        assertTrue(ok, "no sweep to the caller any more");
     }
 }

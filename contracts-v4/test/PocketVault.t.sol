@@ -193,7 +193,31 @@ contract PocketVaultTest is V4Base {
         assertEq(v.isValidSignature(h, V("e1271_OA")), bytes4(0x1626ba7e));
         assertEq(v.isValidSignature(h, V("e1271_OB")), bytes4(0xffffffff));
         assertEq(v.isValidSignature(bytes32(uint256(h) + 1), V("e1271_OA")), bytes4(0xffffffff));
+        // v5.1 F2/F4 regressions
+        assertEq(v.isValidSignature(h, V("e1271Untagged_OA")), bytes4(0xffffffff), "v5 untagged approval refused");
+        assertEq(v.isValidSignature(h, V("e1271PA2_OA")), bytes4(0xffffffff), "approval for another Pocket refused");
+        assertEq(v.isValidSignature(h, V("e1271Chain_OA")), bytes4(0xffffffff), "approval for another chain refused");
+        assertEq(
+            v.erc1271Digest(h), keccak256(abi.encode(keccak256("POCKET_ERC1271_V1"), block.chainid, address(v), h))
+        );
         assertEq(v.isValidSignature(h, hex"00"), bytes4(0xffffffff));
+    }
+
+    /// @dev v5.1 F2 regression: approving an intent digest through ERC-1271 or PqGuard (what a hostile dApp could ask
+    ///      the owner to "approve") never yields a usable owner intent.
+    function test_v51_F2_outside_approvals_are_never_intents() public {
+        bytes32 ig = v.intentDigest(v.ACT_SPEND(), 0, DL, abi.encode(SINK, uint256(0.8 ether)));
+        bytes memory a = V("e1271OfIntent_OA");
+        assertEq(v.isValidSignature(ig, a), bytes4(0x1626ba7e), "a valid ERC-1271 approval of that hash");
+        vm.expectRevert(PocketVault.BadSignature.selector);
+        v.spend(SINK, 0.8 ether, DL, a);
+        bytes memory p = V("pqgOfIntent_OA");
+        vm.expectRevert(PocketVault.BadSignature.selector);
+        v.spend(SINK, 0.8 ether, DL, p);
+        // and an owner intent signature is not an ERC-1271 approval of its digest
+        assertEq(v.isValidSignature(ig, V("spendS_0")), bytes4(0xffffffff));
+        v.spend(SINK, 0.8 ether, DL, V("spendS_0"));
+        assertEq(v.nonce(), 1);
     }
 
     /*====================== limit ======================*/

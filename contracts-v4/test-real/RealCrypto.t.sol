@@ -276,10 +276,13 @@ contract RealCryptoTest is V4Base {
 
     function test_erc1271_real_signature() public {
         bytes32 h = keccak256("order #1");
-        bytes memory s = _signDigest("alice", h);
+        bytes memory s = sign("alice", PqcLib.pqMessage(PqcLib.TAG_ERC1271, pv.erc1271Digest(h)));
         assertEq(pv.isValidSignature(h, s), bytes4(0x1626ba7e));
         assertEq(pv.isValidSignature(keccak256("order #2"), s), bytes4(0xffffffff));
-        assertEq(pv.isValidSignature(h, _signDigest("bob", h)), bytes4(0xffffffff));
+        assertEq(
+            pv.isValidSignature(h, sign("bob", PqcLib.pqMessage(PqcLib.TAG_ERC1271, pv.erc1271Digest(h)))),
+            bytes4(0xffffffff)
+        );
     }
 
     function test_guardian_freeze_with_two_real_guardian_signatures() public {
@@ -323,8 +326,8 @@ contract RealCryptoTest is V4Base {
     function test_drop_open_mode_full_flow_real_signatures() public {
         uint256 id = _createDrop(1);
         bytes32 bk = keccak256(pk("bob"));
-        bytes memory bs = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL));
-        router.relay(DROP, abi.encodeCall(drop.bind, (id, BOB, bk, CAROL, pk("link1"), bs)));
+        bytes memory bs = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL, FEE));
+        router.relay(DROP, abi.encodeCall(drop.bind, (id, BOB, bk, CAROL, FEE, pk("link1"), bs)));
         assertEq(BOB.balance, 0.2 ether); // drip for gas
         bytes memory cs = _signDigest("bob", drop.claimDigest(id, BOB, CAROL));
         router.relay(DROP, abi.encodeCall(drop.claim, (id, cs)));
@@ -334,8 +337,8 @@ contract RealCryptoTest is V4Base {
     function test_drop_confirmed_mode_flow_real_signatures() public {
         uint256 id = _createDrop(0);
         bytes32 bk = keccak256(pk("bob"));
-        bytes memory bs = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL));
-        drop.bind(id, BOB, bk, CAROL, pk("link1"), bs);
+        bytes memory bs = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL, FEE));
+        drop.bind(id, BOB, bk, CAROL, FEE, pk("link1"), bs);
         bytes memory cs = _signDigest("bob", drop.claimDigest(id, BOB, CAROL));
         vm.expectRevert(abi.encodeWithSelector(PocketDrop.InvalidState.selector, PocketDrop.State.Bound));
         drop.claim(id, cs); // not confirmed by the sender yet
@@ -351,31 +354,31 @@ contract RealCryptoTest is V4Base {
         bytes32 bk = keccak256(pk("bob"));
         bytes memory lpk = pk("link1");
         // signed by another key
-        bytes memory s = _signDigest("bob", drop.bindDigest(id, BOB, bk, CAROL));
+        bytes memory s = _signDigest("bob", drop.bindDigest(id, BOB, bk, CAROL, FEE));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, BOB, bk, CAROL, lpk, s);
+        drop.bind(id, BOB, bk, CAROL, FEE, lpk, s);
         // link key signed a bind for another payTo: the relayer cannot redirect the payout
-        s = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL));
+        s = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL, FEE));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, BOB, bk, mallory, lpk, s);
+        drop.bind(id, BOB, bk, mallory, FEE, lpk, s);
         // link key signed the claim digest instead of the bind digest (domain separation)
         s = _signDigest("link1", drop.claimDigest(id, BOB, CAROL));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, BOB, bk, CAROL, lpk, s);
+        drop.bind(id, BOB, bk, CAROL, FEE, lpk, s);
         // a different link public key
-        s = _signDigest("carol", drop.bindDigest(id, BOB, bk, CAROL));
+        s = _signDigest("carol", drop.bindDigest(id, BOB, bk, CAROL, FEE));
         bytes memory cpk = pk("carol");
         vm.expectRevert(PocketDrop.LinkKeyMismatch.selector);
-        drop.bind(id, BOB, bk, CAROL, cpk, s);
+        drop.bind(id, BOB, bk, CAROL, FEE, cpk, s);
     }
 
     function test_drop_claim_needs_the_recipient_key() public {
         uint256 id = _createDrop(1);
         bytes32 bk = keccak256(pk("bob"));
-        drop.bind(id, BOB, bk, CAROL, pk("link1"), _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL)));
+        drop.bind(id, BOB, bk, CAROL, FEE, pk("link1"), _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL, FEE)));
         bytes memory cs = _signDigest("bob", drop.claimDigest(id, BOB, CAROL));
         bytes memory byLink = _signDigest("link1", drop.claimDigest(id, BOB, CAROL));
-        bytes memory overBind = _signDigest("bob", drop.bindDigest(id, BOB, bk, CAROL));
+        bytes memory overBind = _signDigest("bob", drop.bindDigest(id, BOB, bk, CAROL, FEE));
         bytes memory cut = _trunc(cs, SIG_LEN - 1);
         // the link key (which anyone holding the URL has) cannot claim
         vm.expectRevert(PocketDrop.BadRecipientSignature.selector);
@@ -421,9 +424,44 @@ contract RealCryptoTest is V4Base {
         pool.claim(pid, BOB, CAROL, lpk, ls, rs);
     }
 
+    /*---------------- v5.1 regressions with the real algorithm ----------------*/
+
+    /// @dev F2/F4: a real tagged ERC-1271 approval verifies; the same key's approval of an intent digest is never an
+    ///      intent, and an owner intent signature is never an ERC-1271 approval.
+    function test_v51_real_erc1271_is_domain_separated_from_intents() public {
+        bytes32 h = keccak256("real 1271");
+        bytes memory ok = sign("alice", PqcLib.pqMessage(PqcLib.TAG_ERC1271, pv.erc1271Digest(h)));
+        assertEq(pv.isValidSignature(h, ok), bytes4(0x1626ba7e));
+        assertEq(pv.isValidSignature(h, _signDigest("alice", h)), bytes4(0xffffffff), "untagged refused");
+        bytes32 ig = pv.intentDigest(pv.ACT_SPEND(), 0, DL, abi.encode(CAROL, uint256(1 ether)));
+        bytes memory approval = sign("alice", PqcLib.pqMessage(PqcLib.TAG_ERC1271, pv.erc1271Digest(ig)));
+        assertEq(pv.isValidSignature(ig, approval), bytes4(0x1626ba7e));
+        vm.expectRevert(PocketVault.BadSignature.selector);
+        pv.spend(CAROL, 1 ether, DL, approval);
+        bytes memory intent = _spendSig("alice", CAROL, 1 ether, 0, DL);
+        assertEq(pv.isValidSignature(ig, intent), bytes4(0xffffffff));
+        pv.spend(CAROL, 1 ether, DL, intent);
+    }
+
+    /// @dev F1: the relayer fee goes to the feeTo the link key signed, whoever submits.
+    function test_v51_real_bind_fee_goes_to_signed_feeTo() public {
+        uint256 id = _createDrop(1);
+        bytes32 bk = keccak256(pk("bob"));
+        bytes memory bs = _signDigest("link1", drop.bindDigest(id, BOB, bk, CAROL, FEE));
+        vm.prank(mallory);
+        vm.expectRevert(PocketDrop.BadLinkSignature.selector);
+        drop.bind(id, BOB, bk, CAROL, mallory, pk("link1"), bs);
+        uint256 fb = FEE.balance;
+        uint256 mb = mallory.balance;
+        vm.prank(mallory);
+        drop.bind(id, BOB, bk, CAROL, FEE, pk("link1"), bs);
+        assertGt(FEE.balance, fb);
+        assertEq(mallory.balance, mb);
+    }
+
     /*---------------- helpers ----------------*/
 
-    /// @dev The router sweeps relayer fees to its caller (this test contract).
+    /// @dev Lets this test contract receive QOR (refunds, payouts).
     receive() external payable {}
 
     function _hex(bytes32 d) internal pure returns (string memory) {

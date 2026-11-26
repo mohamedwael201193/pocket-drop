@@ -4,10 +4,11 @@
 // The Foundry mock verifier accepts exactly the (pk, sig, msg) triples a test loads from here (by keccak of the triple).
 //   node script/gen-fixtures.mjs
 import fs from 'node:fs';
+import { encodeAbiParameters } from 'viem';
 import { mldsa } from '@qorechain/pqc';
 import {
   ACCOUNTS, ADDR, POCKETS, POCKET_CFG, ACT, ETH, T0, DL, EXP, NUM_LINKS, params, intentDigest, recoveryDigest, dropBindDigest,
-  dropClaimDigest, poolDigest, unanimousDigest, freezeDigest, counterDigest, pqMessage, rawMessage, tripleHash, hex, unhex, keccak256, toBytes,
+  dropClaimDigest, poolDigest, unanimousDigest, freezeDigest, counterDigest, pqMessage, pqMessageTagged, erc1271Digest, pqGuardDigest, TAG_ERC1271, TAG_PQGUARD, rawMessage, tripleHash, hex, unhex, keccak256, toBytes,
 } from './fixtures-lib.mjs';
 
 const keyNames = ['OA', 'OB', 'G0', 'G1', 'G2', 'G3', 'R0', 'R1', 'R2', 'C0', 'C1', 'C2', 'C3', 'LK0', 'LK1', 'LK2', 'PK', 'X'];
@@ -77,12 +78,24 @@ const vault = makeGroup();
   for (const i of [0, 1, 2]) intent(`spendPR${i}_0`, `R${i}`, ACT.SPEND, 0, params.spend(SINK, ETH / 10n), POCKETS[`PR${i}`]);
   // ERC-1271
   const H1 = keccak256(toBytes('erc1271 test'));
-  vault.add('e1271_OA', 'OA', pqMessage(H1));
-  vault.add('e1271_OB', 'OB', pqMessage(H1));
+  vault.add('e1271_OA', 'OA', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: PA, hash: H1 })));
+  vault.add('e1271_OB', 'OB', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: PA, hash: H1 })));
+  // v5.1 F2 regressions: the old untagged ERC-1271 form, a PA2-bound approval used on PA, and an intent used as ERC-1271
+  vault.add('e1271Untagged_OA', 'OA', pqMessage(H1));
+  vault.add('e1271PA2_OA', 'OA', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: POCKETS.PA2, hash: H1 })));
+  vault.add('e1271Chain_OA', 'OA', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: PA, hash: H1, chainId: 1n })));
+  {
+    const ig = intentDigest({ action: ACT.SPEND, vault: PA, nonce: 0, params: params.spend(SINK, 8n * ETH / 10n) });
+    // an ERC-1271 approval of the intent digest must never pass as the intent itself
+    vault.add('e1271OfIntent_OA', 'OA', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: PA, hash: ig })));
+    vault.add('pqgOfIntent_OA', 'OA', pqMessageTagged(TAG_PQGUARD, pqGuardDigest({ account: ACCOUNTS.OA, digest: ig })));
+  }
   // PqGuard counter: through the Pocket (ERC-1271) and directly through a PoP account
   for (let c = 0; c < 2; c++) {
-    vault.add(`ctrPA_${c}`, 'OA', pqMessage(counterDigest({ account: PA, count: c })));
-    vault.add(`ctrOA_${c}`, 'OA', pqMessage(counterDigest({ account: ACCOUNTS.OA, count: c })));
+    vault.add(`ctrPA_${c}`, 'OA', pqMessageTagged(TAG_ERC1271, erc1271Digest({ vault: PA, hash: counterDigest({ account: PA, count: c }) })));
+    vault.add(`ctrOA_${c}`, 'OA', pqMessageTagged(TAG_PQGUARD, pqGuardDigest({ account: ACCOUNTS.OA, digest: counterDigest({ account: ACCOUNTS.OA, count: c }) })));
+    // v5.1 F2 regression: the v5 untagged counter approval of the plain account
+    vault.add(`ctrOAUntagged_${c}`, 'OA', pqMessage(counterDigest({ account: ACCOUNTS.OA, count: c })));
   }
   // guardian recovery (new owner OB)
   for (let rn = 0; rn < 2; rn++) {
@@ -158,6 +171,9 @@ const drops = makeGroup();
   drops.add('wClaimChain', 'R0', pqMessage(dropClaimDigest({ ...c, chainId: 1n })));
   drops.add('wClaimContract', 'R0', pqMessage(dropClaimDigest({ ...c, drop: ADDR.COUNTER })));
   drops.add('wBindWrongKey', 'X', pqMessage(dropBindDigest(b)));
+  // v5.1 F1 regressions: the v5 bind (no feeTo) and a bind signed for another feeTo
+  drops.add('wBindV2', lkOf(1), pqMessage(keccak256(encodeAbiParameters(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address'].map((type) => ({ type })), ['POCKETDROP_BIND_V2', 9800n, ADDR.DROP, 1n, b.recipient, b.keyHash, b.payTo]))));
+  drops.add('bindFeeSink_1_0', lkOf(1), pqMessage(dropBindDigest({ ...b, feeTo: ADDR.SINK })));
 }
 
 /* ---------------- pool ---------------- */

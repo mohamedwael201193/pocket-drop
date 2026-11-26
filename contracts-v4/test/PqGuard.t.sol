@@ -38,6 +38,16 @@ contract PqGuardTest is V4Base {
         counter.bump(OA, forPa);
     }
 
+    /// @dev v5.1 F2 regression: the v5 untagged plain-account approval is refused; only the tagged, account- and
+    ///      chain-bound form passes.
+    function test_v51_F2_untagged_plain_approval_refused() public {
+        bytes memory old = V("ctrOAUntagged_0");
+        vm.expectRevert(PqGuard.PqApprovalFailed.selector);
+        counter.bump(OA, old);
+        counter.bump(OA, V("ctrOA_0"));
+        assertEq(counter.count(OA), 1);
+    }
+
     function test_undeployed_pocket_and_non_pop_account_fail_closed() public {
         address pa = predict(cfgPA()); // counterfactual: no code, no registered key
         bytes memory s = V("ctrPA_0");

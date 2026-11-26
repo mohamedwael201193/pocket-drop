@@ -11,7 +11,7 @@ export const EXP = T0 + 7 * 86400; // link / pool expiry on fixtures
 export const A = (n) => getAddress('0x' + BigInt(n).toString(16).padStart(40, '0'));
 export const ADDR = {
   IMPL: A(0x1110), FACTORY: A(0xfac70), DROP: A(0xd0d0d0), POOL: A(0xb00100), ROUTER: A(0x70070), COUNTER: A(0xc0de0),
-  SINK: A(0x5151), ZERO: A(0),
+  SINK: A(0x5151), ZERO: A(0), FEE: A(0xfee0),
 };
 export const ACCOUNTS = {
   OA: A(0xa0a01), OB: A(0xa0a02),
@@ -54,6 +54,10 @@ export const POCKETS = Object.fromEntries(Object.entries(POCKET_CFG).map(([k, c]
 
 /** The bytes a QoreX / browser key signs for a digest: "qorechain-msg-v1|qorechain-diana|" + 0x-hex digest. */
 export const pqMessage = (digest, chain = CHAIN_STR) => toHex(toBytes(`qorechain-msg-v1|${chain}|${digest}`));
+/** v5.1 tagged approval of an outside hash (ERC-1271, PqGuard): "qorechain-msg-v1|qorechain-diana|<tag>:0x…". */
+export const TAG_ERC1271 = 'pocket-erc1271-v1';
+export const TAG_PQGUARD = 'pqguard-v1';
+export const pqMessageTagged = (tag, digest, chain = CHAIN_STR) => toHex(toBytes(`qorechain-msg-v1|${chain}|${tag}:${digest}`));
 export const rawMessage = (digest) => toHex(toBytes(digest));
 
 /** Owner intent digest: keccak(abi.encode(action, chainid, vault, nonce, deadline, params)). */
@@ -70,8 +74,15 @@ export const unanimousDigest = (a) => recoveryDigest({ ...a, action: ACT.RECOVER
 export const freezeDigest = ({ vault, nonce, deadline = DL }) =>
   keccak256(enc(['bytes32', 'uint256', 'address', 'uint256', 'uint256'], [ACT.GUARDIAN_FREEZE, CHAIN_ID, vault, BigInt(nonce), BigInt(deadline)]));
 
-export const dropBindDigest = ({ domain = 'POCKETDROP_BIND_V2', chainId = CHAIN_ID, drop = ADDR.DROP, id, recipient, keyHash, payTo }) =>
-  keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address'], [domain, chainId, drop, BigInt(id), recipient, keyHash, payTo]));
+/** v5.1 (F1): the bind digest commits to `feeTo`, the address paid the relayer fee on the first bind. */
+export const dropBindDigest = ({ domain = 'POCKETDROP_BIND_V3', chainId = CHAIN_ID, drop = ADDR.DROP, id, recipient, keyHash, payTo, feeTo = ADDR.FEE }) =>
+  keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'bytes32', 'address', 'address'], [domain, chainId, drop, BigInt(id), recipient, keyHash, payTo, feeTo]));
+/** v5.1 (F2/F4): ERC-1271 approval digest, bound to the Pocket and the chain. */
+export const erc1271Digest = ({ vault, hash, chainId = CHAIN_ID }) =>
+  keccak256(enc(['bytes32', 'uint256', 'address', 'bytes32'], [tag('POCKET_ERC1271_V1'), chainId, vault, hash]));
+/** v5.1 (F2): PqGuard plain-account approval digest. */
+export const pqGuardDigest = ({ account, digest, chainId = CHAIN_ID }) =>
+  keccak256(enc(['bytes32', 'uint256', 'address', 'bytes32'], [tag('PQGUARD_APPROVAL_V1'), chainId, account, digest]));
 export const dropClaimDigest = ({ domain = 'POCKETDROP_CLAIM_V2', chainId = CHAIN_ID, drop = ADDR.DROP, id, recipient, payTo }) =>
   keccak256(enc(['string', 'uint256', 'address', 'uint256', 'address', 'address'], [domain, chainId, drop, BigInt(id), recipient, payTo]));
 export const poolDigest = ({ domain, pool = ADDR.POOL, id, recipient, payTo }) =>

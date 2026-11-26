@@ -45,6 +45,8 @@ abstract contract V4Base is Fx {
     address internal constant ROUTER = address(uint160(0x70070));
     address internal constant COUNTER = address(uint160(0xc0de0));
     address internal constant SINK = address(uint160(0x5151));
+    /// @dev v5.1: the address every fixture bind pays its relayer fee to (signed into the bind digest).
+    address internal constant FEE = address(uint160(0xfee0));
     address internal constant KEYS_ADDR = address(uint160(0x0a02));
     uint256 internal constant DL = 1_900_000_000;
     uint256 internal constant EXP = 1_800_000_000 + 7 days;

@@ -27,6 +27,7 @@ contract PocketFlowsTest is V4Base {
                 r(i),
                 keccak256(_pk(string.concat("R", vm.toString(i)))),
                 predict(cfgPR(i)),
+                FEE,
                 _pk(string.concat("LK", vm.toString(id % 3))),
                 D(string.concat("bind_", vm.toString(id), "_", vm.toString(i)))
             )
@@ -68,7 +69,7 @@ contract PocketFlowsTest is V4Base {
     function test_confirmDrop_is_a_sender_intent_and_cancelDrop_refunds_the_pocket() public {
         v.createDrop(DROP, keccak256(_lk1()), 0, uint64(EXP), 0.2 ether, 0.05 ether, 1.25 ether, DL, D("cdConf_1_0"));
         bytes memory bindData = _bindCall(1, 0);
-        vm.prank(relayer); // an EOA caller: the router sweeps the relayer fee to it
+        vm.prank(relayer); // any caller; the relayer fee goes to the signed feeTo
         router.relay(DROP, bindData);
         // wrong recipient key hash: the sender did not check THIS key
         vm.expectRevert(PocketDrop.RecipientChanged.selector);
@@ -132,12 +133,14 @@ contract PocketFlowsTest is V4Base {
                 v.createDrop, (DROP, keccak256(_lk1()), 0, uint64(EXP), 0.2 ether, 0.05 ether, 1.25 ether, DL, D("cdConf_1_0"))
             )
         );
-        // 2. the recipient's browser binds (link-key signature), relayer collects the fee through the router sweep
+        // 2. the recipient's browser binds (link-key signature); v5.1: the fee goes to the feeTo the link key signed
         bytes memory bindData = _bindCall(1, 0);
+        uint256 fb = FEE.balance;
         uint256 rb = relayer.balance;
         vm.prank(relayer);
         router.relay(DROP, bindData);
-        assertEq(relayer.balance, rb + 0.05 ether, "relayerFee reaches the relayer, not the router");
+        assertEq(FEE.balance, fb + 0.05 ether, "relayerFee reaches the signed feeTo");
+        assertEq(relayer.balance, rb, "the submitter is not paid by caller identity");
         assertEq(address(router).balance, 0);
         assertEq(r(0).balance, 0.2 ether, "drip landed in the recipient account (pays its PQ registration)");
         // 3. the sender confirms in one tap (intent), no second device

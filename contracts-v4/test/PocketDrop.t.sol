@@ -63,7 +63,7 @@ contract PocketDropTest is V4Base {
         bytes memory lpk = linkPk(id);
         bytes32 rh = rHash(i);
         vm.prank(relayer);
-        drop.bind(id, r(i), rh, pt, lpk, s);
+        drop.bind(id, r(i), rh, pt, FEE, lpk, s);
     }
 
     function confirm(uint256 id, uint256 i) internal {
@@ -159,7 +159,7 @@ contract PocketDropTest is V4Base {
 
     function test_bind_pays_drip_to_pocket_and_fee_to_relayer() public {
         uint256 id = createC();
-        uint256 r0 = relayer.balance;
+        uint256 r0 = FEE.balance;
         bind(id, 0);
         PocketDrop.Link memory l = drop.getLink(id);
         assertEq(uint8(l.state), uint8(PocketDrop.State.Bound));
@@ -169,8 +169,49 @@ contract PocketDropTest is V4Base {
         assertEq(l.bindDeadline, block.timestamp + BIND_TIMEOUT);
         assertEq(r(0).balance, 0.2 ether, "drip lands in the recipient ACCOUNT (gas money for its PQ registration)");
         assertEq(payTo(0).balance, 0);
-        assertEq(relayer.balance, r0 + 0.05 ether);
+        assertEq(FEE.balance, r0 + 0.05 ether, "v5.1: the fee goes to the signed feeTo");
         assertEq(drop.unpaidOf(id), 1 ether);
+    }
+
+    /// @dev v5.1 F1 regression: a front-runner who copies a pending first bind cannot take the relayer fee. The fee
+    ///      goes to the `feeTo` the link key signed, whoever submits; changing `feeTo` breaks the link signature.
+    function test_v51_F1_frontrunner_cannot_take_the_relayer_fee() public {
+        uint256 id = createC();
+        bytes memory s = D("bind_1_0");
+        bytes memory lpk = linkPk(id);
+        address pt = payTo(0);
+        bytes32 rh = rHash(0);
+        // the thief swaps feeTo to itself: the link signature no longer matches
+        vm.prank(mallory);
+        vm.expectRevert(PocketDrop.BadLinkSignature.selector);
+        drop.bind(id, r(0), rh, pt, mallory, lpk, s);
+        // a link-key signature over another feeTo is not valid for FEE either
+        vm.prank(mallory);
+        vm.expectRevert(PocketDrop.BadLinkSignature.selector);
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("bindFeeSink_1_0"));
+        // the v5 bind form (no feeTo in the digest) is refused
+        vm.prank(mallory);
+        vm.expectRevert(PocketDrop.BadLinkSignature.selector);
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("wBindV2"));
+        // the thief submits the exact copy: the bind lands, but the fee goes to FEE, not to the thief
+        uint256 mb = mallory.balance;
+        uint256 fb = FEE.balance;
+        vm.prank(mallory);
+        drop.bind(id, r(0), rh, pt, FEE, lpk, s);
+        assertEq(mallory.balance, mb, "front-runner gains nothing");
+        assertEq(FEE.balance, fb + 0.05 ether);
+    }
+
+    function test_v51_F1_feeTo_must_be_a_real_address() public {
+        uint256 id = createC();
+        bytes memory s = D("bind_1_0");
+        bytes memory lpk = linkPk(id);
+        address pt = payTo(0);
+        bytes32 rh = rHash(0);
+        vm.expectRevert(PocketDrop.BadFeeTo.selector);
+        drop.bind(id, r(0), rh, pt, address(0), lpk, s);
+        vm.expectRevert(PocketDrop.BadFeeTo.selector);
+        drop.bind(id, r(0), rh, pt, address(drop), lpk, s);
     }
 
     function test_bind_rejects() public {
@@ -179,7 +220,7 @@ contract PocketDropTest is V4Base {
         address pt1 = payTo(0);
         bytes32 rh1 = rHash(0);
         vm.expectRevert(PocketDrop.LinkNotFound.selector);
-        drop.bind(1, r(0), rh1, pt1, lpk1, s1);
+        drop.bind(1, r(0), rh1, pt1, FEE, lpk1, s1);
         uint256 id = createC();
         address pt = payTo(0);
         bytes32 rh = rHash(0);
@@ -188,34 +229,34 @@ contract PocketDropTest is V4Base {
         bytes memory lpk = linkPk(id);
         bytes memory s = D("bind_1_0");
         vm.expectRevert(PocketDrop.BadRecipient.selector);
-        drop.bind(id, address(0), rh, pt, lpk, s);
+        drop.bind(id, address(0), rh, pt, FEE, lpk, s);
         vm.expectRevert(PocketDrop.BadRecipient.selector);
-        drop.bind(id, address(drop), rh, pt, lpk, s);
+        drop.bind(id, address(drop), rh, pt, FEE, lpk, s);
         vm.expectRevert(PocketDrop.BadRecipient.selector);
-        drop.bind(id, r(0), rh, address(0), lpk, s);
+        drop.bind(id, r(0), rh, address(0), FEE, lpk, s);
         vm.expectRevert(PocketDrop.BadRecipient.selector);
-        drop.bind(id, r(0), rh, address(drop), lpk, s);
+        drop.bind(id, r(0), rh, address(drop), FEE, lpk, s);
         vm.expectRevert(PocketDrop.ZeroRecipientKey.selector);
-        drop.bind(id, r(0), bytes32(0), pt, lpk, s);
+        drop.bind(id, r(0), bytes32(0), pt, FEE, lpk, s);
         vm.expectRevert(PocketDrop.LinkKeyMismatch.selector);
-        drop.bind(id, r(0), rh, pt, _pk("LK0"), s);
+        drop.bind(id, r(0), rh, pt, FEE, _pk("LK0"), s);
         // swapped recipient / payTo after the link key signed (the mempool-thief attack)
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(1), rhB, pt, lpk, s);
+        drop.bind(id, r(1), rhB, pt, FEE, lpk, s);
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, paAddr, lpk, s);
+        drop.bind(id, r(0), rh, paAddr, FEE, lpk, s);
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("wBindWrongKey"));
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("wBindWrongKey"));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("wBindDomain"));
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("wBindDomain"));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("wBindChain"));
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("wBindChain"));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("wBindContract"));
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("wBindContract"));
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("bindRaw_1_0")); // real sig, no QoreX prefix
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("bindRaw_1_0")); // real sig, no QoreX prefix
         vm.expectRevert(PocketDrop.BadLinkSignature.selector);
-        drop.bind(id, r(0), rh, pt, lpk, D("claim_1_0")); // a claim sig is not a bind sig
+        drop.bind(id, r(0), rh, pt, FEE, lpk, D("claim_1_0")); // a claim sig is not a bind sig
     }
 
     function test_bind_state_expiry_and_rebind() public {
@@ -227,12 +268,12 @@ contract PocketDropTest is V4Base {
         bytes32 rh1 = rHash(1);
         // still exclusive
         vm.expectRevert(abi.encodeWithSelector(PocketDrop.InvalidState.selector, PocketDrop.State.Bound));
-        drop.bind(id, r(1), rh1, pt1, lpk, s);
+        drop.bind(id, r(1), rh1, pt1, FEE, lpk, s);
         vm.warp(block.timestamp + BIND_TIMEOUT + 1);
-        uint256 rb = relayer.balance;
-        drop.bind(id, r(1), rh1, pt1, lpk, s);
+        uint256 rb = FEE.balance;
+        drop.bind(id, r(1), rh1, pt1, FEE, lpk, s);
         assertEq(drop.getLink(id).recipient, r(1));
-        assertEq(relayer.balance, rb, "no second drip or fee");
+        assertEq(FEE.balance, rb, "no second drip or fee");
         assertEq(r(1).balance, 0);
         // expiry
         vm.warp(EXP);
@@ -241,7 +282,7 @@ contract PocketDropTest is V4Base {
         bytes32 rh0 = rHash(0);
         vm.warp(block.timestamp + BIND_TIMEOUT + 1);
         vm.expectRevert(PocketDrop.Expired.selector);
-        drop.bind(id, r(0), rh0, pt0, lpk, s0);
+        drop.bind(id, r(0), rh0, pt0, FEE, lpk, s0);
     }
 
     /*---------------- confirm ----------------*/
@@ -383,7 +424,7 @@ contract PocketDropTest is V4Base {
         uint256 id = createO();
         bytes memory lpk = linkPk(id);
         bytes memory bs = D("bindPlain_1_0");
-        drop.bind(id, r(0), rHash(0), r(0), lpk, bs);
+        drop.bind(id, r(0), rHash(0), r(0), FEE, lpk, bs);
         drop.claim(id, D("claimPlain_1_0"));
         assertEq(r(0).balance, 1.2 ether);
     }
@@ -501,15 +542,18 @@ contract PocketDropTest is V4Base {
     /*---------------- views ----------------*/
 
     function test_digests_commit_to_everything() public view {
-        bytes32 b = drop.bindDigest(1, r(0), rHash(0), payTo(0));
+        bytes32 b = drop.bindDigest(1, r(0), rHash(0), payTo(0), FEE);
         assertEq(
             b,
-            keccak256(abi.encode("POCKETDROP_BIND_V2", block.chainid, address(drop), uint256(1), r(0), rHash(0), payTo(0)))
+            keccak256(
+                abi.encode("POCKETDROP_BIND_V3", block.chainid, address(drop), uint256(1), r(0), rHash(0), payTo(0), FEE)
+            )
         );
-        assertTrue(b != drop.bindDigest(2, r(0), rHash(0), payTo(0)));
-        assertTrue(b != drop.bindDigest(1, r(1), rHash(0), payTo(0)));
-        assertTrue(b != drop.bindDigest(1, r(0), rHash(1), payTo(0)));
-        assertTrue(b != drop.bindDigest(1, r(0), rHash(0), payTo(1)));
+        assertTrue(b != drop.bindDigest(1, r(0), rHash(0), payTo(0), SINK), "v5.1 F1: feeTo is signed");
+        assertTrue(b != drop.bindDigest(2, r(0), rHash(0), payTo(0), FEE));
+        assertTrue(b != drop.bindDigest(1, r(1), rHash(0), payTo(0), FEE));
+        assertTrue(b != drop.bindDigest(1, r(0), rHash(1), payTo(0), FEE));
+        assertTrue(b != drop.bindDigest(1, r(0), rHash(0), payTo(1), FEE));
         bytes32 cl = drop.claimDigest(1, r(0), payTo(0));
         assertEq(
             cl, keccak256(abi.encode("POCKETDROP_CLAIM_V2", block.chainid, address(drop), uint256(1), r(0), payTo(0)))
