@@ -79,3 +79,15 @@ describe('checkTx on v5.2 finalizeRecovery (signed authorization)', () => {
     expect(verdict(r)).not.toBe('verified');
   }, 60_000);
 });
+
+// Valid signature, reverted transaction (v5 prod, link 11, TEAM-RUN 26 Nov 2026): the interceptor bound the link with its
+// own key and signed a claim with it; the contract refused the claim. The verdict must not read as an accepted transaction.
+describe('checkTx on a reverted transaction with a valid signature', () => {
+  it('the intercepted-link claim: signature valid, transaction reverted, verdict reverted', async () => {
+    const r = await checkTx('0xe83979b1c34beac28df888c20bb732b9f58b897d448c46d0dd091f318bf439a9', await withQoresign(liveDeps));
+    expect(r.tx.ok).toBe(false);
+    expect(r.fn).toBe('claim');
+    expect(r.checks[0].valid).toBe(true);
+    expect(verdict(r)).toBe('reverted');
+  }, 60_000);
+});

@@ -73,6 +73,12 @@ describe('checkTx', () => {
     expect(r.checks[0].tamperedWhat).toMatch(/amount \+ 1 wei; next nonce \(replay\) rejected/);
     expect(verdict(r)).toBe('verified');
   });
+  it('a reverted transaction with valid signatures is reported as reverted, never as verified', async () => {
+    const tx = { ...spendTx(4n), ok: false };
+    const r = await checkTx(tx.hash, deps(tx));
+    expect(r.checks[0].valid).toBe(true);
+    expect(verdict(r)).toBe('reverted');
+  });
   it('the QoreSign cross-check builds the same signed text and also verifies', async () => {
     const tx = spendTx(4n);
     const r = await checkTx(tx.hash, await withQoresign(deps(tx)));

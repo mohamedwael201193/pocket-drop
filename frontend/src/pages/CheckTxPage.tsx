@@ -60,8 +60,9 @@ function ReportView({ r }: { r: Report }) {
   const v = verdict(r);
   return (
     <div className="space-y-3" data-testid="check-report">
-      <Notice tone={v === 'verified' || v === 'refused' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
+      <Notice tone={v === 'verified' || v === 'refused' || v === 'reverted' ? 'ok' : v === 'failed' ? 'error' : 'info'} testId="check-verdict">
         {v === 'verified' && <>All {r.checks.length} post-quantum signature{r.checks.length > 1 ? 's' : ''} in this transaction verified in your browser, with keys read from the chain. A changed intent fails with the same signature.</>}
+        {v === 'reverted' && <>Refused on chain: this transaction reverted at block {r.tx.height.toString()}, so nothing it asked for happened. Its post-quantum signature{r.checks.length > 1 ? 's are' : ' is'} valid for the key that signed it: the contract refused the request itself. The chain does not keep the revert reason.</>}
         {v === 'failed' && <>At least one signature did not check out in this browser. Details below.</>}
         {v === 'refused' && <>Refused attempt: this transaction reverted, and the signature it carried is not a valid ML-DSA-87 signature from the key on chain. The contract refused it for the reason shown below.</>}
         {v === 'none' && <>{r.note ?? 'Nothing to check.'}</>}
@@ -71,11 +72,11 @@ function ReportView({ r }: { r: Report }) {
         <dl className="mt-2 divide-y divide-zinc-100">
           <Row k="Hash"><TxLink hash={r.tx.hash} label={`${r.tx.hash.slice(0, 12)}…${r.tx.hash.slice(-6)}`} /></Row>
           <Row k="Result">{r.tx.ok ? 'succeeded' : 'failed (reverted)'} at block {r.tx.height.toString()}</Row>
-          <Row k="Relayer signature"><span data-testid="check-lane">{r.tx.lane === 'hybrid'
+          <Row k={r.tx.lane === 'hybrid' || evmSender(r.tx.relayer, RELAYER_ADDRESS) === 'relayer' ? 'Relayer signature' : 'Sent by'}><span data-testid="check-lane">{r.tx.lane === 'hybrid'
             ? <>Hybrid: secp256k1 + ML-DSA-87 on a native cross-VM call. The chain's own check: {r.tx.relayerHybridVerified ? <b>pqc_hybrid_verify = verified</b> : 'no pqc_hybrid_verify event'}.</>
             : evmSender(r.tx.relayer, RELAYER_ADDRESS) === 'relayer'
               ? <>EVM transaction (secp256k1), sent inside the relayer&apos;s scoped window. The relayer only pays gas; the signatures below are what move funds.</>
-              : <>EVM transaction (secp256k1), sent by <Mono className="text-xs">{r.tx.relayer ? `${r.tx.relayer.slice(0, 10)}…${r.tx.relayer.slice(-4)}` : 'its sender'}</Mono> from its own scoped EVM window, not by the Pocket Drop relayer. The sender only pays gas; the signatures below are what move funds.</>}</span></Row>
+              : <>EVM transaction (secp256k1), sent by <Mono className="text-xs">{r.tx.relayer ? `${r.tx.relayer.slice(0, 10)}…${r.tx.relayer.slice(-4)}` : 'its sender'}</Mono> with its own secp256k1 key, not by the Pocket Drop relayer. The sender only pays gas; the signatures below are what move funds.</>}</span></Row>
           {r.env && <Row k="Instance">{envLabel(r.env)}{isProdLike(r.env) ? '' : ', 60 s timers'}</Row>}
           <Row k="Call"><Mono className="text-xs">router.{r.action}{r.fn ? ` → ${r.fn}` : ''}</Mono>{r.target && <> on <a className="font-mono text-xs underline" href={addrUrl(r.target)} target="_blank" rel="noopener noreferrer">{r.target.slice(0, 10)}…</a></>}</Row>
           {r.tx.memo && <Row k="Memo"><Mono className="text-xs">{r.tx.memo}</Mono></Row>}

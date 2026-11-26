@@ -247,10 +247,12 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
 }
 
 /** Overall verdict for the page header. */
-export function verdict(r: Report): 'verified' | 'failed' | 'refused' | 'none' {
+export function verdict(r: Report): 'verified' | 'reverted' | 'failed' | 'refused' | 'none' {
   if (!r.checks.length) return 'none';
   const ok = r.checks.every((c) => c.valid && !c.tamperedValid && c.pinned !== false && (c.qoresign === null || (c.qoresign.sameText && c.qoresign.valid)));
-  if (ok) return 'verified';
+  // Valid signatures on a reverted transaction: the signer was real, but the contract refused the request itself
+  // (for example an intercepted link already bound to another key, or a frozen Pocket). Nothing it asked for happened.
+  if (ok) return r.tx.ok ? 'verified' : 'reverted';
   // A reverted transaction whose signature does not verify is an attempt the contract refused, for the reason shown here.
   return r.tx.ok ? 'failed' : 'refused';
 }
