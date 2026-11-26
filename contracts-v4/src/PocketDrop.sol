@@ -131,7 +131,7 @@ contract PocketDrop is Payout, IPocketDropSender {
     ) {
         if (
             minEscrow == 0 || maxAmount < minEscrow || maxAmount > type(uint96).max || maxDrip > type(uint96).max
-                || dailyDripCap < maxDrip || bindTimeout == 0 || bindTimeout > type(uint32).max || maxExpiry == 0
+                || dailyDripCap < maxDrip || dailyDripCap > type(uint128).max || bindTimeout == 0 || bindTimeout > type(uint32).max || maxExpiry == 0
                 || maxExpiry > type(uint32).max
         ) revert InvalidConfig();
         MIN_ESCROW = minEscrow;
@@ -370,11 +370,15 @@ contract PocketDrop is Payout, IPocketDropSender {
         if (drip > MAX_DRIP) revert DripTooHigh();
         if (expiry <= block.timestamp || expiry > block.timestamp + MAX_EXPIRY) revert InvalidExpiry();
 
-        // Subtractive headroom check before the addition: `spent + drip <= DAILY_DRIP_CAP` is proven before it is
-        // computed, so the sum cannot overflow (Solidity 0.8.28 checked math is a second guard).
+        // Explicit bounds (v5.2): `drip` is a uint96 and at most MAX_DRIP (checked above); MAX_DRIP <= DAILY_DRIP_CAP
+        // <= type(uint128).max (constructor); `spent` never exceeds DAILY_DRIP_CAP (it only grows through this
+        // function, below). The headroom is computed by subtraction first, so the new total is known to be within the
+        // cap before it is computed, and it cannot overflow (checked arithmetic is a second guard).
         uint256 day = block.timestamp / 1 days;
         uint256 spent = _dripSpent[msg.sender][day];
-        if (spent > DAILY_DRIP_CAP || uint256(drip) > DAILY_DRIP_CAP - spent) revert DailyDripCapExceeded();
+        if (spent > DAILY_DRIP_CAP) revert DailyDripCapExceeded();
+        uint256 headroom = DAILY_DRIP_CAP - spent;
+        if (uint256(drip) > headroom) revert DailyDripCapExceeded();
         uint256 used = spent + uint256(drip);
         _dripSpent[msg.sender][day] = used;
     }

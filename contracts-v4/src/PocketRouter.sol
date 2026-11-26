@@ -16,6 +16,7 @@ contract PocketRouter {
     address public immutable pool;
 
     error NotAllowed(address target);
+    error ZeroAddress();
 
     event Relayed(address indexed target, bool lazyDeployed);
 
@@ -23,6 +24,7 @@ contract PocketRouter {
     /// @param drop_ The PocketDrop instance.
     /// @param pool_ The DropPool instance.
     constructor(IPocketFactory factory_, address drop_, address pool_) {
+        if (address(factory_) == address(0) || drop_ == address(0) || pool_ == address(0)) revert ZeroAddress();
         factory = factory_;
         drop = drop_;
         pool = pool_;
