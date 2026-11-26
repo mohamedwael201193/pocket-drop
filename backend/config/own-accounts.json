@@ -389,6 +389,20 @@
     "v52-smoke-lab-pocket-D72e8b": "0xD72e8b33F4886790DD1060a3da2DcD5092391bB8",
     "v52-self-relay-sender-pocket-6770b0": "0x6770b04929d801Abafca2e01129E9c1a4827d732",
     "v52-self-relay-recipient-0F6E0F": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
-    "v52-self-relay-recipient-pocket-7c4398": "0x7c4398D66F078b133a91Af5E4053ae668b228334"
+    "v52-self-relay-recipient-pocket-7c4398": "0x7c4398D66F078b133a91Af5E4053ae668b228334",
+    "v52-relay-smoke-persona5-pocket-b76B33": "0xb76B339e6b211430f66eA4336570ac36C8E8d067",
+    "v52-e2e-a-sender-pocket-e9B4D5": "0xe9B4D54cf684f5B46E7Cc5Ece9eFC402Be853AA6",
+    "v52-e2e-a-sender-key-C2a67B": "0xC2a67BF1E5f7dBa42434546e5291D63Fc8387649",
+    "v52-e2e-a-recipient-pocket-104C4A": "0x104C4Ab3Ee85cC63E3294e8D25ab34F9E6fB9fbF",
+    "v52-e2e-b-sender-pocket-82F8f1": "0x82F8f1dCa18f17372FD2804B831b3F806BcD7Ab7",
+    "v52-e2e-b-sender-key-61c70E": "0x61c70E59b8b6683C5C2A29753F16f8d7B651b8A0",
+    "v52-e2e-b-recipient-pocket-849C34": "0x849C346bED99Ac16a8e1d8fF7c7E3Ad95bC734EF",
+    "v52-e2e-c-sender-pocket-bA209d": "0xbA209dD225Fc8F08D82767dF5f5c1721733bF1b8",
+    "v52-e2e-c-sender-key-158363": "0x158363259f52A58949D1C93664e7343907aB99D9",
+    "v52-e2e-c-claimer1-key-787cD1": "0x787cD1c92407e6720e55B5B5Cd754234aE3564B3",
+    "v52-e2e-c-claimer2-key-87986C": "0x87986C9298045Cf758512FC91477F3B43Db21d40",
+    "v52-e2e-d-owner-pocket-a8B41f": "0xa8B41faCA941667E9D40B8c0f4f407c4666Aa0b0",
+    "v52-e2e-d-owner-key-825BE5": "0x825BE5e0D3471dE4d21Af6dC49A580811359A7E1",
+    "v52-e2e-e-new-owner-FC9aF4": "0xFC9aF4605fE5c0709D6a1ac86C730D10C5943b25"
   }
 }
