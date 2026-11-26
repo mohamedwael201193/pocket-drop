@@ -40,3 +40,21 @@ describe('deployments summary', () => {
     expect(h.relayer.balance).toBe('10');
   });
 });
+
+describe('last warm-up', () => {
+  it('reads the latest completed warm-stats run, caches it, and reports errors without guessing', async () => {
+    const { lastWarmUp, resetWarmUpCache } = await import('../src/warmup.js');
+    resetWarmUpCache();
+    const ok = vi.fn(async () => new Response(JSON.stringify({ workflow_runs: [{ updated_at: '2026-11-26T04:30:00Z', conclusion: 'success', html_url: 'https://github.com/x/runs/1' }] }), { status: 200 })) as any;
+    let t = 0;
+    const a = await lastWarmUp(ok, () => t);
+    expect(a).toMatchObject({ lastRunAt: '2026-11-26T04:30:00Z', conclusion: 'success' });
+    t = 60_000; await lastWarmUp(ok, () => t);
+    expect(ok).toHaveBeenCalledTimes(1);
+    resetWarmUpCache();
+    const bad = vi.fn(async () => new Response('{}', { status: 403 })) as any;
+    const b = await lastWarmUp(bad, () => 0);
+    expect(b.lastRunAt).toBeNull();
+    expect(b.error).toBe('github 403');
+  });
+});

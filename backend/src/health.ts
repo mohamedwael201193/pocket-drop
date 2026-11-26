@@ -5,6 +5,7 @@ import { evmToQor } from './relayer.js';
 import { pqSignerKind } from './hybridRelayer.js';
 import { refillFunder, refillStatus } from './refill.js';
 import { deploymentsSummary } from './deployments.js';
+import { lastWarmUp } from './warmup.js';
 
 /** Sponsor wallet (/api/sponsor pays new accounts their key-registration fee), RECORDED in HANDOFF.md. Shown on /judges. */
 export const SPONSOR_ADDRESS = '0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221' as const;
@@ -77,7 +78,7 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };
   const address = privateKeyToAccount(cfg.relayerKey).address;
   const qor = evmToQor(address);
-  const [bal, head, win, pqs, rf, sp] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f), refillStatus(cfg.rest, refillFunder(env), qor, Date.now(), f), pub.getBalance({ address: SPONSOR_ADDRESS })]);
+  const [bal, head, win, pqs, rf, sp, wu] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f), refillStatus(cfg.rest, refillFunder(env), qor, Date.now(), f), pub.getBalance({ address: SPONSOR_ADDRESS }), lastWarmUp(f)]);
   const balance = bal.status === 'fulfilled' ? bal.value : null;
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
   const threshold = lowBalanceThresholdWei(env);
@@ -105,6 +106,7 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
       address: SPONSOR_ADDRESS, cosmosAddress: SPONSOR_COSMOS,
       balanceWei: sp.status === 'fulfilled' ? sp.value.toString() : null, balance: sp.status === 'fulfilled' ? formatEther(sp.value) : null, unit: 'QOR',
     },
+    warmUp: wu.status === 'fulfilled' ? wu.value : null,
     window,
     relay: {
       mode: cfg.relayMode,
