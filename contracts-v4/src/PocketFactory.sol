@@ -11,6 +11,7 @@ contract PocketFactory {
     /// @notice The PocketVault implementation every clone delegates to (its delays are the instance's delays).
     address public immutable implementation;
 
+    /// @notice Whether an address was deployed by this factory.
     mapping(address => bool) public isPocket;
 
     event PocketDeployed(address indexed pocket, address indexed owner, bytes32 salt);
@@ -18,12 +19,19 @@ contract PocketFactory {
     error NoImplementation();
     error AlreadyDeployed();
 
+    /// @param implementation_ The PocketVault implementation (must have code).
     constructor(address implementation_) {
         if (implementation_.code.length == 0) revert NoImplementation();
         implementation = implementation_;
     }
 
     /// @notice The CREATE2 salt for a config.
+    /// @param owner Pocket owner (needs a registered, proven ML-DSA-87 key).
+    /// @param guardians Guardian set (0, or 2..5).
+    /// @param threshold Guardian threshold.
+    /// @param dailyLimit Daily allowance in wei.
+    /// @param userSalt User salt.
+    /// @return The salt (commits to the whole config).
     function saltOf(address owner, address[] calldata guardians, uint8 threshold, uint256 dailyLimit, bytes32 userSalt)
         public
         pure
@@ -33,6 +41,12 @@ contract PocketFactory {
     }
 
     /// @notice Address the Pocket for this config has (or will have).
+    /// @param owner Pocket owner (needs a registered, proven ML-DSA-87 key).
+    /// @param guardians Guardian set (0, or 2..5).
+    /// @param threshold Guardian threshold.
+    /// @param dailyLimit Daily allowance in wei.
+    /// @param userSalt User salt.
+    /// @return The CREATE2 address.
     function predict(address owner, address[] calldata guardians, uint8 threshold, uint256 dailyLimit, bytes32 userSalt)
         external
         view
@@ -49,6 +63,12 @@ contract PocketFactory {
 
     /// @notice Deploy (and initialize) the Pocket for this config. Anyone may call; the owner's registered key is read
     ///         and pinned by `initialize`.
+    /// @param owner Pocket owner (needs a registered, proven ML-DSA-87 key).
+    /// @param guardians Guardian set (0, or 2..5).
+    /// @param threshold Guardian threshold.
+    /// @param dailyLimit Daily allowance in wei.
+    /// @param userSalt User salt.
+    /// @return pocket The new Pocket.
     function deploy(address owner, address[] calldata guardians, uint8 threshold, uint256 dailyLimit, bytes32 userSalt)
         external
         returns (address pocket)

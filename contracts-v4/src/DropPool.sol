@@ -30,6 +30,7 @@ contract DropPool is Payout, IDropPoolHost {
     uint256 public immutable MAX_SLOTS;
     uint256 public immutable MAX_EXPIRY;
 
+    /// @notice Number of pools created (ids start at 1).
     uint256 public poolCount;
     mapping(uint256 => Pool) internal _pools;
     /// @dev poolId => recipient account => has claimed.

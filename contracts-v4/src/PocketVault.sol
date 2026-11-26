@@ -101,8 +101,11 @@ contract PocketVault is IERC1271 {
                                 STORAGE
     //////////////////////////////////////////////////////////////*/
 
+    /// @notice Factory that initialized this Pocket (0xdead on the implementation).
     address public factory;
+    /// @notice Owner account; its ML-DSA-87 key signs every owner intent.
     address public owner;
+    /// @notice keccak256 of the owner key, pinned at init and after recovery.
     bytes32 public ownerKeyHash;
     /// @notice Next owner-intent nonce.
     uint256 public nonce;
@@ -111,25 +114,37 @@ contract PocketVault is IERC1271 {
     /// @notice Bumped by every finalized recovery; queued spends from an older epoch are dead.
     uint256 public epoch;
 
+    /// @notice Daily allowance in wei (spends above it are queued for TIMELOCK).
     uint256 public dailyLimit;
+    /// @notice UTC day number of `spentToday`.
     uint256 public spentDay;
+    /// @notice Wei spent on `spentDay`.
     uint256 public spentToday;
 
     address[] internal _guardians;
+    /// @notice Guardian threshold (0 with no guardians).
     uint8 public threshold;
 
+    /// @notice Number of queued spends (ids start at 1).
     uint256 public queueCount;
     mapping(uint256 => Queued) internal _queue;
 
+    /// @notice Queued daily limit raise.
     uint256 public pendingLimit;
+    /// @notice When the queued limit raise can apply (0 = none).
     uint64 public pendingLimitAt;
 
     address[] internal _pendingGuardians;
+    /// @notice Threshold of the queued guardian set.
     uint8 public pendingThreshold;
+    /// @notice When the queued guardian set can apply (0 = none).
     uint64 public pendingGuardiansAt;
 
+    /// @notice Proposed owner of the pending threshold recovery.
     address public recoveryOwner;
+    /// @notice Approved key hash of the pending threshold recovery.
     bytes32 public recoveryKeyHash;
+    /// @notice Threshold recovery can be finalized from this time on (0 = none pending).
     uint64 public recoveryAt;
 
     /// @notice Next guardian-freeze nonce.
@@ -139,7 +154,9 @@ contract PocketVault is IERC1271 {
     /// @notice Freezes in a row by the current guardian set (reset by a guardian change or a long quiet period).
     uint8 public freezeStreak;
 
+    /// @notice Proposed owner of the pending unanimous recovery.
     address public uRecoveryOwner;
+    /// @notice Approved key hash of the pending unanimous recovery.
     bytes32 public uRecoveryKeyHash;
     /// @notice Unanimous recovery can be finalized from this time on (0 = none pending).
     uint64 public uRecoveryAt;
