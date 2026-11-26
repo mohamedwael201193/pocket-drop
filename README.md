@@ -9,6 +9,19 @@ Send QOR to a friend who has no wallet. They open a link, and their browser crea
 - Video: _link added at submission_
 - Track: Post-Quantum dApp. License: MIT.
 
+## For jurors: the six v5.2 addresses
+
+The current system is v5.2 production on Diana (RECORDED in [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json) under `v5_2`; code and wiring re-checked LIVE by `node frontend/scripts/reverify.mjs`). The app and the API use only these for new Pockets, drops and pools. Lab instances and earlier generations: [Contracts on Diana](#contracts-on-diana) and [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md).
+
+| Contract | Address | Role |
+|---|---|---|
+| PocketRouter | [`0xe0a2679ae760a843880489c8cf8da15c00559a88`](https://explore.qore.network/address/0xe0a2679ae760a843880489c8cf8da15c00559a88) | relays every signed intent; deploys a Pocket on first use |
+| PocketFactory | [`0x8aa57c26fb2ce4389c7732ab7876265dbb9e5278`](https://explore.qore.network/address/0x8aa57c26fb2ce4389c7732ab7876265dbb9e5278) | creates Pockets (clones of the vault) |
+| PocketVault (implementation) | [`0x02375366fc06356e0020c93fbe9d5d8fcbeb4f16`](https://explore.qore.network/address/0x02375366fc06356e0020c93fbe9d5d8fcbeb4f16) | the Pocket logic every clone runs |
+| PocketDrop | [`0xf0103854937897d6d117f947046d53fbc66a2639`](https://explore.qore.network/address/0xf0103854937897d6d117f947046d53fbc66a2639) | send by link |
+| DropPool | [`0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9`](https://explore.qore.network/address/0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9) | one link, many claimers |
+| PqGuardedCounter | [`0xa320b876afea6e2c1e20da5f7fd195b9db47d0be`](https://explore.qore.network/address/0xa320b876afea6e2c1e20da5f7fd195b9db47d0be) | example dApp that requires a post-quantum approval (PqGuard) |
+
 ## The story in four lines
 
 1. On Q-Day, anyone who knows a classical (secp256k1) private key can sign as its owner. Today that means a leak; later it means a quantum computer.
@@ -35,9 +48,9 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 | v5.2 finalize needs a signed authorization from the owner, a guardian or the approved new owner: finalize by an unrelated account (live revert [`0xe44212b3…`](https://explore.qore.network/tx/0xe44212b3c8b5358323702b8b1a883227be5b365191ed091317b5c8dfa7e4cc93)), with a forged signature ([`0x743e98ad…`](https://explore.qore.network/tx/0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e)) and by the old owner on the unanimous path ([`0x8eeb97cd…`](https://explore.qore.network/tx/0x8eeb97cd6d3a572f0b0508fb63c6d4fd72ae068b9243f5f2b77682b91ab26c72)) are refused; the new owner ([`0x6c1e0a00…`](https://explore.qore.network/tx/0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7)) and a guardian ([`0x186e007b…`](https://explore.qore.network/tx/0x186e007b9fd53b434752910af85478e8a1bf83adf072591af43ea20838fdc46c)) finish it | TEAM-RUN, 26 Nov 2026 | [`docs/V5_2.md`](docs/V5_2.md), `node contracts-v4/script/smoke-v52.mjs` |
 | v5.1 (previous) fixes the open review items: a copied bind cannot take the delivery fee (live revert [`0x6700c859…`](https://explore.qore.network/tx/0x6700c859853889b3d060aa3833df7f03b7b7334eef86d8ff182502fab17feae8)), ERC-1271 and PqGuard approvals are tagged and bound to one account and chain, the router holds no value | TEAM-RUN, 26 Nov 2026 | [`docs/V5_1.md`](docs/V5_1.md), `node contracts-v4/script/smoke-v51.mjs` |
 | 793 checks passed, 0 failed: 402 EVM and 202 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.2, v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
 | QCAI Stage 4 on the deployed v5.1 code: 82, 0 critical (`QCAIA-1795655356279-BA1C1020`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info; each answered by a test) | RECORDED | [Stage 4 public report](https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020), [triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md) |
 | Tests: 241 Foundry (unit, fuzz, invariant, v5.1 and v5.2 regressions, QCAI Stage 4 and 5 evidence), 26 real ML-DSA-87, 31 against the live precompiles; 256 frontend and 220 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
+| Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 
 <details>
@@ -61,17 +74,18 @@ Each number is labelled. **LIVE** means it is read from the chain or the API whe
 
 | Claim | How to check it yourself |
 |---|---|
+| Someone who intercepts a Confirmed link cannot take the money | TEAM-RUN on v5 prod, 26 Nov 2026 (link 11, 0.1 QOR). The interceptor test account bound its own key with the link ([`D509C601…1A37`](https://pocket-drop.vercel.app/check/D509C6017E5D05405F5DE55295A15F3DA59A6E598317C5743305A6858CCC1A37)). The public API refused to relay its claim (422 `InvalidState`, nothing sent). Its own claim through its own router-only window was mined and reverted `InvalidState(Bound)` ([`0xe83979b1…39a9`](https://explore.qore.network/tx/0xe83979b1c34beac28df888c20bb732b9f58b897d448c46d0dd091f318bf439a9)). The sender saw 4 words that were not the friend's and cancelled, getting 0.1 QOR back ([`B4CA6735…128F`](https://pocket-drop.vercel.app/check/B4CA6735A5ABFEA17804B0CD1A7EB2285E59F26D7AEFFD16E8336B7009CA128F)); a second claim reverted `InvalidState(Cancelled)` ([`0xd06dc5d4…de53`](https://explore.qore.network/tx/0xd06dc5d49bab8e5d508783a6703af5cd12486513ca1889b4391ac4852198de53)). The interceptor kept the 0.1 QOR drip. Evidence `frontend/evidence/v4/e2e/intercept-confirmed-v5.json`, script `contracts-v4/script/intercept-v5.mjs`, `reverify.mjs` section 13. |
+| Guardians can freeze a Pocket whose key was stolen | Freeze [`0xa0042ee4…56cf`](https://explore.qore.network/tx/0xa0042ee4b44a67f65342c8f99aa117229af5d24ca38301dd03b32261b49956cf), then the thief's spend [`0xd4ca2455…f416`](https://explore.qore.network/tx/0xd4ca2455271a6a0a2f16862632dda34da026789985089753ecab209fdd86f416) reverted with `Frozen`. Test `test_stolen_key_scenario_end_to_end`. |
+| A v5.2 recovery cannot be finished by an outsider or by the old owner | TEAM-RUN on v5.2, 26 Nov 2026: finalize by an unrelated account [`0xe44212b3…`](https://explore.qore.network/tx/0xe44212b3c8b5358323702b8b1a883227be5b365191ed091317b5c8dfa7e4cc93), with a forged signature [`0x743e98ad…`](https://explore.qore.network/tx/0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e) and by the old owner on the unanimous path [`0x8eeb97cd…`](https://explore.qore.network/tx/0x8eeb97cd6d3a572f0b0508fb63c6d4fd72ae068b9243f5f2b77682b91ab26c72) all reverted; the new owner [`0x6c1e0a00…`](https://explore.qore.network/tx/0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7) and a guardian [`0x186e007b…`](https://explore.qore.network/tx/0x186e007b9fd53b434752910af85478e8a1bf83adf072591af43ea20838fdc46c) finished it. Tests `test_qcai52_f2_*`. |
+| The relayer is optional: a user's own scoped EVM window can claim and spend | TEAM-RUN on v5 prod, 26 Nov 2026: a fresh test account (0 QOR at start; the drip paid its fees) opened its own window scoped to the v5 router, 400 blocks and 3 txs, expiry height 10,755,999 ([`A6C998D7…63FD`](https://pocket-drop.vercel.app/check/A6C998D75F07A78F260EB64CC6AB597D30A842599265D5D8627F514E5ED663FD)), sent its own claim [`0xb7941d40…2663`](https://explore.qore.network/tx/0xb7941d40569f7e45217980137a3120c7690bdb0c4aa17e9d2df150c718fd2663) and its own first spend [`0x3abed0a3…03b6`](https://explore.qore.network/tx/0x3abed0a3672504bf026a2e104e03ce917c4c2ddcfe2735430096d92ea88403b6), then closed the window (`3DAFE5B7…8CD5`). Evidence `frontend/evidence/v4/e2e/self-relay-v5.json`, script `contracts-v4/script/self-relay-v5.mjs`, `reverify.mjs` section 11. |
+| Every relay carries a post-quantum signature, checked by the chain | `GET /api/health`: `relay.mode` is `hybrid` and `relay.classicalPathOpen` is `false`. Relay [`04AA1783…D445`](https://pocket-drop.vercel.app/check/04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445) is a `MsgCrossVMCall` with `pqc_hybrid_verify=verified`; the relayer's ECDSA-only EVM window is closed, so an ECDSA-only relay is refused at broadcast (`contracts-v4/LIVE_RESULTS.md`, "Hybrid relay lane"). |
 | A wrong post-quantum key cannot spend a Pocket | Tx [`0x312c0fe1…0dcb`](https://explore.qore.network/tx/0x312c0fe1ecfe1a0159618152ade48639139671adbda5336b4132d06f2a830dcb) reverted with `BadSignature`. Test `test_wrong_key_wrong_prefix_raw_digest_are_rejected`. |
 | A replayed intent fails | Tx [`0x54d99c1e…7fec`](https://explore.qore.network/tx/0x54d99c1e8b04744df5a0360a5dd7b0a02b3066d7f39794a5af97f90ba6957fec) reverted. Test `test_replayed_intent_reverts`. |
 | A claim needs a registered key with proof of possession | Tx [`0x4664a69a…5b5b`](https://explore.qore.network/tx/0x4664a69a207575641d38bcf3af724d9f81753c275dd8312c2a66fb3b18be5b5b) reverted with `PossessionNotProven`. Test `test_claim_key_requirements`. |
 | A mempool thief cannot swap the recipient | Tx [`0xf72a9a09…6318`](https://explore.qore.network/tx/0xf72a9a098d5ea3708302968a6caa712b04e3982870d2c7e34e37c28381996318) reverted with `BadLinkSignature`. Test `test_bind_rejects`. |
-| Guardians can freeze a Pocket whose key was stolen | Freeze [`0xa0042ee4…56cf`](https://explore.qore.network/tx/0xa0042ee4b44a67f65342c8f99aa117229af5d24ca38301dd03b32261b49956cf), then the thief's spend [`0xd4ca2455…f416`](https://explore.qore.network/tx/0xd4ca2455271a6a0a2f16862632dda34da026789985089753ecab209fdd86f416) reverted with `Frozen`. Test `test_stolen_key_scenario_end_to_end`. |
-| Every relay carries a post-quantum signature, checked by the chain | `GET /api/health`: `relay.mode` is `hybrid` and `relay.classicalPathOpen` is `false`. Relay [`04AA1783…D445`](https://pocket-drop.vercel.app/check/04AA17839F57179DA8EC58454F1CD1CEBDDA4D883C86376B4CD92720AF56D445) is a `MsgCrossVMCall` with `pqc_hybrid_verify=verified`; the relayer's ECDSA-only EVM window is closed, so an ECDSA-only relay is refused at broadcast (`contracts-v4/LIVE_RESULTS.md`, "Hybrid relay lane"). |
 | You can re-check a signature without trusting us | Open [`/check`](https://pocket-drop.vercel.app/check): it fetches a transaction from Diana and re-verifies its ML-DSA-87 signatures in your browser with `@qorechain/qoresign`, including a [refused Q-Day attack](https://pocket-drop.vercel.app/check/FB826A14E7E1A8A6271E9489E2BA12BF17075CC793479720F981594F758F00D3). |
 | A QoreX wallet signature can spend a Pocket | Tx [`0xf98daf5e…6d1a`](https://explore.qore.network/tx/0xf98daf5ec7aecb3b82666c25ce10704f251e54460e066a6bc3733a6635286d1a) (TEAM-RUN), evidence in `frontend/evidence/v4/e2e/qorex-wallet-intent-2026-11-20.json`. |
-| The relayer is optional: a user's own scoped EVM window can claim and spend | TEAM-RUN on v5 prod, 26 Nov 2026: a fresh test account (0 QOR at start; the drip paid its fees) opened its own window scoped to the v5 router, 400 blocks and 3 txs, expiry height 10,755,999 ([`A6C998D7…63FD`](https://pocket-drop.vercel.app/check/A6C998D75F07A78F260EB64CC6AB597D30A842599265D5D8627F514E5ED663FD)), sent its own claim [`0xb7941d40…2663`](https://explore.qore.network/tx/0xb7941d40569f7e45217980137a3120c7690bdb0c4aa17e9d2df150c718fd2663) and its own first spend [`0x3abed0a3…03b6`](https://explore.qore.network/tx/0x3abed0a3672504bf026a2e104e03ce917c4c2ddcfe2735430096d92ea88403b6), then closed the window (`3DAFE5B7…8CD5`). Evidence `frontend/evidence/v4/e2e/self-relay-v5.json`, script `contracts-v4/script/self-relay-v5.mjs`, `reverify.mjs` section 11. |
 | A link gets a new account to its first post-quantum spend; a direct transfer does not | TEAM-RUN on v5 prod, 26 Nov 2026, five test accounts per path. Path A, first account: claim [`8A734F26…6BA9`](https://pocket-drop.vercel.app/check/8A734F26BD4EAC2CDE6FF79C4508F15FD682FB460AF301C64C67DAED05AD6BA9), first spend [`E8B929D0…38F9`](https://pocket-drop.vercel.app/check/E8B929D0C565AF970EAD9E3EB97DDE583BA8EA39B056D6788003EB5C4F2138F9). Path B, first account: direct transfer [`06D1D079…0880`](https://pocket-drop.vercel.app/check/06D1D079323B6C42A59E770A9CAF45A92752F3D6F793E4EC6E70B25941590880); its spends were refused (`no usable registered post-quantum key`, `classical fallback not allowed`). All rows: [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md). Re-check: `node scripts/delta-verify.mjs`; re-run: `node scripts/delta-run.mjs --n 5`. |
-| Someone who intercepts a Confirmed link cannot take the money | TEAM-RUN on v5 prod, 26 Nov 2026 (link 11, 0.1 QOR). The interceptor test account bound its own key with the link ([`D509C601…1A37`](https://pocket-drop.vercel.app/check/D509C6017E5D05405F5DE55295A15F3DA59A6E598317C5743305A6858CCC1A37)). The public API refused to relay its claim (422 `InvalidState`, nothing sent). Its own claim through its own router-only window was mined and reverted `InvalidState(Bound)` ([`0xe83979b1…39a9`](https://explore.qore.network/tx/0xe83979b1c34beac28df888c20bb732b9f58b897d448c46d0dd091f318bf439a9)). The sender saw 4 words that were not the friend's and cancelled, getting 0.1 QOR back ([`B4CA6735…128F`](https://pocket-drop.vercel.app/check/B4CA6735A5ABFEA17804B0CD1A7EB2285E59F26D7AEFFD16E8336B7009CA128F)); a second claim reverted `InvalidState(Cancelled)` ([`0xd06dc5d4…de53`](https://explore.qore.network/tx/0xd06dc5d49bab8e5d508783a6703af5cd12486513ca1889b4391ac4852198de53)). The interceptor kept the 0.1 QOR drip. Evidence `frontend/evidence/v4/e2e/intercept-confirmed-v5.json`, script `contracts-v4/script/intercept-v5.mjs`, `reverify.mjs` section 13. |
 | Every recorded hash is real | Run `cd frontend && npm ci && node scripts/reverify.mjs`. |
 
 ## How it works
@@ -109,41 +123,24 @@ The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects,
 
 - v5.2 PqGuard example (`PqGuardedCounter`): `0xa320b876afea6e2c1e20da5f7fd195b9db47d0be`
 
-**Previous: v5.1** (deployed 26 Nov 2026; links and Pockets made on v5.1 keep working there). v5.1 is v5 with the open review items fixed: the bind signs `feeTo`, ERC-1271 and PqGuard approvals carry their own tag and are bound to the account and chain, the router holds no value, plus the Stage 4 cleanups and NatSpec. See [docs/V5_1.md](docs/V5_1.md).
+**Earlier generations: v5.1, v5, v4.** Their addresses, deploy notes and PqGuard examples are in [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) ([v5.1](docs/DEPLOYMENTS.md#v51), [v5](docs/DEPLOYMENTS.md#v5), [v4](docs/DEPLOYMENTS.md#v4), [legacy v3](docs/DEPLOYMENTS.md#legacy-v3)). The contracts cannot be upgraded, so a Pocket keeps the rules of the generation it was made on.
 
-| Contract | v5.1 PROD | v5.1 LAB |
-|---|---|---|
-| PocketRouter | `0x99711daaa39f2f03901950486c70641eca5261cb` | `0x007dd2b3d907e6924e3ad7d3f5281cacebabab07` |
-| PocketFactory | `0x2783b00467e98498eb1ca2f980670d11f241c9f2` | `0x364062747767c0e94e5ed34d3a8ed2a76d59f90b` |
-| PocketVault (implementation) | `0x4d16e0effbf21764520de3dfafeaefbcec9915c5` | `0xfd81083bf8109f76c0b3c1d1976971bebde60965` |
-| PocketDrop | `0xf85e1d470b9e23ed632d8036adc37d66233e20ed` | `0x496342faa28e12b9afee8000793aac261d75d23f` |
-| DropPool | `0xeaf7b161c1d82615d96a01c3e32602be4b1c92e7` | `0xdb17f2d96817cfdd715e23c8d30214afd22a3052` |
+What holds on a Pocket made on an older generation (from `src/` of each generation, [docs/V5_2.md](docs/V5_2.md), [docs/V5_1.md](docs/V5_1.md), [docs/V5.md](docs/V5.md)):
 
-- v5.1 PqGuard example (`PqGuardedCounter`): `0xb6d4dc26188b7f90de2dd2e6ccdd943025fa1765`
+| Guarantee | v4 | v5 | v5.1 | v5.2 (current) |
+|---|---|---|---|---|
+| Every spend and owner action needs an ML-DSA-87 signature checked by `pqcVerify`; the key's hash is pinned at creation | yes | yes | yes | yes |
+| Daily limit, timelock and veto above it, guardian freeze and recovery | yes | yes | yes | yes |
+| Exact ML-DSA-87 key and signature sizes checked before the precompile call; exact key-status layout | no (sizes not checked exactly) | yes | yes | yes |
+| The bind signs `feeTo`, so a copied bind cannot take the delivery fee | no | no | yes | yes |
+| ERC-1271 and PqGuard approvals carry their own tag and are bound to one account and chain | no | no | yes | yes |
+| Finalizing a recovery needs a signed authorization (owner, guardian or approved new owner; never the old owner on the unanimous path) | no: anyone may submit it after the delay, to the guardian-approved target only | no (same) | no (same) | yes |
+| Pocket has its own reentrancy lock; payouts revert outside the lock | no: drop and pool are locked, the vault relies on checks-effects-interactions | no (same) | no (same) | yes |
 
-**Previous: v5** (deployed 25 Nov 2026; links and Pockets made on v5 keep working there). v5 is v4 with a stricter `PqcLib`: exact ML-DSA-87 key and signature sizes are checked before the precompile is called, and the key-status reply must have the exact layout. Nothing else in `src/` changed. See [docs/V5.md](docs/V5.md).
+The five Q-Day bait Pockets on `/qday` are v4 Pockets on purpose: they show that the oldest generation already refuses a classical-key spend.
 
-| Contract | v5 PROD | v5 LAB |
-|---|---|---|
-| PocketRouter | `0x13b8e379e50da657b943781d2816fc17473ae376` | `0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75` |
-| PocketFactory | `0x87b0caf7e9b6ecb28debe1cec223d6e3d7f6b19f` | `0xf00a2ce5945dd6bf762105d03d00b6cb91639443` |
-| PocketVault (implementation) | `0x8603937464a48c18ebede4de1149e8e7dc4e91b4` | `0x5c17c28b7c000e302a7ac67c87562aa767439584` |
-| PocketDrop | `0xcd52c8d2e812ca386fa2f864ba69c1cf63d5d798` | `0xb4a6b993e7aaa450b729fbc1f1b05048d093169a` |
-| DropPool | `0xdb67b9881b37c0e9a4988a56089c05c221c0a26f` | `0xd358dd2e8bcd1db502bfefd99b2795f3e81aa3d6` |
+**Moving to v5.2.** A v5.1 Pocket can be moved now: when this browser's key has a v5.1 Pocket with a balance, `/pocket` shows "You have QOR on the previous contracts" and moves it to the v5.2 Pocket with one ML-DSA-87-signed spend, up to today's allowance (`frontend/src/components/previousPocket.tsx`, test `frontend/test/v5-migration.test.ts`). The app does not offer this for v5 or v4 Pockets. Those funds stay safe and spendable on their own contracts, but there is no one-tap move. We did not add one for this build: a move through the v5 and v4 routers from this app has not been exercised live, and we do not ship an untested button that moves funds.
 
-- v5 PqGuard example (`PqGuardedCounter`): `0x4b8bef69fe7264851f263f6fcf02db3985f43ac9`
-
-**Previous: v4** (still deployed and readable; links and Pockets made on v4 keep working there). From [`contracts-v4/deployments/diana.json`](contracts-v4/deployments/diana.json). PROD uses a 24 h timelock, 48 h recovery, 72 h freeze and 72 h unanimous recovery. LAB uses the same bytecode with short delays (60 s timelock and recovery, 120 s freeze, 180 s unanimous recovery), so the flows can be demonstrated in minutes.
-
-| Contract | v4 PROD | v4 LAB |
-|---|---|---|
-| PocketRouter | `0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209` | `0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d` |
-| PocketFactory | `0x74b604e8f1bb729a6e43dcd893f01747688e3e8f` | `0x864cf0278a24c1b27d1ac66c883c3e74ff8d5a0c` |
-| PocketVault (implementation) | `0x899b289ef60444ac74d82dea5cacc6637a2a29c3` | `0xd017f09992c4c0f27f2d504ba42fe7d3bf578d96` |
-| PocketDrop | `0xbc13b9ee91f31ed56932abdb796693515c351f00` | `0x42da108a4e8bf5d152600b470f1abd28debdee59` |
-| DropPool | `0xaa981588e5430e3db9a789a3754e108cc01e3d00` | `0x1858193617bc2f2e2570a137320e1a1cb3a7ce5b` |
-
-- v4 PqGuard example (`PqGuardedCounter`): `0x5ae81c71b7ff0c93886df8fe7502f3c846c3835f`
 - Legacy v3 PocketDrop (still readable, used by old links): `0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97`
 - Relayer: `0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD` / `qor17mn0ktfnhmesgd5zvk8zk60n5tuxzmxdc8ymnl`
 
