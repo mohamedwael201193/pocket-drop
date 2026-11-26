@@ -23,7 +23,7 @@ import { ACT, params, intentDigest, pqMessage } from './fixtures-lib.mjs';
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
 const N = Number(arg('n', 5));
-const API = process.env.PD_API_URL ?? 'https://pocketdrop-api.vercel.app';
+const API = process.env.PD_API_URL ?? 'https://pocket-drop-api.vercel.app';
 const P = readDeployments().v5.prod;
 const A = { vault: artifact('PocketVault').abi, factory: artifact('PocketFactory').abi, drop: artifact('PocketDrop').abi };
 const u8 = (h) => Uint8Array.from(Buffer.from(h.slice(2), 'hex'));

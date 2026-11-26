@@ -21,7 +21,7 @@ import {
 } from './lib.mjs';
 import { ACT, params, intentDigest, pqMessage } from './fixtures-lib.mjs';
 
-const API = process.env.PD_API_URL ?? 'https://pocketdrop-api.vercel.app';
+const API = process.env.PD_API_URL ?? 'https://pocket-drop-api.vercel.app';
 const P = readDeployments().v5.prod;
 const ROUTER = getAddress(P.router.address);
 const DROP = getAddress(P.drop.address);
