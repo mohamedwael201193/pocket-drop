@@ -3278,7 +3278,27 @@
       "finishedAt": "2026-11-25T23:31:02.332Z",
       "recipientLeftQor": "0.16403471875",
       "recipientPocketQor": "0.15"
-    }
+    },
+    "refunds": [
+      {
+        "step": "refund v5 prod link 3 (expired) to its sender Pocket 0xb1c827e9617f7322256FBaEf2D4A9F6233eb86c6",
+        "hash": "0x7a181f199a497967dc2671a1a5f5eff70029933aff050a39c5a29a6aadf301bd",
+        "url": "https://explore.qore.network/tx/0x7a181f199a497967dc2671a1a5f5eff70029933aff050a39c5a29a6aadf301bd",
+        "status": "success",
+        "gasUsed": "56022",
+        "refundedQor": "0.8",
+        "at": "2026-11-26T02:40:48.166Z"
+      },
+      {
+        "step": "refund v5 prod link 4 (expired) to its sender Pocket 0x9c93B0Cda5be92a09AB2a71979932664e5C260e8",
+        "hash": "0x2f1b7d47c3954f4446742edd6eccfe19e581c589ff822ab5636ba5cfcf73d521",
+        "url": "https://explore.qore.network/tx/0x2f1b7d47c3954f4446742edd6eccfe19e581c589ff822ab5636ba5cfcf73d521",
+        "status": "success",
+        "gasUsed": "53746",
+        "refundedQor": "0.2",
+        "at": "2026-11-26T02:40:51.074Z"
+      }
+    ]
   },
   "v5_1": {
     "windowTx": "74319C0DF956F3C0FDA258CC79B698D0FD3DBA64B0EE37D378B2B06841EA5162",
