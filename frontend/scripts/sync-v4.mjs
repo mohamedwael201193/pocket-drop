@@ -63,8 +63,7 @@ if (fs.existsSync(auditFile)) {
   const [, id2, score2] = row(2);
   const [, id3, score3] = row('3 \\(v5\\)');
   const [, id4, score4] = row('4 \\(v5\\.1\\)');
-  // Stage 5 (v5.2): the audit id may still be a TODO, so only the score cell is read (| 5 (v5.2) | date | id | score / risk | ...)
-  const score5 = /^\| 5 \(v5\.2\) \| [^|]+\| [^|]*\| ([^|]+)\|/m.exec(t)?.[1] ?? null;
+  const [, id5, score5] = row('5 \\(v5\\.2\\)');
   const stage2Done = !!id2;
   const stage3Done = !!score3 && score3.trim() !== 'n/a';
   const stage4Done = !!score4 && score4.trim() !== 'n/a';
@@ -88,8 +87,10 @@ if (fs.existsSync(auditFile)) {
     stage4PublicReport: stage4Done ? g(/^- Stage 4 \(v5\.1\): (https:\/\/\S+)/m) : null,
     stage4Triage: stage4Done ? 'docs/audit/stage4/QCAI_V5_1_TRIAGE.md' : null,
     stage5: stage5Done ? 'complete' : 'pending',
+    stage5AuditId: stage5Done ? id5 : null,
     stage5Score: stage5Done ? score5.trim() : null,
     stage5Findings: stage5Done ? g(/## 14\. Stage 5[\s\S]*?Counts: (\d+ findings[^.]*)\./) : null,
+    stage5PublicReport: stage5Done ? g(/^- Stage 5 \(v5\.2\): (https:\/\/\S+)/m) : null,
     stage5Triage: stage5Done ? 'docs/audit/stage5/QCAI_V5_2_TRIAGE.md' : null,
   };
 }
