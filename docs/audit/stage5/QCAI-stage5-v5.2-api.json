@@ -1,0 +1,121 @@
+{
+  "success": true,
+  "audit": {
+    "auditId": "QCAIA-1795664336974-576A1865",
+    "status": "completed",
+    "blockchain": "ethereum",
+    "language": "solidity",
+    "framework": "EVM/Solidity",
+    "overallScore": 78,
+    "riskLevel": "MEDIUM",
+    "quantumReadiness": null,
+    "findings": [
+      {
+        "category": "Reentrancy",
+        "description": "The Payout contract implements a reentrancy guard using a lock variable, but there's a potential issue with the lock mechanism in the _pay function. The _pay function is called from multiple external functions that are protected by nonReentrant modifiers, but the _pay function itself doesn't have a reentrancy guard. If a malicious contract receives funds through _pay and tries to re-enter the contract before the lock is released, it could potentially cause issues.",
+        "id": "ETH-001",
+        "impact": "Could allow attackers to manipulate state or drain funds through reentrancy attacks",
+        "location": "src/Payout.sol",
+        "recommendation": "Add a reentrancy guard to the _pay function to ensure it cannot be called recursively",
+        "severity": "HIGH",
+        "title": "Potential Reentrancy in Payout Contract"
+      },
+      {
+        "category": "Access Control",
+        "description": "In the finalizeRecovery and finalizeRecoveryUnanimous functions, the access control logic allows the proposed new owner to finalize the recovery, but there's no explicit check that prevents the old owner from finalizing a recovery they're trying to veto. This could lead to privilege escalation if not properly handled.",
+        "id": "ETH-002",
+        "impact": "Potential privilege escalation during recovery process",
+        "location": "src/PocketVault.sol",
+        "recommendation": "Add explicit checks to ensure that the old owner cannot finalize a recovery they've tried to veto",
+        "severity": "MEDIUM",
+        "title": "Missing Access Control in Recovery Finalization"
+      },
+      {
+        "category": "Integer Safety",
+        "description": "In PocketDrop.sol, the drip calculation uses unchecked arithmetic operations that could potentially overflow when adding drip values to daily totals. The code checks for overflow conditions but relies on explicit bounds checking rather than safe math operations.",
+        "id": "ETH-003",
+        "impact": "Could lead to incorrect drip tracking and potential denial of service",
+        "location": "src/PocketDrop.sol",
+        "recommendation": "Use SafeMath or similar library for arithmetic operations to prevent integer overflow",
+        "severity": "MEDIUM",
+        "title": "Potential Overflow in Daily Drip Calculation"
+      },
+      {
+        "category": "External Interactions",
+        "description": "Several external calls in PocketVault.sol use low-level call syntax without proper return value checking. While some functions do check return values, others don't explicitly validate the success of external calls.",
+        "id": "ETH-004",
+        "impact": "Could lead to silent failures in critical operations",
+        "location": "src/PocketVault.sol",
+        "recommendation": "Ensure all external calls have proper return value validation",
+        "severity": "LOW",
+        "title": "Unchecked Return Values in External Calls"
+      },
+      {
+        "category": "Logic Flaws",
+        "description": "The guardian freeze functionality allows freezing based on a nonce that can be predicted. If an attacker knows the current freezeNonce, they could potentially front-run freeze proposals to disrupt legitimate guardian actions.",
+        "id": "ETH-005",
+        "impact": "Could allow attackers to disrupt legitimate guardian freeze operations",
+        "location": "src/PocketVault.sol",
+        "recommendation": "Implement additional randomness or time-based elements to prevent predictable nonce usage",
+        "severity": "MEDIUM",
+        "title": "Potential Front-Running in Guardian Freeze"
+      },
+      {
+        "category": "Gas & DoS",
+        "description": "The _checkGuardianSigs function performs linear scans through guardian arrays with a maximum of 5 elements, but in worst-case scenarios, this could approach gas limits for large arrays or complex validations.",
+        "id": "ETH-006",
+        "impact": "Could potentially cause gas limit issues in edge cases",
+        "location": "src/PocketVault.sol",
+        "recommendation": "Consider implementing more efficient lookup mechanisms or limiting guardian set sizes further",
+        "severity": "LOW",
+        "title": "Potential Gas Limit Issues in Guardian Validation"
+      },
+      {
+        "category": "ERC Standards Compliance",
+        "description": "The PocketVault contract correctly implements the ERC-1271 standard for signature verification, allowing external contracts to verify signatures through the isValidSignature function.",
+        "id": "ETH-007",
+        "impact": "No impact",
+        "location": "src/PocketVault.sol",
+        "recommendation": "No action required - ERC-1271 compliance is properly implemented",
+        "severity": "INFO",
+        "title": "ERC-1271 Implementation"
+      }
+    ],
+    "summary": "The PocketDrop v5.2 contract implements a sophisticated post-quantum secure smart account system with multi-signature capabilities, guardian recovery mechanisms, and escrow functionality. While the core security features appear robust, several medium-severity issues related to reentrancy protection, access control, and integer safety need attention. The contract follows good practices in using PQC libraries and implements proper signature verification mechanisms.",
+    "recommendations": [
+      "Implement comprehensive reentrancy guards throughout the payout system",
+      "Add explicit access control checks in recovery finalization functions",
+      "Use safe math operations for all arithmetic calculations",
+      "Validate all external call return values consistently",
+      "Review and strengthen nonce management in guardian freeze operations"
+    ],
+    "gasOptimizations": [
+      "Use assembly for simple arithmetic operations to reduce gas costs",
+      "Implement batch processing for multiple guardian validations",
+      "Consider using mapping instead of array for guardian lookups to improve efficiency",
+      "Cache frequently accessed storage variables to reduce SLOAD operations"
+    ],
+    "bestPractices": [
+      "Proper use of PQC libraries for post-quantum security",
+      "Implementation of reentrancy guards with clear locking mechanisms",
+      "Comprehensive signature verification using domain separation",
+      "Clear separation of concerns between different contract components",
+      "Proper event emission for all state-changing operations"
+    ],
+    "positiveAspects": [
+      "Robust post-quantum cryptographic implementation using ML-DSA-87",
+      "Well-designed guardian recovery and freeze mechanisms",
+      "Comprehensive reentrancy protection with clear locking patterns",
+      "Proper ERC-1271 implementation for signature verification",
+      "Clear separation of concerns between PocketVault, PocketDrop, and DropPool contracts"
+    ],
+    "findingsCount": 7,
+    "criticalCount": 0,
+    "highCount": 1,
+    "mediumCount": 3,
+    "lowCount": 2,
+    "infoCount": 1,
+    "createdAt": "2026-11-26T03:38:56.974Z",
+    "isPublic": true
+  }
+}
