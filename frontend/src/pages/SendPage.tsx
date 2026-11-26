@@ -20,6 +20,7 @@ import { isCancelled } from '../lib/signReview';
 import { fmtQor, parseQor } from '../lib/chain';
 import { useSponsorStatus } from '../lib/sponsor';
 import { Celebrate } from '../components/alive';
+import { showAmountProblem } from '../lib/formHints';
 
 export function SendTabs() {
   const cls = ({ isActive }: { isActive: boolean }) => cx('flex-1 rounded-full px-4 py-2 text-center text-sm font-medium', isActive ? 'bg-zinc-900 text-stone-100' : 'text-zinc-600');
@@ -45,6 +46,7 @@ export default function SendPage() {
   const [amount, setAmount] = useState('0.3');
   // the prefilled amount was not typed by the sender: a problem with it is a grey hint until they edit it, not a red alert
   const [amountEdited, setAmountEdited] = useState(false);
+  const [amountFocused, setAmountFocused] = useState(false);
   const [openAck, setOpenAck] = useState(false);
   const [slots, setSlots] = useState('3');
   const [perSlot, setPerSlot] = useState('0.02');
@@ -74,7 +76,10 @@ export default function SendPage() {
   // Right after a link is made the balance drops, so the same amount no longer fits. That is expected, not an error:
   // say so plainly instead of a red "fix the amount" alert above the link the sender just made. Editing the amount brings the check back.
   const justMade = justMadeDrop(made, amount);
+  const amountIncomplete = amt === null || amt < inst.minEscrow;
   const shownDropProblem = justMade ? null : dropProblem;
+  // what the sender sees under the field; the lock on step 3 still follows shownDropProblem
+  const visibleDropProblem = showAmountProblem(amountIncomplete, amountFocused) ? shownDropProblem : null;
   const needsAck = openNeedsAck(mode, amt);
   const ackProblem = needsAck && !openAck ? `Above ${fmtQor(OPEN_ACK_ABOVE_WEI)} QOR, a first-to-open link needs your OK below, or switch to Someone I know.` : null;
   const ns = Number(slots);
@@ -155,13 +160,13 @@ export default function SendPage() {
             </label>
           )}
           <label htmlFor="amount" className="mt-4 block text-sm font-semibold text-zinc-900">Amount (QOR)</label>
-          <input id="amount" value={amount} onChange={(e) => { setAmount(e.target.value); setAmountEdited(true); }} inputMode="decimal" autoComplete="off" data-testid="amount" disabled={!ready}
-            aria-invalid={ready && !!shownDropProblem} aria-describedby="drop-total drop-problem amount-lock"
+          <input id="amount" value={amount} onChange={(e) => { setAmount(e.target.value); setAmountEdited(true); }} onFocus={() => setAmountFocused(true)} onBlur={() => setAmountFocused(false)} inputMode="decimal" autoComplete="off" data-testid="amount" disabled={!ready}
+            aria-invalid={ready && !!visibleDropProblem} aria-describedby="drop-total drop-problem amount-lock"
             className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-lg" />
           {lockReason && <p id="amount-lock" className="mt-2 text-xs font-medium text-zinc-700" data-testid="amount-lock">{lockReason}</p>}
-          {ready && shownDropProblem && (amountEdited
-            ? <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{shownDropProblem}</p>
-            : <p id="drop-problem" className="mt-2 text-sm text-zinc-700" data-testid="drop-problem">{shownDropProblem}</p>)}
+          {ready && visibleDropProblem && (amountEdited
+            ? <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{visibleDropProblem}</p>
+            : <p id="drop-problem" className="mt-2 text-sm text-zinc-700" data-testid="drop-problem">{visibleDropProblem}</p>)}
           <div id="drop-total" className="mt-3 rounded-2xl border border-zinc-200 bg-white/70 p-3 text-xs text-zinc-700" data-testid="drop-total">
             <div className="mb-1 font-semibold text-zinc-900">What leaves your Pocket</div>
             <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { showSpendProblem } from '../src/lib/formHints';
+import { showAmountProblem, showSpendProblem } from '../src/lib/formHints';
 
 describe('showSpendProblem', () => {
   it('no red amount alert right after pasting an address, before any amount is typed', () => {
@@ -15,5 +15,15 @@ describe('showSpendProblem', () => {
   });
   it('nothing to show without a problem', () => {
     expect(showSpendProblem(null, false, '0x31d7', '0.05')).toBe(false);
+  });
+});
+
+describe('showAmountProblem', () => {
+  it('hides a fixable-by-typing problem while the field has focus, shows it after blur', () => {
+    expect(showAmountProblem(true, true)).toBe(false);
+    expect(showAmountProblem(true, false)).toBe(true);
+  });
+  it('shows a too-high amount at once, even while typing', () => {
+    expect(showAmountProblem(false, true)).toBe(true);
   });
 });

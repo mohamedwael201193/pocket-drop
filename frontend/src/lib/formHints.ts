@@ -4,3 +4,9 @@ export function showSpendProblem(problem: string | null, addressProblem: boolean
   if (!problem) return false;
   return addressProblem ? to.trim() !== '' : amount.trim() !== '';
 }
+
+/** While the amount field has focus, a problem that more typing can fix (empty, "0", "0.", below the minimum) is not shown
+ *  yet: typing 0.05 passes through "0" and "0.0". It shows once the field loses focus. A too-high amount shows at once. */
+export function showAmountProblem(incomplete: boolean, focused: boolean): boolean {
+  return !(incomplete && focused);
+}

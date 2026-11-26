@@ -20,7 +20,7 @@ import { checkRecipient, recentRecipients, rememberRecipient } from '../lib/reci
 import { pocketEnv } from '../components/powers';
 import { pub } from '../lib/chain';
 import { SelfRelaySetting } from '../components/selfRelayOffer';
-import { showSpendProblem } from '../lib/formHints';
+import { showAmountProblem, showSpendProblem } from '../lib/formHints';
 
 /** busy / error / last tx for one action button. */
 function useAct() {
@@ -65,7 +65,8 @@ export default function PocketPage() {
   const canAct = !!ctx && key.ready && (!pv?.deployed || owned);
 
   const spendAct = useAct(); const limitAct = useAct(); const guardAct = useAct(); const queueAct = useAct(); const recAct = useAct();
-  const [to, setTo] = useState(''); const [amt, setAmt] = useState(''); const [ack, setAck] = useState('');
+  const [to, setTo] = useState(''); const [amt, setAmt] = useState('');
+  const [amtFocused, setAmtFocused] = useState(false); const [ack, setAck] = useState('');
   const [newLimit, setNewLimit] = useState('');
   const [gText, setGText] = useState(''); const [gThr, setGThr] = useState('2');
 
@@ -126,9 +127,9 @@ export default function PocketPage() {
               <p className="text-sm text-zinc-700">Move QOR out of your Pocket with a signed intent. Within today&apos;s limit it is paid at once.</p>
               <div className="mt-3 space-y-2">
                 <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x… address" aria-label="Send to" autoComplete="off" data-testid="spend-to" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
-                <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" autoComplete="off" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
+                <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" autoComplete="off" onFocus={() => setAmtFocused(true)} onBlur={() => setAmtFocused(false)} data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
               </div>
-              {showSpendProblem(spendProblem, !!rc.block, to, amt) && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
+              {showSpendProblem(spendProblem, !!rc.block, to, amt) && (!!rc.block || showAmountProblem(spendAmt === null || spendAmt === 0n, amtFocused)) && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
               {rc.confirm && !rc.block && (
                 <div className="mt-2"><Notice tone="warn" testId="spend-recipient-warning">{rc.confirm}
                   <label className="mt-2 flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={!needAck} onChange={(e) => setAck(e.target.checked ? to.trim().toLowerCase() : '')} data-testid="spend-recipient-ack" /> I checked the address</label></Notice></div>
