@@ -15,8 +15,11 @@ export const FAUCET_URL = 'https://dashboard.qorechain.io/faucet';
 export const SOURCE_URL = 'https://github.com/mohamedwael201193/pocket-drop';
 export const TESTNET_BADGE = 'Testnet — Diana, no monetary value';
 
-/** Explorer links: EVM hashes carry 0x, Cosmos hashes are bare hex. The explorer accepts both forms. */
-export const txUrl = (hash: string) => `${EXPLORER}/tx/${hash}`;
+/** Where a tx hash opens. Cosmos hashes (bare hex) open in the explorer. The explorer indexes Cosmos transactions only:
+ *  an EVM hash (0x...) returns "Transaction not found" there (checked 26 Nov 2026), so EVM hashes open this app's own
+ *  /check page, which reads the receipt from the EVM RPC and re-verifies the signatures in the browser. */
+export const isEvmHash = (hash: string) => /^0x[0-9a-fA-F]{64}$/.test(hash);
+export const txUrl = (hash: string) => (isEvmHash(hash) ? `/check/${hash}` : `${EXPLORER}/tx/${hash}`);
 export const addrUrl = (addr: string) => `${EXPLORER}/address/${addr}`;
 
 export const dianaChain = defineChain({
