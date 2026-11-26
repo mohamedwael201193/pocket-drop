@@ -27,7 +27,9 @@ describe('pqMessage', () => {
   it('action tags are keccak256 of the contract constant names', () => {
     expect(ACT.SPEND).toBe(keccak256(toBytes('POCKET_SPEND_V1')));
     expect(ACT.GUARDIAN_FREEZE).toBe(keccak256(toBytes('POCKET_GUARDIAN_FREEZE_V1')));
-    expect(new Set(Object.values(ACT)).size).toBe(14);
+    expect(ACT.FINALIZE_RECOVERY).toBe(keccak256(toBytes('POCKET_FINALIZE_RECOVERY_V1')));
+    expect(ACT.FINALIZE_RECOVERY_UNANIMOUS).toBe(keccak256(toBytes('POCKET_FINALIZE_RECOVERY_UNANIMOUS_V1')));
+    expect(new Set(Object.values(ACT)).size).toBe(16);
   });
 });
 

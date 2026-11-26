@@ -1,9 +1,9 @@
 // Every real Pocket action: sign an ML-DSA intent in this browser, relay it through /api/route (PocketRouter).
-import { keccak256, type Hex } from 'viem';
-import { ACT, freezeDigest, intentDigest, params, recoveryDigest } from './intents';
+import { encodeFunctionData, keccak256, parseAbi, type Hex } from 'viem';
+import { ACT, finalizeDigest, freezeDigest, intentDigest, params, recoveryDigest } from './intents';
 import { signDigest, keyHashOfAccount, type KeyAccount } from './identity';
 import { bytesToHex, hexToBytes } from './protocol';
-import { INST, chainTimestamp, dropCall, nextNonce, poolCall, relayTo, relayToPocket, vaultCall, type Env, type PocketCfg } from './v4';
+import { INST, chainTimestamp, dropCall, finalizeNeedsAuthorization, nextNonce, poolCall, relayTo, relayToPocket, vaultCall, type Env, type PocketCfg } from './v4';
 import type { RouteResult } from './api';
 import { vaultAbi } from './abi4';
 import { pub } from './chain';
@@ -76,7 +76,37 @@ export async function createPool(c: Ctx, root: string, slots: number, perSlot: b
 export const executeQueued = (env: Env, pocket: Hex, id: bigint) => relayTo(env, pocket, vaultCall('executeQueued', [id]));
 export const applyLimit = (env: Env, pocket: Hex) => relayTo(env, pocket, vaultCall('applyLimit', []));
 export const applyGuardians = (env: Env, pocket: Hex) => relayTo(env, pocket, vaultCall('applyGuardians', []));
-export const finalizeRecovery = (env: Env, pocket: Hex, unanimous: boolean) => relayTo(env, pocket, vaultCall(unanimous ? 'finalizeRecoveryUnanimous' : 'finalizeRecovery', []));
+/* ---- finishing a recovery ---- */
+const FINALIZE_V51 = parseAbi(['function finalizeRecovery()', 'function finalizeRecoveryUnanimous()']);
+
+/** The digest `acct` signs to finish the pending recovery of a v5.2 Pocket. Computed here from the chain state and checked
+ *  against the Pocket's own `finalizeDigest` view, so a mismatch stops before anything is signed. */
+export async function finalizeAuthorization(pocket: Hex, unanimous: boolean, authorizer: Hex, deadline: bigint): Promise<Hex> {
+  const read = <T,>(functionName: string, args: unknown[] = []) => pub.readContract({ address: pocket, abi: vaultAbi, functionName, args } as never) as Promise<T>;
+  const [recNonce, newOwner, newKeyHash] = await Promise.all([
+    read<bigint>('recoveryNonce'),
+    read<Hex>(unanimous ? 'uRecoveryOwner' : 'recoveryOwner'),
+    read<Hex>(unanimous ? 'uRecoveryKeyHash' : 'recoveryKeyHash'),
+  ]);
+  const local = finalizeDigest({ vault: pocket, unanimous, recNonce, newOwner, newKeyHash, authorizer, deadline });
+  const onChain = await read<Hex>('finalizeDigest', [unanimous ? ACT.FINALIZE_RECOVERY_UNANIMOUS : ACT.FINALIZE_RECOVERY, authorizer, deadline]);
+  if (onChain.toLowerCase() !== local.toLowerCase()) throw new Error('The recovery to finish does not match the chain state, so nothing was signed. Reload and try again.');
+  return local;
+}
+
+/**
+ * Finish a recovery after its delay. v5.2: the call carries an ML-DSA-87 authorization from the owner (threshold path only),
+ * a guardian, or the approved new owner; this browser's key signs as the authorizer. Earlier generations take no arguments.
+ */
+export async function finalizeRecovery(env: Env, pocket: Hex, unanimous: boolean, acct?: KeyAccount | null): Promise<RouteResult> {
+  const fn = unanimous ? 'finalizeRecoveryUnanimous' : 'finalizeRecovery';
+  if (!finalizeNeedsAuthorization(env)) return relayTo(env, pocket, encodeFunctionData({ abi: FINALIZE_V51, functionName: fn }));
+  if (!acct) throw new Error('Open your key first: finishing a recovery needs a signature from the owner, a guardian or the new owner.');
+  const deadline = BigInt((await chainTimestamp()) + 3600);
+  const digest = await finalizeAuthorization(pocket, unanimous, acct.evm as Hex, deadline);
+  const sig = await signDigest(acct.pqc.secretKey, digest);
+  return relayTo(env, pocket, vaultCall(fn, [acct.evm, deadline, sig]));
+}
 export const refundDrop = (env: Env, id: bigint) => relayTo(env, INST[env].drop, dropCall('refund', [id]));
 
 /* ---------------- guardians: request -> share -> submit (every guardian signs on their own device) ---------------- */

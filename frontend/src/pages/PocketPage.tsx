@@ -11,7 +11,7 @@ import { RescuePanel } from '../components/rescue';
 import { HelpFriend, LostPhone } from '../components/guardians';
 import { useAccount, useKeyAccount, usePocketView } from '../lib/account';
 import { applyGuardians, applyLimit, cancelPending, executeQueued, finalizeRecovery, setGuardians, setLimit, spend, vetoQueued, vetoRecovery } from '../lib/actions';
-import { ALL_ENVS, CURRENT_ENVS, INST, chainTimestamp } from '../lib/v4';
+import { ALL_ENVS, CURRENT_ENVS, INST, chainTimestamp, finalizeNeedsAuthorization } from '../lib/v4';
 import { explainError, type RouteResult } from '../lib/api';
 import { fmtQor, parseQor } from '../lib/chain';
 import { addrUrl } from '../lib/config';
@@ -203,11 +203,11 @@ export default function PocketPage() {
                 {pv.recovery && (
                   <Notice tone="warn" testId="pending-recovery">Recovery to <Mono>{pv.recovery.newOwner}</Mono> is pending ({pv.recovery.at > t ? `can finish in ${dur(pv.recovery.at - t)}` : 'ready to finish'}). If this is not you, veto it.
                     <div className="mt-2 flex flex-wrap gap-2"><Button variant="danger" disabled={!canAct} busy={recAct.busy === 'veto'} onClick={() => void recAct.run('veto recovery', () => vetoRecovery(ctx!))} data-testid="veto-recovery">Veto this recovery</Button>
-                      <Button variant="secondary" disabled={pv.recovery.at > t} busy={recAct.busy === 'fin'} onClick={() => void recAct.run('finalize recovery', () => finalizeRecovery(a.env, pv.address, false))} data-testid="finalize-recovery">Finish recovery</Button></div></Notice>
+                      <Button variant="secondary" disabled={pv.recovery.at > t} busy={recAct.busy === 'fin'} onClick={() => void recAct.run('finalize recovery', () => finalizeRecovery(a.env, pv.address, false, a.acct))} data-testid="finalize-recovery">Finish recovery</Button></div></Notice>
                 )}
                 {pv.unanimous && (
-                  <Notice tone="error" testId="pending-unanimous">A unanimous recovery to <Mono>{pv.unanimous.newOwner}</Mono> is pending ({pv.unanimous.at > t ? `can finish in ${dur(pv.unanimous.at - t)}` : 'ready to finish'}). <b>It cannot be vetoed</b>: every guardian signed it, and a stolen owner key must not be able to stop it.
-                    <div className="mt-2"><Button variant="secondary" disabled={pv.unanimous.at > t} busy={recAct.busy === 'finu'} onClick={() => void recAct.run('finalize unanimous recovery', () => finalizeRecovery(a.env, pv.address, true))} data-testid="finalize-unanimous">Finish recovery</Button></div></Notice>
+                  <Notice tone="error" testId="pending-unanimous">A unanimous recovery to <Mono>{pv.unanimous.newOwner}</Mono> is pending ({pv.unanimous.at > t ? `can finish in ${dur(pv.unanimous.at - t)}` : 'ready to finish'}). <b>It cannot be vetoed</b>: every guardian signed it, and a stolen owner key must not be able to stop it.{finalizeNeedsAuthorization(a.env) && ' The new owner or a guardian finishes it; the old key is not accepted.'}
+                    <div className="mt-2"><Button variant="secondary" disabled={pv.unanimous.at > t} busy={recAct.busy === 'finu'} onClick={() => void recAct.run('finalize unanimous recovery', () => finalizeRecovery(a.env, pv.address, true, a.acct))} data-testid="finalize-unanimous">Finish recovery</Button></div></Notice>
                 )}
                 {!pv.recovery && !pv.unanimous && <p className="text-xs text-zinc-500" data-testid="no-recovery">No recovery pending.</p>}
               </div>

@@ -6,7 +6,7 @@ import { keccak256, parseAbi, toBytes, type Hex } from 'viem';
 const BIND_V5_DIGEST = parseAbi(['function bindDigest(uint256, address, bytes32, address) view returns (bytes32)']);
 import { dropAbi, poolAbi, vaultAbi } from '../src/lib/abi4';
 import { pub } from '../src/lib/chain';
-import { ACT, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, recoveryDigest } from '../src/lib/intents';
+import { ACT, dropBindDigest, finalizeDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, recoveryDigest } from '../src/lib/intents';
 import { INST, type Env } from '../src/lib/v4';
 
 const R = '0xbeCce1e181BD39C0E2aD32E82D71DF04b7a701AE' as Hex;
@@ -48,6 +48,16 @@ describe.each(['prod', 'lab'] as Env[])('digests equal the %s contracts', (env) 
     for (const nonce of [0n, 1n]) expect(freezeDigest({ vault, nonce, deadline: DL })).toBe(await onchain('freezeDigest', [nonce, DL]));
     expect(recoveryDigest({ vault, recNonce: 0n, newOwner: R, newKeyHash: KH, deadline: DL })).toBe(await onchain('recoveryDigest', [R, KH, DL]));
     expect(recoveryDigest({ vault, recNonce: 0n, newOwner: R, newKeyHash: KH, deadline: DL, unanimous: true })).toBe(await onchain('unanimousDigest', [R, KH, DL]));
+  });
+  it('v5.2 finalize authorization (both paths, authorizer and deadline bound)', async () => {
+    const Z = '0x0000000000000000000000000000000000000000' as Hex; const Z32 = ('0x' + '00'.repeat(32)) as Hex;
+    expect(await onchain('ACT_FINALIZE_RECOVERY', [])).toBe(ACT.FINALIZE_RECOVERY);
+    expect(await onchain('ACT_FINALIZE_RECOVERY_UNANIMOUS', [])).toBe(ACT.FINALIZE_RECOVERY_UNANIMOUS);
+    for (const unanimous of [false, true]) for (const who of [R, P]) {
+      const action = unanimous ? ACT.FINALIZE_RECOVERY_UNANIMOUS : ACT.FINALIZE_RECOVERY;
+      // the implementation has no pending recovery: nonce 0, pending owner and key hash zero
+      expect(finalizeDigest({ vault, unanimous, recNonce: 0n, newOwner: Z, newKeyHash: Z32, authorizer: who, deadline: DL })).toBe(await onchain('finalizeDigest', [action, who, DL]));
+    }
   });
   it('drop bind and claim', async () => {
     for (const id of [1n, 7n, 123456n]) {
