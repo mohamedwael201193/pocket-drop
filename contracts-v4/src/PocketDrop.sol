@@ -88,11 +88,15 @@ contract PocketDrop is Payout, IPocketDropSender {
         address relayer
     );
     event LinkConfirmed(uint256 indexed linkId, address indexed recipient, bytes32 recipientKeyHash);
-    event LinkClaimed(uint256 indexed linkId, address indexed recipient, address payTo, uint256 amount, address relayer);
+    event LinkClaimed(
+        uint256 indexed linkId, address indexed recipient, address payTo, uint256 amount, address relayer
+    );
     event LinkCancelled(uint256 indexed linkId, address indexed sender, uint256 refunded);
     event LinkRefunded(uint256 indexed linkId, address indexed sender, uint256 refunded, address caller);
     /// @dev `feeTo` is the address the link-key signature named for the relayer fee (v5.1), not `msg.sender`.
-    event DripPaid(uint256 indexed linkId, address indexed recipient, uint256 drip, address indexed feeTo, uint256 relayerFee);
+    event DripPaid(
+        uint256 indexed linkId, address indexed recipient, uint256 drip, address indexed feeTo, uint256 relayerFee
+    );
 
     error InvalidConfig();
     error InvalidMode();
@@ -132,8 +136,8 @@ contract PocketDrop is Payout, IPocketDropSender {
     ) {
         if (
             minEscrow == 0 || maxAmount < minEscrow || maxAmount > type(uint96).max || maxDrip > type(uint96).max
-                || dailyDripCap < maxDrip || dailyDripCap > type(uint128).max || bindTimeout == 0 || bindTimeout > type(uint32).max || maxExpiry == 0
-                || maxExpiry > type(uint32).max
+                || dailyDripCap < maxDrip || dailyDripCap > type(uint128).max || bindTimeout == 0
+                || bindTimeout > type(uint32).max || maxExpiry == 0 || maxExpiry > type(uint32).max
         ) revert InvalidConfig();
         MIN_ESCROW = minEscrow;
         MAX_AMOUNT = maxAmount;

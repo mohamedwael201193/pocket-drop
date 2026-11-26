@@ -64,10 +64,7 @@ interface IDropPoolHost {
     /// @param perSlot Amount per slot.
     /// @param expiry Pool expiry.
     /// @return The new pool id.
-    function create(bytes32 linkKeyHash, uint32 slots, uint96 perSlot, uint64 expiry)
-        external
-        payable
-        returns (uint256);
+    function create(bytes32 linkKeyHash, uint32 slots, uint96 perSlot, uint64 expiry) external payable returns (uint256);
 
     /// @notice Close a pool; the unclaimed remainder returns to the host.
     /// @param poolId Pool id.

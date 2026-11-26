@@ -161,6 +161,10 @@ contract PocketVault is IERC1271 {
     /// @notice Unanimous recovery can be finalized from this time on (0 = none pending).
     uint64 public uRecoveryAt;
 
+    /// @dev v5.2 reentrancy lock for the functions that make an external call (0 = unlocked, 1 = locked; clones start
+    ///      at 0). `receive` is not locked, so refunds from PocketDrop / DropPool still land during a locked call.
+    uint256 private _callLock;
+
     /*//////////////////////////////////////////////////////////////
                               EVENTS / ERRORS
     //////////////////////////////////////////////////////////////*/
@@ -213,6 +217,15 @@ contract PocketVault is IERC1271 {
     error FreezeCapped();
     error BadNonce();
     error NotAuthorized();
+    error Reentrancy();
+
+    /// @dev Reverts `Reentrancy` if a locked function is already running (checks-effects-interactions is kept as well).
+    modifier nonReentrant() {
+        if (_callLock != 0) revert Reentrancy();
+        _callLock = 1;
+        _;
+        _callLock = 0;
+    }
 
     /*//////////////////////////////////////////////////////////////
                            CONSTRUCTION / INIT
@@ -298,6 +311,7 @@ contract PocketVault is IERC1271 {
     /// @return queuedId 0 if paid immediately, otherwise the queue id.
     function spend(address to, uint256 amount, uint256 deadline, bytes calldata sig)
         external
+        nonReentrant
         returns (uint256 queuedId)
     {
         _requireNotFrozen();
@@ -317,7 +331,7 @@ contract PocketVault is IERC1271 {
 
     /// @notice Execute a queued spend after its timelock. Anyone may call; the owner already signed.
     /// @param id Queue id.
-    function executeQueued(uint256 id) external {
+    function executeQueued(uint256 id) external nonReentrant {
         _requireNotFrozen();
         if (recoveryAt != 0) revert RecoveryPending();
         Queued storage q = _queue[id];
@@ -484,9 +498,7 @@ contract PocketVault is IERC1271 {
         external
         onlyApprovedThresholdRecovery
     {
-        _authorizeFinalize(
-            ACT_FINALIZE_RECOVERY, recoveryOwner, recoveryKeyHash, authorizer, deadline, sig, true
-        );
+        _authorizeFinalize(ACT_FINALIZE_RECOVERY, recoveryOwner, recoveryKeyHash, authorizer, deadline, sig, true);
         address old = owner;
         address newOwner = recoveryOwner;
         bytes32 newKeyHash = recoveryKeyHash;
@@ -689,7 +701,7 @@ contract PocketVault is IERC1271 {
         uint256 value,
         uint256 deadline,
         bytes calldata sig
-    ) external returns (uint256 linkId) {
+    ) external nonReentrant returns (uint256 linkId) {
         _requireNotFrozen();
         _requireTarget(drop);
         _auth(ACT_CREATE_DROP, abi.encode(drop, linkKeyHash, mode, expiry, drip, relayerFee, value), deadline, sig);
@@ -710,7 +722,7 @@ contract PocketVault is IERC1271 {
         bytes32 expectedRecipientKeyHash,
         uint256 deadline,
         bytes calldata sig
-    ) external {
+    ) external nonReentrant {
         _requireTarget(drop);
         _auth(ACT_CONFIRM_DROP, abi.encode(drop, linkId, expectedRecipientKeyHash), deadline, sig);
         IPocketDropSender(drop).confirmRecipient(linkId, expectedRecipientKeyHash);
@@ -722,7 +734,7 @@ contract PocketVault is IERC1271 {
     /// @param linkId Link id.
     /// @param deadline Intent deadline.
     /// @param sig Owner intent signature.
-    function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external {
+    function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external nonReentrant {
         _requireTarget(drop);
         _auth(ACT_CANCEL_DROP, abi.encode(drop, linkId), deadline, sig);
         IPocketDropSender(drop).cancel(linkId);
@@ -746,7 +758,7 @@ contract PocketVault is IERC1271 {
         uint64 expiry,
         uint256 deadline,
         bytes calldata sig
-    ) external returns (uint256 poolId) {
+    ) external nonReentrant returns (uint256 poolId) {
         _requireNotFrozen();
         _requireTarget(pool);
         _auth(ACT_CREATE_POOL, abi.encode(pool, linkKeyHash, slots, perSlot, expiry), deadline, sig);
@@ -761,7 +773,7 @@ contract PocketVault is IERC1271 {
     /// @param poolId Pool id.
     /// @param deadline Intent deadline.
     /// @param sig Owner intent signature.
-    function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external {
+    function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external nonReentrant {
         _requireTarget(pool);
         _auth(ACT_CLOSE_POOL, abi.encode(pool, poolId), deadline, sig);
         IDropPoolHost(pool).close(poolId);
