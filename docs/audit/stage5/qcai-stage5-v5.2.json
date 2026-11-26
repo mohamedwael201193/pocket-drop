@@ -1,12 +1,10 @@
 {
   "stage": 5,
   "version": "v5.2",
-  "auditId": null,
-  "auditIdTodo": "TODO: add the QCAIA id from the dashboard (not recorded; the audit was run from a separate QCAI account)",
-  "publicReportUrl": null,
-  "publicReportUrlTodo": "TODO: add the public report URL once there is one (none was available when this record was made)",
-  "note": "Hand-transcribed record of the report text. The PDF export and the screenshot were not archived: they could not be checked here for personal data before commit. Titles, severities, locations and text below are verbatim from the report; ids ETH-V52-n are local numbering, not QCAI ids. The report names files only, no line numbers.",
-  "createdAtCairo": "2026-11-26 (time of day not recorded)",
+  "auditId": "QCAIA-1795664336974-576A1865",
+  "publicReportUrl": "https://dashboard.qorechain.io/audits/QCAIA-1795664336974-576A1865",
+  "note": "The public report page title shows 'Unknown contract'; the PDF names it 'PocketDrop v5.2'. Findings were first transcribed from the owner's export, then checked against the public API (https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795664336974-576A1865), archived as QCAI-stage5-v5.2-api.json with the e-mail field removed. The PDF export is archived as QCAI-stage5-v5.2.pdf. Finding ids ETH-001..ETH-007 are the QCAI ids. The report names files only, no line numbers.",
+  "createdAtCairo": "2026-11-26T05:38:56+02:00",
   "contractName": "PocketDrop v5.2",
   "network": "Testnet",
   "auditCost": "150 QOR",
@@ -32,7 +30,7 @@
   "findings": [
     {
       "index": 1,
-      "id": "ETH-V52-1",
+      "id": "ETH-001",
       "severity": "HIGH",
       "title": "Potential Reentrancy in Payout Contract",
       "location": "src/Payout.sol",
@@ -48,7 +46,7 @@
     },
     {
       "index": 2,
-      "id": "ETH-V52-2",
+      "id": "ETH-002",
       "severity": "MEDIUM",
       "title": "Missing Access Control in Recovery Finalization",
       "location": "src/PocketVault.sol",
@@ -64,7 +62,7 @@
     },
     {
       "index": 3,
-      "id": "ETH-V52-3",
+      "id": "ETH-003",
       "severity": "MEDIUM",
       "title": "Potential Overflow in Daily Drip Calculation",
       "location": "src/PocketDrop.sol",
@@ -79,7 +77,7 @@
     },
     {
       "index": 4,
-      "id": "ETH-V52-4",
+      "id": "ETH-004",
       "severity": "LOW",
       "title": "Unchecked Return Values in External Calls",
       "location": "src/PocketVault.sol",
@@ -96,7 +94,7 @@
     },
     {
       "index": 5,
-      "id": "ETH-V52-5",
+      "id": "ETH-005",
       "severity": "MEDIUM",
       "title": "Potential Front-Running in Guardian Freeze",
       "location": "src/PocketVault.sol",
@@ -112,7 +110,7 @@
     },
     {
       "index": 6,
-      "id": "ETH-V52-6",
+      "id": "ETH-006",
       "severity": "LOW",
       "title": "Potential Gas Limit Issues in Guardian Validation",
       "location": "src/PocketVault.sol",
@@ -127,7 +125,7 @@
     },
     {
       "index": 7,
-      "id": "ETH-V52-7",
+      "id": "ETH-007",
       "severity": "INFO",
       "title": "ERC-1271 Implementation",
       "location": "src/PocketVault.sol",
@@ -138,5 +136,7 @@
         "test_qcai52_f7_erc1271_accepts_only_the_owners_bound_approval"
       ]
     }
-  ]
+  ],
+  "publicApiUrl": "https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795664336974-576A1865",
+  "createdAtUtc": "2026-11-26T03:38:56.974Z"
 }
