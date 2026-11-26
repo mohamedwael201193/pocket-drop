@@ -43,6 +43,8 @@ export default function SendPage() {
   const inst = INST[a.env];
   const [mode, setMode] = useState<'Confirmed' | 'Open'>('Confirmed');
   const [amount, setAmount] = useState('0.3');
+  // the prefilled amount was not typed by the sender: a problem with it is a grey hint until they edit it, not a red alert
+  const [amountEdited, setAmountEdited] = useState(false);
   const [openAck, setOpenAck] = useState(false);
   const [slots, setSlots] = useState('3');
   const [perSlot, setPerSlot] = useState('0.02');
@@ -153,11 +155,13 @@ export default function SendPage() {
             </label>
           )}
           <label htmlFor="amount" className="mt-4 block text-sm font-semibold text-zinc-900">Amount (QOR)</label>
-          <input id="amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" data-testid="amount" disabled={!ready}
+          <input id="amount" value={amount} onChange={(e) => { setAmount(e.target.value); setAmountEdited(true); }} inputMode="decimal" autoComplete="off" data-testid="amount" disabled={!ready}
             aria-invalid={ready && !!shownDropProblem} aria-describedby="drop-total drop-problem amount-lock"
             className="mt-1 w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-lg" />
           {lockReason && <p id="amount-lock" className="mt-2 text-xs font-medium text-zinc-700" data-testid="amount-lock">{lockReason}</p>}
-          {ready && shownDropProblem && <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{shownDropProblem}</p>}
+          {ready && shownDropProblem && (amountEdited
+            ? <p id="drop-problem" role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="drop-problem">{shownDropProblem}</p>
+            : <p id="drop-problem" className="mt-2 text-sm text-zinc-700" data-testid="drop-problem">{shownDropProblem}</p>)}
           <div id="drop-total" className="mt-3 rounded-2xl border border-zinc-200 bg-white/70 p-3 text-xs text-zinc-700" data-testid="drop-total">
             <div className="mb-1 font-semibold text-zinc-900">What leaves your Pocket</div>
             <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
