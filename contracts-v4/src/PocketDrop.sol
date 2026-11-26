@@ -5,13 +5,14 @@ import {PqcLib} from "./PqcLib.sol";
 import {Payout} from "./Payout.sol";
 import {IPocketDropSender} from "./interfaces/IPocket.sol";
 
-/// @title PocketDrop (v4)
+/// @title PocketDrop (v5.1)
 /// @notice Escrow that hands QOR to someone who has no wallet yet. The sender (a Pocket) creates a link whose
 ///         ML-DSA-87 key authorises binding a recipient; the recipient claims with a signature from the key registered
 ///         (with proof of possession) for their QoreChain account; the money lands in the recipient's POCKET
 ///         (`payTo`, a counterfactual address is fine).
-/// @dev Same bind/confirm/claim semantics as v3 plus: all signatures use the QoreX-prefixed message
-///      (`PqcLib.pqMessage`), the bind and claim digests commit to `payTo`, the claim signature is checked through
+/// @dev Same bind/confirm/claim semantics as v3 plus: all signatures use the QoreX-prefixed, purpose-tagged message
+///      (`PqcLib.pqMessage`), the bind and claim digests commit to
+///      `payTo`, the bind digest also commits to `feeTo` (v5.1: the relayer fee goes where the link key says), the claim signature is checked through
 ///      `PqcLib`, and the sender's confirmation is an intent executed by the sender's Pocket (`confirmRecipient`).
 ///      No owner, no admin, no upgradeability. State changes follow checks-effects-interactions behind a reentrancy
 ///      lock; payouts fall back to pull balances.
@@ -50,7 +51,8 @@ contract PocketDrop is Payout, IPocketDropSender {
         bytes32 recipientKeyHash;
     }
 
-    string internal constant BIND_DOMAIN = "POCKETDROP_BIND_V2";
+    /// @dev v5.1: the bind digest adds `feeTo`, so the domain moves to V3.
+    string internal constant BIND_DOMAIN = "POCKETDROP_BIND_V3";
     string internal constant CLAIM_DOMAIN = "POCKETDROP_CLAIM_V2";
 
     uint256 public immutable MIN_ESCROW;
@@ -88,7 +90,8 @@ contract PocketDrop is Payout, IPocketDropSender {
     event LinkClaimed(uint256 indexed linkId, address indexed recipient, address payTo, uint256 amount, address relayer);
     event LinkCancelled(uint256 indexed linkId, address indexed sender, uint256 refunded);
     event LinkRefunded(uint256 indexed linkId, address indexed sender, uint256 refunded, address caller);
-    event DripPaid(uint256 indexed linkId, address indexed recipient, uint256 drip, address indexed relayer, uint256 relayerFee);
+    /// @dev `feeTo` is the address the link-key signature named for the relayer fee (v5.1), not `msg.sender`.
+    event DripPaid(uint256 indexed linkId, address indexed recipient, uint256 drip, address indexed feeTo, uint256 relayerFee);
 
     error InvalidConfig();
     error InvalidMode();
@@ -110,7 +113,14 @@ contract PocketDrop is Payout, IPocketDropSender {
     error BadLinkSignature();
     error BadRecipientSignature();
     error RecipientChanged();
+    error BadFeeTo();
 
+    /// @param minEscrow Smallest allowed escrow amount.
+    /// @param maxAmount Largest allowed escrow amount (fits uint96).
+    /// @param maxDrip Largest allowed drip per link.
+    /// @param dailyDripCap Largest total drip one sender may commit per UTC day.
+    /// @param bindTimeout Seconds a bound link stays reserved before it can be re-bound.
+    /// @param maxExpiry Longest allowed link lifetime in seconds.
     constructor(
         uint256 minEscrow,
         uint256 maxAmount,
@@ -137,6 +147,12 @@ contract PocketDrop is Payout, IPocketDropSender {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Create and fund a link; `msg.sender` (a Pocket) is the sender. msg.value = amount + drip + relayerFee.
+    /// @param linkKeyHash keccak256 of the link's ML-DSA-87 public key.
+    /// @param mode 0 = Confirmed (sender checks the recipient key), 1 = Open (first bind wins).
+    /// @param expiry Unix time after which the link can only be refunded.
+    /// @param drip Paid to the recipient account on the first bind (covers its key registration).
+    /// @param relayerFee Paid to the bind's signed `feeTo` on the first bind.
+    /// @return linkId The new link id.
     function create(bytes32 linkKeyHash, uint8 mode, uint64 expiry, uint96 drip, uint96 relayerFee)
         external
         payable
@@ -162,50 +178,62 @@ contract PocketDrop is Payout, IPocketDropSender {
         emit LinkCreated(linkId, msg.sender, Mode(mode), amount, drip, relayerFee, expiry, linkKeyHash);
     }
 
-    /// @notice Bind a recipient account, its key and its payout Pocket to a link. Anyone may submit; the link key's
-    ///         signature over the bind digest is the authority.
+    /// @notice Bind a recipient account, its key, its payout Pocket and the fee receiver to a link. Anyone may submit;
+    ///         the link key's signature over the bind digest is the authority.
+    /// @dev v5.1 (F1): the relayer fee is paid to the signed `feeTo`, not to `msg.sender`, so whoever copies a pending
+    ///      bind and lands it first gains nothing. The drip and fee are paid on the first bind only.
+    /// @param linkId Link id.
+    /// @param recipient Account that will claim (its registered key must hash to `recipientKeyHash` at claim time).
+    /// @param recipientKeyHash keccak256 of the recipient's ML-DSA-87 public key.
+    /// @param payTo Pocket the escrow is paid to at claim.
+    /// @param feeTo Receiver of the link's relayer fee (the relayer for a relayed bind, the user for a self-relay).
+    /// @param linkPk The link's ML-DSA-87 public key (must hash to the link's `linkKeyHash`).
+    /// @param linkSig Link-key signature over `bindDigest(...)`.
     function bind(
         uint256 linkId,
         address recipient,
         bytes32 recipientKeyHash,
         address payTo,
+        address feeTo,
         bytes calldata linkPk,
         bytes calldata linkSig
     ) external nonReentrant {
         Link storage l = _existing(linkId);
-        State s = l.state;
-        if (s != State.Open && !(s == State.Bound && block.timestamp > l.bindDeadline)) revert InvalidState(s);
+        {
+            State s = l.state;
+            if (s != State.Open && !(s == State.Bound && block.timestamp > l.bindDeadline)) revert InvalidState(s);
+        }
         if (block.timestamp >= l.expiry) revert Expired();
         if (recipient == address(0) || recipient == address(this) || payTo == address(0) || payTo == address(this)) {
             revert BadRecipient();
         }
+        if (feeTo == address(0) || feeTo == address(this)) revert BadFeeTo();
         if (recipientKeyHash == bytes32(0)) revert ZeroRecipientKey();
-        if (keccak256(linkPk) != l.linkKeyHash) revert LinkKeyMismatch();
-        if (!PqcLib.verify(linkPk, linkSig, PqcLib.pqMessage(bindDigest(linkId, recipient, recipientKeyHash, payTo)))) {
-            revert BadLinkSignature();
-        }
+        _checkBindSig(l.linkKeyHash, bindDigest(linkId, recipient, recipientKeyHash, payTo, feeTo), linkPk, linkSig);
 
-        uint64 deadline = uint64(block.timestamp + BIND_TIMEOUT);
         l.state = State.Bound;
         l.recipient = recipient;
         l.payTo = payTo;
         l.recipientKeyHash = recipientKeyHash;
-        l.bindDeadline = deadline;
+        l.bindDeadline = uint64(block.timestamp + BIND_TIMEOUT);
         bool first = !l.dripPaid;
-        uint256 drip = l.drip;
-        uint256 fee = l.relayerFee;
         if (first) l.dripPaid = true;
 
-        emit LinkBound(linkId, recipient, payTo, recipientKeyHash, deadline, !first, msg.sender);
+        emit LinkBound(linkId, recipient, payTo, recipientKeyHash, l.bindDeadline, !first, msg.sender);
 
-        if (first) {
-            emit DripPaid(linkId, recipient, drip, msg.sender, fee);
-            _pay(recipient, drip);
-            _pay(msg.sender, fee);
-        }
+        if (first) _payFirstBind(linkId, recipient, feeTo, l.drip, l.relayerFee);
+    }
+
+    /// @dev First bind only: pay the drip to the recipient account and the relayer fee to the signed `feeTo`.
+    function _payFirstBind(uint256 linkId, address recipient, address feeTo, uint256 drip, uint256 fee) internal {
+        emit DripPaid(linkId, recipient, drip, feeTo, fee);
+        _pay(recipient, drip);
+        _pay(feeTo, fee);
     }
 
     /// @notice Sender confirms the bound recipient key (Confirmed mode). Called by the sender's Pocket.
+    /// @param linkId Link id.
+    /// @param expectedRecipientKeyHash The key hash the sender checked (4 words); must equal the bound one.
     function confirmRecipient(uint256 linkId, bytes32 expectedRecipientKeyHash) external override nonReentrant {
         Link storage l = _existing(linkId);
         if (l.recipientKeyHash != expectedRecipientKeyHash) revert RecipientChanged();
@@ -221,6 +249,8 @@ contract PocketDrop is Payout, IPocketDropSender {
 
     /// @notice Claim: pays the escrow to the bound `payTo` Pocket. Anyone may submit; the recipient's ML-DSA-87
     ///         signature over the claim digest is the authority.
+    /// @param linkId Link id.
+    /// @param recipientSig Recipient-key signature over `claimDigest(linkId, recipient, payTo)`.
     function claim(uint256 linkId, bytes calldata recipientSig) external nonReentrant {
         Link storage l = _existing(linkId);
         State s = l.state;
@@ -246,6 +276,7 @@ contract PocketDrop is Payout, IPocketDropSender {
     }
 
     /// @notice Sender cancels (Open, or Bound in Confirmed mode); the unpaid escrow returns to the sender.
+    /// @param linkId Link id.
     function cancel(uint256 linkId) external override nonReentrant {
         Link storage l = _existing(linkId);
         if (msg.sender != l.sender) revert NotSender();
@@ -260,6 +291,7 @@ contract PocketDrop is Payout, IPocketDropSender {
     }
 
     /// @notice After expiry anyone may return the unpaid escrow to the sender.
+    /// @param linkId Link id.
     function refund(uint256 linkId) external nonReentrant {
         Link storage l = _existing(linkId);
         State s = l.state;
@@ -277,29 +309,50 @@ contract PocketDrop is Payout, IPocketDropSender {
                                  VIEWS
     //////////////////////////////////////////////////////////////*/
 
+    /// @notice Read a link.
+    /// @param linkId Link id.
+    /// @return The stored link (state None = not found).
     function getLink(uint256 linkId) external view returns (Link memory) {
         return _links[linkId];
     }
 
     /// @notice Digest the link key signs (as `PqcLib.pqMessage(digest)`) to bind a recipient.
-    function bindDigest(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo)
+    /// @param linkId Link id.
+    /// @param recipient Recipient account.
+    /// @param recipientKeyHash keccak256 of the recipient's ML-DSA-87 key.
+    /// @param payTo Payout Pocket.
+    /// @param feeTo Receiver of the relayer fee.
+    /// @return The digest.
+    function bindDigest(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, address feeTo)
         public
         view
         returns (bytes32)
     {
-        return keccak256(abi.encode(BIND_DOMAIN, block.chainid, address(this), linkId, recipient, recipientKeyHash, payTo));
+        return keccak256(
+            abi.encode(BIND_DOMAIN, block.chainid, address(this), linkId, recipient, recipientKeyHash, payTo, feeTo)
+        );
     }
 
     /// @notice Digest the recipient signs (as `PqcLib.pqMessage(digest)`) to claim.
+    /// @param linkId Link id.
+    /// @param recipient Recipient account.
+    /// @param payTo Payout Pocket.
+    /// @return The digest.
     function claimDigest(uint256 linkId, address recipient, address payTo) public view returns (bytes32) {
         return keccak256(abi.encode(CLAIM_DOMAIN, block.chainid, address(this), linkId, recipient, payTo));
     }
 
+    /// @notice Escrow still held for a live link (amount, plus drip and fee before the first bind).
+    /// @param linkId Link id.
+    /// @return Wei owed back to the sender on cancel or refund (zero for a finished link).
     function unpaidOf(uint256 linkId) external view returns (uint256) {
         Link storage l = _links[linkId];
         return _isLive(l.state) ? _unpaid(l) : 0;
     }
 
+    /// @notice Drip a sender has committed today (UTC day).
+    /// @param account Sender (a Pocket).
+    /// @return Wei of drip debited today.
     function dripUsedToday(address account) external view returns (uint256) {
         return _dripSpent[account][block.timestamp / 1 days];
     }
@@ -308,6 +361,7 @@ contract PocketDrop is Payout, IPocketDropSender {
                                INTERNALS
     //////////////////////////////////////////////////////////////*/
 
+    /// @dev Checks the value split, the limits, the expiry and the sender's daily drip cap; returns the escrow amount.
     function _validateCreate(uint64 expiry, uint96 drip, uint96 relayerFee) internal returns (uint256 amount) {
         uint256 extras = uint256(drip) + uint256(relayerFee);
         if (msg.value < extras) revert AmountOutOfRange(0);
@@ -316,21 +370,37 @@ contract PocketDrop is Payout, IPocketDropSender {
         if (drip > MAX_DRIP) revert DripTooHigh();
         if (expiry <= block.timestamp || expiry > block.timestamp + MAX_EXPIRY) revert InvalidExpiry();
 
+        // Subtractive headroom check before the addition: `spent + drip <= DAILY_DRIP_CAP` is proven before it is
+        // computed, so the sum cannot overflow (Solidity 0.8.28 checked math is a second guard).
         uint256 day = block.timestamp / 1 days;
-        uint256 used = _dripSpent[msg.sender][day] + drip;
-        if (used > DAILY_DRIP_CAP) revert DailyDripCapExceeded();
+        uint256 spent = _dripSpent[msg.sender][day];
+        if (spent > DAILY_DRIP_CAP || uint256(drip) > DAILY_DRIP_CAP - spent) revert DailyDripCapExceeded();
+        uint256 used = spent + uint256(drip);
         _dripSpent[msg.sender][day] = used;
     }
 
+    /// @dev The link key must hash to `linkKeyHash` and sign `digest`. Split out of `bind` to keep the
+    ///      stack shallow.
+    function _checkBindSig(bytes32 linkKeyHash, bytes32 digest, bytes calldata linkPk, bytes calldata linkSig)
+        internal
+        view
+    {
+        if (keccak256(linkPk) != linkKeyHash) revert LinkKeyMismatch();
+        if (!PqcLib.verify(linkPk, linkSig, PqcLib.pqMessage(digest))) revert BadLinkSignature();
+    }
+
+    /// @dev The stored link, or revert `LinkNotFound`.
     function _existing(uint256 linkId) internal view returns (Link storage l) {
         l = _links[linkId];
         if (l.state == State.None) revert LinkNotFound();
     }
 
+    /// @dev Open, Bound or Confirmed.
     function _isLive(State s) internal pure returns (bool) {
         return s == State.Open || s == State.Bound || s == State.Confirmed;
     }
 
+    /// @dev Escrow still owed to the sender: amount, plus drip and fee if no bind paid them yet.
     function _unpaid(Link storage l) internal view returns (uint256) {
         return l.dripPaid ? uint256(l.amount) : uint256(l.amount) + uint256(l.drip) + uint256(l.relayerFee);
     }

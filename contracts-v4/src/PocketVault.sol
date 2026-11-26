@@ -12,7 +12,11 @@ import {IERC1271, IPocketDropSender, IDropPoolHost} from "./interfaces/IPocket.s
 ///      Delays are immutables of the implementation, so a lab deployment can use short ones.
 ///
 ///      Every owner intent signs `keccak256(abi.encode(action, chainid, vault, nonce, deadline, params))` as the
-///      QoreX-prefixed message (`PqcLib.pqMessage`). The nonce is a single sequential counter consumed on success.
+///      QoreX-prefixed message (`PqcLib.pqMessage(digest)`); guardian approvals likewise, under their own action
+///      tags and nonces. ERC-1271 approvals are signed as `PqcLib.pqMessage(TAG_ERC1271, erc1271Digest(hash))` over a
+///      Pocket- and chain-bound digest (v5.1, F2), a byte layout no intent can have, so no ERC-1271 approval is ever
+///      accepted as an intent and vice versa. The nonce is a single sequential counter
+///      consumed on success.
 ///
 ///      Safety rules beyond the spec text (all tightenings):
 ///      - the owner key hash is pinned at init and after recovery (a later key rotation does not move the Pocket);
@@ -50,6 +54,8 @@ contract PocketVault is IERC1271 {
     bytes32 public constant ACT_FREEZE = keccak256("POCKET_GUARDIAN_FREEZE_V1");
     /// @dev Unanimous guardian recovery intent (own action tag, shares `recoveryNonce`).
     bytes32 public constant ACT_RECOVER_UNANIMOUS = keccak256("POCKET_RECOVER_UNANIMOUS_V1");
+    /// @dev Domain of an ERC-1271 approval (v5.1): binds the approved hash to this Pocket and the chain id.
+    bytes32 public constant ERC1271_DOMAIN = keccak256("POCKET_ERC1271_V1");
 
     uint256 public constant MAX_GUARDIANS = 5;
     /// @notice After two freezes in a row, a third needs this many FREEZE_PERIODs of quiet (or a guardian-set change).
@@ -207,6 +213,10 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice One-shot initialization by the factory. Reads and pins the owner's proven ML-DSA-87 key.
+    /// @param owner_ Owner account (registered, proven ML-DSA-87 key).
+    /// @param guardians_ Initial guardian set (0, or 2..5).
+    /// @param threshold_ Guardian threshold (0 with no guardians, else 2..n).
+    /// @param dailyLimit_ Daily allowance in wei.
     function initialize(address owner_, address[] calldata guardians_, uint8 threshold_, uint256 dailyLimit_) external {
         if (factory != address(0)) revert AlreadyInitialized();
         factory = msg.sender;
@@ -220,6 +230,7 @@ contract PocketVault is IERC1271 {
         emit Initialized(msg.sender, owner_, ownerKeyHash, dailyLimit_);
     }
 
+    /// @notice Accept QOR (a Pocket can be funded before and after it is deployed).
     receive() external payable {
         emit Received(msg.sender, msg.value);
     }
@@ -228,10 +239,25 @@ contract PocketVault is IERC1271 {
                                 ERC-1271
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Valid only for the owner's ML-DSA-87 signature over the QoreX-prefixed message of `hash`.
+    /// @notice Valid only for the owner's ML-DSA-87 signature over
+    ///         `pqMessage(TAG_ERC1271, erc1271Digest(hash))`.
+    /// @dev v5.1 (F2, F4): the approval is bound to this Pocket and the chain id and carries its own tag, so it can never
+    ///      be an owner intent, and one approval is not valid for another Pocket of the same owner key.
+    /// @param hash The hash being approved.
+    /// @param signature The owner's ML-DSA-87 signature.
+    /// @return 0x1626ba7e when valid, 0xffffffff otherwise.
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
-        if (PqcLib.verifyForKey(owner, ownerKeyHash, PqcLib.pqMessage(hash), signature)) return 0x1626ba7e;
+        if (PqcLib.verifyForKey(
+                owner, ownerKeyHash, PqcLib.pqMessage(PqcLib.TAG_ERC1271, erc1271Digest(hash)), signature
+            )) return 0x1626ba7e;
         return 0xffffffff;
+    }
+
+    /// @notice The digest the owner signs (as `PqcLib.pqMessage(PqcLib.TAG_ERC1271, digest)`) to approve `hash`.
+    /// @param hash The hash being approved.
+    /// @return The Pocket- and chain-bound approval digest.
+    function erc1271Digest(bytes32 hash) public view returns (bytes32) {
+        return keccak256(abi.encode(ERC1271_DOMAIN, block.chainid, address(this), hash));
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -239,8 +265,15 @@ contract PocketVault is IERC1271 {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Pay `to`. Within today's allowance it pays now; above it, the spend is queued for TIMELOCK.
+    /// @param to Receiver.
+    /// @param amount Wei to pay.
+    /// @param deadline Intent deadline (unix time).
+    /// @param sig Owner intent signature.
     /// @return queuedId 0 if paid immediately, otherwise the queue id.
-    function spend(address to, uint256 amount, uint256 deadline, bytes calldata sig) external returns (uint256 queuedId) {
+    function spend(address to, uint256 amount, uint256 deadline, bytes calldata sig)
+        external
+        returns (uint256 queuedId)
+    {
         _requireNotFrozen();
         _auth(ACT_SPEND, abi.encode(to, amount), deadline, sig);
         if (to == address(0) || amount == 0) revert BadParams();
@@ -257,6 +290,7 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Execute a queued spend after its timelock. Anyone may call; the owner already signed.
+    /// @param id Queue id.
     function executeQueued(uint256 id) external {
         _requireNotFrozen();
         if (recoveryAt != 0) revert RecoveryPending();
@@ -270,6 +304,9 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Owner veto of a queued spend.
+    /// @param id Queue id.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function vetoQueued(uint256 id, uint256 deadline, bytes calldata sig) external {
         _auth(ACT_VETO_QUEUED, abi.encode(id), deadline, sig);
         Queued storage q = _queue[id];
@@ -283,6 +320,9 @@ contract PocketVault is IERC1271 {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Lowering (or keeping) the daily limit is immediate; raising it is queued for TIMELOCK.
+    /// @param newLimit New daily limit in wei.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function setLimit(uint256 newLimit, uint256 deadline, bytes calldata sig) external {
         _auth(ACT_SET_LIMIT, abi.encode(newLimit), deadline, sig);
         if (newLimit <= dailyLimit) {
@@ -310,6 +350,10 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Queue a new guardian set (0 guardians + threshold 0, or 2..5 guardians with 2 <= threshold <= n).
+    /// @param guardians_ New guardian set.
+    /// @param threshold_ New threshold.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function setGuardians(address[] calldata guardians_, uint8 threshold_, uint256 deadline, bytes calldata sig)
         external
     {
@@ -338,6 +382,8 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Owner cancels a queued limit raise and a queued guardian change.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function cancelPending(uint256 deadline, bytes calldata sig) external {
         _auth(ACT_CANCEL_PENDING, "", deadline, sig);
         _clearPending();
@@ -350,6 +396,11 @@ contract PocketVault is IERC1271 {
 
     /// @notice Propose replacing the owner key. Needs `threshold` distinct guardians' ML-DSA signatures over the
     ///         recovery digest. The old key may veto until `finalizeRecovery` is possible.
+    /// @param newOwner Proposed owner account (registered, proven ML-DSA-87 key; not a guardian).
+    /// @param newKeyHash keccak256 of the proposed owner's key.
+    /// @param deadline Approval deadline.
+    /// @param signers Distinct guardians, at least `threshold`.
+    /// @param sigs Their signatures over `recoveryDigest`.
     function proposeRecovery(
         address newOwner,
         bytes32 newKeyHash,
@@ -373,6 +424,8 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice The CURRENT owner key vetoes a pending recovery.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function vetoRecovery(uint256 deadline, bytes calldata sig) external {
         _auth(ACT_VETO_RECOVERY, "", deadline, sig);
         if (recoveryAt == 0) revert NoRecoveryPending();
@@ -380,12 +433,21 @@ contract PocketVault is IERC1271 {
         emit RecoveryVetoed();
     }
 
-    /// @notice Complete a recovery after its delay. Anyone may call.
-    function finalizeRecovery() external {
+    /// @dev Enforces that a guardian-signed threshold recovery proposal is pending, its timelock has elapsed, and the
+    ///      proposed owner key still passes `PqcLib.requireKey`. Callers cannot supply or alter any parameter.
+    modifier onlyApprovedThresholdRecovery() {
         uint64 at = recoveryAt;
         if (at == 0) revert NoRecoveryPending();
         if (block.timestamp < at) revert TooEarly();
         PqcLib.requireKey(recoveryOwner, recoveryKeyHash);
+        _;
+    }
+
+    /// @notice Complete a guardian-approved threshold recovery after its timelock. Permissionless execution is
+    ///         intentional: `recoveryOwner` and `recoveryKeyHash` were already authorized by threshold guardian
+    ///         ML-DSA-87 signatures in `proposeRecovery`, remain vetoable by the owner via `vetoRecovery`, and the
+    ///         caller chooses nothing.
+    function finalizeRecovery() external onlyApprovedThresholdRecovery {
         address old = owner;
         owner = recoveryOwner;
         ownerKeyHash = recoveryKeyHash;
@@ -399,6 +461,11 @@ contract PocketVault is IERC1271 {
     ///         this is the lost-or-stolen-key path. It overrides a pending threshold recovery and, while pending,
     ///         the Pocket is frozen. A new unanimous proposal replaces a pending one (restarting the delay), which
     ///         lets the guardians fix a proposal whose new key turned out unusable.
+    /// @param newOwner Proposed owner account (registered, proven ML-DSA-87 key; not a guardian).
+    /// @param newKeyHash keccak256 of the proposed owner's key.
+    /// @param deadline Approval deadline.
+    /// @param signers All guardians, each once.
+    /// @param sigs Their signatures over `unanimousDigest`.
     function proposeRecoveryUnanimous(
         address newOwner,
         bytes32 newKeyHash,
@@ -421,12 +488,20 @@ contract PocketVault is IERC1271 {
         emit UnanimousRecoveryProposed(newOwner, newKeyHash, uRecoveryAt, recoveryNonce - 1);
     }
 
-    /// @notice Complete a unanimous recovery after its delay. Anyone may call.
-    function finalizeRecoveryUnanimous() external {
+    /// @dev Enforces that a guardian-signed unanimous recovery proposal is pending, its timelock has elapsed, and the
+    ///      proposed owner key still passes `PqcLib.requireKey`. Callers cannot supply or alter any parameter.
+    modifier onlyApprovedUnanimousRecovery() {
         uint64 at = uRecoveryAt;
         if (at == 0) revert NoRecoveryPending();
         if (block.timestamp < at) revert TooEarly();
         PqcLib.requireKey(uRecoveryOwner, uRecoveryKeyHash);
+        _;
+    }
+
+    /// @notice Complete a guardian-approved unanimous recovery after its timelock. Permissionless execution is
+    ///         intentional: `uRecoveryOwner` and `uRecoveryKeyHash` were already authorized by ALL guardians'
+    ///         ML-DSA-87 signatures in `proposeRecoveryUnanimous`, and the caller chooses nothing.
+    function finalizeRecoveryUnanimous() external onlyApprovedUnanimousRecovery {
         address old = owner;
         owner = uRecoveryOwner;
         ownerKeyHash = uRecoveryKeyHash;
@@ -436,7 +511,11 @@ contract PocketVault is IERC1271 {
         emit RecoveryFinalized(old, owner, ownerKeyHash);
     }
 
-    /// @notice The digest each guardian signs (as the QoreX-prefixed message) for the next unanimous recovery.
+    /// @notice The digest each guardian signs (as `PqcLib.pqMessage(digest)`) for the next unanimous recovery.
+    /// @param newOwner Proposed owner.
+    /// @param newKeyHash keccak256 of the proposed owner's key.
+    /// @param deadline Approval deadline.
+    /// @return The digest (bound to this Pocket, the chain and `recoveryNonce`).
     function unanimousDigest(address newOwner, bytes32 newKeyHash, uint256 deadline) public view returns (bytes32) {
         return keccak256(
             abi.encode(
@@ -453,6 +532,13 @@ contract PocketVault is IERC1271 {
     ///         `freezeDigest(nonce_, deadline)`. The owner key cannot lift it. Not allowed while already frozen. After
     ///         `MAX_FREEZE_STREAK` freezes in a row (gaps shorter than `FREEZE_COOLDOWN_PERIODS` periods) the same
     ///         guardian set cannot freeze again until it has been quiet for that long or the set is changed.
+    /// @dev Sequential EVM execution and strict nonce/state guards prevent concurrent or duplicate freezes:
+    ///      `nonce_ != freezeNonce` reverts `BadNonce` and `frozen()` reverts `AlreadyFrozen` before any state update,
+    ///      `freezeNonce` and `frozenUntil` are updated together, and no external call is made.
+    /// @param signers Distinct guardians, at least `threshold`.
+    /// @param sigs Their signatures over `freezeDigest(nonce_, deadline)`.
+    /// @param nonce_ Must equal `freezeNonce`.
+    /// @param deadline Approval deadline.
     function guardianFreeze(address[] calldata signers, bytes[] calldata sigs, uint256 nonce_, uint256 deadline)
         external
     {
@@ -462,31 +548,41 @@ contract PocketVault is IERC1271 {
         if (frozen()) revert AlreadyFrozen();
         if (signers.length != sigs.length || signers.length < threshold) revert NotEnoughSigners();
         _checkGuardianSigs(signers, sigs, PqcLib.pqMessage(freezeDigest(nonce_, deadline)));
-        uint8 streak = block.timestamp >= uint256(frozenUntil) + FREEZE_COOLDOWN_PERIODS * FREEZE_PERIOD
-            ? 1
-            : freezeStreak + 1;
+        uint8 streak =
+            block.timestamp >= uint256(frozenUntil) + FREEZE_COOLDOWN_PERIODS * FREEZE_PERIOD ? 1 : freezeStreak + 1;
         if (streak > MAX_FREEZE_STREAK) revert FreezeCapped();
+        // State transition: bump freezeNonce and set frozenUntil before emitting.
         freezeStreak = streak;
         freezeNonce = nonce_ + 1;
         frozenUntil = uint64(block.timestamp + FREEZE_PERIOD);
+        assert(frozen() && freezeNonce == nonce_ + 1);
         emit GuardianFrozen(frozenUntil, nonce_, streak);
     }
 
-    /// @notice The digest each guardian signs (as the QoreX-prefixed message) for the freeze with nonce `nonce_`.
+    /// @notice The digest each guardian signs (as `PqcLib.pqMessage(digest)`) for the freeze with nonce `nonce_`.
+    /// @param nonce_ Freeze nonce.
+    /// @param deadline Approval deadline.
+    /// @return The digest.
     function freezeDigest(uint256 nonce_, uint256 deadline) public view returns (bytes32) {
         return keccak256(abi.encode(ACT_FREEZE, block.chainid, address(this), nonce_, deadline));
     }
 
     /// @notice True while a guardian freeze runs or a unanimous recovery is pending.
+    /// @return Whether the Pocket is frozen now.
     function frozen() public view returns (bool) {
         return block.timestamp < frozenUntil || uRecoveryAt != 0;
     }
 
-    /// @notice The digest each guardian signs (as the QoreX-prefixed message) for the next recovery proposal.
+    /// @notice The digest each guardian signs (as `PqcLib.pqMessage(digest)`) for the next recovery proposal.
+    /// @param newOwner Proposed owner.
+    /// @param newKeyHash keccak256 of the proposed owner's key.
+    /// @param deadline Approval deadline.
+    /// @return The digest (bound to this Pocket, the chain and `recoveryNonce`).
     function recoveryDigest(address newOwner, bytes32 newKeyHash, uint256 deadline) public view returns (bytes32) {
-        return keccak256(
-            abi.encode(ACT_RECOVER, block.chainid, address(this), recoveryNonce, deadline, newOwner, newKeyHash)
-        );
+        return
+            keccak256(
+                abi.encode(ACT_RECOVER, block.chainid, address(this), recoveryNonce, deadline, newOwner, newKeyHash)
+            );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -495,6 +591,16 @@ contract PocketVault is IERC1271 {
 
     /// @notice Create a PocketDrop link with this Pocket as sender. `value` (= escrow + drip + relayer fee) is debited
     ///         from today's allowance.
+    /// @param drop PocketDrop instance.
+    /// @param linkKeyHash keccak256 of the link's ML-DSA-87 key.
+    /// @param mode 0 = Confirmed, 1 = Open.
+    /// @param expiry Link expiry.
+    /// @param drip Drip for the recipient.
+    /// @param relayerFee Relayer fee paid at the first bind.
+    /// @param value escrow + drip + relayerFee.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
+    /// @return linkId The new link id.
     function createDrop(
         address drop,
         bytes32 linkKeyHash,
@@ -514,6 +620,11 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Sender intent: confirm the recipient key the drop is bound to (the "sender check", one tap).
+    /// @param drop PocketDrop instance.
+    /// @param linkId Link id.
+    /// @param expectedRecipientKeyHash The key hash the sender checked.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function confirmDrop(
         address drop,
         uint256 linkId,
@@ -527,6 +638,10 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Sender intent: cancel a drop; the escrow returns to this Pocket.
+    /// @param drop PocketDrop instance.
+    /// @param linkId Link id.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external {
         _auth(ACT_CANCEL_DROP, abi.encode(drop, linkId), deadline, sig);
         IPocketDropSender(drop).cancel(linkId);
@@ -534,6 +649,14 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Host a DropPool from this Pocket; slots * perSlot is debited from today's allowance.
+    /// @param pool DropPool instance.
+    /// @param linkKeyHash keccak256 of the pool's link key.
+    /// @param slots Slot count.
+    /// @param perSlot Amount per slot.
+    /// @param expiry Pool expiry.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
+    /// @return poolId The new pool id.
     function createPool(
         address pool,
         bytes32 linkKeyHash,
@@ -552,6 +675,10 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice Close a hosted pool; the unclaimed remainder returns to this Pocket.
+    /// @param pool DropPool instance.
+    /// @param poolId Pool id.
+    /// @param deadline Intent deadline.
+    /// @param sig Owner intent signature.
     function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external {
         _auth(ACT_CLOSE_POOL, abi.encode(pool, poolId), deadline, sig);
         IDropPoolHost(pool).close(poolId);
@@ -562,7 +689,12 @@ contract PocketVault is IERC1271 {
                                   VIEWS
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice The digest an owner intent signs for `action` at `nonce_` (sign it as `PqcLib.pqMessage(digest)`).
+    /// @notice The digest an owner intent signs for `action` at `nonce_` (as `PqcLib.pqMessage(digest)`).
+    /// @param action One of the `ACT_*` tags.
+    /// @param nonce_ Intent nonce.
+    /// @param deadline Intent deadline.
+    /// @param params ABI-encoded action parameters.
+    /// @return The digest.
     function intentDigest(bytes32 action, uint256 nonce_, uint256 deadline, bytes memory params)
         public
         view
@@ -572,19 +704,27 @@ contract PocketVault is IERC1271 {
     }
 
     /// @notice What can still be spent immediately today.
+    /// @return Remaining daily allowance in wei.
     function allowanceLeft() public view returns (uint256) {
         uint256 used = spentDay == block.timestamp / 1 days ? spentToday : 0;
         return used >= dailyLimit ? 0 : dailyLimit - used;
     }
 
+    /// @notice Current guardian set.
+    /// @return The guardians.
     function guardians() external view returns (address[] memory) {
         return _guardians;
     }
 
+    /// @notice Queued guardian set (empty when none).
+    /// @return The queued guardians.
     function pendingGuardians() external view returns (address[] memory) {
         return _pendingGuardians;
     }
 
+    /// @notice Read a queued spend.
+    /// @param id Queue id.
+    /// @return The queued spend.
     function getQueued(uint256 id) external view returns (Queued memory) {
         return _queue[id];
     }
@@ -602,6 +742,7 @@ contract PocketVault is IERC1271 {
         nonce++;
     }
 
+    /// @dev Revert `Frozen` while a freeze or a unanimous recovery is active.
     function _requireNotFrozen() internal view {
         if (frozen()) revert Frozen();
     }
@@ -617,20 +758,21 @@ contract PocketVault is IERC1271 {
     ///      Gas bound (QCAI ETH-004): the loops are bounded. `_guardians.length <= MAX_GUARDIANS` (5) because both
     ///      `initialize` and `setGuardians` go through `_validateGuardians`, which reverts when `n > MAX_GUARDIANS`.
     ///      Every signer must be a distinct guardian (`NotGuardian` / `DuplicateSigner`), so a call with more than
-    ///      MAX_GUARDIANS signers reverts at the latest on the sixth entry; the duplicate scan is at most 5 x 4 / 2 steps.
-    function _checkGuardianSigs(address[] calldata signers, bytes[] calldata sigs, bytes memory message)
-        internal
-        view
-    {
-        for (uint256 i; i < signers.length; i++) {
+    ///      MAX_GUARDIANS signers can never be valid and fails fast, before any precompile call. The duplicate scan is
+    ///      at most 5 x 4 / 2 steps.
+    function _checkGuardianSigs(address[] calldata signers, bytes[] calldata sigs, bytes memory message) internal view {
+        uint256 len = signers.length;
+        if (len > MAX_GUARDIANS) revert NotGuardian();
+        for (uint256 i; i < len && i < MAX_GUARDIANS; i++) {
             if (!_isGuardian(signers[i])) revert NotGuardian();
-            for (uint256 j; j < i; j++) {
+            for (uint256 j; j < i && j < MAX_GUARDIANS; j++) {
                 if (signers[j] == signers[i]) revert DuplicateSigner();
             }
             if (!PqcLib.verifyFor(signers[i], message, sigs[i])) revert BadSignature();
         }
     }
 
+    /// @dev Add `amount` to today's spend (a new UTC day starts from zero).
     function _debit(uint256 amount) internal {
         uint256 day = block.timestamp / 1 days;
         if (spentDay != day) {
@@ -641,22 +783,26 @@ contract PocketVault is IERC1271 {
         }
     }
 
+    /// @dev Debit or revert `OverDailyLimit` (drops and pools never queue).
     function _debitOrRevert(uint256 amount) internal {
         if (amount > allowanceLeft()) revert OverDailyLimit();
         _debit(amount);
     }
 
+    /// @dev Pay QOR; revert `SendFailed` if the receiver rejects it.
     function _send(address to, uint256 amount) internal {
         (bool ok,) = to.call{value: amount}("");
         if (!ok) revert SendFailed();
     }
 
+    /// @dev Drop a queued limit raise and a queued guardian change.
     function _clearPending() internal {
         pendingLimitAt = 0;
         pendingGuardiansAt = 0;
         delete _pendingGuardians;
     }
 
+    /// @dev Linear scan of at most MAX_GUARDIANS entries.
     function _isGuardian(address who) internal view returns (bool) {
         uint256 n = _guardians.length;
         for (uint256 i; i < n; i++) {

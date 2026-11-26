@@ -99,15 +99,24 @@ library PqcLib {
     }
 
     /*//////////////////////////////////////////////////////////////
-                    v4: PREFIXED MESSAGE + KEY CHECKS
+                 PREFIXED, PURPOSE-TAGGED MESSAGES (v5.1)
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev QoreX signs `"qorechain-msg-v1|" + chainId + "|" + data` (qoresign `messagePqSignBytes`). Every v4 intent
-    ///      digest is signed as that byte string, so the contracts have one verification path for QoreX users and
-    ///      browser-key users alike.
+    /// @dev QoreX signs `"qorechain-msg-v1|" + chainId + "|" + data` (qoresign `messagePqSignBytes`). Every digest the
+    ///      contracts check is signed as that byte string, so QoreX users and browser-key users share one path.
     string internal constant MSG_PREFIX = "qorechain-msg-v1|";
     /// @dev Cosmos chain id string used in the prefix (Diana testnet).
     string internal constant CHAIN_ID_STR = "qorechain-diana";
+
+    /// @dev v5.1 (F2): approvals of an OUTSIDE hash are signed as `<tag>:0x<digest hex>`, protocol messages (owner
+    ///      intents, guardian approvals, link and claim signatures) as plain `0x<digest hex>`. The two byte layouts can
+    ///      never be equal (after the chain id one starts with "0x", the other with a tag), so an ERC-1271 or PqGuard
+    ///      approval of a hash chosen by some app can never be replayed as a Pocket intent, and vice versa. Protocol
+    ///      digests are separated from each other by their own domain strings and action tags inside the hash.
+    /// @dev ERC-1271 approvals of a Pocket (`PocketVault.isValidSignature`, over `erc1271Digest`).
+    string internal constant TAG_ERC1271 = "pocket-erc1271-v1";
+    /// @dev PqGuard approvals by a plain PoP-proven account (over `PqGuard.approvalDigest`).
+    string internal constant TAG_PQGUARD = "pqguard-v1";
 
     /// @notice Why a key check failed; `Ok` means the account has a usable, proven ML-DSA-87 key.
     enum KeyCheck {
@@ -127,11 +136,27 @@ library PqcLib {
     error KeyMismatch();
     error BadKeyLength();
 
-    /// @notice The exact bytes an owner signs for `digest`. THE ONE PLACE the message format lives.
-    /// @dev data = lowercase hex of the digest with a 0x prefix (66 chars), as produced by viem `keccak256`. If QoreX
-    ///      encodes the data differently, change only this function.
+    /// @notice The exact bytes a key signs for a protocol `digest` (owner intent, guardian approval, link or claim).
+    /// @dev Layout: `qorechain-msg-v1|qorechain-diana|0x<64 lowercase hex chars>`. The hex is the digest as produced by
+    ///      viem `keccak256`. Unchanged since v4.
+    /// @param digest The 32-byte digest being approved.
+    /// @return The message bytes passed to `pqcVerify`.
     function pqMessage(bytes32 digest) internal pure returns (bytes memory) {
-        bytes memory out = new bytes(66);
+        return bytes.concat(bytes(MSG_PREFIX), bytes(CHAIN_ID_STR), "|", _hex(digest));
+    }
+
+    /// @notice The exact bytes a key signs to approve an outside `digest` under purpose `tag` (ERC-1271, PqGuard).
+    /// @dev Layout: `qorechain-msg-v1|qorechain-diana|<tag>:0x<64 lowercase hex chars>` (v5.1, F2).
+    /// @param tag `TAG_ERC1271` or `TAG_PQGUARD`.
+    /// @param digest The 32-byte digest being approved.
+    /// @return The message bytes passed to `pqcVerify`.
+    function pqMessage(string memory tag, bytes32 digest) internal pure returns (bytes memory) {
+        return bytes.concat(bytes(MSG_PREFIX), bytes(CHAIN_ID_STR), "|", bytes(tag), ":", _hex(digest));
+    }
+
+    /// @dev `0x` + 64 lowercase hex chars of `digest`.
+    function _hex(bytes32 digest) private pure returns (bytes memory out) {
+        out = new bytes(66);
         out[0] = "0";
         out[1] = "x";
         bytes16 alphabet = "0123456789abcdef";
@@ -140,11 +165,14 @@ library PqcLib {
             out[2 + 2 * i] = alphabet[b >> 4];
             out[3 + 2 * i] = alphabet[b & 0x0f];
         }
-        return bytes.concat(bytes(MSG_PREFIX), bytes(CHAIN_ID_STR), "|", out);
     }
 
     /// @notice Check that `account` has a registered, proof-of-possession ML-DSA-87 key (and, if `pinned != 0`, that its
     ///         hash equals `pinned`).
+    /// @param account Account whose registry entry is read.
+    /// @param pinned Expected keccak256 of the key, or zero for any key.
+    /// @return code `KeyCheck.Ok` or the first failing rule.
+    /// @return pk The registered key when `code == Ok`, else empty.
     function checkKey(address account, bytes32 pinned) internal view returns (KeyCheck code, bytes memory pk) {
         KeyStatus memory ks = keyStatus(account);
         if (!ks.ok) return (KeyCheck.Unavailable, pk);
@@ -157,6 +185,9 @@ library PqcLib {
     }
 
     /// @notice Same as `checkKey` but reverts with a specific error unless the key is usable.
+    /// @param account Account whose registry entry is read.
+    /// @param pinned Expected keccak256 of the key, or zero for any key.
+    /// @return pk The registered 2592-byte ML-DSA-87 key.
     function requireKey(address account, bytes32 pinned) internal view returns (bytes memory pk) {
         KeyCheck code;
         (code, pk) = checkKey(account, pinned);
@@ -170,11 +201,20 @@ library PqcLib {
 
     /// @notice Verify `sig` over `message` with the key currently registered for `account`.
     /// @dev False (never a revert) when the key is missing, unproven, not ML-DSA-87, or the signature is wrong.
+    /// @param account Signer account.
+    /// @param message Full message bytes (see `pqMessage`).
+    /// @param sig ML-DSA-87 signature.
+    /// @return True only for a valid signature by a usable key.
     function verifyFor(address account, bytes memory message, bytes memory sig) internal view returns (bool) {
         return verifyForKey(account, bytes32(0), message, sig);
     }
 
     /// @notice As `verifyFor`, additionally requiring `keccak256(registered key) == pinned` when `pinned != 0`.
+    /// @param account Signer account.
+    /// @param pinned Expected keccak256 of the key, or zero for any key.
+    /// @param message Full message bytes (see `pqMessage`).
+    /// @param sig ML-DSA-87 signature.
+    /// @return True only for a valid signature by a usable key with the pinned hash.
     function verifyForKey(address account, bytes32 pinned, bytes memory message, bytes memory sig)
         internal
         view

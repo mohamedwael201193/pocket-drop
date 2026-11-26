@@ -56,6 +56,10 @@ contract DropPool is Payout, IDropPoolHost {
     error BadRecipientSignature();
     error NotHostOrNotExpired();
 
+    /// @param minPerSlot Smallest allowed per-slot amount.
+    /// @param maxPerSlot Largest allowed per-slot amount.
+    /// @param maxSlots Largest allowed slot count.
+    /// @param maxExpiry Longest allowed pool lifetime in seconds.
     constructor(uint256 minPerSlot, uint256 maxPerSlot, uint256 maxSlots, uint256 maxExpiry) {
         if (
             minPerSlot == 0 || maxPerSlot < minPerSlot || maxPerSlot > type(uint96).max || maxSlots == 0
@@ -68,6 +72,11 @@ contract DropPool is Payout, IDropPoolHost {
     }
 
     /// @notice Create and fund a pool; `msg.value` must equal `slots * perSlot`. `msg.sender` is the host.
+    /// @param linkKeyHash keccak256 of the pool's ML-DSA-87 link public key.
+    /// @param slots Number of slots.
+    /// @param perSlot Amount paid per slot, in wei.
+    /// @param expiry Unix time after which no slot can be claimed and anyone may close.
+    /// @return poolId The new pool id.
     function create(bytes32 linkKeyHash, uint32 slots, uint96 perSlot, uint64 expiry)
         external
         payable
@@ -87,6 +96,12 @@ contract DropPool is Payout, IDropPoolHost {
     }
 
     /// @notice Claim one slot for `recipient` (a PoP-proven account), paid to `payTo`. Anyone may submit.
+    /// @param poolId Pool id.
+    /// @param recipient Claiming account; needs a registered, proven ML-DSA-87 key and may claim once per pool.
+    /// @param payTo Where the slot is paid.
+    /// @param linkPk The pool's link public key (must hash to `linkKeyHash`).
+    /// @param linkSig Link-key signature over `linkDigest`.
+    /// @param recipientSig Recipient-key signature over `claimDigest`.
     function claim(
         uint256 poolId,
         address recipient,
@@ -102,14 +117,7 @@ contract DropPool is Payout, IDropPoolHost {
         if (p.taken >= p.slots) revert PoolFull();
         if (recipient == address(0) || payTo == address(0) || payTo == address(this)) revert BadRecipient();
         if (claimed[poolId][recipient]) revert AlreadyClaimed();
-        if (keccak256(linkPk) != p.linkKeyHash) revert LinkKeyMismatch();
-        if (!PqcLib.verify(linkPk, linkSig, PqcLib.pqMessage(linkDigest(poolId, recipient, payTo)))) {
-            revert BadLinkSignature();
-        }
-        bytes memory pk = PqcLib.requireKey(recipient, bytes32(0));
-        if (!PqcLib.verify(pk, recipientSig, PqcLib.pqMessage(claimDigest(poolId, recipient, payTo)))) {
-            revert BadRecipientSignature();
-        }
+        _checkClaimSigs(p.linkKeyHash, poolId, recipient, payTo, linkPk, linkSig, recipientSig);
 
         claimed[poolId][recipient] = true;
         uint32 taken = ++p.taken;
@@ -119,6 +127,7 @@ contract DropPool is Payout, IDropPoolHost {
     }
 
     /// @notice Return the unclaimed slots to the host. The host may close any time; anyone may after expiry.
+    /// @param poolId Pool id.
     function close(uint256 poolId) external override nonReentrant {
         Pool storage p = _pools[poolId];
         if (p.host == address(0)) revert PoolNotFound();
@@ -131,23 +140,57 @@ contract DropPool is Payout, IDropPoolHost {
         _pay(host, owed);
     }
 
+    /// @notice Read a pool.
+    /// @param poolId Pool id.
+    /// @return The stored pool (host zero = not found).
     function getPool(uint256 poolId) external view returns (Pool memory) {
         return _pools[poolId];
     }
 
     /// @notice Digest the pool's link key signs for a claim (as `PqcLib.pqMessage(digest)`).
+    /// @param poolId Pool id.
+    /// @param recipient Claiming account.
+    /// @param payTo Pocket the slot is paid to.
+    /// @return The digest.
     function linkDigest(uint256 poolId, address recipient, address payTo) public view returns (bytes32) {
         return keccak256(abi.encode(LINK_DOMAIN, block.chainid, address(this), poolId, recipient, payTo));
     }
 
     /// @notice Digest the recipient signs for a claim (as `PqcLib.pqMessage(digest)`).
+    /// @param poolId Pool id.
+    /// @param recipient Claiming account.
+    /// @param payTo Pocket the slot is paid to.
+    /// @return The digest.
     function claimDigest(uint256 poolId, address recipient, address payTo) public view returns (bytes32) {
         return keccak256(abi.encode(CLAIM_DOMAIN, block.chainid, address(this), poolId, recipient, payTo));
     }
 
     /// @notice Unclaimed escrow of an open pool.
+    /// @param poolId Pool id.
+    /// @return Wei still held for unclaimed slots (zero once closed).
     function unclaimedOf(uint256 poolId) external view returns (uint256) {
         Pool storage p = _pools[poolId];
         return p.closed ? 0 : uint256(p.slots - p.taken) * p.perSlot;
+    }
+
+    /// @dev The link key and the recipient's registered, proven key must both sign
+    ///      this exact claim. Split out of `claim` to keep the stack shallow.
+    function _checkClaimSigs(
+        bytes32 linkKeyHash,
+        uint256 poolId,
+        address recipient,
+        address payTo,
+        bytes calldata linkPk,
+        bytes calldata linkSig,
+        bytes calldata recipientSig
+    ) internal view {
+        if (keccak256(linkPk) != linkKeyHash) revert LinkKeyMismatch();
+        if (!PqcLib.verify(linkPk, linkSig, PqcLib.pqMessage(linkDigest(poolId, recipient, payTo)))) {
+            revert BadLinkSignature();
+        }
+        bytes memory pk = PqcLib.requireKey(recipient, bytes32(0));
+        if (!PqcLib.verify(pk, recipientSig, PqcLib.pqMessage(claimDigest(poolId, recipient, payTo)))) {
+            revert BadRecipientSignature();
+        }
     }
 }
