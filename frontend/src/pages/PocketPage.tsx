@@ -125,8 +125,8 @@ export default function PocketPage() {
             <Section title="Send out" testId="spend-section" badge={<SourceBadge kind="LIVE" />}>
               <p className="text-sm text-zinc-700">Move QOR out of your Pocket with a signed intent. Within today&apos;s limit it is paid at once.</p>
               <div className="mt-3 space-y-2">
-                <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x… address" aria-label="Send to" data-testid="spend-to" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
-                <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
+                <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x… address" aria-label="Send to" autoComplete="off" data-testid="spend-to" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
+                <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" autoComplete="off" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
               </div>
               {showSpendProblem(spendProblem, !!rc.block, to, amt) && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
               {rc.confirm && !rc.block && (
