@@ -183,6 +183,11 @@
      "internalType": "address"
     }
    ]
+  },
+  {
+   "type": "error",
+   "name": "ZeroAddress",
+   "inputs": []
   }
  ]
 }

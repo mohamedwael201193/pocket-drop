@@ -24,6 +24,9 @@ export const PQ_ARG_ABI = parseAbi([
   'function guardianFreeze(address[] signers, bytes[] sigs, uint256 nonce_, uint256 deadline)',
   'function proposeRecovery(address newOwner, bytes32 newKeyHash, uint256 deadline, address[] signers, bytes[] sigs)',
   'function proposeRecoveryUnanimous(address newOwner, bytes32 newKeyHash, uint256 deadline, address[] signers, bytes[] sigs)',
+  // v5.2: finalize carries the authorization of the owner, a guardian or the approved new owner
+  'function finalizeRecovery(address authorizer, uint256 deadline, bytes sig)',
+  'function finalizeRecoveryUnanimous(address authorizer, uint256 deadline, bytes sig)',
   // PocketDrop
   'function bind(uint256 linkId, address recipient, bytes32 recipientKeyHash, address payTo, bytes linkPk, bytes linkSig)',
   // v5.1: the link key also signs feeTo, the address paid the relayer fee

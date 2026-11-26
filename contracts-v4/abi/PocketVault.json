@@ -112,6 +112,32 @@
   },
   {
    "type": "function",
+   "name": "ACT_FINALIZE_RECOVERY",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
+   "name": "ACT_FINALIZE_RECOVERY_UNANIMOUS",
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
    "name": "ACT_FREEZE",
    "inputs": [],
    "outputs": [
@@ -646,15 +672,76 @@
   },
   {
    "type": "function",
+   "name": "finalizeDigest",
+   "inputs": [
+    {
+     "name": "action",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    },
+    {
+     "name": "authorizer",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "",
+     "type": "bytes32",
+     "internalType": "bytes32"
+    }
+   ],
+   "stateMutability": "view"
+  },
+  {
+   "type": "function",
    "name": "finalizeRecovery",
-   "inputs": [],
+   "inputs": [
+    {
+     "name": "authorizer",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
    "outputs": [],
    "stateMutability": "nonpayable"
   },
   {
    "type": "function",
    "name": "finalizeRecoveryUnanimous",
-   "inputs": [],
+   "inputs": [
+    {
+     "name": "authorizer",
+     "type": "address",
+     "internalType": "address"
+    },
+    {
+     "name": "deadline",
+     "type": "uint256",
+     "internalType": "uint256"
+    },
+    {
+     "name": "sig",
+     "type": "bytes",
+     "internalType": "bytes"
+    }
+   ],
    "outputs": [],
    "stateMutability": "nonpayable"
   },
@@ -1708,6 +1795,31 @@
   },
   {
    "type": "event",
+   "name": "RecoveryFinalizeAuthorized",
+   "inputs": [
+    {
+     "name": "authorizer",
+     "type": "address",
+     "indexed": true,
+     "internalType": "address"
+    },
+    {
+     "name": "recoveryNonce",
+     "type": "uint256",
+     "indexed": false,
+     "internalType": "uint256"
+    },
+    {
+     "name": "unanimous",
+     "type": "bool",
+     "indexed": false,
+     "internalType": "bool"
+    }
+   ],
+   "anonymous": false
+  },
+  {
+   "type": "event",
    "name": "RecoveryFinalized",
    "inputs": [
     {
@@ -1926,6 +2038,11 @@
   },
   {
    "type": "error",
+   "name": "NotAuthorized",
+   "inputs": []
+  },
+  {
+   "type": "error",
    "name": "NotEnoughSigners",
    "inputs": []
   },
@@ -1962,6 +2079,11 @@
   {
    "type": "error",
    "name": "RecoveryPending",
+   "inputs": []
+  },
+  {
+   "type": "error",
+   "name": "Reentrancy",
    "inputs": []
   },
   {

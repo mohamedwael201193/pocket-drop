@@ -39,7 +39,7 @@ describe.skipIf(!haveAbi)('PQ_ARG_ABI matches the deployed contract ABIs', () =>
     const want = new Set(fns.filter((f) => f.inputs.some((i) => i.type === 'bytes' || i.type === 'bytes[]')).map(sel));
     const have = new Set(PQ_ARG_ABI.map((a) => sel(a as never)));
     expect([...want].filter((s) => !have.has(s))).toEqual([]);
-    expect(have.size).toBe(18);
+    expect(have.size).toBe(20);
   });
 });
 
@@ -60,7 +60,13 @@ describe('pqPreflight', () => {
     const rec = encodeFunctionData({ abi: PQ_ARG_ABI, functionName: 'proposeRecovery', args: [ADDR as Hex, hex(32), 9n, [ADDR as Hex, ADDR as Hex], [hex(4627), hex(10)]] });
     expect(pqPreflight(rec)).toMatchObject({ issues: [{ arg: 'sigs', index: 1, bytes: 10 }] });
   });
-  it('leaves calls without signatures (executeQueued, finalizeRecovery, deploy only) to the simulation', () => {
+  it('v5.2: checks the finalize authorization size', () => {
+    const fin = encodeFunctionData({ abi: PQ_ARG_ABI, functionName: 'finalizeRecovery', args: [ADDR as Hex, 9n, hex(4627)] });
+    expect(pqPreflight(fin)).toEqual({ known: true, fn: 'finalizeRecovery', issues: [] });
+    const finU = encodeFunctionData({ abi: PQ_ARG_ABI, functionName: 'finalizeRecoveryUnanimous', args: [ADDR as Hex, 9n, hex(100)] });
+    expect(pqPreflight(finU)).toMatchObject({ fn: 'finalizeRecoveryUnanimous', issues: [{ arg: 'sig', bytes: 100, expected: 4627 }] });
+  });
+  it('leaves calls without signatures (executeQueued, the v5.1 finalizeRecovery(), deploy only) to the simulation', () => {
     expect(pqPreflight('0x')).toEqual({ known: false });
     expect(pqPreflight('0x12345678')).toEqual({ known: false });
   });
