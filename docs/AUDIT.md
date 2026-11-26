@@ -4,7 +4,9 @@
 
 All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary value.
 
-**v5 (25 Nov 2026).** v5 changes one library, `PqcLib`, to close the hygiene item that used to be listed at the end of section 5.1 (exact ML-DSA-87 sizes and the exact key-status layout are now checked in the contract). The rest of `src/` is byte-for-byte the audited Stage 2 source. v5 is deployed on Diana and is the current version; v4 stays deployed as the previous version. Stage 3 QCAI ran on the v5 flattened source on 25 Nov 2026 UTC (26 Nov 2026 00:26 Cairo) and scored 85/100 (MEDIUM, Quantum Safe: Not scored under the EVM setting). Artifacts and triage are in [`docs/audit/stage3/`](audit/stage3/) and section 9. Details of v5: [`docs/V5.md`](V5.md).
+**Current version: v5.2** (deployed 26 Nov 2026). See [`docs/V5_2.md`](V5_2.md). v5.1, v5 and v4 stay deployed; links and Pockets made on those contracts keep working. The v5.2 QCAI run (Stage 5) has not run yet.
+
+**v5 (25 Nov 2026).** v5 changes one library, `PqcLib`, to close the hygiene item that used to be listed at the end of section 5.1 (exact ML-DSA-87 sizes and the exact key-status layout are now checked in the contract). The rest of `src/` is byte-for-byte the audited Stage 2 source. v5 remains deployed on Diana as a previous version, with v4 still deployed before it. Stage 3 QCAI ran on the v5 flattened source on 25 Nov 2026 UTC (26 Nov 2026 00:26 Cairo) and scored 85/100 (MEDIUM, Quantum Safe: Not scored under the EVM setting). Artifacts and triage are in [`docs/audit/stage3/`](audit/stage3/) and section 9. Details of v5: [`docs/V5.md`](V5.md).
 
 ## 1. Reports
 
@@ -139,7 +141,7 @@ QCAI only computes its "Quantum readiness" score for QoreChain-native contracts.
 
 `src/examples/PqGuardedCounter.sol` is a small consumer of PqGuard. It is deployed as the shared counter `0x5ae81c71b7ff0c93886df8fe7502f3c846c3835f` and is not part of the audited file.
 
-**ECDSA.** No spend or recovery path uses an ECDSA authority. The relayer's secp256k1 key only pays gas. Through the chain's scoped EVM window it can only call an allow list: the two v4 routers and the v3 drop contract. A Pocket refuses any intent without the owner's ML-DSA-87 signature.
+**ECDSA.** No spend or recovery path uses an ECDSA authority. The relayer's secp256k1 key only pays gas. Relays are hybrid `MsgCrossVMCall` (secp256k1 + ML-DSA-87); the relayer's ECDSA-only EVM window is closed. A Pocket refuses any intent without the owner's ML-DSA-87 signature.
 
 ### 5.6 For jurors: the two Solidity PQC features, checked by hand
 
@@ -157,9 +159,9 @@ Bytecode check (read 23 Nov 2026, 19:40 Cairo): the runtime code of all three co
 
 ```bash
 cd contracts-v4
-forge test                                   # 185 tests (v5), mock precompiles
-FOUNDRY_PROFILE=realcrypto forge test        # 22 tests, real ML-DSA-87 via vm.ffi (needs npm ci in contracts-v4)
-FOUNDRY_PROFILE=live forge test              # 27 tests, eth_call against the live Diana precompiles
+forge test                                   # 217 tests (v5.2), mock precompiles
+FOUNDRY_PROFILE=realcrypto forge test        # 26 tests, real ML-DSA-87 via vm.ffi (needs npm ci in contracts-v4)
+FOUNDRY_PROFILE=live forge test              # 31 tests, eth_call against the live Diana precompiles
 sh script/ffi/mutation-check.sh              # accept-all verifier must break the real-crypto suite
 node script/probe-precompiles.mjs            # precompile conformance probe (eth_call only)
 forge coverage --report summary              # 100% on src/
@@ -172,9 +174,9 @@ The default suite replaces the two precompiles with Solidity mocks. Three furthe
 
 | Layer | What it proves | Where | Count |
 |---|---|---|---|
-| Real-crypto suite | Every signature in these tests is a real ML-DSA-87 signature. The `pqcVerify` stand-in calls out (`vm.ffi`) to two independent ML-DSA-87 implementations and accepts only when both agree. Covers spend, replay, tamper, a single flipped bit, wrong key, truncated / oversized / empty signatures, wrong domain, chain id, nonce and deadline, a rotated registry key, truncated keys, ERC-1271, guardian freeze, both drop modes and pool domain separation. | `contracts-v4/test-real/`, `contracts-v4/script/ffi/mldsa.mjs` | 22 tests |
-| Mutation check | With the verifier forced to accept everything, the real-crypto suite must fail. It does: 18 of 22 tests fail (the 4 that pass do not depend on a signature being rejected). | `contracts-v4/script/ffi/mutation-check.sh`, CI job `contracts-realcrypto` | 18 / 22 fail as required |
-| Live profile | The same 22 tests rerun with `pqcVerify` answered by the live Diana precompile (eth_call), plus 5 tests on live key status and on a fork (a fork has no precompile code, and `PqcLib` fails closed there). | `contracts-v4/test-live/`, CI job `contracts-live` | 27 tests |
+| Real-crypto suite | Every signature in these tests is a real ML-DSA-87 signature. The `pqcVerify` stand-in calls out (`vm.ffi`) to two independent ML-DSA-87 implementations and accepts only when both agree. Covers spend, replay, tamper, a single flipped bit, wrong key, truncated / oversized / empty signatures, wrong domain, chain id, nonce and deadline, a rotated registry key, truncated keys, ERC-1271, guardian freeze, both drop modes and pool domain separation. | `contracts-v4/test-real/`, `contracts-v4/script/ffi/mldsa.mjs` | 26 tests |
+| Mutation check | With the verifier forced to accept everything, the real-crypto suite must fail. It does: 19 of 26 tests fail (the 7 that pass do not depend on a signature being rejected). | `contracts-v4/script/ffi/mutation-check.sh`, CI job `contracts-realcrypto` | 19 / 26 fail as required |
+| Live profile | The same 26 tests rerun with `pqcVerify` answered by the live Diana precompile (eth_call), plus 5 tests on live key status and on a fork (a fork has no precompile code, and `PqcLib` fails closed there). | `contracts-v4/test-live/`, CI job `contracts-live` | 31 tests |
 | Precompile conformance | 43 eth_call cases against 0x0A01 / 0x0A02, compared with FIPS 204: 0 anomalies in 28 reached verify cases. Wrong sizes, ML-DSA-65 / 44, context and internal-API signatures return false (no revert). The key-status bytes offset is always 0x80. An empty message is refused at block 10,654,799 and accepted from 10,654,800 (archive query), an independent reproduction of a chain change; Pocket Drop never signs an empty message. The recorded answers are replayed against `PqcLib` in CI. | [`docs/PRECOMPILE_CONFORMANCE.md`](PRECOMPILE_CONFORMANCE.md), `contracts-v4/test/PrecompileConformance.t.sol` | 3 tests over the recorded answers |
 
 v5 on chain: the deploy transactions of all 11 contracts and their runtime code hashes are in `contracts-v4/deployments/diana.json` (`v5`), re-checked by `reverify.mjs`. A live smoke on the v5 production instance (one drop sent, bound, claimed by a newcomer whose key registration was paid by the drip; one pool hosted, claimed and closed) is in [`contracts-v4/LIVE_RESULTS.md`](../contracts-v4/LIVE_RESULTS.md), section "v5 deploy and live smoke".
