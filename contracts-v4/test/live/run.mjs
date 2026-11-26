@@ -4,6 +4,8 @@
 //   node test/live/run.mjs
 // Two deployed instances are used: PROD (24 h timelock, 48 h recovery) for the money flows and the "too early" proof,
 // LAB (60 s delays) for the full timelock / veto / recovery cycles.
+// Pinned to the v4 deployment (dep.v4): v4 finalize takes no arguments. The v5.2 finalize (signed authorization by the owner,
+// a guardian or the approved new owner) is exercised live by script/smoke-v52.mjs (section R) on the v5.2 lab instance.
 import fs from 'node:fs';
 import path from 'node:path';
 import { mldsa } from '@qorechain/pqc';

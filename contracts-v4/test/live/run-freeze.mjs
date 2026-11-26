@@ -6,6 +6,8 @@
 // The earlier paths that touch the vault (spend, queued spend + veto, threshold recovery + owner veto, drop create ->
 // claim) are re-run by test/live/run.mjs against the same deployment.
 //   node test/live/run-freeze.mjs
+// Pinned to the v4 deployment (dep.v4): v4 finalize takes no arguments. The v5.2 finalize (signed authorization by the owner,
+// a guardian or the approved new owner) is exercised live by script/smoke-v52.mjs (section R) on the v5.2 lab instance.
 import fs from 'node:fs';
 import path from 'node:path';
 import { mldsa } from '@qorechain/pqc';
