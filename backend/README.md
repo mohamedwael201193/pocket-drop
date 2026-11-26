@@ -1,7 +1,7 @@
 # Pocket Drop relayer API (QoreChain Diana testnet)
 
 Vercel serverless functions (Node 20+, TypeScript, zod, viem). Testnet only: every JSON response carries `network: "diana-testnet"`.
-Vercel project: `pocketdrop-api`. Production alias: https://pocketdrop-api.vercel.app
+Vercel project: `pocketdrop-api`. Production alias: https://pocket-drop-api.vercel.app
 
 ## Endpoints
 
@@ -81,6 +81,6 @@ npm install
 npm test                  # vitest unit tests
 npm run coverage          # v8 coverage on src/
 npm run typecheck
-PD_API_URL=https://pocketdrop-api.vercel.app npx vitest run test/integration.test.ts   # deployed endpoints (skipped otherwise)
+PD_API_URL=https://pocket-drop-api.vercel.app npx vitest run test/integration.test.ts   # deployed endpoints (skipped otherwise)
 npx vercel deploy --prod  # needs VERCEL_TOKEN in the environment
 ```

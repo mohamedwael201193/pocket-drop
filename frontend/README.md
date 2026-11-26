@@ -2,9 +2,9 @@
 
 > **Testnet only. Diana, no monetary value.** React 18 + Vite + TypeScript + Tailwind + framer-motion + react-query + zod.
 
-Live: https://pocketdrop-app.vercel.app
+Live: https://pocket-drop.vercel.app
 
-A sender creates a link, a friend with **no wallet** opens it, and a quantum-safe QoreChain account is born in their browser with the QOR in it. The app talks to the deployed `PocketDrop` contract (`0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97`) and the relayer API (`https://pocketdrop-api.vercel.app`).
+A sender creates a link, a friend with **no wallet** opens it, and a quantum-safe QoreChain account is born in their browser with the QOR in it. The app talks to the deployed `PocketDrop` contract (`0x29f53b4b8031e7ba1785dc8c7a1c0be413a4bd97`) and the relayer API (`https://pocket-drop-api.vercel.app`).
 
 ## Pages
 
@@ -43,7 +43,7 @@ npm run build
 npm run typecheck
 npm run lint
 npm test                 # unit tests + LIVE digest tests (needs network)
-E2E_URL=https://pocketdrop-app.vercel.app npx playwright test    # deployed-URL E2E, 390x844, Chromium + WebKit
+E2E_URL=https://pocket-drop.vercel.app npx playwright test    # deployed-URL E2E, 390x844, Chromium + WebKit
 node scripts/verify-tx.mjs                                        # receipts for every tx hash in evidence/
 ```
 
