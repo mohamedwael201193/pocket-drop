@@ -1,10 +1,10 @@
-# v5.2 changes (branch `v5.2-audit-hardening`, not deployed)
+# v5.2 changes (deployed on Diana, 26 Nov 2026)
 
 v5.1 (deployed on Diana, QCAI stage 4: 82 / HIGH, 0 critical) has no confirmed vulnerability; see
 [`QCAI_V5_1_TRIAGE.md`](QCAI_V5_1_TRIAGE.md). v5.2 makes the guarantees behind each false positive explicit in the
 code. The security model stays the same: every change adds a check, none removes one.
 
-Status: source and tests only. No v5.2 contract is deployed, the live app still uses v5.1, and no audit has run on v5.2.
+Status: deployed on Diana testnet on 26 Nov 2026 (prod, lab and the shared counter; addresses and txs in [`../../V5_2.md`](../../V5_2.md)). The app and API use v5.2 for new Pockets, drops and pools; v5.1, v5 and v4 links keep working. No audit has run on v5.2 yet (Stage 5 pending).
 
 ## Flattened source for the next audit
 
@@ -38,7 +38,7 @@ deploy it also compares against the chain.
 | `export-abi --check` | 5 / 5 ABIs current |
 | backend vitest | 220 passed, 9 skipped |
 
-## Blast radius of a v5.2 deploy
+## Blast radius of the v5.2 deploy (done; kept as the record of what was rewired)
 
 - Every contract gets a new address: the vault implementation changes, so the factory, router, PocketDrop and DropPool
   must be redeployed (prod and lab sets). v5.1 contracts and their links keep working; existing v5.1 Pockets stay v5.1.

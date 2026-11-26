@@ -1,4 +1,4 @@
-# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3; v5.1 Stage 4)
+# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3; v5.1 Stage 4; v5.2 deployed, Stage 5 pending)
 
 **Summary (one line, reused in the README and the project page):** four QCAI runs across v4, v5 and v5.1. Stage 1 (v4) scored 82 on 19 Nov 2026, Stage 2 (v4) 78 on 20 Nov 2026, Stage 3 (v5) 85 on 25 Nov 2026 UTC, and Stage 4 (v5.1, the deployed code) 82 on 26 Nov 2026 01:09 UTC (03:09 Cairo). Stage 4 reported 0 critical and 5 items (1 high, 2 medium, 1 low, 1 info): 3 false positives, 1 pattern bounded at 5 guardians, and 1 informational confirmation of ERC-1271. Every finding maps to named Foundry tests ([Stage 4 triage](audit/stage4/QCAI_V5_1_TRIAGE.md)).
 
@@ -241,3 +241,16 @@ QCAI ran on the v5.1 flattened source (the deployed code) on 26 Nov 2026 01:09 U
 | 5 | INFO | ERC-1271 implemented correctly | **Informational.** | `test_v51_real_erc1271_is_domain_separated_from_intents` (real crypto) |
 
 Counts: 5 findings (1 high, 2 medium, 1 low, 1 info), 0 critical. 0 valid unmitigated bugs; the deployed v5.1 contracts are unchanged.
+
+## 13. v5.2 (deployed 26 Nov 2026): Stage 4 items answered in code
+
+The Stage 4 findings on v5.1 were false positives or bounded (section 12). v5.2 still turns each guarantee behind them into an explicit check, so the next run does not have to infer it; details, addresses, deploy txs and live txs in [`docs/V5_2.md`](V5_2.md), per-finding changes in [`audit/stage4/V5_2_CHANGES.md`](audit/stage4/V5_2_CHANGES.md).
+
+| Stage 4 item | v5.2 change | Live evidence (TEAM-RUN, Diana) |
+|---|---|---|
+| 1 finalize access control | `finalizeRecovery(authorizer, deadline, sig)` / `finalizeRecoveryUnanimous(...)`: the owner, a guardian or the approved new owner signs `finalizeDigest` with ML-DSA-87; the old owner is not accepted on the unanimous path | refused: unrelated authorizer `0xe44212b3…` (`NotAuthorized`), forged signature `0x743e98ad…` (`BadSignature`), before the delay `0x679e36b3…` (`TooEarly`), old owner on the unanimous path `0x8eeb97cd…` (`NotAuthorized`); accepted: new owner `0x6c1e0a00…`, guardian `0x186e007b…` |
+| 2 drip sum | `spent > cap` checked first, then `drip > cap - spent`; constructor bound on the cap | Foundry `test_v52_drip_*` |
+| 3 payout reentrancy | vault lock on every external-call function; `_pay` asserts the lock (`PayoutOutsideLock`) | Foundry `test_v52_payout_*`, `test_v52_vault_lock_*` |
+| 4 guardian loop | bitmap duplicate check, every loop bounded by `MAX_GUARDIANS` | Foundry `test_qcai51_l4_*` |
+
+Audit source for Stage 5: [`audit/stage5/PocketDrop-v5.2-flattened.sol`](audit/stage5/PocketDrop-v5.2-flattened.sol), 2,168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d` ([`SHA256SUMS`](audit/stage5/SHA256SUMS)). `node contracts-v4/script/flatten-v52.mjs --check` compiles it alone and compares each runtime bytecode with the build and with the code at the v5.2 addresses (immutables masked): all equal. Stage 5 has not run yet.

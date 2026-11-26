@@ -29,14 +29,15 @@ Send QOR to a friend who has no wallet. They open a link, and their browser crea
 
 Each number is labelled. **LIVE** means it is read from the chain or the API when you open the link. **RECORDED** means it comes from a file in this repo, written by a named script on the date shown. TEAM-RUN rows use team test accounts; they are never counted as external users.
 
-| Number (deployed v5.1) | Label | Source |
+| Number (deployed v5.2) | Label | Source |
 |---|---|---|
-| v5.1 contracts on Diana: router `0x99711daa…61cb`, drop `0xf85e1d47…20ed` (all addresses under [Contracts on Diana](#contracts-on-diana)); each runtime code hash equals the one recorded at deploy, and the flattened audit file compiles to the same code | LIVE | `node frontend/scripts/reverify.mjs`, `node contracts-v4/script/flatten-v51.mjs --check` |
-| v5.1 fixes the open review items: a copied bind cannot take the delivery fee (live revert [`0x6700c859…`](https://explore.qore.network/tx/0x6700c859853889b3d060aa3833df7f03b7b7334eef86d8ff182502fab17feae8)), ERC-1271 and PqGuard approvals are tagged and bound to one account and chain, the router holds no value | TEAM-RUN, 26 Nov 2026 | [`docs/V5_1.md`](docs/V5_1.md), `node contracts-v4/script/smoke-v51.mjs` |
-| 674 checks passed, 0 failed: 348 EVM and 177 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
+| v5.2 contracts on Diana: router `0xe0a2679a…9a88`, drop `0xf0103854…2639` (all addresses under [Contracts on Diana](#contracts-on-diana)); the runtime code at all 11 addresses equals the build, and the flattened audit file (SHA-256 `ec71d762…1b7d`) compiles to the same code | LIVE | `node frontend/scripts/reverify.mjs`, `node contracts-v4/script/deploy-v52.mjs --check`, `node contracts-v4/script/flatten-v52.mjs --check` |
+| v5.2 finalize needs a signed authorization from the owner, a guardian or the approved new owner: finalize by an unrelated account (live revert [`0xe44212b3…`](https://explore.qore.network/tx/0xe44212b3c8b5358323702b8b1a883227be5b365191ed091317b5c8dfa7e4cc93)), with a forged signature ([`0x743e98ad…`](https://explore.qore.network/tx/0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e)) and by the old owner on the unanimous path ([`0x8eeb97cd…`](https://explore.qore.network/tx/0x8eeb97cd6d3a572f0b0508fb63c6d4fd72ae068b9243f5f2b77682b91ab26c72)) are refused; the new owner ([`0x6c1e0a00…`](https://explore.qore.network/tx/0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7)) and a guardian ([`0x186e007b…`](https://explore.qore.network/tx/0x186e007b9fd53b434752910af85478e8a1bf83adf072591af43ea20838fdc46c)) finish it | TEAM-RUN, 26 Nov 2026 | [`docs/V5_2.md`](docs/V5_2.md), `node contracts-v4/script/smoke-v52.mjs` |
+| v5.1 (previous) fixes the open review items: a copied bind cannot take the delivery fee (live revert [`0x6700c859…`](https://explore.qore.network/tx/0x6700c859853889b3d060aa3833df7f03b7b7334eef86d8ff182502fab17feae8)), ERC-1271 and PqGuard approvals are tagged and bound to one account and chain, the router holds no value | TEAM-RUN, 26 Nov 2026 | [`docs/V5_1.md`](docs/V5_1.md), `node contracts-v4/script/smoke-v51.mjs` |
+| 793 checks passed, 0 failed: 402 EVM and 202 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.2, v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
 | Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
 | QCAI Stage 4 on the deployed v5.1 code: 82, 0 critical (`QCAIA-1795655356279-BA1C1020`; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 info; each answered by a test) | RECORDED | [Stage 4 public report](https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020), [triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md) |
-| Tests: 205 Foundry (unit, fuzz, invariant, v5.1 regressions, QCAI Stage 4 evidence), 24 real ML-DSA-87, 29 against the live precompiles; 254 frontend and 219 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
+| Tests: 217 Foundry (unit, fuzz, invariant, v5.1 and v5.2 regressions, QCAI Stage 4 evidence), 26 real ML-DSA-87, 31 against the live precompiles; 256 frontend and 220 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | `/qday`, `GET /api/qday` |
 
 <details>
@@ -96,7 +97,19 @@ The full call-site list (what each `pqcVerify` and `pqcKeyStatus` call protects,
 
 ## Contracts on Diana
 
-**Current: v5.1** (deployed 26 Nov 2026). v5.1 is v5 with the open review items fixed: the bind signs `feeTo`, ERC-1271 and PqGuard approvals carry their own tag and are bound to the account and chain, the router holds no value, plus the Stage 4 cleanups and NatSpec. See [docs/V5_1.md](docs/V5_1.md).
+**Current: v5.2** (deployed 26 Nov 2026). v5.2 is v5.1 with the guarantees behind the Stage 4 review items made explicit: finalizing a recovery needs an ML-DSA-87 authorization signed by the owner, a guardian or the approved new owner (never the old owner on the unanimous path), the vault has its own reentrancy lock, payouts assert the lock, drip bounds and zero addresses are checked explicitly, and every external function has NatSpec. See [docs/V5_2.md](docs/V5_2.md).
+
+| Contract | v5.2 PROD | v5.2 LAB |
+|---|---|---|
+| PocketRouter | `0xe0a2679ae760a843880489c8cf8da15c00559a88` | `0xa52d5c5eeb65e564f5a76cc6cc8f518c735c7bee` |
+| PocketFactory | `0x8aa57c26fb2ce4389c7732ab7876265dbb9e5278` | `0x40e163c011197ea2de23bcbffc64e7150a8e2a20` |
+| PocketVault (implementation) | `0x02375366fc06356e0020c93fbe9d5d8fcbeb4f16` | `0x5ca64d1ace94fc727856bf1adb1c48963a23a5d0` |
+| PocketDrop | `0xf0103854937897d6d117f947046d53fbc66a2639` | `0x87560569b9dd7aaa294d52f0f3fee0a1d5d88db6` |
+| DropPool | `0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9` | `0xaf0b4976796085f420dc51481a58e2658298792c` |
+
+- v5.2 PqGuard example (`PqGuardedCounter`): `0xa320b876afea6e2c1e20da5f7fd195b9db47d0be`
+
+**Previous: v5.1** (deployed 26 Nov 2026; links and Pockets made on v5.1 keep working there). v5.1 is v5 with the open review items fixed: the bind signs `feeTo`, ERC-1271 and PqGuard approvals carry their own tag and are bound to the account and chain, the router holds no value, plus the Stage 4 cleanups and NatSpec. See [docs/V5_1.md](docs/V5_1.md).
 
 | Contract | v5.1 PROD | v5.1 LAB |
 |---|---|---|
@@ -149,7 +162,7 @@ Threats, mitigations and residual risk: [docs/THREAT_MODEL.md](docs/THREAT_MODEL
 
 ## Audit
 
-Four QCAI runs across v4, v5 and v5.1: Stage 1 (v4) 82 (19 Nov 2026), Stage 2 (v4) 78 (20 Nov 2026), Stage 3 (v5) 85 (25 Nov 2026 UTC), and Stage 4 on the deployed v5.1 code 82 (26 Nov 2026 01:09 UTC / 03:09 Cairo; audit `QCAIA-1795655356279-BA1C1020`; 0 critical; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a verdict and named Foundry tests that run against the deployed source ([Stage 4 triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md), `contracts-v4/test/QcaiV51AuditRegression.t.sol`). Details: [docs/AUDIT.md](docs/AUDIT.md). Stage 4 public report: https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020. PDFs: [`docs/audit/`](docs/audit/).
+Four QCAI runs across v4, v5 and v5.1: Stage 1 (v4) 82 (19 Nov 2026), Stage 2 (v4) 78 (20 Nov 2026), Stage 3 (v5) 85 (25 Nov 2026 UTC), and Stage 4 on the deployed v5.1 code 82 (26 Nov 2026 01:09 UTC / 03:09 Cairo; audit `QCAIA-1795655356279-BA1C1020`; 0 critical; 5 findings: 3 false positives, 1 bounded at 5 guardians, 1 informational ERC-1271 confirmation). Every finding is mapped to a verdict and named Foundry tests that run against the deployed source ([Stage 4 triage](docs/audit/stage4/QCAI_V5_1_TRIAGE.md), `contracts-v4/test/QcaiV51AuditRegression.t.sol`). Details: [docs/AUDIT.md](docs/AUDIT.md). Stage 4 public report: https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020. PDFs: [`docs/audit/`](docs/audit/). v5.2 (deployed 26 Nov 2026) answers the Stage 4 items in code; its flattened source for Stage 5 is [`docs/audit/stage5/PocketDrop-v5.2-flattened.sol`](docs/audit/stage5/PocketDrop-v5.2-flattened.sol) (2,168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d`); Stage 5 has not run yet.
 
 ## Run it
 
