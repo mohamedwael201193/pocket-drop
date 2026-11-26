@@ -20,6 +20,7 @@ import { checkRecipient, recentRecipients, rememberRecipient } from '../lib/reci
 import { pocketEnv } from '../components/powers';
 import { pub } from '../lib/chain';
 import { SelfRelaySetting } from '../components/selfRelayOffer';
+import { showSpendProblem } from '../lib/formHints';
 
 /** busy / error / last tx for one action button. */
 function useAct() {
@@ -127,7 +128,7 @@ export default function PocketPage() {
                 <input value={to} onChange={(e) => setTo(e.target.value)} placeholder="0x… address" aria-label="Send to" data-testid="spend-to" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-xs" />
                 <input value={amt} onChange={(e) => setAmt(e.target.value)} placeholder="Amount in QOR" inputMode="decimal" aria-label="Amount" data-testid="spend-amount" className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-3 font-mono text-sm" />
               </div>
-              {spendProblem && to + amt !== '' && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
+              {showSpendProblem(spendProblem, !!rc.block, to, amt) && <p role="alert" className="mt-2 text-sm font-medium text-red-700" data-testid="spend-problem">{spendProblem}</p>}
               {rc.confirm && !rc.block && (
                 <div className="mt-2"><Notice tone="warn" testId="spend-recipient-warning">{rc.confirm}
                   <label className="mt-2 flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={!needAck} onChange={(e) => setAck(e.target.checked ? to.trim().toLowerCase() : '')} data-testid="spend-recipient-ack" /> I checked the address</label></Notice></div>
