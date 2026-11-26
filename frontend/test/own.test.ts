@@ -34,5 +34,12 @@ describe('own accounts', () => {
         expect(ownSet.has(a.toLowerCase()), `${run.id} ${role} ${a}`).toBe(true);
       }
     }
+    // The demo-film takes (TEAM-RUN, 26 Nov 2026) are team accounts too.
+    const film = JSON.parse(fs.readFileSync(path.join(repo, 'frontend/evidence/v4/video/film-2026-11-26.json'), 'utf8')) as {
+      ownAccountKeys: Record<string, string>;
+      takes: { id: string; accounts: Record<string, string> }[];
+    };
+    for (const [k, a] of Object.entries(film.ownAccountKeys)) expect(ownSet.has(a.toLowerCase()), `${k} ${a}`).toBe(true);
+    for (const t of film.takes) for (const [role, a] of Object.entries(t.accounts)) expect(ownSet.has(a.toLowerCase()), `${t.id} ${role} ${a}`).toBe(true);
   });
 });
