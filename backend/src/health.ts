@@ -4,6 +4,11 @@ import { NETWORK, EVM_CHAIN_ID, COSMOS_CHAIN_ID, type Config } from './config.js
 import { evmToQor } from './relayer.js';
 import { pqSignerKind } from './hybridRelayer.js';
 import { refillFunder, refillStatus } from './refill.js';
+import { deploymentsSummary } from './deployments.js';
+
+/** Sponsor wallet (/api/sponsor pays new accounts their key-registration fee), RECORDED in HANDOFF.md. Shown on /judges. */
+export const SPONSOR_ADDRESS = '0x1e32e2B8e04d48a5b88bdE27d7D1072A3B0A8221' as const;
+export const SPONSOR_COSMOS = 'qor1rcew9w8qf4y2twytmcna05g89gas4q3p429uwh' as const;
 
 /** Public facts of the isolated ML-DSA-87 signer (GET on it), so /api/health can show which key it holds. */
 export async function pqSignerFacts(cfg: Pick<Config, 'pqSignerUrl'>, f: typeof fetch = fetch): Promise<{ reachable: boolean; pqPublicKeyKeccak?: string; relayer?: string; signedThisHour?: number } | null> {
@@ -62,11 +67,17 @@ export function balanceWarning(balanceWei: bigint | null, thresholdWei: bigint):
 }
 
 export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance' | 'getBlockNumber'>, f: typeof fetch = fetch, env: Record<string, string | undefined> = process.env) {
-  const base = { network: NETWORK, evmChainId: EVM_CHAIN_ID, cosmosChainId: COSMOS_CHAIN_ID, contract: cfg.contract, time: new Date().toISOString() };
+  // `contract` is kept for older readers: it is the legacy v3 PocketDrop (v3 links at /c/<n>). The current contracts are in
+  // `deployments.current` (v5.2); `contractRole` says so in plain words.
+  const base = {
+    network: NETWORK, evmChainId: EVM_CHAIN_ID, cosmosChainId: COSMOS_CHAIN_ID, contract: cfg.contract,
+    contractRole: 'legacy v3 PocketDrop (v3 links only); current contracts: deployments.current',
+    deployments: deploymentsSummary(), time: new Date().toISOString(),
+  };
   if (!cfg.relayerKey) return { ok: false, ...base, relayer: null, error: 'RELAYER_SECP_KEY not configured' };
   const address = privateKeyToAccount(cfg.relayerKey).address;
   const qor = evmToQor(address);
-  const [bal, head, win, pqs, rf] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f), refillStatus(cfg.rest, refillFunder(env), qor, Date.now(), f)]);
+  const [bal, head, win, pqs, rf, sp] = await Promise.allSettled([pub.getBalance({ address }), pub.getBlockNumber(), getWindow(cfg, qor, f), pqSignerFacts(cfg, f), refillStatus(cfg.rest, refillFunder(env), qor, Date.now(), f), pub.getBalance({ address: SPONSOR_ADDRESS })]);
   const balance = bal.status === 'fulfilled' ? bal.value : null;
   const window = win.status === 'fulfilled' ? win.value : { queryable: false, error: 'window query failed' };
   const threshold = lowBalanceThresholdWei(env);
@@ -89,6 +100,10 @@ export async function getHealth(cfg: Config, pub: Pick<PublicClient, 'getBalance
       lowBalance: balWarn?.level === 'low', lowBalanceThreshold: formatEther(threshold),
       /** auto-refill job: rules, the refill wallet, its last refill and the rolling 24 h total (read from the chain) */
       refill: rf.status === 'fulfilled' ? rf.value : { configured: true, error: 'refill read failed' },
+    },
+    sponsor: {
+      address: SPONSOR_ADDRESS, cosmosAddress: SPONSOR_COSMOS,
+      balanceWei: sp.status === 'fulfilled' ? sp.value.toString() : null, balance: sp.status === 'fulfilled' ? formatEther(sp.value) : null, unit: 'QOR',
     },
     window,
     relay: {
