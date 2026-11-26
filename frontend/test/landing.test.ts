@@ -31,7 +31,7 @@ describe('landing renders with the API down', () => {
   it('the rest of the page renders from recorded data, every number labelled', () => {
     const h = html(createElement(LiveCtx.Provider, { value: SNAPSHOT }, createElement(Rest)));
     const t = text(h);
-    expect(t).toContain('672 passed, 0 failed');
+    expect(t).toContain('674 passed, 0 failed');
     expect(t).not.toMatch(/NaN|undefined/);
     for (const label of ['Recorded', 'Illustration']) expect(t).toContain(label);
   });
