@@ -1,0 +1,100 @@
+{
+  "success": true,
+  "audit": {
+    "auditId": "QCAIA-1795655356279-BA1C1020",
+    "status": "completed",
+    "blockchain": "ethereum",
+    "language": "solidity",
+    "framework": "EVM/Solidity",
+    "overallScore": 82,
+    "riskLevel": "HIGH",
+    "quantumReadiness": null,
+    "findings": [
+      {
+        "category": "Access Control",
+        "description": "The `finalizeRecovery` and `finalizeRecoveryUnanimous` functions in PocketVault lack proper access control. These functions should only be callable by the intended recovery participants, but they're currently permissionless. This allows any attacker to finalize a recovery process.",
+        "id": "ETH-001",
+        "impact": "Any attacker can take control of a Pocket by finalizing a recovery process, leading to complete loss of funds and control.",
+        "location": "src/PocketVault.sol:790,822",
+        "recommendation": "Add proper access control to ensure these functions can only be called by authorized parties.",
+        "severity": "HIGH",
+        "title": "Missing Access Control on Critical Functions"
+      },
+      {
+        "category": "Integer Safety",
+        "description": "In PocketDrop.sol, the calculation `spent + drip <= DAILY_DRIP_CAP` is vulnerable to integer overflow. Although Solidity 0.8.28+ prevents overflow, the logic assumes that `spent` and `drip` are within bounds, but there's no explicit validation of these values.",
+        "id": "ETH-002",
+        "impact": "Could lead to incorrect drip calculations and potentially allow unauthorized spending.",
+        "location": "src/PocketDrop.sol:410",
+        "recommendation": "Add explicit bounds checking for `spent` and `drip` values before performing arithmetic operations.",
+        "severity": "MEDIUM",
+        "title": "Potential Overflow in Daily Drip Calculation"
+      },
+      {
+        "category": "Logic Flaws",
+        "description": "The Payout contract's `_pay` function uses a raw call that can lead to reentrancy issues. While there's a reentrancy guard, the fallback mechanism to pull balances doesn't fully protect against reentrancy attacks.",
+        "id": "ETH-003",
+        "impact": "Could allow attackers to drain funds through reentrancy attacks during payout operations.",
+        "location": "src/Payout.sol:54",
+        "recommendation": "Implement additional safeguards to prevent reentrancy during payout operations.",
+        "severity": "MEDIUM",
+        "title": "Reentrancy Vulnerability in Payout Contract"
+      },
+      {
+        "category": "Gas & DoS",
+        "description": "The `_checkGuardianSigs` function in PocketVault performs nested loops for signature validation, which could exceed gas limits with large guardian sets.",
+        "id": "ETH-004",
+        "impact": "Could cause transactions to fail due to gas limit exceeded if guardian sets are very large.",
+        "location": "src/PocketVault.sol:640",
+        "recommendation": "Add gas estimation checks or limit the maximum number of guardians processed.",
+        "severity": "LOW",
+        "title": "Potential Gas Limit Exceeded in Guardian Validation"
+      },
+      {
+        "category": "ERC Standards Compliance",
+        "description": "The PocketVault contract implements ERC-1271 correctly with proper signature verification using ML-DSA-87 keys.",
+        "id": "ETH-005",
+        "impact": "No impact, standard compliance achieved.",
+        "location": "src/PocketVault.sol:230",
+        "recommendation": "Maintain current implementation for ERC-1271 compliance.",
+        "severity": "INFO",
+        "title": "ERC-1271 Implementation"
+      }
+    ],
+    "summary": "The PocketDrop v5.1 contract contains several high-risk vulnerabilities including missing access controls on critical recovery functions and potential integer overflow issues. The reentrancy protection in Payout is insufficient, and there are gas optimization opportunities. Overall, the contract requires significant improvements to ensure security and prevent fund loss.",
+    "recommendations": [
+      "Implement proper access control for recovery finalization functions",
+      "Add comprehensive bounds checking for integer operations",
+      "Enhance reentrancy protection mechanisms",
+      "Optimize gas usage in guardian validation loops",
+      "Review and strengthen signature verification processes"
+    ],
+    "gasOptimizations": [
+      "Use assembly for faster array length checks in `_isGuardian` function",
+      "Cache frequently accessed storage variables like `ownerKeyHash` in `_auth` function",
+      "Consider using `unchecked` blocks for arithmetic operations where overflow is guaranteed to not occur"
+    ],
+    "bestPractices": [
+      "Use immutable variables for constants that don't change",
+      "Implement proper error handling and revert messages",
+      "Regularly audit and update security measures",
+      "Follow established patterns for access control and reentrancy protection",
+      "Ensure all external calls are properly validated"
+    ],
+    "positiveAspects": [
+      "Comprehensive use of post-quantum cryptography with ML-DSA-87",
+      "Robust signature verification system with proper domain separation",
+      "Well-structured modular design with clear separation of concerns",
+      "Effective use of reentrancy guards in critical sections",
+      "Proper implementation of ERC-1271 standard"
+    ],
+    "findingsCount": 5,
+    "criticalCount": 0,
+    "highCount": 1,
+    "mediumCount": 2,
+    "lowCount": 1,
+    "infoCount": 1,
+    "createdAt": "2026-11-26T01:09:16.279Z",
+    "isPublic": true
+  }
+}

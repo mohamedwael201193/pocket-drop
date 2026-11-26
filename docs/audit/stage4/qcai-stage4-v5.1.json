@@ -1,0 +1,101 @@
+{
+  "stage": 4,
+  "version": "v5.1",
+  "auditId": "QCAIA-1795655356279-BA1C1020",
+  "publicReportUrl": "https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020",
+  "publicApiUrl": "https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795655356279-BA1C1020",
+  "note": "The public report page title shows 'Unknown contract'; the PDF names it 'PocketDrop v5.1'. Line numbers in the report do not match the submitted flattened file (see the triage).",
+  "createdAtUtc": "2026-11-26T01:09:16.279Z",
+  "createdAtCairo": "2026-11-26T03:09:16+02:00",
+  "contractName": "PocketDrop v5.1",
+  "network": "Testnet",
+  "auditCost": "150 QOR",
+  "blockchain": "Ethereum (EVM/Solidity)",
+  "language": "solidity",
+  "source": {
+    "path": "docs/audit/stage4/PocketDrop-v5.1-flattened.sol",
+    "lines": 1944,
+    "sha256": "22faf22b3aa59124a3cc19fa77f8dcc9d65e924a98ea147918deee02cdd61b8a"
+  },
+  "overallScore": 82,
+  "riskLevel": "HIGH",
+  "quantumSafe": "Not scored",
+  "counts": {
+    "criticalCount": 0,
+    "highCount": 1,
+    "mediumCount": 2,
+    "lowCount": 1,
+    "infoCount": 1,
+    "findingsCount": 5
+  },
+  "summary": "The PocketDrop v5.1 contract contains several high-risk vulnerabilities including missing access controls on critical recovery functions and potential integer overflow issues. The reentrancy protection in Payout is insufficient, and there are gas optimization opportunities. Overall, the contract requires significant improvements to ensure security and prevent fund loss.",
+  "findings": [
+    {
+      "index": 1,
+      "id": "ETH-001",
+      "severity": "HIGH",
+      "category": "Access Control",
+      "title": "Missing Access Control on Critical Functions",
+      "location": "src/PocketVault.sol:790,822",
+      "description": "The `finalizeRecovery` and `finalizeRecoveryUnanimous` functions in PocketVault lack proper access control. These functions should only be callable by the intended recovery participants, but they're currently permissionless. This allows any attacker to finalize a recovery process.",
+      "impact": "Any attacker can take control of a Pocket by finalizing a recovery process, leading to complete loss of funds and control.",
+      "recommendation": "Add proper access control to ensure these functions can only be called by authorized parties.",
+      "triage": "False positive (see QCAI_V5_1_TRIAGE.md #1)"
+    },
+    {
+      "index": 2,
+      "id": "ETH-002",
+      "severity": "MEDIUM",
+      "category": "Integer Safety",
+      "title": "Potential Overflow in Daily Drip Calculation",
+      "location": "src/PocketDrop.sol:410",
+      "description": "In PocketDrop.sol, the calculation `spent + drip <= DAILY_DRIP_CAP` is vulnerable to integer overflow. Although Solidity 0.8.28+ prevents overflow, the logic assumes that `spent` and `drip` are within bounds, but there's no explicit validation of these values.",
+      "impact": "Could lead to incorrect drip calculations and potentially allow unauthorized spending.",
+      "recommendation": "Add explicit bounds checking for `spent` and `drip` values before performing arithmetic operations.",
+      "triage": "False positive (see QCAI_V5_1_TRIAGE.md #2)"
+    },
+    {
+      "index": 3,
+      "id": "ETH-003",
+      "severity": "MEDIUM",
+      "category": "Logic Flaws",
+      "title": "Reentrancy Vulnerability in Payout Contract",
+      "location": "src/Payout.sol:54",
+      "description": "The Payout contract's `_pay` function uses a raw call that can lead to reentrancy issues. While there's a reentrancy guard, the fallback mechanism to pull balances doesn't fully protect against reentrancy attacks.",
+      "impact": "Could allow attackers to drain funds through reentrancy attacks during payout operations.",
+      "recommendation": "Implement additional safeguards to prevent reentrancy during payout operations.",
+      "triage": "False positive (see QCAI_V5_1_TRIAGE.md #3)"
+    },
+    {
+      "index": 4,
+      "id": "ETH-004",
+      "severity": "LOW",
+      "category": "Gas & DoS",
+      "title": "Potential Gas Limit Exceeded in Guardian Validation",
+      "location": "src/PocketVault.sol:640",
+      "description": "The `_checkGuardianSigs` function in PocketVault performs nested loops for signature validation, which could exceed gas limits with large guardian sets.",
+      "impact": "Could cause transactions to fail due to gas limit exceeded if guardian sets are very large.",
+      "recommendation": "Add gas estimation checks or limit the maximum number of guardians processed.",
+      "triage": "Not exploitable; bounded by MAX_GUARDIANS = 5 (see QCAI_V5_1_TRIAGE.md #4)"
+    },
+    {
+      "index": 5,
+      "id": "ETH-005",
+      "severity": "INFO",
+      "category": "ERC Standards Compliance",
+      "title": "ERC-1271 Implementation",
+      "location": "src/PocketVault.sol:230",
+      "description": "The PocketVault contract implements ERC-1271 correctly with proper signature verification using ML-DSA-87 keys.",
+      "impact": "No impact, standard compliance achieved.",
+      "recommendation": "Maintain current implementation for ERC-1271 compliance.",
+      "triage": "Informational (positive)"
+    }
+  ],
+  "triage": "docs/audit/stage4/QCAI_V5_1_TRIAGE.md",
+  "artifacts": {
+    "pdf": "docs/audit/stage4/QCAI-stage4-v5.1.pdf",
+    "apiJson": "docs/audit/stage4/QCAI-stage4-v5.1-api.json",
+    "summaryScreenshot": "docs/audit/stage4/QCAI-stage4-v5.1-summary.png",
+    "fullPageScreenshot": "docs/audit/stage4/QCAI-stage4-v5.1-full.png"
+  }
+}
