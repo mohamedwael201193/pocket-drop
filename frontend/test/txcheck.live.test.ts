@@ -57,3 +57,25 @@ describe('checkTx on a refused attack', () => {
     expect(verdict(r)).toBe('refused');
   }, 60_000);
 });
+
+// v5.2 signed recovery finalize (TEAM-RUN, lab instance, 26 Nov 2026; README "Check our claims"): the approved new owner's
+// authorization verifies; the forged signature and the unrelated account are refused by the signature check itself.
+describe('checkTx on v5.2 finalizeRecovery (signed authorization)', () => {
+  it('the new owner finishing it: signature valid', async () => {
+    const r = await checkTx('0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7', await withQoresign(liveDeps));
+    console.log('finalize ok', r.fn, r.note, r.checks.map((c) => [c.who, c.valid, c.tamperedValid]));
+    expect(r.fn).toMatch(/^finalizeRecovery/);
+    expect(r.note).toBeUndefined();
+    expect(r.checks.map((c) => c.who)).toEqual(['authorizer']);
+    expect(r.checks[0].valid).toBe(true);
+    expect(r.checks[0].tamperedValid).toBe(false);
+    expect(verdict(r)).toBe('verified');
+  }, 60_000);
+  it('a forged signature: not valid, refused', async () => {
+    const r = await checkTx('0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e', await withQoresign(liveDeps));
+    console.log('finalize forged', r.fn, r.tx.ok, r.checks.map((c) => [c.who, c.valid, c.tamperedValid]));
+    expect(r.fn).toMatch(/^finalizeRecovery/);
+    expect(r.checks[0].valid).toBe(false);
+    expect(verdict(r)).not.toBe('verified');
+  }, 60_000);
+});

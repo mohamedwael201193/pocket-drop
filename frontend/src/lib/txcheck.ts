@@ -4,7 +4,7 @@
 import { decodeFunctionData, keccak256, type Hex } from 'viem';
 import { BIND_V5_ABI } from './claim4';
 import { dropAbi, factoryAbi, poolAbi, routerAbi, vaultAbi } from './abi4';
-import { ACT, CHAIN_STR, dropBindDigest, dropClaimDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, pqMessageBytes, pqMessageText, recoveryDigest } from './intents';
+import { ACT, CHAIN_STR, dropBindDigest, dropClaimDigest, finalizeDigest, freezeDigest, intentDigest, params, poolClaimDigest, poolLinkDigest, pqMessageBytes, pqMessageText, recoveryDigest } from './intents';
 import { INST, type Env } from './v4';
 
 export type Lane = 'hybrid' | 'evm';
@@ -16,7 +16,7 @@ export interface FetchedTx {
   relayerHybridVerified?: boolean; relayer: string; memo?: string;
 }
 
-export type Who = 'owner' | 'guardian' | 'link key' | 'recipient';
+export type Who = 'owner' | 'guardian' | 'link key' | 'recipient' | 'authorizer';
 export interface SigCheck {
   who: Who; signer: Hex; fn: string; digest: Hex; message: string;
   keySource: 'chain' | 'calldata'; pkBytes: number; sigBytes: number;
@@ -193,6 +193,19 @@ export async function checkTx(hashIn: string, d: CheckDeps): Promise<Report> {
       const digest = recoveryDigest({ vault: target, recNonce, newOwner, newKeyHash, deadline, unanimous });
       const tampered = recoveryDigest({ vault: target, recNonce, newOwner: target, newKeyHash, deadline, unanimous });
       for (let i = 0; i < signers.length; i++) out.checks.push(await runCheck(d, { who: 'guardian', signer: signers[i], fn: call.functionName, digest, tampered, tamperedWhat: 'a different new owner', pk: await d.keyOf(signers[i]), keySource: 'chain', pinnedHash: null, sig: sigs[i], nonce: recNonce }));
+    } else if ((call.functionName === 'finalizeRecovery' || call.functionName === 'finalizeRecoveryUnanimous') && a.length === 3) {
+      // v5.2: finishing a recovery carries an ML-DSA-87 authorization from the owner (threshold path only), a guardian or the
+      // approved new owner. The signed digest names the pending recovery read from the chain at the block before.
+      const [authorizer, deadline, sig] = a as [Hex, bigint, Hex];
+      const unanimous = call.functionName === 'finalizeRecoveryUnanimous';
+      const [recNonce, newOwner, newKeyHash] = await Promise.all([
+        d.read(target, vaultAbi, 'recoveryNonce', [], h - 1n) as Promise<bigint>,
+        d.read(target, vaultAbi, unanimous ? 'uRecoveryOwner' : 'recoveryOwner', [], h - 1n) as Promise<Hex>,
+        d.read(target, vaultAbi, unanimous ? 'uRecoveryKeyHash' : 'recoveryKeyHash', [], h - 1n) as Promise<Hex>,
+      ]);
+      const digest = finalizeDigest({ vault: target, unanimous, recNonce, newOwner, newKeyHash, authorizer, deadline });
+      const tampered = finalizeDigest({ vault: target, unanimous, recNonce, newOwner: target, newKeyHash, authorizer, deadline });
+      out.checks.push(await runCheck(d, { who: 'authorizer', signer: authorizer, fn: call.functionName, digest, tampered, tamperedWhat: 'a different new owner', pk: await d.keyOf(authorizer), keySource: 'chain', pinnedHash: null, sig, nonce: recNonce }));
     } else {
       out.note = `${call.functionName} carries no signature: anyone may call it, and the Pocket's own rules (timelock, delays) decide.`;
     }

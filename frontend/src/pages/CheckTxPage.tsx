@@ -27,6 +27,7 @@ const WHO: Record<SigCheck['who'], string> = {
   guardian: "guardian's post-quantum key",
   'link key': 'one-time link key (its seed was in the link)',
   recipient: "recipient's post-quantum key",
+  authorizer: 'post-quantum key of the account finishing the recovery (owner, guardian or new owner)',
 };
 
 function Row({ k, children }: { k: string; children: React.ReactNode }) {
