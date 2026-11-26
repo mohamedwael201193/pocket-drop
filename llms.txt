@@ -8,7 +8,7 @@ Judge path: /qday (published classical keys of five bait Pockets, attacked hourl
 
 ## Docs
 
-- [README](README.md): story, 60-second judge path, labelled numbers, claim checks, addresses, custody, credits
+- [README](README.md): pitch, 60-second try-it path, screenshots, the story, architecture and sequence diagrams, v5.2 addresses, a proof table (every claim with its Diana transactions, re-read on 26 Nov 2026), labelled numbers, audit runs, run it yourself, verify it yourself, known issues
 - [Audit](docs/AUDIT.md): QCAI Stage 1 (82), Stage 2 (78), Stage 3 on v5 (85), Stage 4 on v5.1 (82), Stage 5 on v5.2 (78, `QCAIA-1795664336974-576A1865`); v5.2 is current ([docs/V5_2.md](docs/V5_2.md)). The last three runs scored 85, 82 and 78 while the code got stricter; every finding has a verdict and tests (see [Stage 5 triage](docs/audit/stage5/QCAI_V5_2_TRIAGE.md)). Every pqcVerify/pqcKeyStatus call site is documented
 - [Threat model](docs/THREAT_MODEL.md): assets, adversaries, mitigations, residual risk
 - [Live results](contracts-v4/LIVE_RESULTS.md): every live step and attack on Diana, with tx hashes
@@ -23,6 +23,12 @@ Judge path: /qday (published classical keys of five bait Pockets, attacked hourl
 - [contracts-v4/deployments/diana.json](contracts-v4/deployments/diana.json): deployed addresses and recorded runs
 - [backend](backend): relayer API (Vercel functions)
 - [frontend](frontend): React app, Playwright specs, evidence, scripts/reverify.mjs
+
+## Verify it yourself
+
+- `node frontend/scripts/reverify.mjs`: read-only, no install; expected `793 passed, 0 failed`
+- `node scripts/delta-verify.mjs`: read-only re-check of the measured delta; expected `45 passed, 0 failed`
+- `node contracts-v4/script/flatten-v52.mjs --check` (needs Foundry): the audited flattened file equals `src/` and the deployed v5.2 code
 
 ## Key facts
 
