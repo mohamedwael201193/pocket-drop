@@ -2,10 +2,12 @@
 
 | | |
 |---|---|
-| Report | Stage 5 (v5.2), run from a separate QCAI account on 26 Nov 2026 (time of day not recorded). Audit id and public report URL: TODO (not available when this was written; see [`qcai-stage5-v5.2.json`](qcai-stage5-v5.2.json)). |
+| Report | `QCAIA-1795664336974-576A1865`, created 2026-11-26 03:38:56 UTC (05:38 Cairo). Run from a separate QCAI account. |
+| Public page | https://dashboard.qorechain.io/audits/QCAIA-1795664336974-576A1865 (the page title shows "Unknown contract"; the PDF names it "PocketDrop v5.2") |
+| Public JSON | https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795664336974-576A1865 (archived as [`QCAI-stage5-v5.2-api.json`](QCAI-stage5-v5.2-api.json), e-mail field removed) |
 | Result | 78/100, risk MEDIUM, 7 findings: High 1, Medium 3, Low 2, Info 1, Critical 0. Quantum readiness: not scored for the EVM setting (expected). Cost 150 QOR (testnet). |
 | Source audited | [`PocketDrop-v5.2-flattened.sol`](PocketDrop-v5.2-flattened.sol), 2,168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d` (= the deployed v5.2 code; it is the plain concatenation of `contracts-v4/src`, checked by `node contracts-v4/script/flatten-v52.mjs --check`). |
-| Archived | [`qcai-stage5-v5.2.json`](qcai-stage5-v5.2.json): score, risk and the seven findings verbatim, with the verdict and test names added. The PDF export and a screenshot of the report are **not** archived here: they were not checked for personal data before commit, so the report text was transcribed by hand instead. |
+| Artifacts | [`QCAI-stage5-v5.2.pdf`](QCAI-stage5-v5.2.pdf), structured record [`qcai-stage5-v5.2.json`](qcai-stage5-v5.2.json) (score, risk and the seven findings verbatim, with the verdict and test names) |
 | Evidence tests | [`contracts-v4/test/QcaiV52AuditRegression.t.sol`](../../../contracts-v4/test/QcaiV52AuditRegression.t.sol), 24 tests (3 fuzz at 1,000 runs; also run at 10,000 runs in the CI profile), all pass against the unchanged v5.2 `src/`. |
 
 The report names a file for each finding and no line numbers. Below, every citation gives the line in `contracts-v4/src` and the matching line in the flattened file that was audited (`flat`).
