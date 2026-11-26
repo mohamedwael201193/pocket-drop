@@ -105,6 +105,9 @@ export function buildStats(logs: Log[], own: OwnMap) {
   };
 }
 
+/** v3 scan: 9,000-block ranges (Diana getLogs limit is 10,000), up to 400 ranges (3.6 M blocks, about 59 days at 1.43 s/block), 12 in flight. */
+export const V3_SCAN: StatsOptions = { chunk: 9000n, maxChunks: 400, concurrency: 12 };
+
 let cache: { at: number; value: unknown } | null = null;
 export const resetStatsCache = () => { cache = null; };
 
@@ -115,7 +118,8 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   const from = cfg.deployBlock ?? (head > cfg.statsLookback ? head - cfg.statsLookback : 0n);
   const v3 = cfg.contract as Address;
   const [{ logs: evmLogs, scannedTo, truncated }, v4, v3hy] = await Promise.all([
-    collectLogs(pub, v3, from, head),
+    // The full v3 range from its deploy block to head, a cap far above the v3 range (v3 is idle; about 50 ranges today).
+    collectLogs(pub, v3, from, head, V3_SCAN),
     'getBalance' in pub ? getV4Stats(makeV4Reader(pub, 9000n, 'readContract' in pub ? (env) => hybridEventsFor(env, cfg, pub as never) : undefined), own).catch((e) => { log('warn', 'stats.v4_failed', { message: String((e as Error)?.message ?? e) }); return null; }) : Promise.resolve(null),
     'readContract' in pub
       ? searchRouterTxs(cfg.rest.replace(/\/$/, ''), v3).then((txs) => v3HybridLogs(txs, v3, readV3Link(pub as never, v3))).catch((e) => { log('warn', 'stats.v3_hybrid_failed', { message: String((e as Error)?.message ?? e) }); return null; })
@@ -124,8 +128,13 @@ export async function getStats(pub: LogsClient, cfg: Config, own: OwnMap, now: (
   // v3 links bound or claimed through a hybrid relay leave no EVM log: add the events the contract would have logged
   const logs = [...evmLogs, ...(v3hy ?? [])].sort((a, b) => Number((a.blockNumber ?? 0n) - (b.blockNumber ?? 0n)));
   const value = {
-    network: NETWORK, contract: cfg.contract, fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
-    truncated, note: truncated ? 'Scan was capped; counts are a lower bound. Set POCKETDROP_DEPLOY_BLOCK to index from deployment.' : undefined,
+    network: NETWORK, contract: cfg.contract,
+    contractRole: 'legacy v3 PocketDrop; the top-level counts and `v3` are v3 only. Current v5.2 contracts: `v4.prod` / `v4.lab`; previous generations: `v4.prodV51` ... `v4.labV4`.',
+    fromBlock: from.toString(), toBlock: scannedTo.toString(), headBlock: head.toString(),
+    truncated,
+    note: truncated
+      ? 'Scan was capped; counts are a lower bound. Set POCKETDROP_DEPLOY_BLOCK to index from deployment.'
+      : cfg.deployBlock !== null ? 'v3 logs read in full, from the v3 deploy block to head.' : `v3 logs read for the last ${cfg.statsLookback} blocks (POCKETDROP_DEPLOY_BLOCK not set).`,
     ownAccountsNote: 'Addresses listed in config/own-accounts.json (team/test accounts) are marked own; all others are external. Counts are addresses, not users.',
     // How many addresses the deployed function actually loaded; 0 means the list was not bundled and every address reads as external.
     ownAccountsListed: own.size,
