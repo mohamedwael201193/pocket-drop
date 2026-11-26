@@ -1,4 +1,10 @@
-evidence
+# evidence is not shipped, except the run records /judges imports
+evidence/*
+!evidence/v4
+evidence/v4/*
+!evidence/v4/e2e
+evidence/v4/e2e/*
+!evidence/v4/e2e/*.json
 test-results
 e2e
 dist
