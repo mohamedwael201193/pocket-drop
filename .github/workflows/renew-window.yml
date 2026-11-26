@@ -1,8 +1,8 @@
 name: renew-window
 # Manual only since 2026-11-22. Relays now go out as hybrid-signed MsgCrossVMCall (secp256k1 + ML-DSA-87), which need no
 # EVM window, so the window was left to close and the classical (ECDSA-only) relay path is shut by the chain itself.
-# This workflow stays as the operator fallback: run it by hand to re-open the scoped window (prod router, lab router,
-# v3 PocketDrop) if the hybrid lane ever has to be switched off (RELAY_MODE=evm on the API).
+# This workflow stays as the operator fallback: run it by hand to re-open the scoped window (the v5.2, v5.1, v5 and v4
+# routers and the v3 PocketDrop) if the hybrid lane ever has to be switched off (RELAY_MODE=evm on the API).
 on:
   workflow_dispatch:
     inputs:
@@ -33,8 +33,8 @@ jobs:
         env:
           RELAYER_SECP_KEY: ${{ secrets.RELAYER_SECP_KEY }}
           RELAYER_PQC_SEED: ${{ secrets.RELAYER_PQC_SEED }}
-          # v4: PocketRouter (prod), PocketRouter (lab), PocketDrop v3 (kept for the v3 flows)
-          WINDOW_TARGETS: '0x13b8e379e50da657b943781d2816fc17473ae376,0x6de5f7d06e5a4c9563d405b39c192d8d2de1be75,0xb0d8fd2379e06ed5d48371b41baa6dd0a31cf209,0x0b4ee3c8a7a63716c5700b2711ad57a461b7ac2d,0x29F53b4B8031E7bA1785dC8C7a1C0Be413a4bd97'
+          # no WINDOW_TARGETS: the script reads the v5.2, v5.1, v5 and v4 routers (prod, lab) from contracts-v4/deployments/diana.json,
+          # plus PocketDrop v3 (kept for the v3 flows)
           FORCE: ${{ inputs.force }}
         run: |
           THRESHOLD=8000
