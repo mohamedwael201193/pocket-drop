@@ -5,7 +5,7 @@
 // Usage: node scripts/renew-window.mjs [--blocks 17280] [--txs 500] [--tx-gas 1000000] [--wait-minutes 0] [--if-below 8000]
 //   --if-below N  only renew when the window is not live or has fewer than N blocks left (used by the scheduled workflow).
 //   Key sources: .secrets/pocketdrop-relayer.json, or env RELAYER_SECP_KEY + RELAYER_PQC_SEED (CI secrets).
-//   Targets: --targets a,b,c  or env WINDOW_TARGETS (comma list). Without either, the v5.1, v5 and v4 routers and the v3 PocketDrop are
+//   Targets: --targets a,b,c  or env WINDOW_TARGETS (comma list). Without either, the v5.2, v5.1, v5 and v4 routers and the v3 PocketDrop are
 //   read from contracts-v4/deployments/diana.json and contracts/deployments/diana.json.
 //   maxValue is the window's own fee/value budget (evmWindowCost per tx * txs, plus headroom). The relayer sends
 //   value 0 to PocketDrop, so this cap is mostly gas accounting; it also bounds what a stolen relayer key could move.
@@ -27,7 +27,7 @@ function targetsFromFiles() {
   const v4 = path.join(here, '..', '..', 'contracts-v4', 'deployments', 'diana.json');
   if (fs.existsSync(v4)) {
     const d = JSON.parse(fs.readFileSync(v4, 'utf8'));
-    for (const g of ['v5_1', 'v5', 'v4']) for (const k of ['prod', 'lab']) if (d[g]?.[k]?.router?.address) out.push(d[g][k].router.address);
+    for (const g of ['v5_2', 'v5_1', 'v5', 'v4']) for (const k of ['prod', 'lab']) if (d[g]?.[k]?.router?.address) out.push(d[g][k].router.address);
   }
   const v3p = path.join(here, '..', '..', 'contracts', 'deployments', 'diana.json');
   const v3 = process.env.POCKETDROP_ADDRESS ?? (fs.existsSync(v3p) ? JSON.parse(fs.readFileSync(v3p, 'utf8')).contracts?.main?.address : null) ?? contractAddress();

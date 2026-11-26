@@ -61,7 +61,9 @@ const VAULT_FN = parseAbi([
   'function createDrop(address,bytes32,uint8,uint64,uint96,uint96,uint256,uint256,bytes)', 'function confirmDrop(address,uint256,bytes32,uint256,bytes)',
   'function cancelDrop(address,uint256,uint256,bytes)', 'function createPool(address,bytes32,uint32,uint96,uint64,uint256,bytes)', 'function closePool(address,uint256,uint256,bytes)',
   'function proposeRecovery(address,bytes32,uint256,address[],bytes[])', 'function proposeRecoveryUnanimous(address,bytes32,uint256,address[],bytes[])',
-  'function finalizeRecovery()', 'function finalizeRecoveryUnanimous()', 'function guardianFreeze(address[],bytes[],uint256,uint256)',
+  'function finalizeRecovery()', 'function finalizeRecoveryUnanimous()',
+  'function finalizeRecovery(address,uint256,bytes)', 'function finalizeRecoveryUnanimous(address,uint256,bytes)', // v5.2
+  'function guardianFreeze(address[],bytes[],uint256,uint256)',
 ]);
 const DROP_FN = parseAbi(['function claim(uint256,bytes)', 'function cancel(uint256)', 'function bind(uint256,address,bytes32,address,bytes,bytes)', 'function refund(uint256)']);
 

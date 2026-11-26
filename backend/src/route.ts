@@ -6,7 +6,7 @@ import { RULES, type Limiter } from './ratelimit.js';
 import type { Relayer, SendResult } from './relayer.js';
 import { relayMemo } from './hybridRelayer.js';
 import { reply, type HttpResult } from './handlers.js';
-import { V4_INSTANCES, genOf, isProdLike, type V4Env } from './v4.js';
+import { V4_INSTANCES, isProdLike, signsFeeTo, type V4Env } from './v4.js';
 import { formatIssues, routeSchema } from './validation.js';
 import { noteRouteRefusal } from './qday.js';
 import { pqPreflight } from './pqPreflight.js';
@@ -157,7 +157,7 @@ const BIND_V51 = parseAbi(['function bind(uint256 linkId, address recipient, byt
  * "Relay it yourself"). Returns the refusal message, or null when the call is not a v5.1 bind or feeTo is the relayer.
  */
 export function bindFeeToIssue(env: V4Env, target: string | undefined, data: Hex, relayer: string): string | null {
-  if (genOf(env) !== 'v5.1' || !target || target.toLowerCase() !== V4_INSTANCES[env].drop.toLowerCase()) return null;
+  if (!signsFeeTo(env) || !target || target.toLowerCase() !== V4_INSTANCES[env].drop.toLowerCase()) return null;
   let feeTo: string;
   try {
     const c = decodeFunctionData({ abi: BIND_V51, data });

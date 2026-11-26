@@ -160,7 +160,7 @@ describe('v4 instances', () => {
   const file = path.resolve(__dirname, '..', '..', 'contracts-v4', 'deployments', 'diana.json');
   it.skipIf(!fs.existsSync(file))('match contracts-v4/deployments/diana.json', () => {
     const all = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const pairs = [['prod', all.v5_1.prod], ['lab', all.v5_1.lab], ['prodV5', all.v5.prod], ['labV5', all.v5.lab], ['prodV4', all.v4.prod], ['labV4', all.v4.lab]] as const;
+    const pairs = [['prod', all.v5_2.prod], ['lab', all.v5_2.lab], ['prodV51', all.v5_1.prod], ['labV51', all.v5_1.lab], ['prodV5', all.v5.prod], ['labV5', all.v5.lab], ['prodV4', all.v4.prod], ['labV4', all.v4.lab]] as const;
     for (const [env, rec] of pairs) {
       for (const k of ['router', 'factory', 'drop', 'pool'] as const) {
         expect(V4_INSTANCES[env][k].toLowerCase()).toBe(rec[k].address.toLowerCase());
@@ -182,6 +182,7 @@ describe('v5.1 bind feeTo', () => {
     expect(bindFeeToIssue('prod', V4_INSTANCES.prod.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toMatch(/not to the relayer/);
     expect(bindFeeToIssue('lab', V4_INSTANCES.lab.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toMatch(/not to the relayer/);
     // previous generations and other targets are not affected
+    expect(bindFeeToIssue('prodV51', V4_INSTANCES.prodV51.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toMatch(/not to the relayer/);
     expect(bindFeeToIssue('prodV5', V4_INSTANCES.prodV5.drop, bind('0x000000000000000000000000000000000000dEaD'), REL)).toBeNull();
     expect(bindFeeToIssue('prod', V4_INSTANCES.prod.pool, bind('0x000000000000000000000000000000000000dEaD'), REL)).toBeNull();
   });

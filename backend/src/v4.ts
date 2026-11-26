@@ -1,17 +1,29 @@
 import type { Hex } from 'viem';
 
 /** Pocket Drop deployments on Diana testnet (RECORDED from contracts-v4/deployments/diana.json; checked by test/route.test.ts).
- *  `prod` / `lab` are the CURRENT contracts (v5.1, deployed 26 Nov 2026). `prodV5` / `labV5` are the v5 contracts and
- *  `prodV4` / `labV4` the v4 contracts: still read for history and still relayed to, so links and Pockets made on them keep
+ *  `prod` / `lab` are the CURRENT contracts (v5.2, deployed 26 Nov 2026). `prodV51` / `labV51` are the v5.1 contracts,
+ *  `prodV5` / `labV5` the v5 contracts and `prodV4` / `labV4` the v4 contracts: still read for history and still relayed to, so links and Pockets made on them keep
  *  working (claims, refunds, spends). New Pockets, drops and pools are made on the current contracts. */
 export const V4_INSTANCES = {
   prod: {
+    router: '0xe0a2679ae760a843880489c8cf8da15c00559a88',
+    factory: '0x8aa57c26fb2ce4389c7732ab7876265dbb9e5278',
+    drop: '0xf0103854937897d6d117f947046d53fbc66a2639',
+    pool: '0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9',
+  },
+  lab: {
+    router: '0xa52d5c5eeb65e564f5a76cc6cc8f518c735c7bee',
+    factory: '0x40e163c011197ea2de23bcbffc64e7150a8e2a20',
+    drop: '0x87560569b9dd7aaa294d52f0f3fee0a1d5d88db6',
+    pool: '0xaf0b4976796085f420dc51481a58e2658298792c',
+  },
+  prodV51: {
     router: '0x99711daaa39f2f03901950486c70641eca5261cb',
     factory: '0x2783b00467e98498eb1ca2f980670d11f241c9f2',
     drop: '0xf85e1d470b9e23ed632d8036adc37d66233e20ed',
     pool: '0xeaf7b161c1d82615d96a01c3e32602be4b1c92e7',
   },
-  lab: {
+  labV51: {
     router: '0x007dd2b3d907e6924e3ad7d3f5281cacebabab07',
     factory: '0x364062747767c0e94e5ed34d3a8ed2a76d59f90b',
     drop: '0x496342faa28e12b9afee8000793aac261d75d23f',
@@ -45,6 +57,9 @@ export const V4_INSTANCES = {
 
 export type V4Env = keyof typeof V4_INSTANCES;
 export const V4_ENVS = Object.keys(V4_INSTANCES) as V4Env[];
-/** Contract generation of an env. Only the current generation (v5.1) signs `feeTo` into a bind. */
-export const genOf = (e: V4Env): 'v5.1' | 'v5' | 'v4' => (e === 'prod' || e === 'lab' ? 'v5.1' : e === 'prodV5' || e === 'labV5' ? 'v5' : 'v4');
-export const isProdLike = (e: V4Env) => e === 'prod' || e === 'prodV5' || e === 'prodV4';
+/** Contract generation of an env. v5.1 and later sign `feeTo` into a bind; v5.2 finalize carries a signed authorization. */
+export const genOf = (e: V4Env): 'v5.2' | 'v5.1' | 'v5' | 'v4' =>
+  e === 'prod' || e === 'lab' ? 'v5.2' : e === 'prodV51' || e === 'labV51' ? 'v5.1' : e === 'prodV5' || e === 'labV5' ? 'v5' : 'v4';
+/** True when binds on this env sign `feeTo` (v5.1 and v5.2). */
+export const signsFeeTo = (e: V4Env) => genOf(e) === 'v5.2' || genOf(e) === 'v5.1';
+export const isProdLike = (e: V4Env) => e === 'prod' || e === 'prodV51' || e === 'prodV5' || e === 'prodV4';
