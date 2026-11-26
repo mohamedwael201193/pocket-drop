@@ -47,7 +47,7 @@ test('judges: the Q-Day Drill is step 1, the requirement table has every row, bo
   await page.goto(`${BASE}/judges`);
   await expect(page).toHaveTitle('Judges checklist · Pocket Drop');
   await expect(page.getByRole('heading', { level: 2 }).first()).toHaveText('Start here: the Q-Day Drill');
-  await expect(page.getByTestId('req-table').locator('tbody tr')).toHaveCount(REQUIREMENTS.length);
+  await expect(page.getByTestId('req-table').locator('[data-req-card]')).toHaveCount(REQUIREMENTS.length);
   await expect(page.getByTestId('req-pqc-verify')).toContainText('pqcVerify');
   await expect(page.getByTestId('qcai')).toContainText('Stage 2');
   await expect(page.getByTestId('qcai')).toContainText('78');
@@ -56,6 +56,8 @@ test('judges: the Q-Day Drill is step 1, the requirement table has every row, bo
   await expect(page.getByTestId('test-others')).toContainText(/\d+ frontend and \d+ backend unit tests pass/);
   await expect(page.getByTestId('sample-pool')).toBeVisible();
   await fits(page);
+  const overflow = await page.evaluate(() => [...document.querySelectorAll('[data-testid="judges"] *')].filter((el) => el.scrollWidth > el.clientWidth + 2).length);
+  expect(overflow).toBe(0);
   await page.screenshot({ path: `${SHOTS}/judges-${page.viewportSize()!.width}.png`, fullPage: true });
 });
 

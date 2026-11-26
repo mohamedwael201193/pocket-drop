@@ -42,3 +42,31 @@ describe('/judges requirement table', () => {
     }
   });
 });
+
+import { isRefusedTx, splitRequirement, TEST_COLLAPSE_THRESHOLD } from '../src/components/RequirementsList';
+
+describe('/judges requirement card helpers', () => {
+  it('splits each requirement into a readable title and optional summary without dropping text', () => {
+    for (const r of REQUIREMENTS) {
+      const { title, summary } = splitRequirement(r.requirement);
+      expect(title.length, r.id).toBeGreaterThanOrEqual(4);
+      if (summary) {
+        expect(summary.length, r.id).toBeGreaterThan(3);
+        const rejoined = `${title} ${summary}`.replace(/\s+/g, ' ');
+        for (const word of r.requirement.split(/\s+/)) {
+          const clean = word.replace(/[.:;]$/, '');
+          if (clean) expect(rejoined, `${r.id}: ${word}`).toContain(clean);
+        }
+      } else {
+        expect(title).toBe(r.requirement);
+      }
+    }
+  });
+
+  it('flags reverted and refused live items cleanly', () => {
+    expect(isRefusedTx('intent signed by another proven key: reverted BadSignature')).toBe(true);
+    expect(isRefusedTx('Q-Day attempt: the Pocket refused the call (code 14)')).toBe(true);
+    expect(isRefusedTx('owner intent accepted (lazy deploy + spend)')).toBe(false);
+    expect(TEST_COLLAPSE_THRESHOLD).toBeGreaterThanOrEqual(3);
+  });
+});

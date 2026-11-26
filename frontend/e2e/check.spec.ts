@@ -109,3 +109,25 @@ test('the landing Q-Day count equals the refused attempts in the live /api/qday 
   await page.goto(`${BASE}/`);
   await expect(page.getByTestId('qday-refused')).toHaveAttribute('data-value', String(n), { timeout: 90_000 });
 });
+
+test('/judges: requirement cards wrap cleanly, mark refused attacks, and expand full test lists', async ({ page }) => {
+  await page.goto(`${BASE}/judges`);
+  const verify = page.getByTestId('req-pqc-verify');
+  await expect(verify).toBeVisible();
+  await expect(verify).toContainText('refused');
+  await expect(verify.locator('code')).toHaveCount(3);
+  const toggle = page.getByTestId('req-pqc-verify-toggle-tests');
+  await expect(toggle).toContainText('Show all 9 tests');
+  await toggle.click();
+  await expect(verify.locator('code')).toHaveCount(9);
+  await expect(verify).toContainText('testFuzz_replayed_intent_never_executes');
+  await expect(toggle).toContainText('Show fewer');
+  await toggle.click();
+  await expect(verify.locator('code')).toHaveCount(3);
+
+  const overflow = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-testid="judges"] *')].filter((el) => el.scrollWidth > el.clientWidth + 2).length,
+  );
+  expect(overflow).toBe(0);
+  await noSideScroll(page);
+});
