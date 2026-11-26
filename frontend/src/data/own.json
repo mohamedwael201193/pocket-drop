@@ -379,6 +379,16 @@
     "v51-self-relay-sender-pocket-EE3091": "0xEE3091264D207417fad5527EdD115A626A8b7212",
     "v51-self-relay-recipient-798D9a": "0x798D9aAC6cC108e9603fB800C3cA78EdC6A3E064",
     "v51-self-relay-recipient-pocket-5d8dA4": "0x5d8dA4A96013b52D207d3670ACe54F3C1696b9f3",
-    "qa-persona-5-v51-pocket-901C55": "0x901C555532Ee3F0BA3B595d8229aaBD3dc3EA532"
+    "qa-persona-5-v51-pocket-901C55": "0x901C555532Ee3F0BA3B595d8229aaBD3dc3EA532",
+    "v52-smoke-recipient-549742": "0x549742778076E62d1E64D46B42e283e5581f5a0b",
+    "v52-smoke-interceptor-D4feCE": "0xD4feCE33E2cC619231eEDC804cf9C67B1F0E4B3A",
+    "v52-smoke-sender-pocket-1197A9": "0x1197A9CE91edeFb09E2855925CBc8EBC3DF4B081",
+    "v52-smoke-guardian1-F12308": "0xF12308b2986551aBCFe12ebd63f949F650B7e448",
+    "v52-smoke-guardian2-EA3D60": "0xEA3D605da364679Bc0793F64b656442FF8CDea53",
+    "v52-smoke-new-owner-dC5998": "0xdC59987bC3A1A6741B242340Da4755dd1FA0D8c6",
+    "v52-smoke-lab-pocket-D72e8b": "0xD72e8b33F4886790DD1060a3da2DcD5092391bB8",
+    "v52-self-relay-sender-pocket-6770b0": "0x6770b04929d801Abafca2e01129E9c1a4827d732",
+    "v52-self-relay-recipient-0F6E0F": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+    "v52-self-relay-recipient-pocket-7c4398": "0x7c4398D66F078b133a91Af5E4053ae668b228334"
   }
 }
