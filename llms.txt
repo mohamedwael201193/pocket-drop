@@ -9,7 +9,7 @@ Judge path: /qday (published classical keys of five bait Pockets, attacked hourl
 ## Docs
 
 - [README](README.md): story, 60-second judge path, labelled numbers, claim checks, addresses, custody, credits
-- [Audit](docs/AUDIT.md): QCAI Stage 1 (82), Stage 2 (78), Stage 3 on v5 (85), Stage 4 on v5.1 (82), Stage 5 on v5.2 (78); v5.2 is current ([docs/V5_2.md](docs/V5_2.md)). The last three runs scored 85, 82 and 78 while the code got stricter; every finding has a verdict and tests (see [Stage 5 triage](docs/audit/stage5/QCAI_V5_2_TRIAGE.md)). Every pqcVerify/pqcKeyStatus call site is documented
+- [Audit](docs/AUDIT.md): QCAI Stage 1 (82), Stage 2 (78), Stage 3 on v5 (85), Stage 4 on v5.1 (82), Stage 5 on v5.2 (78, `QCAIA-1795664336974-576A1865`); v5.2 is current ([docs/V5_2.md](docs/V5_2.md)). The last three runs scored 85, 82 and 78 while the code got stricter; every finding has a verdict and tests (see [Stage 5 triage](docs/audit/stage5/QCAI_V5_2_TRIAGE.md)). Every pqcVerify/pqcKeyStatus call site is documented
 - [Threat model](docs/THREAT_MODEL.md): assets, adversaries, mitigations, residual risk
 - [Live results](contracts-v4/LIVE_RESULTS.md): every live step and attack on Diana, with tx hashes
 - [Known issues](contracts-v4/KNOWN_ISSUES.md): limits we know about
