@@ -45,7 +45,15 @@ export const healthSchema = z.object({
   ok: z.boolean(),
   network: z.string(),
   headBlock: z.string().nullable(),
-  relayer: z.object({ address: z.string(), cosmosAddress: z.string(), balance: z.string().nullable() }).nullable(),
+  relayer: z.object({
+    address: z.string(), cosmosAddress: z.string(), balance: z.string().nullable(),
+    /** auto-refill wallet (absent on older API deployments) */
+    refill: z.object({ funderBalance: z.string().nullable().optional() }).passthrough().optional(),
+  }).nullable(),
+  /** the gas sponsor of the hybrid lane (absent on older API deployments) */
+  sponsor: z.object({ address: z.string(), balance: z.string().nullable() }).passthrough().optional(),
+  /** last completed run of the warm-up job, read by the API from GitHub Actions (absent on older API deployments) */
+  warmUp: z.object({ lastRunAt: z.string().nullable(), conclusion: z.string().nullable(), url: z.string().nullable(), error: z.string().optional() }).passthrough().nullable().optional(),
   window: z.object({
     queryable: z.boolean(), live: z.boolean().optional(), remainingTxs: z.string().optional(), remainingBlocks: z.string().optional(),
     expiryHeight: z.string().optional(), allowedTargets: z.array(z.string()).optional(),
