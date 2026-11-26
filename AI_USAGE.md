@@ -19,7 +19,7 @@ Pocket Drop was built by its human team (the repository owner) working with an A
 
 | Area | What the assistant did | How it was checked |
 |---|---|---|
-| Solidity (`contracts-v4/src`) | Wrote and revised the contracts to the team's spec: PocketVault, factory, router, PocketDrop, DropPool, PqcLib, PqGuard. | 217 Foundry tests with 100% coverage of `src/`; four QCAI runs (Stages 1–4) with the v5.2 audit pending ([docs/AUDIT.md](docs/AUDIT.md)); live attack runs on Diana ([contracts-v4/LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md)) |
+| Solidity (`contracts-v4/src`) | Wrote and revised the contracts to the team's spec: PocketVault, factory, router, PocketDrop, DropPool, PqcLib, PqGuard. | 241 Foundry tests with 100% coverage of `src/`; five QCAI runs (Stages 1–5, the last three scored 85, 82 and 78 and every finding has a test) ([docs/AUDIT.md](docs/AUDIT.md)); live attack runs on Diana ([contracts-v4/LIVE_RESULTS.md](contracts-v4/LIVE_RESULTS.md)) |
 | Tests | Wrote unit, fuzz and invariant tests, backend and frontend unit tests, and Playwright e2e and QA specs. | CI on every push; the counts are recorded by `frontend/scripts/count-tests.mjs` |
 | Relayer API (`backend/`) | Wrote the endpoints, input validation, rate limits, health and stats. | Backend unit tests; the deployed API |
 | Web app (`frontend/`) | Wrote the pages and the signing code, and reworked layouts within the given design. | Playwright on the deployed app (Chromium and WebKit, 390 px and 1440 px), screenshots in `frontend/evidence/` |
