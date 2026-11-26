@@ -1,0 +1,119 @@
+{
+ "label": "RECORDED, TEAM-RUN",
+ "note": "Playwright e2e against production during the v5.2 rollout (26 Nov 2026). The first chromium-390 pass of a, b and a failed c (and a restarted a) ran at 02:19-02:24 UTC. Those runs left fresh keys and Pockets that were not copied into own-accounts.json, because the later successful rerun (02:30-02:52 UTC) overwrote frontend/evidence/v4/e2e/chromium-390-*.json. The later files also omitted the recipient keys of drops s7 and s8 (only the recipient Pockets were listed). This file reconstructs every account from the spend ledger and from the live v5.2 prod contracts, so /api/stats does not count them as external.",
+ "network": "qorechain-diana / EVM 9800",
+ "instance": "v5.2 production",
+ "sources": [
+  "frontend/evidence/v4/spend.json (deployer fund and sweep entries, 26 Nov 2026 02:19:08Z-02:23:49Z, notes 'e2e chromium-390 ...')",
+  "frontend/evidence/v4/e2e/chromium-390-a-confirmed.json and chromium-390-b-giveaway.json (successful rerun, finished 02:46Z / 02:47Z; bind txs for drops s7 and s8)",
+  "Diana: PocketDrop 0xf0103854937897d6d117f947046d53fbc66a2639 getLink(s4..s8) and DropPool PoolClaimed",
+  "box log of the first suite: /workspace/qore/work/e2e-v52.log (mtime 26 Nov 2026 04:24 Cairo / 02:24 UTC): a and b passed, c failed on register-key, d did not run"
+ ],
+ "runs": [
+  {
+   "id": "first-a1",
+   "flow": "a-confirmed, first start (abandoned after createDrop; drop s4 is still Created and unbound)",
+   "at": "2026-11-26T02:19:08Z",
+   "accounts": {
+    "sender.key": "0x8BA34fd55528A0789dd695D0e4A294759Df17E6A",
+    "sender.pocket": "0xC71C9deE3Ea8EA44209CE27cbb4269be9d8a2048"
+   },
+   "txs": {
+    "fund sender key 0.075 QOR": "0x8d553bb81ccf6608ce9ee8e046de83fdc46ef2e20354ed8ab845a092c6a4a40f",
+    "fund sender Pocket 0.8 QOR": "0x10ded2f8754211e57184da1a531c7f3996d4f91980cd196bc3034a84efe6a651",
+    "sender Pocket deployAndRelay + createDrop s4 (Created, never bound)": "286475E61E632406488028B639CB0161033BF2D9DE023F4BC556A9E0CB9BE907"
+   },
+   "proof": "spend.json notes at 02:19:08 and 02:19:11; fund destination equals the account; PocketDeployed owner and LinkCreated sender at height 10762687."
+  },
+  {
+   "id": "first-a2",
+   "flow": "a-confirmed, completed in the first suite (drop s5, Claimed)",
+   "at": "2026-11-26T02:20:29Z",
+   "accounts": {
+    "sender.key": "0x0cDe91d4BB9E8CCAcFD36cC91BFB917E6DFcE91E",
+    "sender.pocket": "0x994e3ddd89125832ba5eeC54E674547206EEb3b7",
+    "recipient.key": "0xD149D4d7249bc75E40f040468374E9021F5e13cC",
+    "recipient.pocket": "0xFfCf4058A2B43c71bD97fb08A13396E3d8D618A2"
+   },
+   "txs": {
+    "fund sender key 0.075 QOR": "0xecdca91c38cd071506c0a3eed691110b3bca2204da2128f3f6be71467a04814d",
+    "fund sender Pocket 0.8 QOR": "0xc3d02333a5ad09c2239b96bf6ee63047073115f47fe538e40641720d8ad82bae",
+    "sender Pocket deployAndRelay + createDrop s5": "08541AC61A0E8974411D0E63FA8A0DC0444A451B435E1BAFD66BF2C75DD21FE4",
+    "recipient bind": "0A585D74F285281856D7B37CC03D527277C229CB0E69F42E28455BF8CA4DAADD",
+    "sweep sender Pocket": "B89A2C6A9C328078FFDCBB69C7FF844F93011CF606D3C10C711C234673C6CC1C"
+   },
+   "proof": "spend.json fund notes at 02:20:29-02:20:30 and sweep at 02:21:16 (memo 'pd route prod relay 0x994e3ddd...'); bind five blocks after the createDrop, getLink(s5) recipient/payTo match."
+  },
+  {
+   "id": "first-b",
+   "flow": "b-giveaway, completed in the first suite (drop s6, Claimed)",
+   "at": "2026-11-26T02:21:23Z",
+   "accounts": {
+    "sender.key": "0x7188210790bE787f35fc748e5B16D9B2A2131d2C",
+    "sender.pocket": "0xF3839d25072bA4fe42160BE9ff0814799a398912",
+    "recipient.key": "0x16287ca4dC03f890d3a4Ded1a0400F9cd5DF38C3",
+    "recipient.pocket": "0x001956d7C1C6fc971Bc2c2528ac1D483897D0605"
+   },
+   "txs": {
+    "fund sender key 0.075 QOR": "0xc2978255c3e80e73cb40df5ac719eeb9ac764a9c09c610e2941e96d127ccf327",
+    "fund sender Pocket 0.8 QOR": "0x3eb9385a8136bb2248afe19ae4067c684c3ae406488926789c32ccd536eb29d1",
+    "sender Pocket deployAndRelay + createDrop s6": "704819E4DD972387718B7DCB9939EE21512714666E1D34164AD9353A1B257F37",
+    "recipient bind": "1A7075557E729A95C4384458C35AF2FA5BB7EB38EB44582A7F600F7BD72AA006",
+    "sweep sender Pocket": "A4201B8021BEE0C80B51E9FAFE0CE1BEF06A53F910D0EB09EDADB34C21ED2A39"
+   },
+   "proof": "spend.json fund notes at 02:21:23-02:21:26 and sweep at 02:22:03 (memo 'pd route prod relay 0xF3839d25...'); bind six blocks after the createDrop, getLink(s6) recipient/payTo match."
+  },
+  {
+   "id": "first-c",
+   "flow": "c-pool, first suite failed on claimer2 register-key (claimer1 had already taken a slot)",
+   "at": "2026-11-26T02:22:10Z",
+   "accounts": {
+    "sender.key": "0x2d772D9344F34CC7700D0a80cf39bBbE762eb04E",
+    "sender.pocket": "0x9e75CFE1A5Ca9B677305c7763C95eb1734208856",
+    "claimer1.key": "0x24aa421a1137b920d03669b2a0065fBFd5E39BA8",
+    "claimer2.key": "0xa84CC37b24C93431793dCD9a43efedFC92e038BE"
+   },
+   "txs": {
+    "fund sender key 0.075 QOR": "0x789dc5f25d7aada975ec851084340016bbc53178f6f88a5837b737d3cba06da6",
+    "fund sender Pocket 0.8 QOR": "0x8ed04baa01146db6f51b2549abd6d028f5118753363ef364a9a564f1d86e0990",
+    "sender Pocket deployAndRelay + createPool": "EAA356D9420F91923AF5AD3BF0E1769246529B3A5418CD76E4D199D84A09AC19",
+    "fund claimer1 0.075 QOR": "0x53f6e52ee02d05098b9822cf6bbe95a99b0a8c6aeec3d11a3cc94fd14ef9f189",
+    "claimer1 takes a slot": "AB6A3B9B9B7BDE8077D3B03AA6965396795A4EECAE7F4755E761E85EF859282A",
+    "fund claimer2 0.075 QOR": "0x932e9edbeb01282f09a2c49877c9f18a7d78091f55caf1065384aee634a34faf"
+   },
+   "proof": "spend.json fund notes at 02:22:10-02:23:49; PoolCreated host is the sender key; PoolClaimed recipient is claimer1. claimer2 was funded by the deployer with the e2e note and did not claim (the test timed out on register-key)."
+  },
+  {
+   "id": "rerun-recipient-keys",
+   "flow": "successful chromium-390 rerun of a and b (drops s7 and s8). Sender and recipient Pockets were added in 4542124; the recipient keys were not, and /api/stats counts the bind recipient (the key).",
+   "at": "2026-11-26T02:45:39Z",
+   "accounts": {
+    "a-confirmed recipient.key": "0xA6B7210DF3ce9794F337AE7308566f8BBBAd0E4b",
+    "b-giveaway recipient.key": "0xc6a01495F9A8dbe5beF60a4d4C45A1eb31b6179D"
+   },
+   "txs": {
+    "s7 recipient bind (chromium-390-a-confirmed.json)": "1FF809EA05C6E1B8348B88AD4B52668056818640111A493EE3137D27BBE2C93A",
+    "s8 recipient bind (chromium-390-b-giveaway.json)": "23F631D1F8F70F2CCDB81EB174CE9EFF3B8AC7DC2392F3EA5D27E9BB62A30C3E"
+   },
+   "proof": "getLink(s7) recipient is the a-confirmed key, payTo is the already-listed Pocket 0x104C4Ab3\u2026; getLink(s8) recipient is the b-giveaway key, payTo is the already-listed Pocket 0x849C346b\u2026; both bind hashes are in the rerun evidence files."
+  }
+ ],
+ "ownAccountKeys": {
+  "v52-e2e-first-a1-sender-key-8BA34f": "0x8BA34fd55528A0789dd695D0e4A294759Df17E6A",
+  "v52-e2e-first-a1-sender-pocket-C71C9d": "0xC71C9deE3Ea8EA44209CE27cbb4269be9d8a2048",
+  "v52-e2e-first-a2-sender-key-0cDe91": "0x0cDe91d4BB9E8CCAcFD36cC91BFB917E6DFcE91E",
+  "v52-e2e-first-a2-sender-pocket-994e3d": "0x994e3ddd89125832ba5eeC54E674547206EEb3b7",
+  "v52-e2e-first-a2-recipient-key-D149D4": "0xD149D4d7249bc75E40f040468374E9021F5e13cC",
+  "v52-e2e-first-a2-recipient-pocket-FfCf40": "0xFfCf4058A2B43c71bD97fb08A13396E3d8D618A2",
+  "v52-e2e-first-b-sender-key-718821": "0x7188210790bE787f35fc748e5B16D9B2A2131d2C",
+  "v52-e2e-first-b-sender-pocket-F3839d": "0xF3839d25072bA4fe42160BE9ff0814799a398912",
+  "v52-e2e-first-b-recipient-key-16287c": "0x16287ca4dC03f890d3a4Ded1a0400F9cd5DF38C3",
+  "v52-e2e-first-b-recipient-pocket-001956": "0x001956d7C1C6fc971Bc2c2528ac1D483897D0605",
+  "v52-e2e-first-c-sender-key-2d772D": "0x2d772D9344F34CC7700D0a80cf39bBbE762eb04E",
+  "v52-e2e-first-c-sender-pocket-9e75CF": "0x9e75CFE1A5Ca9B677305c7763C95eb1734208856",
+  "v52-e2e-first-c-claimer1-key-24aa42": "0x24aa421a1137b920d03669b2a0065fBFd5E39BA8",
+  "v52-e2e-first-c-claimer2-key-a84CC3": "0xa84CC37b24C93431793dCD9a43efedFC92e038BE",
+  "v52-e2e-a-recipient-key-A6B721": "0xA6B7210DF3ce9794F337AE7308566f8BBBAd0E4b",
+  "v52-e2e-b-recipient-key-c6a014": "0xc6a01495F9A8dbe5beF60a4d4C45A1eb31b6179D"
+ }
+}
