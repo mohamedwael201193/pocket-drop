@@ -42,23 +42,24 @@ contract Stage3AuditRegressionTest is V4Base {
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
 
         v.proposeRecovery(OB, keccak256(_pk("OB")), DL, _pair(G0, G1), _sigs2(V("rec_G0_0"), V("rec_G1_0")));
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
 
         vm.warp(block.timestamp + RECOVERY_DELAY);
+        bytes memory fin1 = _finSig(v, false);
         vm.prank(mallory);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, fin1);
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), keccak256(_pk("OB")));
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
     }
 
     /// @dev Stage 3 #1 (HIGH): Same guarantee for finalizeRecoveryUnanimous.
@@ -67,7 +68,7 @@ contract Stage3AuditRegressionTest is V4Base {
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
 
         v.proposeRecoveryUnanimous(
             OB, keccak256(_pk("OB")), DL, _trio(), _sigs3(V("unan_G0_0"), V("unan_G1_0"), V("unan_G2_0"))
@@ -75,17 +76,18 @@ contract Stage3AuditRegressionTest is V4Base {
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
 
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
+        bytes memory fin2 = _finSig(v, true);
         vm.prank(mallory);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, fin2);
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), keccak256(_pk("OB")));
 
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
     }
 
     /// @dev Stage 3 #2 (MEDIUM): Daily drip calculation uses Solidity 0.8 checked math and caps MAX_DRIP / DAILY_DRIP_CAP;

@@ -191,7 +191,7 @@ contract V4FuzzTest is V4Base {
         v.vetoRecovery(DL, veto);
         assertTrue(v.frozen());
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
     }
 
     /*---------------- drop ----------------*/

@@ -362,9 +362,9 @@ contract PocketVaultTest is V4Base {
         assertEq(v.recoveryAt(), block.timestamp + RECOVERY_DELAY);
         assertEq(v.recoveryNonce(), 1);
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         vm.warp(block.timestamp + RECOVERY_DELAY);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, _finSig(v, false));
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), _hOB());
         assertEq(v.epoch(), 1);
@@ -450,7 +450,7 @@ contract PocketVaultTest is V4Base {
         assertEq(v.recoveryAt(), 0);
         assertEq(v.owner(), OA);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
         v.vetoRecovery(DL, V("vetoRec_1"));
     }
@@ -463,7 +463,7 @@ contract PocketVaultTest is V4Base {
         // a fresh proposal at recovery nonce 1 works, finalizes, and the new owner continues at owner nonce 1
         v.proposeRecovery(OB, _hOB(), DL, _two(G0, G1), _bytes2(V("rec_G0_1"), V("rec_G1_1")));
         vm.warp(block.timestamp + RECOVERY_DELAY);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, _finSig(v, false));
         v.spend(SINK, 0.8 ether, DL, V("spendS_OB_1"));
         assertEq(SINK.balance, 0.8 ether);
     }
@@ -480,7 +480,7 @@ contract PocketVaultTest is V4Base {
         keys.set(OB, false, 0, "", false);
         vm.warp(block.timestamp + RECOVERY_DELAY);
         vm.expectRevert(PqcLib.NotRegistered.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         assertEq(v.owner(), OA);
     }
 
@@ -504,7 +504,7 @@ contract PocketVaultTest is V4Base {
         v.setGuardians(_two(G0, G1), 2, DL, V("gSet_2"));
         _propose0();
         vm.warp(block.timestamp + RECOVERY_DELAY);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, _finSig(v, false));
         vm.expectRevert(PocketVault.StaleEpoch.selector);
         v.executeQueued(1);
         assertEq(v.pendingLimitAt(), 0);

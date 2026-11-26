@@ -203,11 +203,13 @@ contract FreezeHandler is Fx {
     }
 
     function finalizeUnanimous() external {
-        try v.finalizeRecoveryUnanimous() {} catch {}
+        bytes memory sig = _finSigBy(v, true, address(uint160(0x6700)), "G0", DL_);
+        try v.finalizeRecoveryUnanimous(address(uint160(0x6700)), DL_, sig) {} catch {}
     }
 
     function finalizeThreshold() external {
-        try v.finalizeRecovery() {} catch {}
+        bytes memory sig = _finSigBy(v, false, address(uint160(0x6700)), "G0", DL_);
+        try v.finalizeRecovery(address(uint160(0x6700)), DL_, sig) {} catch {}
     }
 
     /// The (old) owner key tries to veto: it may clear a threshold proposal, never a unanimous one.

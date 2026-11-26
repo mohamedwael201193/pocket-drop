@@ -56,7 +56,13 @@ contract PocketVault is IERC1271 {
     bytes32 public constant ACT_RECOVER_UNANIMOUS = keccak256("POCKET_RECOVER_UNANIMOUS_V1");
     /// @dev Domain of an ERC-1271 approval (v5.1): binds the approved hash to this Pocket and the chain id.
     bytes32 public constant ERC1271_DOMAIN = keccak256("POCKET_ERC1271_V1");
+    /// @dev v5.2: authorization to finalize a pending threshold recovery (signed by the owner, a guardian or the
+    ///      proposed new owner).
+    bytes32 public constant ACT_FINALIZE_RECOVERY = keccak256("POCKET_FINALIZE_RECOVERY_V1");
+    /// @dev v5.2: authorization to finalize a pending unanimous recovery (signed by a guardian or the proposed new owner).
+    bytes32 public constant ACT_FINALIZE_RECOVERY_UNANIMOUS = keccak256("POCKET_FINALIZE_RECOVERY_UNANIMOUS_V1");
 
+    /// @notice Hard cap on the guardian set (and on the signers any guardian check accepts).
     uint256 public constant MAX_GUARDIANS = 5;
     /// @notice After two freezes in a row, a third needs this many FREEZE_PERIODs of quiet (or a guardian-set change).
     uint256 public constant FREEZE_COOLDOWN_PERIODS = 4;
@@ -160,6 +166,8 @@ contract PocketVault is IERC1271 {
         address indexed newOwner, bytes32 newKeyHash, uint64 finalizeAfter, uint256 recoveryNonce
     );
     event RecoveryFinalized(address indexed oldOwner, address indexed newOwner, bytes32 newKeyHash);
+    /// @notice v5.2: who authorized a finalize (owner, guardian or the proposed new owner), and for which proposal.
+    event RecoveryFinalizeAuthorized(address indexed authorizer, uint256 recoveryNonce, bool unanimous);
     event DropCreated(address indexed drop, uint256 indexed linkId, uint256 value);
     event DropConfirmed(address indexed drop, uint256 indexed linkId);
     event DropCancelled(address indexed drop, uint256 indexed linkId);
@@ -187,6 +195,7 @@ contract PocketVault is IERC1271 {
     error AlreadyFrozen();
     error FreezeCapped();
     error BadNonce();
+    error NotAuthorized();
 
     /*//////////////////////////////////////////////////////////////
                            CONSTRUCTION / INIT
@@ -443,18 +452,34 @@ contract PocketVault is IERC1271 {
         _;
     }
 
-    /// @notice Complete a guardian-approved threshold recovery after its timelock. Permissionless execution is
-    ///         intentional: `recoveryOwner` and `recoveryKeyHash` were already authorized by threshold guardian
-    ///         ML-DSA-87 signatures in `proposeRecovery`, remain vetoable by the owner via `vetoRecovery`, and the
-    ///         caller chooses nothing.
-    function finalizeRecovery() external onlyApprovedThresholdRecovery {
+    /// @notice Complete a guardian-approved threshold recovery after its timelock.
+    /// @dev Access control (v5.2): `authorizer` must be the current owner, a current guardian, or the proposed new owner
+    ///      (`recoveryOwner`), and `sig` must be that account's ML-DSA-87 signature over
+    ///      `finalizeDigest(ACT_FINALIZE_RECOVERY, authorizer, deadline)`. The owner is checked against the pinned
+    ///      `ownerKeyHash` and the new owner against `recoveryKeyHash`. The digest binds this Pocket, the chain id, the
+    ///      current `recoveryNonce` (so it is valid for this proposal only), the approved owner and key, the authorizer
+    ///      and the deadline. The caller (`msg.sender`, usually the relayer) gains no authority: everything that changes
+    ///      was fixed by the guardians in `proposeRecovery`, and no value moves.
+    /// @param authorizer The account that authorizes the finalize (owner, guardian or `recoveryOwner`).
+    /// @param deadline Authorization deadline.
+    /// @param sig The authorizer's ML-DSA-87 signature.
+    function finalizeRecovery(address authorizer, uint256 deadline, bytes calldata sig)
+        external
+        onlyApprovedThresholdRecovery
+    {
+        _authorizeFinalize(
+            ACT_FINALIZE_RECOVERY, recoveryOwner, recoveryKeyHash, authorizer, deadline, sig, true
+        );
         address old = owner;
-        owner = recoveryOwner;
-        ownerKeyHash = recoveryKeyHash;
+        address newOwner = recoveryOwner;
+        bytes32 newKeyHash = recoveryKeyHash;
         recoveryAt = 0;
+        owner = newOwner;
+        ownerKeyHash = newKeyHash;
         epoch++;
         _clearPending();
-        emit RecoveryFinalized(old, owner, ownerKeyHash);
+        emit RecoveryFinalizeAuthorized(authorizer, recoveryNonce, false);
+        emit RecoveryFinalized(old, newOwner, newKeyHash);
     }
 
     /// @notice Replace the owner key with the signatures of ALL guardians (set size >= 2). The old key cannot veto it:
@@ -498,17 +523,53 @@ contract PocketVault is IERC1271 {
         _;
     }
 
-    /// @notice Complete a guardian-approved unanimous recovery after its timelock. Permissionless execution is
-    ///         intentional: `uRecoveryOwner` and `uRecoveryKeyHash` were already authorized by ALL guardians'
-    ///         ML-DSA-87 signatures in `proposeRecoveryUnanimous`, and the caller chooses nothing.
-    function finalizeRecoveryUnanimous() external onlyApprovedUnanimousRecovery {
+    /// @notice Complete a guardian-approved unanimous recovery after its timelock.
+    /// @dev Access control (v5.2): `authorizer` must be a current guardian or the proposed new owner (`uRecoveryOwner`),
+    ///      with an ML-DSA-87 signature over `finalizeDigest(ACT_FINALIZE_RECOVERY_UNANIMOUS, authorizer, deadline)`.
+    ///      The old owner key is not accepted here: this is the lost-or-stolen-key path, where the old key has no say.
+    ///      The new owner and key were fixed by ALL guardians in `proposeRecoveryUnanimous`; no value moves.
+    /// @param authorizer The account that authorizes the finalize (guardian or `uRecoveryOwner`).
+    /// @param deadline Authorization deadline.
+    /// @param sig The authorizer's ML-DSA-87 signature.
+    function finalizeRecoveryUnanimous(address authorizer, uint256 deadline, bytes calldata sig)
+        external
+        onlyApprovedUnanimousRecovery
+    {
+        _authorizeFinalize(
+            ACT_FINALIZE_RECOVERY_UNANIMOUS, uRecoveryOwner, uRecoveryKeyHash, authorizer, deadline, sig, false
+        );
         address old = owner;
-        owner = uRecoveryOwner;
-        ownerKeyHash = uRecoveryKeyHash;
+        address newOwner = uRecoveryOwner;
+        bytes32 newKeyHash = uRecoveryKeyHash;
         uRecoveryAt = 0;
+        owner = newOwner;
+        ownerKeyHash = newKeyHash;
         epoch++;
         _clearPending();
-        emit RecoveryFinalized(old, owner, ownerKeyHash);
+        emit RecoveryFinalizeAuthorized(authorizer, recoveryNonce, true);
+        emit RecoveryFinalized(old, newOwner, newKeyHash);
+    }
+
+    /// @notice The digest an authorizer signs (as `PqcLib.pqMessage(digest)`) to finalize the pending recovery.
+    /// @param action `ACT_FINALIZE_RECOVERY` or `ACT_FINALIZE_RECOVERY_UNANIMOUS`.
+    /// @param authorizer The authorizing account.
+    /// @param deadline Authorization deadline.
+    /// @return The digest (bound to this Pocket, the chain, `recoveryNonce` and the pending owner and key).
+    function finalizeDigest(bytes32 action, address authorizer, uint256 deadline) public view returns (bytes32) {
+        bool unanimous = action == ACT_FINALIZE_RECOVERY_UNANIMOUS;
+        if (!unanimous && action != ACT_FINALIZE_RECOVERY) revert BadParams();
+        return keccak256(
+            abi.encode(
+                action,
+                block.chainid,
+                address(this),
+                recoveryNonce,
+                unanimous ? uRecoveryOwner : recoveryOwner,
+                unanimous ? uRecoveryKeyHash : recoveryKeyHash,
+                authorizer,
+                deadline
+            )
+        );
     }
 
     /// @notice The digest each guardian signs (as `PqcLib.pqMessage(digest)`) for the next unanimous recovery.
@@ -613,6 +674,7 @@ contract PocketVault is IERC1271 {
         bytes calldata sig
     ) external returns (uint256 linkId) {
         _requireNotFrozen();
+        _requireTarget(drop);
         _auth(ACT_CREATE_DROP, abi.encode(drop, linkKeyHash, mode, expiry, drip, relayerFee, value), deadline, sig);
         _debitOrRevert(value);
         linkId = IPocketDropSender(drop).create{value: value}(linkKeyHash, mode, expiry, drip, relayerFee);
@@ -632,6 +694,7 @@ contract PocketVault is IERC1271 {
         uint256 deadline,
         bytes calldata sig
     ) external {
+        _requireTarget(drop);
         _auth(ACT_CONFIRM_DROP, abi.encode(drop, linkId, expectedRecipientKeyHash), deadline, sig);
         IPocketDropSender(drop).confirmRecipient(linkId, expectedRecipientKeyHash);
         emit DropConfirmed(drop, linkId);
@@ -643,6 +706,7 @@ contract PocketVault is IERC1271 {
     /// @param deadline Intent deadline.
     /// @param sig Owner intent signature.
     function cancelDrop(address drop, uint256 linkId, uint256 deadline, bytes calldata sig) external {
+        _requireTarget(drop);
         _auth(ACT_CANCEL_DROP, abi.encode(drop, linkId), deadline, sig);
         IPocketDropSender(drop).cancel(linkId);
         emit DropCancelled(drop, linkId);
@@ -667,6 +731,7 @@ contract PocketVault is IERC1271 {
         bytes calldata sig
     ) external returns (uint256 poolId) {
         _requireNotFrozen();
+        _requireTarget(pool);
         _auth(ACT_CREATE_POOL, abi.encode(pool, linkKeyHash, slots, perSlot, expiry), deadline, sig);
         uint256 value = uint256(slots) * perSlot;
         _debitOrRevert(value);
@@ -680,6 +745,7 @@ contract PocketVault is IERC1271 {
     /// @param deadline Intent deadline.
     /// @param sig Owner intent signature.
     function closePool(address pool, uint256 poolId, uint256 deadline, bytes calldata sig) external {
+        _requireTarget(pool);
         _auth(ACT_CLOSE_POOL, abi.encode(pool, poolId), deadline, sig);
         IDropPoolHost(pool).close(poolId);
         emit PoolClosed(pool, poolId);
@@ -742,6 +808,40 @@ contract PocketVault is IERC1271 {
         nonce++;
     }
 
+    /// @dev Access control of both finalize paths. `authorizer` must be the proposed new owner (checked against the
+    ///      approved key hash), the current owner when `ownerAllowed` (checked against the pinned `ownerKeyHash`), or a
+    ///      current guardian (checked against its registered, proven key). Reverts `Expired`, `NotAuthorized` or
+    ///      `BadSignature`. View only: called before any effect.
+    function _authorizeFinalize(
+        bytes32 action,
+        address newOwner,
+        bytes32 newKeyHash,
+        address authorizer,
+        uint256 deadline,
+        bytes calldata sig,
+        bool ownerAllowed
+    ) internal view {
+        if (block.timestamp > deadline) revert Expired();
+        if (authorizer == address(0)) revert NotAuthorized();
+        bytes memory message = PqcLib.pqMessage(finalizeDigest(action, authorizer, deadline));
+        bool ok;
+        if (authorizer == newOwner) {
+            ok = PqcLib.verifyForKey(newOwner, newKeyHash, message, sig);
+        } else if (ownerAllowed && authorizer == owner) {
+            ok = PqcLib.verifyForKey(owner, ownerKeyHash, message, sig);
+        } else if (_isGuardian(authorizer)) {
+            ok = PqcLib.verifyFor(authorizer, message, sig);
+        } else {
+            revert NotAuthorized();
+        }
+        if (!ok) revert BadSignature();
+    }
+
+    /// @dev A drop or pool target must be a contract address other than zero and this Pocket.
+    function _requireTarget(address target) internal view {
+        if (target == address(0) || target == address(this) || target.code.length == 0) revert BadParams();
+    }
+
     /// @dev Revert `Frozen` while a freeze or a unanimous recovery is active.
     function _requireNotFrozen() internal view {
         if (frozen()) revert Frozen();
@@ -755,19 +855,18 @@ contract PocketVault is IERC1271 {
     }
 
     /// @dev Every signer must be a distinct configured guardian with a valid ML-DSA signature over `message`.
-    ///      Gas bound (QCAI ETH-004): the loops are bounded. `_guardians.length <= MAX_GUARDIANS` (5) because both
-    ///      `initialize` and `setGuardians` go through `_validateGuardians`, which reverts when `n > MAX_GUARDIANS`.
-    ///      Every signer must be a distinct guardian (`NotGuardian` / `DuplicateSigner`), so a call with more than
-    ///      MAX_GUARDIANS signers can never be valid and fails fast, before any precompile call. The duplicate scan is
-    ///      at most 5 x 4 / 2 steps.
+    ///      Gas bound: at most `MAX_GUARDIANS` (5) signers are accepted (more reverts before any work), the guardian set
+    ///      itself is capped at `MAX_GUARDIANS` by `_validateGuardians`, and duplicates are detected with a bitmap of
+    ///      guardian indexes, so the work is at most 5 index lookups of at most 5 steps plus 5 precompile calls.
     function _checkGuardianSigs(address[] calldata signers, bytes[] calldata sigs, bytes memory message) internal view {
         uint256 len = signers.length;
         if (len > MAX_GUARDIANS) revert NotGuardian();
-        for (uint256 i; i < len && i < MAX_GUARDIANS; i++) {
-            if (!_isGuardian(signers[i])) revert NotGuardian();
-            for (uint256 j; j < i && j < MAX_GUARDIANS; j++) {
-                if (signers[j] == signers[i]) revert DuplicateSigner();
-            }
+        if (len != sigs.length) revert NotEnoughSigners();
+        uint256 seen;
+        for (uint256 i; i < len; ++i) {
+            uint256 bit = uint256(1) << _guardianIndex(signers[i]);
+            if (seen & bit != 0) revert DuplicateSigner();
+            seen |= bit;
             if (!PqcLib.verifyFor(signers[i], message, sigs[i])) revert BadSignature();
         }
     }
@@ -805,10 +904,19 @@ contract PocketVault is IERC1271 {
     /// @dev Linear scan of at most MAX_GUARDIANS entries.
     function _isGuardian(address who) internal view returns (bool) {
         uint256 n = _guardians.length;
-        for (uint256 i; i < n; i++) {
+        for (uint256 i; i < n && i < MAX_GUARDIANS; ++i) {
             if (_guardians[i] == who) return true;
         }
         return false;
+    }
+
+    /// @dev Index of `who` in the guardian set (at most MAX_GUARDIANS steps); reverts `NotGuardian` if absent.
+    function _guardianIndex(address who) internal view returns (uint256) {
+        uint256 n = _guardians.length;
+        for (uint256 i; i < n && i < MAX_GUARDIANS; ++i) {
+            if (_guardians[i] == who) return i;
+        }
+        revert NotGuardian();
     }
 
     /// @dev 0 guardians with threshold 0, or 2..MAX guardians with 2 <= threshold <= n; non-zero, distinct, != owner.

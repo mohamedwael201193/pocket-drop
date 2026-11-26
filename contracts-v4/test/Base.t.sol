@@ -9,6 +9,7 @@ import {PocketDrop} from "../src/PocketDrop.sol";
 import {DropPool} from "../src/DropPool.sol";
 import {PqGuardedCounter} from "../src/examples/PqGuardedCounter.sol";
 import {IPocketFactory} from "../src/interfaces/IPocket.sol";
+import {PqcLib} from "../src/PqcLib.sol";
 import {MockPqcVerify, MockPqcKeys} from "./mocks/MockPqc.sol";
 import {Maker} from "./mocks/Hostile.sol";
 
@@ -31,6 +32,21 @@ abstract contract Fx is Test {
         bytes32 h = vm.parseJsonBytes32(f, ".h");
         vm.store(VERIFY_ADDR, keccak256(abi.encode(h, uint256(0))), bytes32(uint256(1)));
         return vm.parseJsonBytes(f, ".sig");
+    }
+    /// @dev v5.2: a finalize authorization by `who` (key fixture `name`) for the pending recovery of `v`. The mock
+    ///      verifier accepts exactly this (key, signature, message) triple, set through a storage write. The message is
+    ///      read from the Pocket (`finalizeDigest`), so call this BEFORE `vm.prank` / `vm.expectRevert`. The
+    ///      real-crypto suite signs the same digest with real ML-DSA-87 keys.
+    function _finSigBy(PocketVault v, bool unanimous, address who, string memory name, uint256 deadline)
+        internal
+        returns (bytes memory sig)
+    {
+        bytes32 act = unanimous ? v.ACT_FINALIZE_RECOVERY_UNANIMOUS() : v.ACT_FINALIZE_RECOVERY();
+        bytes memory m = PqcLib.pqMessage(v.finalizeDigest(act, who, deadline));
+        sig = new bytes(PqcLib.ML_DSA_87_SIG_LEN);
+        sig[0] = unanimous ? bytes1(0xf2) : bytes1(0xf1);
+        bytes32 h = keccak256(abi.encode(_pk(name), sig, m));
+        vm.store(VERIFY_ADDR, keccak256(abi.encode(h, uint256(0))), bytes32(uint256(1)));
     }
 }
 
@@ -187,6 +203,11 @@ abstract contract V4Base is Fx {
 
     function deployPocket(Cfg memory k) internal returns (PocketVault v) {
         v = PocketVault(payable(factory.deploy(k.owner, k.guardians, k.threshold, k.limit, k.salt)));
+    }
+
+    /// @dev v5.2: finalize authorization by guardian G0, deadline DL.
+    function _finSig(PocketVault v, bool unanimous) internal returns (bytes memory) {
+        return _finSigBy(v, unanimous, G0, "G0", DL);
     }
 
     /// @dev PA, deployed and funded with 100 QOR.

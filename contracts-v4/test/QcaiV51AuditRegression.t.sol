@@ -66,19 +66,19 @@ contract QcaiV51VaultTest is V4Base {
         PocketVault v = pocketA();
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
 
         _proposeThreshold(v);
         vm.warp(block.timestamp + RECOVERY_DELAY - 1);
         vm.prank(mallory);
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
 
         v.vetoRecovery(DL, V("vetoRec_0")); // the current owner key vetoes
         vm.warp(block.timestamp + 1);
         vm.prank(mallory);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         assertEq(v.owner(), OA);
         assertEq(v.epoch(), 0);
     }
@@ -92,8 +92,9 @@ contract QcaiV51VaultTest is V4Base {
         vm.warp(block.timestamp + RECOVERY_DELAY);
         uint256 pocketBal = address(v).balance;
         uint256 callerBal = caller.balance;
+        bytes memory fin1 = _finSig(v, false);
         vm.prank(caller);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, fin1);
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), keccak256(_pk("OB")));
         assertEq(v.epoch(), 1);
@@ -108,15 +109,16 @@ contract QcaiV51VaultTest is V4Base {
         PocketVault v = pocketA();
         vm.prank(caller);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         _proposeUnanimous(v);
         vm.prank(caller);
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
         uint256 pocketBal = address(v).balance;
+        bytes memory fin2 = _finSig(v, true);
         vm.prank(caller);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, fin2);
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), keccak256(_pk("OB")));
         assertEq(address(v).balance, pocketBal);
@@ -130,7 +132,7 @@ contract QcaiV51VaultTest is V4Base {
         vm.warp(block.timestamp + RECOVERY_DELAY);
         vm.prank(mallory);
         vm.expectRevert();
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         assertEq(v.owner(), OA);
     }
 

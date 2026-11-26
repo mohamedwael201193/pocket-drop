@@ -251,11 +251,11 @@ contract PocketVaultFreezeTest is V4Base {
         vm.expectRevert(PocketVault.Frozen.selector);
         v.spend(SINK, 0.8 ether, DL, V("spendS_0"));
         vm.expectRevert(PocketVault.TooEarly.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery(); // the threshold path has nothing pending
+        v.finalizeRecovery(G0, DL, ""); // the threshold path has nothing pending
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, _finSig(v, true));
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), _hOB());
         assertEq(v.epoch(), 1);
@@ -278,7 +278,7 @@ contract PocketVaultFreezeTest is V4Base {
         v.vetoRecovery(DL, V("vetoRec_2"));
         vm.warp(block.timestamp + UNANIMOUS_DELAY); // the freeze has also ended by now
         assertTrue(v.frozen(), "still held by the pending recovery, not by the clock");
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, _finSig(v, true));
         vm.expectRevert(PocketVault.StaleEpoch.selector);
         v.executeQueued(1); // the thief's queue is dead
         v.spend(SINK, 0.8 ether, DL, V("spendS_OB_2"));
@@ -347,7 +347,7 @@ contract PocketVaultFreezeTest is V4Base {
         assertGt(v.uRecoveryAt(), 0);
         vm.warp(block.timestamp + RECOVERY_DELAY);
         vm.expectRevert(PocketVault.NoRecoveryPending.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         // and no threshold proposal while the unanimous one is pending
         vm.expectRevert(PocketVault.RecoveryPending.selector);
         v.proposeRecovery(OB, _hOB(), DL, _two(G0, G1), _b2(V("rec_G0_1"), V("rec_G1_1")));
@@ -365,7 +365,7 @@ contract PocketVaultFreezeTest is V4Base {
         keys.set(OB, false, 0, "", false);
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
         vm.expectRevert(PqcLib.NotRegistered.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         assertEq(v.owner(), OA);
         assertTrue(v.frozen());
         // the guardians repair it with a fresh unanimous proposal (restarts the delay)
@@ -373,7 +373,7 @@ contract PocketVaultFreezeTest is V4Base {
         _unan(1);
         assertEq(v.uRecoveryAt(), block.timestamp + UNANIMOUS_DELAY);
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, _finSig(v, true));
         assertEq(v.owner(), OB);
     }
 
@@ -383,7 +383,7 @@ contract PocketVaultFreezeTest is V4Base {
         v.setGuardians(_two(G0, G1), 2, DL, V("gSet_2"));
         _unan(0);
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, _finSig(v, true));
         vm.expectRevert(PocketVault.StaleEpoch.selector);
         v.executeQueued(1);
         assertEq(v.pendingLimitAt(), 0);

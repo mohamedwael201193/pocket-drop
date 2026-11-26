@@ -123,11 +123,11 @@ contract HardeningTest is V4Base {
         keys.set(OB, true, 1, _pk("OB"), false); // proof withdrawn while pending
         vm.warp(block.timestamp + RECOVERY_DELAY);
         vm.expectRevert(PqcLib.PossessionNotProven.selector);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, "");
         assertEq(v.owner(), OA);
 
         keys.set(OB, true, 1, _pk("OB"), true);
-        v.finalizeRecovery();
+        v.finalizeRecovery(G0, DL, _finSig(v, false));
         assertEq(v.owner(), OB);
     }
 
@@ -141,14 +141,14 @@ contract HardeningTest is V4Base {
         keys.set(OB, true, 1, _pk("OA"), true); // registry now holds a different key for OB
         vm.warp(block.timestamp + UNANIMOUS_DELAY);
         vm.expectRevert(PqcLib.KeyMismatch.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         keys.set(OB, true, 1, _pk("OB"), false);
         vm.expectRevert(PqcLib.PossessionNotProven.selector);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, "");
         assertEq(v.owner(), OA);
 
         keys.set(OB, true, 1, _pk("OB"), true);
-        v.finalizeRecoveryUnanimous();
+        v.finalizeRecoveryUnanimous(G0, DL, _finSig(v, true));
         assertEq(v.owner(), OB);
         assertEq(v.ownerKeyHash(), _hOB());
     }
