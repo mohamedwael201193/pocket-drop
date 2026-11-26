@@ -1,10 +1,10 @@
-# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3; v5.1 Stage 4; v5.2 deployed, Stage 5 pending)
+# Pocket Drop - QCAI audit (v4 Stages 1 and 2; v5 Stage 3; v5.1 Stage 4; v5.2 Stage 5)
 
-**Summary (one line, reused in the README and the project page):** four QCAI runs across v4, v5 and v5.1. Stage 1 (v4) scored 82 on 19 Nov 2026, Stage 2 (v4) 78 on 20 Nov 2026, Stage 3 (v5) 85 on 25 Nov 2026 UTC, and Stage 4 (v5.1, the deployed code) 82 on 26 Nov 2026 01:09 UTC (03:09 Cairo). Stage 4 reported 0 critical and 5 items (1 high, 2 medium, 1 low, 1 info): 3 false positives, 1 pattern bounded at 5 guardians, and 1 informational confirmation of ERC-1271. Every finding maps to named Foundry tests ([Stage 4 triage](audit/stage4/QCAI_V5_1_TRIAGE.md)).
+**Summary (one line, reused in the README and the project page):** five QCAI runs across v4, v5, v5.1 and v5.2. Stage 1 (v4) scored 82 on 19 Nov 2026, Stage 2 (v4) 78 on 20 Nov 2026, Stage 3 (v5) 85 on 25 Nov 2026 UTC, Stage 4 (v5.1) 82 on 26 Nov 2026 01:09 UTC (03:09 Cairo), and Stage 5 on the deployed v5.2 code 78 on 26 Nov 2026 (MEDIUM, 0 critical, 7 items: 5 false positives, 1 bound at 5 guardians, 1 informational). The last three runs, on v5, v5.1 and v5.2, scored 85, 82 and 78 while the code got stricter; the same titles come back after the checks they ask for exist, and every one has a verdict and named Foundry tests ([Stage 5 triage](audit/stage5/QCAI_V5_2_TRIAGE.md), [Stage 4 triage](audit/stage4/QCAI_V5_1_TRIAGE.md)). No real vulnerability has been found in any run.
 
 All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary value.
 
-**Current version: v5.2** (deployed 26 Nov 2026). See [`docs/V5_2.md`](V5_2.md). v5.1, v5 and v4 stay deployed; links and Pockets made on those contracts keep working. The v5.2 QCAI run (Stage 5) has not run yet.
+**Current version: v5.2** (deployed 26 Nov 2026). See [`docs/V5_2.md`](V5_2.md). v5.1, v5 and v4 stay deployed; links and Pockets made on those contracts keep working. Stage 5 ran on the v5.2 source: section 14.
 
 **v5 (25 Nov 2026).** v5 changes one library, `PqcLib`, to close the hygiene item that used to be listed at the end of section 5.1 (exact ML-DSA-87 sizes and the exact key-status layout are now checked in the contract). The rest of `src/` is byte-for-byte the audited Stage 2 source. v5 remains deployed on Diana as a previous version, with v4 still deployed before it. Stage 3 QCAI ran on the v5 flattened source on 25 Nov 2026 UTC (26 Nov 2026 00:26 Cairo) and scored 85/100 (MEDIUM, Quantum Safe: Not scored under the EVM setting). Artifacts and triage are in [`docs/audit/stage3/`](audit/stage3/) and section 9. Details of v5: [`docs/V5.md`](V5.md).
 
@@ -15,6 +15,7 @@ All of this runs on the Diana testnet (chain id 9800); QOR there has no monetary
 | 1 | 2026-11-19 23:28 | `QCAIA-1795130931306-3D8DAA40` | 82 / MEDIUM | [`docs/audit/stage1/QCAI-stage1-2026-11-19.pdf`](audit/stage1/QCAI-stage1-2026-11-19.pdf) | [`.json`](audit/stage1/QCAI-stage1-2026-11-19.json) | [`stage1/PocketDrop-v4-flattened.sol`](audit/stage1/PocketDrop-v4-flattened.sol), 1601 lines, SHA-256 `a4fdacc97a798149c6ce0b15e46b9944c94fb5ecb11ab68d235440692ad32cd4` |
 | 3 (v5) | 2026-11-25 22:26 | `QCAIA-1795645590445-DF0CEDA6` | 85 / MEDIUM | [`docs/audit/stage3/QCAI-stage3-v5.pdf`](audit/stage3/QCAI-stage3-v5.pdf) | [`.json`](audit/stage3/qcai-stage3-v5.json) | [`stage3/PocketDrop-v5-flattened.sol`](audit/stage3/PocketDrop-v5-flattened.sol), 1617 lines, SHA-256 `2b27a1498ff29dd73b4f1175e3e608f84c34dc9b2523b8c6c8e5bf8e2959e610` |
 | 4 (v5.1) | 2026-11-26 01:09 | `QCAIA-1795655356279-BA1C1020` | 82 / HIGH | [`docs/audit/stage4/QCAI-stage4-v5.1.pdf`](audit/stage4/QCAI-stage4-v5.1.pdf) | [`.json`](audit/stage4/QCAI-stage4-v5.1-api.json), [record](audit/stage4/qcai-stage4-v5.1.json) | [`stage4/PocketDrop-v5.1-flattened.sol`](audit/stage4/PocketDrop-v5.1-flattened.sol), 1944 lines, SHA-256 `22faf22b3aa59124a3cc19fa77f8dcc9d65e924a98ea147918deee02cdd61b8a` |
+| 5 (v5.2) | 2026-11-26 (time not recorded) | TODO (id not recorded) | 78 / MEDIUM | not archived (not checked for personal data; text transcribed) | [record](audit/stage5/qcai-stage5-v5.2.json) | [`stage5/PocketDrop-v5.2-flattened.sol`](audit/stage5/PocketDrop-v5.2-flattened.sol), 2168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d` |
 | 2 | 2026-11-20 01:32 | `QCAIA-1795138339351-F6A93427` | 78 / MEDIUM | [`docs/audit/stage2/QCAI-stage2-2026-11-20.pdf`](audit/stage2/QCAI-stage2-2026-11-20.pdf) | [`.json`](audit/stage2/QCAI-stage2-2026-11-20.json), SHA-256 `a1d587ebb749c6cd8601b47bbcf63f6cf4f5709e0b72f6168c114ba2eb30bbc7` | [`stage2/PocketDrop-v4-flattened.sol`](audit/stage2/PocketDrop-v4-flattened.sol), 1605 lines, SHA-256 `c4b19a8d00879b64417aece0d7dd65a20e1398285c4fbf895f19e78cdfe1b0cf` |
 
 Public reports:
@@ -22,6 +23,7 @@ Public reports:
 - Stage 2: https://dashboard.qorechain.io/api/proxy/audits/QCAIA-1795138339351-F6A93427
 - Stage 3 (v5): https://dashboard.qorechain.io/audits/QCAIA-1795645590445-DF0CEDA6
 - Stage 4 (v5.1): https://dashboard.qorechain.io/audits/QCAIA-1795655356279-BA1C1020
+- Stage 5 (v5.2): TODO (no public report URL yet)
 
 All four runs use the blockchain setting "Ethereum (EVM/Solidity)". The dashboard showed a cost of 150 QOR (testnet) for each run.
 
@@ -159,7 +161,7 @@ Bytecode check (read 23 Nov 2026, 19:40 Cairo): the runtime code of all three co
 
 ```bash
 cd contracts-v4
-forge test                                   # 217 tests (v5.2), mock precompiles
+forge test                                   # 241 tests (v5.2), mock precompiles
 FOUNDRY_PROFILE=realcrypto forge test        # 26 tests, real ML-DSA-87 via vm.ffi (needs npm ci in contracts-v4)
 FOUNDRY_PROFILE=live forge test              # 31 tests, eth_call against the live Diana precompiles
 sh script/ffi/mutation-check.sh              # accept-all verifier must break the real-crypto suite
@@ -255,4 +257,22 @@ The Stage 4 findings on v5.1 were false positives or bounded (section 12). v5.2 
 | 3 payout reentrancy | vault lock on every external-call function; `_pay` asserts the lock (`PayoutOutsideLock`) | Foundry `test_v52_payout_*`, `test_v52_vault_lock_*` |
 | 4 guardian loop | bitmap duplicate check, every loop bounded by `MAX_GUARDIANS` | Foundry `test_qcai51_l4_*` |
 
-Audit source for Stage 5: [`audit/stage5/PocketDrop-v5.2-flattened.sol`](audit/stage5/PocketDrop-v5.2-flattened.sol), 2,168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d` ([`SHA256SUMS`](audit/stage5/SHA256SUMS)). `node contracts-v4/script/flatten-v52.mjs --check` compiles it alone and compares each runtime bytecode with the build and with the code at the v5.2 addresses (immutables masked): all equal. Stage 5 has not run yet.
+Audit source for Stage 5: [`audit/stage5/PocketDrop-v5.2-flattened.sol`](audit/stage5/PocketDrop-v5.2-flattened.sol), 2,168 lines, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d` ([`SHA256SUMS`](audit/stage5/SHA256SUMS)). `node contracts-v4/script/flatten-v52.mjs --check` compiles it alone and compares each runtime bytecode with the build and with the code at the v5.2 addresses (immutables masked): all equal. Stage 5 ran on this file; see section 14.
+
+## 14. Stage 5 (v5.2): three AI audit runs scored 85, 82 and 78
+
+QCAI ran on the v5.2 flattened source (the deployed code, SHA-256 `ec71d762edfc5343d867a7c674a05ff06b5796ec85c4576f79067f8d2fa81b7d`) on 26 Nov 2026, from a separate QCAI account. Result: **78/100, risk MEDIUM**, Quantum readiness "Not scored" (expected for an EVM audit), 7 findings (1 high, 3 medium, 2 low, 1 info), 0 critical. Cost 150 QOR (testnet). Audit id and public report URL: TODO (not available when this was written). The record with the seven findings verbatim is [`audit/stage5/qcai-stage5-v5.2.json`](audit/stage5/qcai-stage5-v5.2.json); the PDF export and a screenshot of the report are not archived (they were not checked for personal data). The reasoning for each finding, with the exact code lines in `src/` and in the audited flattened file: [`audit/stage5/QCAI_V5_2_TRIAGE.md`](audit/stage5/QCAI_V5_2_TRIAGE.md). Evidence tests: `contracts-v4/test/QcaiV52AuditRegression.t.sol` (24 tests, all against the unchanged v5.2 `src/`).
+
+**Three AI audit runs, three scores: 85 (v5), 82 (v5.1), 78 (v5.2).** The code got stricter each time (v5.1 and v5.2 added explicit checks for exactly the points the reports raised), and the score went down. The findings repeat: the reentrancy, finalize access control, drip overflow and guardian-loop titles appear in more than one run, including after the code was changed so that the stated concern could not occur. The report text and its line numbers differ between runs of the same code family. Each finding below has a verdict and at least one test that proves it, so a reviewer can check the claim instead of relying on the number. The QoreChain FAQ says the audit score is not fed into judging automatically and that jurors read the reports with the team's explanations.
+
+| # | Severity | Finding | Verdict | Tests |
+|---|---|---|---|---|
+| 1 | HIGH | Potential reentrancy in `Payout` (`_pay` has no guard of its own) | **False positive.** `_pay` reverts `PayoutOutsideLock` unless the lock is held, and every caller is `nonReentrant` with state changes first. | `test_qcai52_f1_pay_reverts_outside_lock_and_receiver_cannot_reenter_the_locked_path`, `test_qcai52_f1_vault_spend_receiver_cannot_reenter_spend`, `test_qcai52_f1_vault_executeQueued_receiver_cannot_reenter`, `test_qcai52_f1_claim_receiver_cannot_reenter_and_payout_is_recorded_once` |
+| 2 | MEDIUM | Missing access control in recovery finalization (old owner and a veto) | **False positive.** A vetoed recovery has nothing pending; the unanimous path never accepts the old owner; on the threshold path the owner can only complete what the guardians approved. | `test_qcai52_f2_old_owner_cannot_finalize_a_recovery_it_vetoed`, `test_qcai52_f2_unanimous_path_never_accepts_the_old_owner`, `testFuzz_qcai52_f2_unrelated_authorizer_is_refused`, `test_qcai52_f2_threshold_owner_finalize_only_completes_the_guardian_approved_target` |
+| 3 | MEDIUM | Potential overflow in the daily drip calculation | **False positive.** Subtractive headroom check before the sum, constructor bounds (uint128 cap), 0.8.28 checked math, no `unchecked` block in `src/`. | `test_qcai52_f3_constructor_bounds_cap_to_uint128_and_maxdrip_to_cap`, `testFuzz_qcai52_f3_exact_sum_up_to_the_cap_and_refusal_above`, `test_qcai52_f3_allowance_is_per_sender_and_resets_daily` |
+| 4 | LOW | Unchecked return values in external calls (`PocketVault.sol`) | **False positive.** The vault has one low-level call (`_send`) and it is checked; the payout push is deferred on failure on purpose. | `test_qcai52_f4_failed_send_reverts_spend_and_changes_nothing`, `test_qcai52_f4_failed_send_keeps_the_queued_spend_pending`, `test_qcai52_f4_refused_payout_is_deferred_not_lost`, `test_qcai52_f4_return_bomb_receiver_does_not_affect_the_claim`, `test_qcai52_f4_gas_burning_receiver_is_deferred` |
+| 5 | MEDIUM | Front-running of the guardian freeze through a predictable `freezeNonce` | **False positive.** The nonce is a replay counter; a freeze needs guardian ML-DSA-87 signatures that bind it. A front-runner can only deliver the freeze the guardians signed. | `test_qcai52_f5_attacker_who_knows_the_nonce_cannot_freeze`, `test_qcai52_f5_front_running_the_signed_freeze_only_delivers_the_intended_freeze`, `testFuzz_qcai52_f5_wrong_nonce_is_refused_and_changes_nothing`, `test_qcai52_f5_freeze_signature_is_bound_to_nonce_and_pocket` |
+| 6 | LOW | Gas limit in `_checkGuardianSigs` | **Not exploitable.** `MAX_GUARDIANS = 5` at init, fail-fast above 5 signers, bitmap duplicate check; worst case measured. | `test_qcai52_f6_six_signers_revert_before_any_signature_work`, `test_qcai52_f6_guardian_set_is_capped_at_deploy`, `test_qcai52_f6_five_of_five_unanimous_check_gas_is_bounded` |
+| 7 | INFO | ERC-1271 implementation | **Informational (positive).** | `test_qcai52_f7_erc1271_accepts_only_the_owners_bound_approval` |
+
+Counts: 7 findings (1 high, 3 medium, 2 low, 1 info), 0 critical. 0 valid unmitigated bugs; the deployed v5.2 contracts are unchanged by this triage.
