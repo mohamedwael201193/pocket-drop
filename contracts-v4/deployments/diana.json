@@ -4222,6 +4222,618 @@
       "bytecodeHash": "none",
       "cborMetadata": false,
       "reproduce": "cd contracts-v4 && forge build && node script/deploy-v52.mjs --check"
+    },
+    "smoke": {
+      "startedAt": "2026-11-26T02:01:09.878Z",
+      "instance": "v5_2.prod + v5_2.lab",
+      "router": "0xe0a2679ae760a843880489c8cf8da15c00559a88",
+      "submitter": "0x392f50b1955a827458A320205e19acf7C664f116",
+      "rows": [
+        {
+          "step": "deployer opens a 40-tx EVM window (hybrid-signed native tx)",
+          "hash": "9EA139D4D93910851B34FAA9BD508FB1DA01DFA39C3E8714DAD9037DDC7FA2CC",
+          "status": "success",
+          "native": true
+        },
+        {
+          "step": "team test accounts (fresh, empty)",
+          "hash": null,
+          "status": "info",
+          "outcome": "recipient 0x549742778076E62d1E64D46B42e283e5581f5a0b, interceptor 0xD4feCE33E2cC619231eEDC804cf9C67B1F0E4B3A; balances 0 / 0 QOR"
+        },
+        {
+          "step": "S1 fund the sender Pocket address before it exists (0.75 QOR)",
+          "hash": "0x3947fbbdd3b7364596e7a1ad242fd5708126a77865830305b136e14c032878fd",
+          "url": "https://explore.qore.network/tx/0x3947fbbdd3b7364596e7a1ad242fd5708126a77865830305b136e14c032878fd",
+          "status": "success",
+          "block": "10761930",
+          "gasUsed": "21000",
+          "feeQor": "0.00307125",
+          "valueQor": "0.75"
+        },
+        {
+          "step": "D1 router.deployAndRelay: deploys the v5.2 Pocket and creates an Open drop link (0.1 QOR, 0.1 drip, 0.05 delivery fee) by ML-DSA-87 intent",
+          "hash": "0x94ffb825b164747f4c8f7e055b167d5d25bb9da87f238b19a7ae652adab85878",
+          "url": "https://explore.qore.network/tx/0x94ffb825b164747f4c8f7e055b167d5d25bb9da87f238b19a7ae652adab85878",
+          "status": "success",
+          "block": "10761932",
+          "gasUsed": "650067",
+          "feeQor": "0.09507229875",
+          "valueQor": "0"
+        },
+        {
+          "step": "link created",
+          "hash": null,
+          "status": "info",
+          "outcome": "v5.2 prod link id 1 (app link id s1), sender Pocket 0x1197A9CE91edeFb09E2855925CBc8EBC3DF4B081"
+        },
+        {
+          "step": "F1 front-run attempt: the signed bind copied with feeTo changed to the copier; refused on chain (BadLinkSignature), nothing paid",
+          "hash": "0xf32d8ba7bbbd0615f29a834a813717abadca7d591ecdbc3ce451bb8fa6535c57",
+          "url": "https://explore.qore.network/tx/0xf32d8ba7bbbd0615f29a834a813717abadca7d591ecdbc3ce451bb8fa6535c57",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10761934",
+          "gasUsed": "450000",
+          "feeQor": "0.0658125"
+        },
+        {
+          "step": "D2 bind: the link key signs recipient, payout address and feeTo; the 0.1 QOR drip lands in the empty recipient account, the 0.05 QOR fee goes to the signed feeTo",
+          "hash": "0xbb47f306576e12c1d5d60d7a5cc2a8440b7f9151f66b96a799d056f82e209333",
+          "url": "https://explore.qore.network/tx/0xbb47f306576e12c1d5d60d7a5cc2a8440b7f9151f66b96a799d056f82e209333",
+          "status": "success",
+          "block": "10761936",
+          "gasUsed": "385205",
+          "feeQor": "0.05633623125",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: fee went to the signed feeTo, not to the submitter",
+          "hash": null,
+          "status": "info",
+          "outcome": "feeTo 0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD +0.05 QOR; submitter 0x392f50b1955a827458A320205e19acf7C664f116 is not feeTo"
+        },
+        {
+          "step": "D3 recipient registers its ML-DSA-87 key with proof of possession (native tx, fee paid from the drip)",
+          "hash": "7221227E920C982CA3828C388BE036369FA3BF01822EDA432023D8498B1EA75F",
+          "status": "success",
+          "native": true,
+          "outcome": "possessionProven=true"
+        },
+        {
+          "step": "D4 claim: the recipient signs with its registered ML-DSA-87 key; 0.1 QOR paid",
+          "hash": "0x689a5e37c5121650d517a99f1e9376139675a690b6ca311ca4d36648328acff4",
+          "url": "https://explore.qore.network/tx/0x689a5e37c5121650d517a99f1e9376139675a690b6ca311ca4d36648328acff4",
+          "status": "success",
+          "block": "10761943",
+          "gasUsed": "265674",
+          "feeQor": "0.0388548225",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: claim paid",
+          "hash": null,
+          "status": "info",
+          "outcome": "recipient +0.1 QOR, link state 4 (4 = Claimed)"
+        },
+        {
+          "step": "I1 the sender Pocket creates a Confirmed link (\"Someone I know\") by intent",
+          "hash": "0x7ccd72da14ca3d974ae26b86b624823402c729b15548e5f05926923102a38e15",
+          "url": "https://explore.qore.network/tx/0x7ccd72da14ca3d974ae26b86b624823402c729b15548e5f05926923102a38e15",
+          "status": "success",
+          "block": "10761945",
+          "gasUsed": "391960",
+          "feeQor": "0.05732415",
+          "valueQor": "0"
+        },
+        {
+          "step": "I2 an interceptor who got the link (s2) binds it to its own key",
+          "hash": "0x344f3f7e1ec5c78e120dd0e1ac60a9392a9423ca774b45b8bfd5c7e91c7a14be",
+          "url": "https://explore.qore.network/tx/0x344f3f7e1ec5c78e120dd0e1ac60a9392a9423ca774b45b8bfd5c7e91c7a14be",
+          "status": "success",
+          "block": "10761946",
+          "gasUsed": "385181",
+          "feeQor": "0.05633272125",
+          "valueQor": "0"
+        },
+        {
+          "step": "I3 the interceptor tries to claim before the sender checked the key; refused on chain (InvalidState Bound)",
+          "hash": "0x2cfa0b93ffbf082f4318c19a108e8a003cf329f33db4ef7002686c6880d6a235",
+          "url": "https://explore.qore.network/tx/0x2cfa0b93ffbf082f4318c19a108e8a003cf329f33db4ef7002686c6880d6a235",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10761947",
+          "gasUsed": "450000",
+          "feeQor": "0.0658125"
+        },
+        {
+          "step": "I4 the sender sees a key it does not know and cancels; the escrow returns to its Pocket",
+          "hash": "0xe643d8a584de98b670cce862153ed217d8fef8b26983d3393f3e9aa272b85410",
+          "url": "https://explore.qore.network/tx/0xe643d8a584de98b670cce862153ed217d8fef8b26983d3393f3e9aa272b85410",
+          "status": "success",
+          "block": "10761949",
+          "gasUsed": "284437",
+          "feeQor": "0.04159891125",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: cancel refund",
+          "hash": null,
+          "status": "info",
+          "outcome": "Pocket +0.1 QOR (0.1 escrow; drip and fee were paid at the first bind)"
+        },
+        {
+          "step": "I5 the interceptor tries again after the cancel; refused on chain (InvalidState Cancelled)",
+          "hash": "0x4831b588679a73069059f1eb02dd2ba6e08a7d459d5a4403a32a89bf8cccb60c",
+          "url": "https://explore.qore.network/tx/0x4831b588679a73069059f1eb02dd2ba6e08a7d459d5a4403a32a89bf8cccb60c",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10761950",
+          "gasUsed": "450000",
+          "feeQor": "0.0658125"
+        },
+        {
+          "step": "P1 the sender Pocket hosts a Drop Pool (2 slots x 0.05 QOR) by intent",
+          "hash": "0xa6c056acce11f4f198762033d40d7b9bab4a62f69f64c1cfc082cd468e43d1b0",
+          "url": "https://explore.qore.network/tx/0xa6c056acce11f4f198762033d40d7b9bab4a62f69f64c1cfc082cd468e43d1b0",
+          "status": "success",
+          "block": "10761952",
+          "gasUsed": "380726",
+          "feeQor": "0.0556811775",
+          "valueQor": "0"
+        },
+        {
+          "step": "P2 the recipient claims a slot of pool s1 (link-key signature + its own signature)",
+          "hash": "0x6bbe38fbec3afbb52f74a88afffbf97ce4075fdb596a49d4ceacc71bcd1e052c",
+          "url": "https://explore.qore.network/tx/0x6bbe38fbec3afbb52f74a88afffbf97ce4075fdb596a49d4ceacc71bcd1e052c",
+          "status": "success",
+          "block": "10761954",
+          "gasUsed": "520041",
+          "feeQor": "0.07605599625",
+          "valueQor": "0"
+        },
+        {
+          "step": "P3 the host Pocket closes the pool; the unclaimed slot returns to the Pocket",
+          "hash": "0x2c73c3cfee7202ec0ac60daf4857deb1df29b23ce9aee7f8baefc4143a520cad",
+          "url": "https://explore.qore.network/tx/0x2c73c3cfee7202ec0ac60daf4857deb1df29b23ce9aee7f8baefc4143a520cad",
+          "status": "success",
+          "block": "10761956",
+          "gasUsed": "284435",
+          "feeQor": "0.04159861875",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: pool refund",
+          "hash": null,
+          "status": "info",
+          "outcome": "Pocket +0.05 QOR"
+        },
+        {
+          "step": "E1 ERC-1271 (eth_call on the live Pocket): tagged, Pocket-bound approval",
+          "hash": null,
+          "status": "info",
+          "outcome": "isValidSignature = 0x1626ba7e (valid)"
+        },
+        {
+          "step": "E2 ERC-1271 (eth_call on the live Pocket): the v5 untagged approval of the same hash",
+          "hash": null,
+          "status": "info",
+          "outcome": "isValidSignature = 0xffffffff (refused)"
+        },
+        {
+          "step": "E3 an ERC-1271 approval of a spend-intent digest, submitted as that spend (eth_call)",
+          "hash": null,
+          "status": "info",
+          "outcome": "refused: Execution reverted for an unknown reason."
+        },
+        {
+          "step": "R0 fund the guardian 1 account for its key registration (0.1 QOR)",
+          "hash": "0xb566c19e6a1e973a03f5dd4e0fa17ac6e6c03fc0b4e0531d200d950803348500",
+          "url": "https://explore.qore.network/tx/0xb566c19e6a1e973a03f5dd4e0fa17ac6e6c03fc0b4e0531d200d950803348500",
+          "status": "success",
+          "block": "10761958",
+          "gasUsed": "21000",
+          "feeQor": "0.00307125",
+          "valueQor": "0.1"
+        },
+        {
+          "step": "R0 the guardian 1 registers its ML-DSA-87 key with proof of possession (native tx)",
+          "hash": "61865B6AB6A53FCC6427DC2A016F983957EBF9404F5B1276DC5310D07E265E24",
+          "status": "success",
+          "native": true,
+          "outcome": "possessionProven=true"
+        },
+        {
+          "step": "R0 fund the guardian 2 account for its key registration (0.1 QOR)",
+          "hash": "0x08ceb8f14d0cf2c50cad2aee5644ac84f69d673aa0d4b63c1a580f3ec28da9ba",
+          "url": "https://explore.qore.network/tx/0x08ceb8f14d0cf2c50cad2aee5644ac84f69d673aa0d4b63c1a580f3ec28da9ba",
+          "status": "success",
+          "block": "10761963",
+          "gasUsed": "21000",
+          "feeQor": "0.00307125",
+          "valueQor": "0.1"
+        },
+        {
+          "step": "R0 the guardian 2 registers its ML-DSA-87 key with proof of possession (native tx)",
+          "hash": "02F09C09F1238DFEF11D06DC8AD4017F385697CDE235C8CDA8E74F81FF07ED32",
+          "status": "success",
+          "native": true,
+          "outcome": "possessionProven=true"
+        },
+        {
+          "step": "R0 fund the new owner account for its key registration (0.1 QOR)",
+          "hash": "0xe36d81eefbc8def760eb60de6ec49a5d4fd9fd49b2048bc0851cd23cbe0bf042",
+          "url": "https://explore.qore.network/tx/0xe36d81eefbc8def760eb60de6ec49a5d4fd9fd49b2048bc0851cd23cbe0bf042",
+          "status": "success",
+          "block": "10761968",
+          "gasUsed": "21000",
+          "feeQor": "0.00307125",
+          "valueQor": "0.1"
+        },
+        {
+          "step": "R0 the new owner registers its ML-DSA-87 key with proof of possession (native tx)",
+          "hash": "EEA2C29D42B56DD4C7D32E953B9B2285DB7BAE6DD4D46A301645290C7DFD1ACF",
+          "status": "success",
+          "native": true,
+          "outcome": "possessionProven=true"
+        },
+        {
+          "step": "R1 deploy a LAB Pocket owned by the deployer key with guardians G1, G2 (2 of 2)",
+          "hash": "0x54841b86ae4d7f8e5a238001f68cd15288fd12a5c5dd97d876867b08c9d6948c",
+          "url": "https://explore.qore.network/tx/0x54841b86ae4d7f8e5a238001f68cd15288fd12a5c5dd97d876867b08c9d6948c",
+          "status": "success",
+          "block": "10761975",
+          "gasUsed": "290080",
+          "feeQor": "0.0424242",
+          "valueQor": "0"
+        },
+        {
+          "step": "lab Pocket",
+          "hash": null,
+          "status": "info",
+          "outcome": "0xD72e8b33F4886790DD1060a3da2DcD5092391bB8, owner 0x392f50b1955a827458A320205e19acf7C664f116, guardians 0xF12308b2986551aBCFe12ebd63f949F650B7e448, 0xEA3D605da364679Bc0793F64b656442FF8CDea53, threshold 2"
+        },
+        {
+          "step": "R2 guardians G1 + G2 propose a threshold recovery of the lab Pocket to the new owner N (ML-DSA-87 signatures)",
+          "hash": "0x7e6db471fbd00387f0f95f1bffd219e0d212191382f94f01f1780c77bba60d43",
+          "url": "https://explore.qore.network/tx/0x7e6db471fbd00387f0f95f1bffd219e0d212191382f94f01f1780c77bba60d43",
+          "status": "success",
+          "block": "10761977",
+          "gasUsed": "543875",
+          "feeQor": "0.07954171875",
+          "valueQor": "0"
+        },
+        {
+          "step": "R3 ATTACK finalize before the 60 s recovery delay, even with the new owner's valid authorization: refused (TooEarly)",
+          "hash": "0x679e36b3cb1990dfa503b1545f51fcb67b3ed5e5b88ad83dbde5458c6ae7974f",
+          "url": "https://explore.qore.network/tx/0x679e36b3cb1990dfa503b1545f51fcb67b3ed5e5b88ad83dbde5458c6ae7974f",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10761979",
+          "gasUsed": "1250000",
+          "feeQor": "0.1828125"
+        },
+        {
+          "step": "R4 ATTACK an unrelated account (the interceptor) signs a finalize authorization for itself: refused (NotAuthorized)",
+          "hash": "0xe44212b3c8b5358323702b8b1a883227be5b365191ed091317b5c8dfa7e4cc93",
+          "url": "https://explore.qore.network/tx/0xe44212b3c8b5358323702b8b1a883227be5b365191ed091317b5c8dfa7e4cc93",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10762022",
+          "gasUsed": "1250000",
+          "feeQor": "0.1828125"
+        },
+        {
+          "step": "R5 ATTACK a finalize that names guardian G1 as authorizer but carries another key's signature: refused (BadSignature)",
+          "hash": "0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e",
+          "url": "https://explore.qore.network/tx/0x743e98ad0171a74c9f896f1c2602259d55218d595c07b17ae4dd4544085a370e",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10762024",
+          "gasUsed": "1250000",
+          "feeQor": "0.1828125"
+        },
+        {
+          "step": "R6 a finalize authorization whose deadline has passed (eth_call)",
+          "hash": null,
+          "status": "info",
+          "outcome": "refused: Execution reverted for an unknown reason."
+        },
+        {
+          "step": "R7 the approved new owner N finalizes the recovery with its own ML-DSA-87 authorization: owner is now N",
+          "hash": "0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7",
+          "url": "https://explore.qore.network/tx/0x6c1e0a0039e96b0911b8d884cb2c452297cfa0a00cf7287373802e571b1ec2a7",
+          "status": "success",
+          "block": "10762026",
+          "gasUsed": "305695",
+          "feeQor": "0.04470789375",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: threshold finalize",
+          "hash": null,
+          "status": "info",
+          "outcome": "owner 0xdC59987bC3A1A6741B242340Da4755dd1FA0D8c6; RecoveryFinalizeAuthorized(authorizer 0xdC59987bC3A1A6741B242340Da4755dd1FA0D8c6, nonce 1, unanimous false)"
+        },
+        {
+          "step": "U1 all guardians (G1 + G2) propose a unanimous recovery of the lab Pocket back to the deployer key (the Pocket freezes)",
+          "hash": "0xdfe5da6260c277e3a29d8d70fa4caa3531cc53f78a4b6756e7c590bd2b03fc2f",
+          "url": "https://explore.qore.network/tx/0xdfe5da6260c277e3a29d8d70fa4caa3531cc53f78a4b6756e7c590bd2b03fc2f",
+          "status": "success",
+          "block": "10762028",
+          "gasUsed": "524685",
+          "feeQor": "0.07673518125",
+          "valueQor": "0"
+        },
+        {
+          "step": "U2 ATTACK the current owner (N, the key a unanimous recovery replaces) authorizes the unanimous finalize: refused (NotAuthorized)",
+          "hash": "0x8eeb97cd6d3a572f0b0508fb63c6d4fd72ae068b9243f5f2b77682b91ab26c72",
+          "url": "https://explore.qore.network/tx/0x8eeb97cd6d3a572f0b0508fb63c6d4fd72ae068b9243f5f2b77682b91ab26c72",
+          "status": "reverted",
+          "expected": "reverted",
+          "block": "10762155",
+          "gasUsed": "1250000",
+          "feeQor": "0.1828125"
+        },
+        {
+          "step": "U3 guardian G1 finalizes the unanimous recovery with its ML-DSA-87 authorization: owner is the deployer key again",
+          "hash": "0x186e007b9fd53b434752910af85478e8a1bf83adf072591af43ea20838fdc46c",
+          "url": "https://explore.qore.network/tx/0x186e007b9fd53b434752910af85478e8a1bf83adf072591af43ea20838fdc46c",
+          "status": "success",
+          "block": "10762157",
+          "gasUsed": "294562",
+          "feeQor": "0.0430796925",
+          "valueQor": "0"
+        },
+        {
+          "step": "check: unanimous finalize",
+          "hash": null,
+          "status": "info",
+          "outcome": "owner 0x392f50b1955a827458A320205e19acf7C664f116; RecoveryFinalizeAuthorized(authorizer 0xF12308b2986551aBCFe12ebd63f949F650B7e448, nonce 2, unanimous true)"
+        },
+        {
+          "step": "deployer closes its EVM window (hybrid-signed native tx)",
+          "hash": "B4801EB371F7F836B2DAF776684CD3006A4CC0922F1BF2A480BFF1B2A0F0DE54",
+          "status": "success",
+          "native": true,
+          "outcome": "live after: false"
+        }
+      ],
+      "accounts": {
+        "recipient": "0x549742778076E62d1E64D46B42e283e5581f5a0b",
+        "interceptor": "0xD4feCE33E2cC619231eEDC804cf9C67B1F0E4B3A",
+        "feeTo": "0xF6e6fb2d33Bef3043682658E2b69F3a2F8616cCD"
+      },
+      "recoveryAccounts": {
+        "guardian1": "0xF12308b2986551aBCFe12ebd63f949F650B7e448",
+        "guardian2": "0xEA3D605da364679Bc0793F64b656442FF8CDea53",
+        "newOwner": "0xdC59987bC3A1A6741B242340Da4755dd1FA0D8c6",
+        "oldOwner": "0x392f50b1955a827458A320205e19acf7C664f116"
+      },
+      "labPocket": "0xD72e8b33F4886790DD1060a3da2DcD5092391bB8",
+      "finishedAt": "2026-11-26T02:06:53.197Z",
+      "pocket": "0x1197A9CE91edeFb09E2855925CBc8EBC3DF4B081",
+      "linkId": "1",
+      "confirmedLinkId": "2",
+      "poolId": "1",
+      "deployerSpentQor": "2.95631611375",
+      "note": "TEAM-RUN on the v5.2 production instance (journey, copied bind, intercept, pool, ERC-1271) and the v5.2 lab instance (finalize access control). Every account is a team test account. deployerSpentQor = EVM fees + the 0.75 QOR Pocket funding + 0.3 QOR key-registration funding (what is not paid out stays in the Pocket)."
+    },
+    "selfRelay": {
+      "note": "TEAM-RUN test accounts. A claim and a spend submitted by the user's own account through its own scoped EVM window; the Pocket Drop relayer and API are not used.",
+      "startedAt": "2026-11-26T02:07:15.341Z",
+      "instance": "v5.prod",
+      "router": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+      "rows": [
+        {
+          "step": "recipient test account (fresh)",
+          "address": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+          "balanceQor": "0",
+          "keyRegistered": false
+        },
+        {
+          "step": "main test wallet funds the sender Pocket address before it exists (1.0 QOR, hybrid MsgSend)",
+          "hash": "41B8E5244A63BFC0B143A8DDEB4EC997EF4E417C0AAED3039F3B61A3800DD698",
+          "url": "https://explore.qore.network/tx/41B8E5244A63BFC0B143A8DDEB4EC997EF4E417C0AAED3039F3B61A3800DD698",
+          "lane": "native",
+          "height": "10762182",
+          "code": 0,
+          "gasUsed": "201073",
+          "fee": "100000uqor",
+          "pqcHybridVerify": "address=qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus algorithm_id=dilithium5 status=verified"
+        },
+        {
+          "step": "sender opens its own EVM window, hybrid-signed, scoped to the v5.2 PocketRouter only (3 txs, 400 blocks)",
+          "hash": "536D94337CCF569473F882619297D5B3C0CE1D3665B48AC4F1EA2A1FE08C5A6B",
+          "url": "https://explore.qore.network/tx/536D94337CCF569473F882619297D5B3C0CE1D3665B48AC4F1EA2A1FE08C5A6B",
+          "lane": "native",
+          "height": "10762184",
+          "code": 0,
+          "gasUsed": "189728",
+          "fee": "100000uqor",
+          "pqcHybridVerify": "address=qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq algorithm_id=dilithium5 status=verified",
+          "window": {
+            "live": true,
+            "allowedTargets": [
+              "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+            ],
+            "maxTxs": 3,
+            "blocks": 400,
+            "maxValueUqor": "626500",
+            "expiryHeight": "10762584",
+            "openedNearHeight": "10762183"
+          }
+        },
+        {
+          "step": "S1 sender submits router.deployAndRelay itself: deploys its Pocket and creates an Open link (ML-DSA-87 intent)",
+          "submitter": "sender 0x392f50b1955a827458A320205e19acf7C664f116",
+          "hash": "0x00507e7486cc6364f1d7ba4d29e8ff571a772aa69821df8c31ccf0148aed1626",
+          "url": "https://explore.qore.network/tx/0x00507e7486cc6364f1d7ba4d29e8ff571a772aa69821df8c31ccf0148aed1626",
+          "lane": "evm",
+          "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+          "status": "success",
+          "block": "10762190",
+          "gasUsed": "633039",
+          "feeQor": "0.09258195375"
+        },
+        {
+          "step": "S2 bind (link-key signature, feeTo = the sender who submits it) submitted by the sender; drip 0.3 QOR to the recipient account, payTo = recipient Pocket",
+          "submitter": "sender 0x392f50b1955a827458A320205e19acf7C664f116",
+          "hash": "0xa74cf1432595c29edeef6fd4f34de9dfd02278b0cd272ab1615206194df9a504",
+          "url": "https://explore.qore.network/tx/0xa74cf1432595c29edeef6fd4f34de9dfd02278b0cd272ab1615206194df9a504",
+          "lane": "evm",
+          "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+          "status": "success",
+          "block": "10762192",
+          "gasUsed": "382753",
+          "feeQor": "0.05597762625"
+        },
+        {
+          "step": "sender closes its window (hybrid-signed); live after: false",
+          "hash": "1E9DB84C3B9463E83FF9566B387D61B36C46AD40794329785ED59925D6D26860",
+          "url": "https://explore.qore.network/tx/1E9DB84C3B9463E83FF9566B387D61B36C46AD40794329785ED59925D6D26860",
+          "lane": "native",
+          "height": "10762194",
+          "code": 0,
+          "gasUsed": "170520",
+          "fee": "60000uqor",
+          "pqcHybridVerify": "address=qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq algorithm_id=dilithium5 status=verified"
+        },
+        {
+          "step": "U1 recipient registers its ML-DSA-87 key with proof of possession (fee from the drip); possessionProven=true",
+          "hash": "9C9DD32888FA7F2F8FD7F542482F828A09FCF3C2EF71DC658FB7BB0F8948E1D1",
+          "url": "https://explore.qore.network/tx/9C9DD32888FA7F2F8FD7F542482F828A09FCF3C2EF71DC658FB7BB0F8948E1D1",
+          "lane": "native",
+          "height": "10762199",
+          "code": 0,
+          "gasUsed": "299248",
+          "fee": "60000uqor",
+          "pqcHybridVerify": null
+        },
+        {
+          "step": "recipient opens its own EVM window, hybrid-signed, scoped to the v5.2 PocketRouter only (3 txs, 400 blocks)",
+          "hash": "858D6C836B683DF28DCA3694481888C2B9FD432BC1A8B8FB62301437D889C395",
+          "url": "https://explore.qore.network/tx/858D6C836B683DF28DCA3694481888C2B9FD432BC1A8B8FB62301437D889C395",
+          "lane": "native",
+          "height": "10762204",
+          "code": 0,
+          "gasUsed": "189634",
+          "fee": "100000uqor",
+          "pqcHybridVerify": "address=qor1pahqlzdx275nuyjda6c76k0j9a8mkuvl4xv4qs algorithm_id=dilithium5 status=verified",
+          "window": {
+            "live": true,
+            "allowedTargets": [
+              "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+            ],
+            "maxTxs": 3,
+            "blocks": 400,
+            "maxValueUqor": "626500",
+            "expiryHeight": "10762604",
+            "openedNearHeight": "10762202"
+          }
+        },
+        {
+          "step": "U2 recipient submits its own claim through router.relay (ML-DSA-87 signature); 0.1 QOR into its Pocket",
+          "submitter": "recipient 0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+          "hash": "0xeb1c8529d6b8bd21a757a1a42b43ee692f17c14d2c7a84040ebac0d495e90190",
+          "url": "https://explore.qore.network/tx/0xeb1c8529d6b8bd21a757a1a42b43ee692f17c14d2c7a84040ebac0d495e90190",
+          "lane": "evm",
+          "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+          "status": "success",
+          "block": "10762209",
+          "gasUsed": "290626",
+          "feeQor": "0.0425040525"
+        },
+        {
+          "step": "check: claim paid into the recipient Pocket",
+          "outcome": "+0.1 QOR"
+        },
+        {
+          "step": "main test wallet tops up the recipient by 0.08 QOR for its last tx fee (the 0.3 QOR drip paid the key registration, the window and the claim; hybrid MsgSend)",
+          "hash": "73460F7EA6E5FA492398C635908FA7E6C63EE06090E28923C0CE534773F2505A",
+          "url": "https://explore.qore.network/tx/73460F7EA6E5FA492398C635908FA7E6C63EE06090E28923C0CE534773F2505A",
+          "lane": "native",
+          "height": "10762238",
+          "code": 0,
+          "gasUsed": "187298",
+          "fee": "100000uqor",
+          "pqcHybridVerify": "address=qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus algorithm_id=dilithium5 status=verified"
+        },
+        {
+          "step": "U3 recipient submits its own first spend through router.deployAndRelay (deploys its Pocket, ML-DSA-87 spend intent, 0.05 QOR)",
+          "submitter": "recipient 0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+          "hash": "0xabcb6e924d5eebe5f7f38aa3e39cfbc23e40fb4b0e1c05f8d094d3cf806606c4",
+          "url": "https://explore.qore.network/tx/0xabcb6e924d5eebe5f7f38aa3e39cfbc23e40fb4b0e1c05f8d094d3cf806606c4",
+          "lane": "evm",
+          "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+          "status": "success",
+          "block": "10762243",
+          "gasUsed": "506222",
+          "feeQor": "0.0740349675"
+        },
+        {
+          "step": "check: spend arrived",
+          "outcome": "+0.05 QOR at 0x392f50b1955a827458A320205e19acf7C664f116"
+        },
+        {
+          "step": "recipient closes its window (hybrid-signed); live after: false",
+          "hash": "EF7A97BCB4D48FFDDEC5A0A4DF3F41372318063DA505584FC6AE134107DA6168",
+          "url": "https://explore.qore.network/tx/EF7A97BCB4D48FFDDEC5A0A4DF3F41372318063DA505584FC6AE134107DA6168",
+          "lane": "native",
+          "height": "10762245",
+          "code": 0,
+          "gasUsed": "170396",
+          "fee": "60000uqor",
+          "pqcHybridVerify": "address=qor1pahqlzdx275nuyjda6c76k0j9a8mkuvl4xv4qs algorithm_id=dilithium5 status=verified"
+        }
+      ],
+      "abortedAttempts": [],
+      "accounts": {
+        "sender": "0x392f50b1955a827458A320205e19acf7C664f116",
+        "senderPocket": "0x6770b04929d801Abafca2e01129E9c1a4827d732",
+        "senderPocketCfg": [
+          "0x392f50b1955a827458A320205e19acf7C664f116",
+          "",
+          "0",
+          "1000000000000000000",
+          "0x48e53eaf512d33941ed7f45b2ce6d6e7c35bd01474af573c6b29806c4603ff79"
+        ],
+        "recipient": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+        "recipientPocket": "0x7c4398D66F078b133a91Af5E4053ae668b228334",
+        "recipientPocketCfg": [
+          "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+          "",
+          "0",
+          "1000000000000000000",
+          "0x3b60cd6fa393e02db947868ded7bd4ea32913e887a00e24893cfd1333146f19e"
+        ]
+      },
+      "senderWindow": {
+        "live": true,
+        "allowedTargets": [
+          "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+        ],
+        "maxTxs": 3,
+        "blocks": 400,
+        "maxValueUqor": "626500",
+        "expiryHeight": "10762584",
+        "openedNearHeight": "10762183"
+      },
+      "linkId": "3",
+      "recipientWindow": {
+        "live": true,
+        "allowedTargets": [
+          "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+        ],
+        "maxTxs": 3,
+        "blocks": 400,
+        "maxValueUqor": "626500",
+        "expiryHeight": "10762604",
+        "openedNearHeight": "10762202"
+      },
+      "finishedAt": "2026-11-26T02:08:53.966Z",
+      "recipientLeftQor": "0.04346098",
+      "recipientPocketQor": "0.05"
     }
   }
 }

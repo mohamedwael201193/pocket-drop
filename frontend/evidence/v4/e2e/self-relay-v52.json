@@ -1,0 +1,216 @@
+{
+  "note": "TEAM-RUN test accounts. A claim and a spend submitted by the user's own account through its own scoped EVM window; the Pocket Drop relayer and API are not used.",
+  "startedAt": "2026-11-26T02:07:15.341Z",
+  "instance": "v5.prod",
+  "router": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+  "rows": [
+    {
+      "step": "recipient test account (fresh)",
+      "address": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+      "balanceQor": "0",
+      "keyRegistered": false
+    },
+    {
+      "step": "main test wallet funds the sender Pocket address before it exists (1.0 QOR, hybrid MsgSend)",
+      "hash": "41B8E5244A63BFC0B143A8DDEB4EC997EF4E417C0AAED3039F3B61A3800DD698",
+      "url": "https://explore.qore.network/tx/41B8E5244A63BFC0B143A8DDEB4EC997EF4E417C0AAED3039F3B61A3800DD698",
+      "lane": "native",
+      "height": "10762182",
+      "code": 0,
+      "gasUsed": "201073",
+      "fee": "100000uqor",
+      "pqcHybridVerify": "address=qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus algorithm_id=dilithium5 status=verified"
+    },
+    {
+      "step": "sender opens its own EVM window, hybrid-signed, scoped to the v5.2 PocketRouter only (3 txs, 400 blocks)",
+      "hash": "536D94337CCF569473F882619297D5B3C0CE1D3665B48AC4F1EA2A1FE08C5A6B",
+      "url": "https://explore.qore.network/tx/536D94337CCF569473F882619297D5B3C0CE1D3665B48AC4F1EA2A1FE08C5A6B",
+      "lane": "native",
+      "height": "10762184",
+      "code": 0,
+      "gasUsed": "189728",
+      "fee": "100000uqor",
+      "pqcHybridVerify": "address=qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq algorithm_id=dilithium5 status=verified",
+      "window": {
+        "live": true,
+        "allowedTargets": [
+          "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+        ],
+        "maxTxs": 3,
+        "blocks": 400,
+        "maxValueUqor": "626500",
+        "expiryHeight": "10762584",
+        "openedNearHeight": "10762183"
+      }
+    },
+    {
+      "step": "S1 sender submits router.deployAndRelay itself: deploys its Pocket and creates an Open link (ML-DSA-87 intent)",
+      "submitter": "sender 0x392f50b1955a827458A320205e19acf7C664f116",
+      "hash": "0x00507e7486cc6364f1d7ba4d29e8ff571a772aa69821df8c31ccf0148aed1626",
+      "url": "https://explore.qore.network/tx/0x00507e7486cc6364f1d7ba4d29e8ff571a772aa69821df8c31ccf0148aed1626",
+      "lane": "evm",
+      "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+      "status": "success",
+      "block": "10762190",
+      "gasUsed": "633039",
+      "feeQor": "0.09258195375"
+    },
+    {
+      "step": "S2 bind (link-key signature, feeTo = the sender who submits it) submitted by the sender; drip 0.3 QOR to the recipient account, payTo = recipient Pocket",
+      "submitter": "sender 0x392f50b1955a827458A320205e19acf7C664f116",
+      "hash": "0xa74cf1432595c29edeef6fd4f34de9dfd02278b0cd272ab1615206194df9a504",
+      "url": "https://explore.qore.network/tx/0xa74cf1432595c29edeef6fd4f34de9dfd02278b0cd272ab1615206194df9a504",
+      "lane": "evm",
+      "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+      "status": "success",
+      "block": "10762192",
+      "gasUsed": "382753",
+      "feeQor": "0.05597762625"
+    },
+    {
+      "step": "sender closes its window (hybrid-signed); live after: false",
+      "hash": "1E9DB84C3B9463E83FF9566B387D61B36C46AD40794329785ED59925D6D26860",
+      "url": "https://explore.qore.network/tx/1E9DB84C3B9463E83FF9566B387D61B36C46AD40794329785ED59925D6D26860",
+      "lane": "native",
+      "height": "10762194",
+      "code": 0,
+      "gasUsed": "170520",
+      "fee": "60000uqor",
+      "pqcHybridVerify": "address=qor18yh4pvv4t2p8gk9ryqs9uxdv7lrxfugkaksdhq algorithm_id=dilithium5 status=verified"
+    },
+    {
+      "step": "U1 recipient registers its ML-DSA-87 key with proof of possession (fee from the drip); possessionProven=true",
+      "hash": "9C9DD32888FA7F2F8FD7F542482F828A09FCF3C2EF71DC658FB7BB0F8948E1D1",
+      "url": "https://explore.qore.network/tx/9C9DD32888FA7F2F8FD7F542482F828A09FCF3C2EF71DC658FB7BB0F8948E1D1",
+      "lane": "native",
+      "height": "10762199",
+      "code": 0,
+      "gasUsed": "299248",
+      "fee": "60000uqor",
+      "pqcHybridVerify": null
+    },
+    {
+      "step": "recipient opens its own EVM window, hybrid-signed, scoped to the v5.2 PocketRouter only (3 txs, 400 blocks)",
+      "hash": "858D6C836B683DF28DCA3694481888C2B9FD432BC1A8B8FB62301437D889C395",
+      "url": "https://explore.qore.network/tx/858D6C836B683DF28DCA3694481888C2B9FD432BC1A8B8FB62301437D889C395",
+      "lane": "native",
+      "height": "10762204",
+      "code": 0,
+      "gasUsed": "189634",
+      "fee": "100000uqor",
+      "pqcHybridVerify": "address=qor1pahqlzdx275nuyjda6c76k0j9a8mkuvl4xv4qs algorithm_id=dilithium5 status=verified",
+      "window": {
+        "live": true,
+        "allowedTargets": [
+          "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+        ],
+        "maxTxs": 3,
+        "blocks": 400,
+        "maxValueUqor": "626500",
+        "expiryHeight": "10762604",
+        "openedNearHeight": "10762202"
+      }
+    },
+    {
+      "step": "U2 recipient submits its own claim through router.relay (ML-DSA-87 signature); 0.1 QOR into its Pocket",
+      "submitter": "recipient 0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+      "hash": "0xeb1c8529d6b8bd21a757a1a42b43ee692f17c14d2c7a84040ebac0d495e90190",
+      "url": "https://explore.qore.network/tx/0xeb1c8529d6b8bd21a757a1a42b43ee692f17c14d2c7a84040ebac0d495e90190",
+      "lane": "evm",
+      "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+      "status": "success",
+      "block": "10762209",
+      "gasUsed": "290626",
+      "feeQor": "0.0425040525"
+    },
+    {
+      "step": "check: claim paid into the recipient Pocket",
+      "outcome": "+0.1 QOR"
+    },
+    {
+      "step": "main test wallet tops up the recipient by 0.08 QOR for its last tx fee (the 0.3 QOR drip paid the key registration, the window and the claim; hybrid MsgSend)",
+      "hash": "73460F7EA6E5FA492398C635908FA7E6C63EE06090E28923C0CE534773F2505A",
+      "url": "https://explore.qore.network/tx/73460F7EA6E5FA492398C635908FA7E6C63EE06090E28923C0CE534773F2505A",
+      "lane": "native",
+      "height": "10762238",
+      "code": 0,
+      "gasUsed": "187298",
+      "fee": "100000uqor",
+      "pqcHybridVerify": "address=qor1326uun7dghxxnlhrr6nwne3z9s0p3w7a6frcus algorithm_id=dilithium5 status=verified"
+    },
+    {
+      "step": "U3 recipient submits its own first spend through router.deployAndRelay (deploys its Pocket, ML-DSA-87 spend intent, 0.05 QOR)",
+      "submitter": "recipient 0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+      "hash": "0xabcb6e924d5eebe5f7f38aa3e39cfbc23e40fb4b0e1c05f8d094d3cf806606c4",
+      "url": "https://explore.qore.network/tx/0xabcb6e924d5eebe5f7f38aa3e39cfbc23e40fb4b0e1c05f8d094d3cf806606c4",
+      "lane": "evm",
+      "to": "0xe0A2679aE760A843880489C8cf8dA15c00559a88",
+      "status": "success",
+      "block": "10762243",
+      "gasUsed": "506222",
+      "feeQor": "0.0740349675"
+    },
+    {
+      "step": "check: spend arrived",
+      "outcome": "+0.05 QOR at 0x392f50b1955a827458A320205e19acf7C664f116"
+    },
+    {
+      "step": "recipient closes its window (hybrid-signed); live after: false",
+      "hash": "EF7A97BCB4D48FFDDEC5A0A4DF3F41372318063DA505584FC6AE134107DA6168",
+      "url": "https://explore.qore.network/tx/EF7A97BCB4D48FFDDEC5A0A4DF3F41372318063DA505584FC6AE134107DA6168",
+      "lane": "native",
+      "height": "10762245",
+      "code": 0,
+      "gasUsed": "170396",
+      "fee": "60000uqor",
+      "pqcHybridVerify": "address=qor1pahqlzdx275nuyjda6c76k0j9a8mkuvl4xv4qs algorithm_id=dilithium5 status=verified"
+    }
+  ],
+  "abortedAttempts": [],
+  "accounts": {
+    "sender": "0x392f50b1955a827458A320205e19acf7C664f116",
+    "senderPocket": "0x6770b04929d801Abafca2e01129E9c1a4827d732",
+    "senderPocketCfg": [
+      "0x392f50b1955a827458A320205e19acf7C664f116",
+      "",
+      "0",
+      "1000000000000000000",
+      "0x48e53eaf512d33941ed7f45b2ce6d6e7c35bd01474af573c6b29806c4603ff79"
+    ],
+    "recipient": "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+    "recipientPocket": "0x7c4398D66F078b133a91Af5E4053ae668b228334",
+    "recipientPocketCfg": [
+      "0x0F6E0F89a657A93E124dEeb1Ed59F22f4fBb719f",
+      "",
+      "0",
+      "1000000000000000000",
+      "0x3b60cd6fa393e02db947868ded7bd4ea32913e887a00e24893cfd1333146f19e"
+    ]
+  },
+  "senderWindow": {
+    "live": true,
+    "allowedTargets": [
+      "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+    ],
+    "maxTxs": 3,
+    "blocks": 400,
+    "maxValueUqor": "626500",
+    "expiryHeight": "10762584",
+    "openedNearHeight": "10762183"
+  },
+  "linkId": "3",
+  "recipientWindow": {
+    "live": true,
+    "allowedTargets": [
+      "0xe0a2679ae760a843880489c8cf8da15c00559a88"
+    ],
+    "maxTxs": 3,
+    "blocks": 400,
+    "maxValueUqor": "626500",
+    "expiryHeight": "10762604",
+    "openedNearHeight": "10762202"
+  },
+  "finishedAt": "2026-11-26T02:08:53.966Z",
+  "recipientLeftQor": "0.04346098",
+  "recipientPocketQor": "0.05"
+}
