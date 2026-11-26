@@ -167,9 +167,9 @@ Four QCAI runs across v4, v5 and v5.1: Stage 1 (v4) 82 (19 Nov 2026), Stage 2 (v
 ## Run it
 
 ```bash
-cd contracts-v4 && forge test                  # 190 tests
-cd contracts-v4 && npm ci && FOUNDRY_PROFILE=realcrypto forge test   # 22 real ML-DSA-87 tests
-cd contracts-v4 && FOUNDRY_PROFILE=live forge test                  # 27 tests against the live precompiles
+cd contracts-v4 && forge test                  # 217 tests
+cd contracts-v4 && npm ci && FOUNDRY_PROFILE=realcrypto forge test   # 26 real ML-DSA-87 tests
+cd contracts-v4 && FOUNDRY_PROFILE=live forge test                  # 31 tests against the live precompiles
 cd backend && npm ci && npm test               # relayer unit tests
 cd frontend && npm ci && npm test              # app unit tests
 cd frontend && node scripts/reverify.mjs       # re-check every recorded hash on Diana
