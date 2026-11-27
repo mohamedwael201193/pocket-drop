@@ -9,7 +9,7 @@ import CBOM_META from '../data/cbom-meta.json';
 
 const CBOM_DATE = new Date(CBOM_META.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
-const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday': 'LIVE', '/radar': 'LIVE', '/judges': 'RECORDED', '/check': 'LIVE' };
+const KIND: Record<string, 'LIVE' | 'RECORDED'> = { '/lab': 'RECORDED', '/qday': 'LIVE', '/radar': 'LIVE', '/proof/testers': 'RECORDED', '/judges': 'RECORDED', '/check': 'LIVE' };
 
 const CONTRACTS = [['Pocket router', 'router'], ['Pocket factory', 'factory'], ['Drop links', 'drop'], ['Drop pools', 'pool']] as const;
 
@@ -87,6 +87,7 @@ export default function ProofPage() {
         <ol className="list-decimal space-y-1 pl-5 text-sm text-zinc-700">
           <li>Open <Link to="/lab" className="underline">Lab</Link> and press <b>Verify live</b>: each refused attack is re-read from the chain and replayed.</li>
           <li>Open <Link to="/radar" className="underline">Radar</Link>: every count comes from contract events, with own and external accounts kept apart.</li>
+          <li>Open <Link to="/proof/testers" className="underline">Outside testers</Link>: the recorded external claims from the public pool, each with its transaction hash.</li>
           <li>Read the code and the recorded runs in the <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="underline">public repository</a>.</li>
         </ol>
       </section>

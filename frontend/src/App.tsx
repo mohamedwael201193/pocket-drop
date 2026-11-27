@@ -21,6 +21,7 @@ const PoolClaimPage = lazyPage(() => import('./pages/PoolClaimPage'));
 const PublicPoolPage = lazyPage(() => import('./pages/PublicPoolPage'));
 const PocketPage = lazyPage(() => import('./pages/PocketPage'));
 const ProofPage = lazyPage(() => import('./pages/ProofPage'));
+const TestersPage = lazyPage(() => import('./pages/TestersPage'));
 const RadarPage = lazyPage(() => import('./pages/RadarPage'));
 const LabPage = lazyPage(() => import('./pages/LabPage'));
 const JudgesPage = lazyPage(() => import('./pages/JudgesPage'));
@@ -61,6 +62,7 @@ export function AppRoutes() {
         <Route path="/pocket" element={<PocketPage />} />
         {/* Proof tab */}
         <Route path="/proof" element={<ProofPage />} />
+        <Route path="/proof/testers" element={<TestersPage />} />
         <Route path="/lab" element={<LabPage />} />
         <Route path="/radar" element={<RadarPage />} />
         <Route path="/stats" element={<Navigate to="/radar" replace />} />

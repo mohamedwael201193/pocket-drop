@@ -16,7 +16,7 @@ const ROUTES: [string, string][] = [
   ['claim-v3-17', '/c/17'], ['claim-v4-p12-claimed', '/c/p12'], ['claim-v4-p12-badkey', '/c/p12#k=' + '00'.repeat(32)],
   ['claim-v4-missing', '/c/p99999#k=' + 'ab'.repeat(32)], ['claim-garbage', '/c/zzz'],
   ['pool-p5', '/pool/p5'], ['pool-missing', '/pool/p99999#k=' + 'ab'.repeat(32)],
-  ['pocket', '/pocket'], ['pocket-lab', '/pocket?env=lab'], ['proof', '/proof'], ['lab', '/lab'], ['radar', '/radar'],
+  ['pocket', '/pocket'], ['pocket-lab', '/pocket?env=lab'], ['proof', '/proof'], ['testers', '/proof/testers'], ['lab', '/lab'], ['radar', '/radar'],
   ['stats-redirect', '/stats'], ['judges', '/judges'], ['qday', '/qday'], ['check', '/check'], ['dashboard-redirect', '/dashboard'], ['claim-redirect', '/claim'], ['unknown', '/nope-404'],
 ];
 async function audit(page: Page, name: string, w: number, project: string) {

@@ -40,7 +40,7 @@ describe('route table: landing at /, dashboard at /app', () => {
     const deep: [string, string][] = [
       ['/send', '/send'], ['/send/inbox', '/send/inbox'], ['/receive', '/receive'],
       ['/c/12', '/c/:id'], ['/c/p12', '/c/:id'], ['/c/l3', '/c/:id'], ['/c/q7', '/c/:id'], ['/c/k2', '/c/:id'],
-      ['/pool/p14', '/pool/:id'], ['/pool/s5', '/pool/:id'], ['/pocket', '/pocket'], ['/proof', '/proof'], ['/lab', '/lab'], ['/radar', '/radar'],
+      ['/pool/p14', '/pool/:id'], ['/pool/s5', '/pool/:id'], ['/pocket', '/pocket'], ['/proof', '/proof'], ['/proof/testers', '/proof/testers'], ['/lab', '/lab'], ['/radar', '/radar'],
       ['/judges', '/judges'], ['/qday', '/qday'], ['/check', '/check'], ['/check/0xabc', '/check/:hash'],
     ];
     for (const [url, pat] of deep) {

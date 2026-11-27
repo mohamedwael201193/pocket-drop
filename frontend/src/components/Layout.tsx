@@ -13,7 +13,7 @@ import { LegacyKeyStrip } from './upgrade';
 import { SpotlightTracker } from './alive';
 import { SignReviewHost } from './signReview';
 import { LogoMark, Wordmark } from './logo';
-import { Compass, FlaskConical, Inbox, KeyRound, LayoutGrid, Menu, Radio, RefreshCw, Scale, Send, ShieldCheck, Sidebar, Wallet, X, type IconProps } from './icons';
+import { Compass, FlaskConical, Inbox, KeyRound, LayoutGrid, Menu, Radio, RefreshCw, Scale, Send, ShieldCheck, Sidebar, Users, Wallet, X, type IconProps } from './icons';
 import { SOURCE_URL, addrUrl, API_BASE } from '../lib/config';
 import { CURRENT_VERSION, INST } from '../lib/v4';
 import { useHealth } from '../lib/queries';
@@ -42,6 +42,7 @@ export const PROOF_ITEMS = [
   { to: '/qday', label: 'Q-Day Drill', sub: 'Public classical keys, live: try to take the QOR', Icon: KeyRound },
   { to: '/lab', label: 'Lab', sub: 'Attacks the chain refused', Icon: FlaskConical },
   { to: '/radar', label: 'Radar', sub: 'Live stats from the chain', Icon: Radio },
+  { to: '/proof/testers', label: 'Outside testers', sub: 'Recorded external claims from the public pool', Icon: Users },
   { to: '/check', label: 'Check a transaction', sub: 'Re-verify its ML-DSA-87 signatures in your browser', Icon: ShieldCheck },
   { to: '/judges', label: 'Judges', sub: '60-second checklist', Icon: Scale },
 ];
