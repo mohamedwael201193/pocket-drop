@@ -286,7 +286,7 @@ The rest of the recorded hashes (402 EVM and 202 Cosmos transactions) are in [`c
 |---|---|---|
 | v5.2 contracts on Diana: the runtime code at the 10 prod and lab addresses equals both the repo build and the build of the audited flattened file (SHA-256 `ec71d762…1b7d`, 2,168 lines), with immutables masked | LIVE | `node contracts-v4/script/flatten-v52.mjs --check` (no keys); `node frontend/scripts/reverify.mjs` also checks each contract's code hash |
 | 793 checks passed, 0 failed: 402 EVM and 202 Cosmos transactions re-checked against Diana (status, contract, decoded error, `pqc_hybrid_verify` for hybrid relays, window scope), plus the code hash of every v5.2, v5.1, v5 and v4 contract | RECORDED, 26 Nov 2026 | `node frontend/scripts/reverify.mjs` |
-| <a id="tests"></a>Tests: 241 Foundry (unit, fuzz, invariant, v5.1 and v5.2 regressions, QCAI Stage 4 and 5 evidence), 26 real ML-DSA-87 (an accept-all verifier fails 19 of them, as it must), 31 against the live precompiles; 258 frontend and 224 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json), CI |
+| <a id="tests"></a>Tests: 241 Foundry (unit, fuzz, invariant, v5.1 and v5.2 regressions, QCAI Stage 4 and 5 evidence), 26 real ML-DSA-87 (an accept-all verifier fails 19 of them, as it must), 31 against the live precompiles; 273 frontend and 224 backend unit tests (9 more run only against a deployed API) | RECORDED, 26 Nov 2026 | [`contracts-v4/COVERAGE.md`](contracts-v4/COVERAGE.md), [`frontend/src/data/tests.json`](frontend/src/data/tests.json), CI |
 | Measured delta: 5 of 5 fresh test accounts (0 QOR, no key) that opened a 0.1 QOR link made a first post-quantum signed spend, median 17 s; 0 of 5 fresh test accounts sent the same 0.1 QOR directly could spend it | RECORDED, TEAM-RUN, 26 Nov 2026 | [`docs/DELTA_RUN.md`](docs/DELTA_RUN.md), `node scripts/delta-verify.mjs` |
 | QCAI audits: Stage 5 on the deployed v5.2 code 78 / MEDIUM, 0 critical, 7 findings (5 false positives, 1 bounded at 5 guardians, 1 informational); earlier runs 82, 78, 85, 82 | RECORDED | [Audit](#audit) |
 | Bait Pocket balances, published-key status, attacker log, alarm | LIVE | [`/qday`](https://pocket-drop.vercel.app/qday), [`/api/qday`](https://pocket-drop-api.vercel.app/api/qday) |
@@ -366,10 +366,10 @@ cd ..
 
 ```bash
 (cd backend && npm ci && npm run typecheck && npm test)     # 224 passed, 9 skipped (they need a deployed API)
-(cd frontend && npm ci && npm run typecheck && npm run lint && npm test)   # 258 passed
+(cd frontend && npm ci && npm run typecheck && npm run lint && npm test)   # 273 passed
 ```
 
-A few of the 258 frontend tests and the `live` Foundry profile read Diana and the public API, so they need a network connection; behind a flaky connection they fail with a fetch or TLS error, not an assertion about the code. CI runs all of them on every push.
+A few of the 273 frontend tests and the `live` Foundry profile read Diana and the public API, so they need a network connection; behind a flaky connection they fail with a fetch or TLS error, not an assertion about the code. CI runs all of them on every push.
 
 **Run the app locally** against the public API and Diana. No `.env` is needed: the defaults in [`frontend/src/lib/config.ts`](frontend/src/lib/config.ts) point at the live API and RPC. To override them, copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env.local`.
 
