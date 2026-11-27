@@ -1,0 +1,69 @@
+name: Install Foundry
+description: Install a pinned Foundry release from the GitHub tarball, with checksum, cache, and retries. Avoids foundryup attestation downloads, which 504'd on GitHub.
+
+inputs:
+  version:
+    description: Foundry release tag
+    default: v1.10.1
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Foundry binaries
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.foundry/bin
+        key: foundry-${{ inputs.version }}-${{ runner.os }}-${{ runner.arch }}
+    - name: Download and verify Foundry
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        FOUNDRY_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        case "${RUNNER_ARCH}" in
+          X64) arch=amd64 ;;
+          ARM64) arch=arm64 ;;
+          *) echo "unsupported arch ${RUNNER_ARCH}"; exit 1 ;;
+        esac
+        case "${RUNNER_OS}" in
+          Linux) os=linux ;;
+          macOS) os=darwin ;;
+          *) echo "unsupported os ${RUNNER_OS}"; exit 1 ;;
+        esac
+        # v1.10.1 linux amd64, from the release checksum file (re-fetched and checked below when the job misses cache).
+        expected_linux_amd64=577ba5548f74748c7e75bd324a98084b8812b1a34001b5c9527c832975ad06bc
+        base="https://github.com/foundry-rs/foundry/releases/download/${FOUNDRY_VERSION}"
+        name="foundry_${FOUNDRY_VERSION}_${os}_${arch}"
+        tmp=$(mktemp -d)
+        download() {
+          curl -fL --retry 8 --retry-all-errors --retry-delay 4 --connect-timeout 20 --max-time 180 \
+            -A 'pocket-drop-ci' -o "$1" "$2"
+        }
+        for i in 1 2 3 4 5; do
+          if download "${tmp}/${name}.tar.gz" "${base}/${name}.tar.gz"; then
+            if download "${tmp}/${name}.sha256" "${base}/${name}.sha256"; then
+              (cd "$tmp" && sha256sum -c "${name}.sha256")
+            elif [ "$os" = linux ] && [ "$arch" = amd64 ] && [ "$FOUNDRY_VERSION" = v1.10.1 ]; then
+              echo "${expected_linux_amd64}  ${name}.tar.gz" | (cd "$tmp" && sha256sum -c -)
+            else
+              echo "no checksum file and no pinned hash for ${name}"
+              sleep $((8 * i))
+              continue
+            fi
+            mkdir -p "${HOME}/.foundry/bin"
+            tar -C "${HOME}/.foundry/bin" -xzf "${tmp}/${name}.tar.gz"
+            rm -rf "$tmp"
+            exit 0
+          fi
+          echo "Foundry download failed, attempt ${i} of 5"
+          sleep $((8 * i))
+        done
+        exit 1
+    - name: Add Foundry to PATH
+      shell: bash
+      run: |
+        echo "${HOME}/.foundry/bin" >> "$GITHUB_PATH"
+        "${HOME}/.foundry/bin/forge" --version
+        "${HOME}/.foundry/bin/cast" --version
