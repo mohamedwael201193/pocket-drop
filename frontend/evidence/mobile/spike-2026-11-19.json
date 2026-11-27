@@ -1,0 +1,77 @@
+{
+  "label": "TEAM-RUN",
+  "recordedAt": "2026-11-19",
+  "verifiedAt": "2026-11-27T02:50:00Z",
+  "app": "https://pocketdrop-spike.vercel.app",
+  "network": "QoreChain Diana testnet (EVM chain id 9800). QOR there has no monetary value.",
+  "claimProbe": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd",
+  "note": "These are the 19 Nov 2026 phone-spike runs (register, EVM window, an ML-DSA-87 claim that succeeded, and a wrong-signature claim that reverted). Team devices and team test accounts only; they are never counted as external users. Every hash was re-read on Diana on 27 Nov 2026: Cosmos REST code 0 for register and window, EVM receipts for the two ClaimProbe calls (status 0x1 and 0x0). Prefunding was an operator transfer from the team burner, not a phone action.",
+  "caveats": [
+    "The runs used the spike page (ClaimProbe), not the Pocket Drop app.",
+    "The two iPhone runs used BrowserStack iPhone 16, iOS 18.0. Whether that session was a real device or a simulator is not confirmed.",
+    "The macOS Safari run is real Safari/WebKit on Apple hardware. It is not an iPhone run.",
+    "ios3 has no screenshot in the spike notes; its four hashes are on chain and were re-checked on 27 Nov 2026."
+  ],
+  "sources": [
+    "19 Nov 2026 spike notes (VERDICT, RESULTS, fund ledger). Those notes are not in this repository; every hash below was re-read on Diana on 27 Nov 2026."
+  ],
+  "ownAccountKeys": {
+    "spike-android-1-852850": "0x852850c01EbA0Ac29C957c74f8Ea6200bA78b0E4",
+    "spike-android-2-632587": "0x632587A771e7732B962F930f37FA17A9AbDbC3e7",
+    "spike-macos-safari-85bD58": "0x85bD580d3E42e6f7E3a2F1BFFD52718a4ca78f17",
+    "spike-ios2-89adE5": "0x89adE5B0008AABa4B3f858D350aE800184Dd7FB3",
+    "spike-ios3-F10460": "0xF10460092718af7C4c354a1E42b12589Ce6F4a16"
+  },
+  "runs": [
+    {
+      "id": "02a122af",
+      "device": "real Android 10, Chrome 157, viewport 384x744",
+      "account": "0x852850c01EbA0Ac29C957c74f8Ea6200bA78b0E4",
+      "prefund": { "from": "0x664a2B7d5541B31C5C8A17849B5e85618309359E", "amountQor": 1, "tx": "0xe69b43d3a431bae9de5ac8258aea63279c517f2f851c82e513d62cc3719ba80c", "status": "0x1", "block": 10345088 },
+      "register": { "tx": "3319C19D4E25986D2D31C30AF2148B5A4A013ED700A0913CCC3C4B198227DC3D", "msg": "MsgRegisterPQCKeyV2", "code": 0, "height": 10345162, "time": "2026-11-19T00:14:41Z" },
+      "window": { "tx": "E9F57E02F6283C2D89A3703B2EBD3830B9E5527F60700F90F795855E73F2F6FA", "msg": "MsgOpenEVMWindow", "code": 0, "height": 10345167, "time": "2026-11-19T00:14:48Z" },
+      "claim": { "tx": "0xf18e1554a9a5a316d381b891075be548276c6f1a91ec0d664509d24de4dcd569", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x1", "block": 10345171, "time": "2026-11-19T00:14:54Z" },
+      "wrongSigClaim": { "tx": "0x466190e2e06438bdaf8ba332ec9e18c00fe4867d0f6f7527f4a99ba0de0a2f0a", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x0", "block": 10345175, "time": "2026-11-19T00:14:59Z" }
+    },
+    {
+      "id": "0149bda7",
+      "device": "real Android 10, Chrome 157 (second run)",
+      "account": "0x632587A771e7732B962F930f37FA17A9AbDbC3e7",
+      "prefund": { "from": "0x664a2B7d5541B31C5C8A17849B5e85618309359E", "amountQor": 1, "tx": "0x2e9135cdaecef3fb488304314051e9a1c285c263e90bfd22f69d15b93d226126", "status": "0x1", "block": 10345344 },
+      "register": { "tx": "914845C3E48C569BCEA2F618DBA5153B10CF3026DFEE3071E03981E284233AB5", "msg": "MsgRegisterPQCKeyV2", "code": 0, "height": 10345350, "time": "2026-11-19T00:19:08Z" },
+      "window": { "tx": "8A25D0FC7620759900A76D6A36493545810E187C9497065A729F30656BFE3DB6", "msg": "MsgOpenEVMWindow", "code": 0, "height": 10345353, "time": "2026-11-19T00:19:12Z" },
+      "claim": { "tx": "0x6e8692df45872574af0c1f16de6a37109d44bf737878cc213ce6ff6ef7be77f9", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x1", "block": 10345355, "time": "2026-11-19T00:19:15Z" },
+      "wrongSigClaim": { "tx": "0xdf25b42057cbe0b873b7a285bbbddaa2609a63e2e8bf5325fc24bca75e29a56c", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x0", "block": 10345357, "time": "2026-11-19T00:19:18Z" }
+    },
+    {
+      "id": "ios1-macos",
+      "device": "macOS 15 Sequoia, Safari 18 (BrowserStack session opened as macOS, not an iPhone)",
+      "account": "0x85bD580d3E42e6f7E3a2F1BFFD52718a4ca78f17",
+      "prefund": { "from": "0x664a2B7d5541B31C5C8A17849B5e85618309359E", "amountQor": 0.6, "tx": "0xb591ee0b949dc1064e14ba41ec64b40889d3cfe9f902f843a5ab3d092cc05d15", "status": "0x1", "block": 10346039 },
+      "register": { "tx": "2CE5960E34913ED6F514B3AF357BD66D1879CE328729BBE57F31CE67EA028450", "msg": "MsgRegisterPQCKeyV2", "code": 0, "height": 10346355, "time": "2026-11-19T00:43:05Z" },
+      "window": { "tx": "D0AAB82A4F85D4F7A805AC1FE492559347C3F23924C824D7FF5B15A5AB904734", "msg": "MsgOpenEVMWindow", "code": 0, "height": 10346357, "time": "2026-11-19T00:43:08Z" },
+      "claim": { "tx": "0xa5f2506db037c894454a34fef49aa8e957740fb35785baa24608ec2e228960e7", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x1", "block": 10346359, "time": "2026-11-19T00:43:10Z" },
+      "wrongSigClaim": { "tx": "0x4231a363f2d84fcc6f185b0c6672fb654c8dadb873ad644d2d8fe127d7d704ed", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x0", "block": 10346360, "time": "2026-11-19T00:43:12Z" }
+    },
+    {
+      "id": "8edfafb7",
+      "device": "BrowserStack iPhone 16, iOS 18.0, Safari. Real device vs simulator not confirmed.",
+      "account": "0x89adE5B0008AABa4B3f858D350aE800184Dd7FB3",
+      "prefund": { "from": "0x664a2B7d5541B31C5C8A17849B5e85618309359E", "amountQor": 0.6, "tx": "0x784a2a2dfafb0de9d286697712cc6f9d5cb4959310fef37999c569972ca871f4", "status": "0x1", "block": 10346043 },
+      "register": { "tx": "95CCE90D5E03C04FCB1271CAAEF2E7419A8BBE91D5B21A10A3E8DC387A8CA659", "msg": "MsgRegisterPQCKeyV2", "code": 0, "height": 10346682, "time": "2026-11-19T00:50:50Z" },
+      "window": { "tx": "0BDB5C217877133B2D7D0A717D6F26C24A72B3C9D220BC7CEA26C3331F7A2518", "msg": "MsgOpenEVMWindow", "code": 0, "height": 10346684, "time": "2026-11-19T00:50:53Z" },
+      "claim": { "tx": "0x87446374c0ddff9cb354e44fa54db8163e51959c5db707b1f6dbe1ba5e6abf78", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x1", "block": 10346685, "time": "2026-11-19T00:50:55Z" },
+      "wrongSigClaim": { "tx": "0x0424b43b06c35ae2cef39a2eb735c22066d405ac5f9151a2d360ae5267f4828f", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x0", "block": 10346686, "time": "2026-11-19T00:50:56Z" }
+    },
+    {
+      "id": "ios3",
+      "device": "BrowserStack iPhone 16, iOS 18.0, Safari. Real device vs simulator not confirmed. No screenshot in the spike notes.",
+      "account": "0xF10460092718af7C4c354a1E42b12589Ce6F4a16",
+      "prefund": { "from": "0x664a2B7d5541B31C5C8A17849B5e85618309359E", "amountQor": 0.6, "tx": "0xd039ec0eb85562419a2425c6de4c773f30b716ea1a17818366ac1b654c65a99c", "status": "0x1", "block": 10346047 },
+      "register": { "tx": "33B69DE86E97C44CDFD8588F012CAB3D8C1418ED7F01B5BDEAFF795774F41734", "msg": "MsgRegisterPQCKeyV2", "code": 0, "height": 10346920, "time": "2026-11-19T00:56:30Z" },
+      "window": { "tx": "8FCAB1C660767C3553AB81122563FC73F979FE0122BAB1B7683982FE4C35D700", "msg": "MsgOpenEVMWindow", "code": 0, "height": 10346922, "time": "2026-11-19T00:56:33Z" },
+      "claim": { "tx": "0x783cff5b48709b8f9853064e6c3f0a28c8c981f1d29566c573ff982b7190f9d0", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x1", "block": 10346924, "time": "2026-11-19T00:56:36Z" },
+      "wrongSigClaim": { "tx": "0xffc33b34aac61f282e5d57748d289ddaa982a7fbf268d580d65c442f0f8c47dd", "to": "0xe250d23b3b8c71793bdbed2a0886ff7c4d5096bd", "status": "0x0", "block": 10346926, "time": "2026-11-19T00:56:39Z" }
+    }
+  ]
+}
