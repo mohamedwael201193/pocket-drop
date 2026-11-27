@@ -423,7 +423,7 @@ The full list is [`contracts-v4/KNOWN_ISSUES.md`](contracts-v4/KNOWN_ISSUES.md).
 - **Open-mode links are bearer links** until bound, and an interceptor of a Confirmed link keeps the drip.
 - **Browser keys live in the browser.** Clearing site data without a backup loses the key; guardians can recover the Pocket.
 - **No one-tap move** from v5 or v4 Pockets to v5.2 (see Contracts).
-- **Phones.** What is tested today: a full send and claim in Playwright on a 390×844 mobile viewport (RECORDED, TEAM-RUN, proof row 9), and the mobile clip in the demo film, recorded at the same 390×844 viewport. A claim on a real phone is pending; it will be added here as TEAM-RUN with its transactions once recorded. **Open in QoreX** has not yet been tried on a real phone.
+- **Phones.** Recorded: a full send and claim in Playwright on a 390×844 mobile viewport (TEAM-RUN, proof row 9), and the mobile clip in the demo film, recorded at the same viewport. The team has also used the app on a real Android phone (Chrome) and an iPhone (Safari); those runs are TEAM-RUN with no recorded hashes, except v3 link #17, which was bound from the owner's phone after it was opened from WhatsApp (bind `0x5fff8605040e5e04d012d82035d29e10bc8b46e37111d943c766903c5f27527e`, block 10,357,718, 19 Nov 2026; the sender confirm was not finished, so that link was not claimed). **Open in QoreX** has not yet been tried on a real phone.
 
 ## Repository map
 
