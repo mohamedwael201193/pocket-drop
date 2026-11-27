@@ -36,7 +36,8 @@
 
 ## Demo
 
-<!-- inline-video -->
+https://github.com/user-attachments/assets/827f2472-6a08-4fe4-a88d-08de6eee016e
+
 <p align="center">
   <a href="https://youtu.be/4e3-nYa1P7k"><img src="docs/readme/demo-thumb.png" alt="Pocket Drop demo film: send QOR by link, no wallet on the other end." width="100%"></a><br>
   <a href="https://youtu.be/4e3-nYa1P7k">Watch on YouTube</a>
