@@ -42,4 +42,16 @@ describe('own accounts', () => {
     for (const [k, a] of Object.entries(film.ownAccountKeys)) expect(ownSet.has(a.toLowerCase()), `${k} ${a}`).toBe(true);
     for (const t of film.takes) for (const [role, a] of Object.entries(t.accounts)) expect(ownSet.has(a.toLowerCase()), `${t.id} ${role} ${a}`).toBe(true);
   });
+
+  it('every account in the 19 Nov 2026 phone-spike evidence is listed as own', () => {
+    const ev = JSON.parse(fs.readFileSync(path.join(repo, 'frontend/evidence/mobile/spike-2026-11-19.json'), 'utf8')) as {
+      ownAccountKeys: Record<string, string>;
+      runs: { id: string; account: string }[];
+    };
+    for (const [k, a] of Object.entries(ev.ownAccountKeys)) {
+      expect(ownSet.has(a.toLowerCase()), `${k} ${a}`).toBe(true);
+      expect((own as { accounts: Record<string, string> }).accounts[k].toLowerCase(), k).toBe(a.toLowerCase());
+    }
+    for (const run of ev.runs) expect(ownSet.has(run.account.toLowerCase()), `${run.id} ${run.account}`).toBe(true);
+  });
 });
