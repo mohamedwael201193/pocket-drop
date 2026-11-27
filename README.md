@@ -55,6 +55,25 @@ https://github.com/user-attachments/assets/827f2472-6a08-4fe4-a88d-08de6eee016e
 > [!NOTE]
 > Each number in this README carries a label. **LIVE** is read from the chain or the API when you open the link. **RECORDED** comes from a file in this repo, written by a named script on the date shown. **TEAM-RUN** means team test accounts did it; they are never counted as external users. **ILLUSTRATION** marks a picture that is not data.
 
+## Outside testers
+
+We made a small public call on [X](https://x.com/PocketDropq/status/2126385715638321258) to encourage people to try receiving from the public pool.
+
+The seven claims below are **RECORDED**. They are v5.2 production `DropPool` claims on pool **s5** ([`0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9`](https://explore.qore.network/address/0xab3ac2fedb07c1e419ea86f41d49d417dd10dbf9)): 20 slots of 0.5 QOR, hosted by a team Pocket (TEAM-RUN host). An address is **External** when it is not in [`backend/config/own-accounts.json`](backend/config/own-accounts.json) (434 team accounts). Anyone can re-check a hash: open it on [`/check`](https://pocket-drop.vercel.app/check), or run `npx vite-node scripts/list-external.ts` from `backend/`. The same list is in [`frontend/evidence/outside-testers.json`](frontend/evidence/outside-testers.json) and on [`/proof/testers`](https://pocket-drop.vercel.app/proof/testers). Live counts, including later claims, are on [`/radar`](https://pocket-drop.vercel.app/radar).
+
+On the public explorer, pick **Testnet** in the header before opening a hash.
+
+| # | Claimer (External) | Transaction |
+|---|---|---|
+| 1 | `0xEeE1b16A368a8ef289e6a0D6F73b5090113E843d` | [`56C6F79664D49A6D905AB23C2F14EE6B6492FA8445074A801AFA965A4E8AF39F`](https://pocket-drop.vercel.app/check/56C6F79664D49A6D905AB23C2F14EE6B6492FA8445074A801AFA965A4E8AF39F) · [explorer](https://explore.qore.network/tx/56C6F79664D49A6D905AB23C2F14EE6B6492FA8445074A801AFA965A4E8AF39F) |
+| 2 | `0x55b102e98884De9FEFA44670C83B61E47aA8E72F` | [`0B6F2D7FC1783BA4695E05551D15DC5972D014A78F0C7FBEEBE984C3AB2FCA33`](https://pocket-drop.vercel.app/check/0B6F2D7FC1783BA4695E05551D15DC5972D014A78F0C7FBEEBE984C3AB2FCA33) · [explorer](https://explore.qore.network/tx/0B6F2D7FC1783BA4695E05551D15DC5972D014A78F0C7FBEEBE984C3AB2FCA33) |
+| 3 | `0xeb58f5F5Cc477A06F1B27b2E5328089a0A03Dbb8` | [`8B7258BF8C790A930C9784127CD13946A7E72A065378EB424E55E2C2E72B5446`](https://pocket-drop.vercel.app/check/8B7258BF8C790A930C9784127CD13946A7E72A065378EB424E55E2C2E72B5446) · [explorer](https://explore.qore.network/tx/8B7258BF8C790A930C9784127CD13946A7E72A065378EB424E55E2C2E72B5446) |
+| 4 | `0x12F1200595c735d80B0515Aa1A1F9Ea5f4e4D6A7` | [`715692E38DB874FE3F9CBD2C117EB5D96037E25443650CB547EEB0C98541D319`](https://pocket-drop.vercel.app/check/715692E38DB874FE3F9CBD2C117EB5D96037E25443650CB547EEB0C98541D319) · [explorer](https://explore.qore.network/tx/715692E38DB874FE3F9CBD2C117EB5D96037E25443650CB547EEB0C98541D319) |
+| 5 | `0x2C71b702349554339e4E3Da29066F26A734280a0` | [`19D71CF00AA9C5D3C93B073C4048A635006778E49C8A553C81A7EDFFB9D87FDA`](https://pocket-drop.vercel.app/check/19D71CF00AA9C5D3C93B073C4048A635006778E49C8A553C81A7EDFFB9D87FDA) · [explorer](https://explore.qore.network/tx/19D71CF00AA9C5D3C93B073C4048A635006778E49C8A553C81A7EDFFB9D87FDA) |
+| 6 | `0x9F0c722BaDC1368749D64684c45a3C8c9E949873` | [`CEE9AC24063FE83A88E76EF29E76ADC73654A2BDFF190EDCA989E0A1530B559A`](https://pocket-drop.vercel.app/check/CEE9AC24063FE83A88E76EF29E76ADC73654A2BDFF190EDCA989E0A1530B559A) · [explorer](https://explore.qore.network/tx/CEE9AC24063FE83A88E76EF29E76ADC73654A2BDFF190EDCA989E0A1530B559A) |
+| 7 | `0x76f32cDDc3Ac446133246f4fcB9BaC96782583F3` | [`90C431FC2EBB08783BB2495D0B56773D0D32BBBE5C8FF76C56507B8FC78750CD`](https://pocket-drop.vercel.app/check/90C431FC2EBB08783BB2495D0B56773D0D32BBBE5C8FF76C56507B8FC78750CD) · [explorer](https://explore.qore.network/tx/90C431FC2EBB08783BB2495D0B56773D0D32BBBE5C8FF76C56507B8FC78750CD) |
+
+
 ## Screens
 
 All screenshots are of the live app, taken on 26 Nov 2026 from a fresh browser with no key (how: [docs/readme/ASSETS.md](docs/readme/ASSETS.md)).
