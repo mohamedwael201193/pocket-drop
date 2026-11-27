@@ -13,13 +13,19 @@
   <a href="#contracts-on-diana-v52"><img alt="Network: QoreChain Diana testnet, EVM 9800" src="https://img.shields.io/badge/QoreChain-Diana%20testnet%20%C2%B7%20EVM%209800-18181b"></a>
 </p>
 
+<div align="center">
+
+[![Built on QoreChain](https://build.qorechain.io/badge/pocket-drop.svg)](https://build.qorechain.io/p/pocket-drop)
+
+</div>
+
 <p align="center">
   <a href="https://pocket-drop.vercel.app"><b>Live app</b></a> ·
   <a href="https://pocket-drop.vercel.app/judges">Judges checklist</a> ·
   <a href="https://pocket-drop.vercel.app/qday">Q-Day drill</a> ·
   <a href="https://pocket-drop-api.vercel.app/api/health">API health</a> ·
   <a href="docs/AUDIT.md">Audit</a> ·
-  Video: <i>link added at submission</i>
+  <a href="https://youtu.be/4e3-nYa1P7k">Demo film</a>
 </p>
 
 **Send QOR to someone who has no wallet.** You share a link. Their browser makes an ML-DSA-87 (FIPS 204) key and a **Pocket**: a smart account that only that key can move.
@@ -27,6 +33,14 @@
 **A leaked classical key cannot move the money.** Every spend needs a post-quantum signature, and the chain checks it through its `pqcVerify` (0x0A01) and `pqcKeyStatus` (0x0A02) precompiles. No server does that check.
 
 **Everything below is on the QoreChain Diana testnet** (EVM chain id 9800, Cosmos chain id `qorechain-diana`). The QOR there has no monetary value. Track: Post-Quantum dApp.
+
+## Demo
+
+<!-- inline-video -->
+<p align="center">
+  <a href="https://youtu.be/4e3-nYa1P7k"><img src="docs/readme/demo-thumb.png" alt="Pocket Drop demo film: send QOR by link, no wallet on the other end." width="100%"></a><br>
+  <a href="https://youtu.be/4e3-nYa1P7k">Watch on YouTube</a>
+</p>
 
 ## Try it in 60 seconds
 
