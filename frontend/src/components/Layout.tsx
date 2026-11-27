@@ -33,7 +33,7 @@ const OVERVIEW: Item = { key: 'overview', label: 'Overview', to: '/app', Icon: L
 /** The primary navigation: exactly Send, Receive, Pocket, Proof. */
 export const TABS: Item[] = [
   { key: 'send', label: 'Send', to: '/send', Icon: Send, match: (p) => p.startsWith('/send') },
-  { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p) => p.startsWith('/receive') || p.startsWith('/c/') || p.startsWith('/pool/') },
+  { key: 'receive', label: 'Receive', to: '/receive', Icon: Inbox, match: (p) => p.startsWith('/receive') || p.startsWith('/c/') || p === '/pool' || p.startsWith('/pool/') },
   { key: 'pocket', label: 'Pocket', to: '/pocket', Icon: Wallet, match: (p) => p.startsWith('/pocket') },
   { key: 'proof', label: 'Proof', to: '/proof', Icon: ShieldCheck, match: (p) => p.startsWith('/proof') },
 ];

@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import sample from '../src/data/sample-pool.json';
 import { baitShare, samplePoolShare, shareMessage, whatsappUrl } from '../src/lib/share';
 
 describe('share texts', () => {
-  it('the sample pool link carries its key and says testnet', () => {
+  it('the sample pool share uses the public /pool URL and says testnet', () => {
     const s = samplePoolShare('https://pocket-drop.vercel.app', 3);
-    expect(s.url).toBe(`https://pocket-drop.vercel.app${sample.path}`);
-    expect(s.url).toMatch(/\/pool\/p\d+#k=[0-9a-f]{64}$/);
+    expect(s.url).toBe('https://pocket-drop.vercel.app/pool');
     expect(s.text).toContain('3 slots left');
     expect(s.text).toContain('testnet');
     expect(samplePoolShare('https://x', 1).text).toContain('1 slot left');

@@ -1,13 +1,13 @@
 // Ready-to-send share texts for the two things a visitor can pass on without an account: the team's sample Drop Pool and
 // the Q-Day bait challenge. Nothing is posted by the app: the visitor taps Share / Copy / WhatsApp themselves.
-import sample from '../data/sample-pool.json';
+import { PUBLIC_POOL, PUBLIC_POOL_PATH } from './publicPool';
 
 export interface ShareSpec { title: string; text: string; url: string }
 
 export const samplePoolShare = (origin: string, slotsLeft?: number | null): ShareSpec => ({
   title: 'Pocket Drop sample pool (testnet)',
-  text: `Try receiving ${sample.perSlotQor} testnet QOR with a quantum-safe key made in your browser: no wallet, no seed phrase${slotsLeft != null ? `, ${slotsLeft} slot${slotsLeft === 1 ? '' : 's'} left` : ''}. Diana testnet, no real value.`,
-  url: `${origin}${sample.path}`,
+  text: `Try receiving ${PUBLIC_POOL.perSlotQor} testnet QOR with a quantum-safe key made in your browser: no wallet, no seed phrase${slotsLeft != null ? `, ${slotsLeft} slot${slotsLeft === 1 ? '' : 's'} left` : ''}. Diana testnet, no real value.`,
+  url: `${origin}${PUBLIC_POOL_PATH}`,
 });
 
 export const baitShare = (origin: string, pocketCount = 5): ShareSpec => ({

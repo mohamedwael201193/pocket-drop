@@ -1,0 +1,17 @@
+{
+ "label": "TEAM-HOSTED public pool",
+ "note": "Hosted by the PocketDrop team on the v5.2 production DropPool so a visitor with no link can try receiving. Self-funded by the team, not by a user. RECORDED, TEAM-RUN host. The #k= fragment is the pool link key (bearer): anyone with the link can claim one slot per Pocket, which is how a public pool is meant to be shared.",
+ "env": "prod",
+ "generation": "v5.2",
+ "poolId": 5,
+ "path": "/pool/s5#k=da92536eee4fa97c4687ebc623e872fbd8b4d5c5baec9c330dfc11b573c5df08",
+ "slots": 20,
+ "perSlotQor": "0.5",
+ "totalQor": "10.00",
+ "hostPocket": "0x898C47F6D4f3936b26276A7101e062F4Cd98EBeB",
+ "hostOwner": "0x392f50b1955a827458A320205e19acf7C664f116",
+ "createTx": "E72B105815FF3D2414693820A54F066ED5173F65949F82E61C90735FBB425A72",
+ "fundTx": "E92E8CB36FD8A27AC70AE176983D48D5F2B8317B9785A908D6EAAD094B3035E9",
+ "createdAt": "2026-11-27T18:23:38.353Z",
+ "expiresAt": "2026-12-11T18:23:31.000Z"
+}

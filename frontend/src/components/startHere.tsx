@@ -8,7 +8,7 @@ import { motionOk } from './alive';
 import { cx } from './ui';
 import { useAccount, usePocketView } from '../lib/account';
 import { useMyLinks } from '../lib/hooks4';
-import sample from '../data/sample-pool.json';
+import { PUBLIC_POOL_PATH } from '../lib/publicPool';
 import { drillSeen, hideStartHere, startHereHidden } from '../lib/firstRun';
 
 
@@ -22,7 +22,7 @@ export function StartHere() {
   const steps = [
     { key: 'qor', Icon: Gift, title: 'Get free testnet QOR', done: hasQor || sent,
       body: 'Open the team-hosted sample pool. It makes your quantum-safe key and your Pocket in this browser and pays a slot into it. No wallet, no sign-up.',
-      cta: { to: sample.path, label: a.root ? 'Take a sample slot' : 'Start with the sample' } },
+      cta: { to: PUBLIC_POOL_PATH, label: a.root ? 'Take a sample slot' : 'Start with the sample' } },
     { key: 'send', Icon: Send, title: 'Send QOR through a link', done: sent,
       body: 'Pick an amount, check what you sign, and share the link in any chat. Your friend opens it and the QOR lands in a Pocket made for them.',
       cta: { to: '/send', label: 'Create a link' } },

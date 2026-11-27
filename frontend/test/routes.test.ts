@@ -5,8 +5,8 @@ import { createRoutesFromChildren, matchRoutes, type RouteObject } from 'react-r
 import type { ReactElement } from 'react';
 import { AppRoutes } from '../src/App';
 import { TABS } from '../src/components/Layout';
-import pool from '../src/data/sample-pool.json';
 import { SAMPLE_PATH, APP_PATH } from '../src/landing/links';
+import { PUBLIC_POOL_PATH } from '../src/lib/publicPool';
 
 const table: RouteObject[] = createRoutesFromChildren((AppRoutes() as ReactElement<{ children: unknown }>).props.children as never);
 const leaf = (path: string) => {
@@ -40,7 +40,7 @@ describe('route table: landing at /, dashboard at /app', () => {
     const deep: [string, string][] = [
       ['/send', '/send'], ['/send/inbox', '/send/inbox'], ['/receive', '/receive'],
       ['/c/12', '/c/:id'], ['/c/p12', '/c/:id'], ['/c/l3', '/c/:id'], ['/c/q7', '/c/:id'], ['/c/k2', '/c/:id'],
-      ['/pool/p14', '/pool/:id'], ['/pocket', '/pocket'], ['/proof', '/proof'], ['/lab', '/lab'], ['/radar', '/radar'],
+      ['/pool/p14', '/pool/:id'], ['/pool/s5', '/pool/:id'], ['/pocket', '/pocket'], ['/proof', '/proof'], ['/lab', '/lab'], ['/radar', '/radar'],
       ['/judges', '/judges'], ['/qday', '/qday'], ['/check', '/check'], ['/check/0xabc', '/check/:hash'],
     ];
     for (const [url, pat] of deep) {
@@ -55,10 +55,14 @@ describe('route table: landing at /, dashboard at /app', () => {
   it('unknown paths fall to the not-found page inside the shell', () => {
     expect(pattern('/nope/at/all')).toBe('*');
   });
-  it('the landing “Claim a sample slot” goes straight to the sample pool flow', () => {
-    expect(SAMPLE_PATH).toBe(pool.path);
-    expect(SAMPLE_PATH.startsWith('/pool/')).toBe(true);
-    expect(pattern(SAMPLE_PATH.split('#')[0])).toBe('/pool/:id');
+  it('/pool (no id) is a real page inside the shell, not a 404', () => {
+    expect(pattern('/pool')).toBe('/pool');
+    expect(inShell('/pool')).toBe(true);
+  });
+  it('the landing “Claim a sample slot” goes to /pool, which resolves the current public pool', () => {
+    expect(SAMPLE_PATH).toBe(PUBLIC_POOL_PATH);
+    expect(SAMPLE_PATH).toBe('/pool');
+    expect(pattern(SAMPLE_PATH)).toBe('/pool');
   });
   it('every app path mentioned in requirements.ts and proofs.ts has a route', () => {
     const src = ['requirements.ts', 'proofs.ts'].map((f) => readFileSync(resolve(__dirname, '../src/data', f), 'utf8')).join('\n');

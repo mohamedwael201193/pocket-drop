@@ -36,7 +36,7 @@ test('receive: the TEAM-HOSTED sample pool is offered and opens with its label',
   await fits(page);
   await page.screenshot({ path: `${SHOTS}/receive-${page.viewportSize()!.width}.png`, fullPage: true });
   await page.getByTestId('sample-pool-open').click();
-  await expect(page).toHaveURL(new RegExp(`/pool/p${sample.poolId}#k=[0-9a-f]{64}$`));
+  await expect(page).toHaveURL(/\/pool\/s\d+#k=[0-9a-f]{64}$/);
   await expect(page.getByTestId('pool-team-hosted')).toBeVisible();
   await expect(page.getByTestId('pool-slots-left')).toContainText('(the PocketDrop team)', { timeout: 60_000 });
   await expect(page).toHaveTitle('Drop Pool · Pocket Drop');

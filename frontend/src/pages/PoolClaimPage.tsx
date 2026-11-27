@@ -15,6 +15,7 @@ import { parseClaimFragment } from '../lib/protocol';
 import { useBalance } from '../lib/queries';
 import { useSponsorStatus } from '../lib/sponsor';
 import { isSamplePool } from '../components/samplePool';
+import { isPublicPool } from '../lib/publicPool';
 
 /** /pool/:id#k=…  A Drop Pool slot goes to a distinct proof-of-possession ACCOUNT, not a person. The claimer needs a registered key. */
 export default function PoolClaimPage() {
@@ -72,10 +73,10 @@ export default function PoolClaimPage() {
     <Page narrow testId="pool-page">
       <div className="space-y-5">
         <div className="capsule-obsidian rounded-3xl p-6 text-stone-100">
-          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Drop Pool · {linkId4(env, pid)}{isProdLike(env) ? '' : ' · lab'}{genOf(env) === 'v4' ? ' · v4' : ''}</span><span className="flex items-center gap-2">{isSamplePool(env, pid) && <span className="rounded-full border border-stone-500 px-2 py-0.5 font-mono text-xs text-stone-200" data-testid="pool-team-hosted">TEAM-HOSTED sample</span>}<SourceBadge kind="LIVE" /></span></div>
+          <div className="flex items-center justify-between text-sm font-medium text-stone-300"><span>Drop Pool · {linkId4(env, pid)}{isProdLike(env) ? '' : ' · lab'}{genOf(env) === 'v4' ? ' · v4' : ''}</span><span className="flex items-center gap-2">{(isSamplePool(env, pid) || isPublicPool(env, pid)) && <span className="rounded-full border border-stone-500 px-2 py-0.5 font-mono text-xs text-stone-200" data-testid="pool-team-hosted">TEAM-HOSTED sample</span>}<SourceBadge kind="LIVE" /></span></div>
           <div className="mt-3 text-sm text-stone-300">One slot is worth</div>
           <div className="font-money text-6xl sm:text-7xl leading-none" data-testid="slot-amount">{pool ? fmtQor(pool.perSlot) : <span className="inline-block h-10 w-28 animate-pulse rounded-xl bg-stone-700/70 align-middle" aria-label="Loading the pool" />}<span className="ml-2 text-xl text-stone-400">QOR</span></div>
-          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="pool-slots-left">{pool ? `${pool.slots - pool.taken} of ${pool.slots} slots left · self-funded by the host${isSamplePool(env, pid) ? ' (the PocketDrop team)' : ''} · Testnet` : <span className="inline-block h-3 w-48 animate-pulse rounded bg-stone-700/70 align-middle" aria-hidden />}</div>
+          <div className="mt-2 font-mono text-xs text-stone-400" data-testid="pool-slots-left">{pool ? `${pool.slots - pool.taken} of ${pool.slots} slots left · self-funded by the host${(isSamplePool(env, pid) || isPublicPool(env, pid)) ? ' (the PocketDrop team)' : ''} · Testnet` : <span className="inline-block h-3 w-48 animate-pulse rounded bg-stone-700/70 align-middle" aria-hidden />}</div>
         </div>
         <Notice tone="info">Each slot goes to a <b>distinct proof-of-possession account, not a person</b>. One person can hold several accounts, so this is a way to share a little testnet QOR, not a count of people.</Notice>
         {pool && !open && !took && !tx && <h1 className="font-serif text-3xl text-zinc-900">{pool.closed ? 'This pool is closed' : pool.taken >= pool.slots ? 'No slots left' : 'This pool has expired'}</h1>}
