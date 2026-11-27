@@ -28,9 +28,6 @@
 
 **Everything below is on the QoreChain Diana testnet** (EVM chain id 9800, Cosmos chain id `qorechain-diana`). The QOR there has no monetary value. Track: Post-Quantum dApp.
 
-> [!NOTE]
-> Each number in this README carries a label. **LIVE** is read from the chain or the API when you open the link. **RECORDED** comes from a file in this repo, written by a named script on the date shown. **TEAM-RUN** means team test accounts did it; they are never counted as external users. **ILLUSTRATION** marks a picture that is not data.
-
 ## Try it in 60 seconds
 
 | | Open | What you should see |
@@ -39,6 +36,9 @@
 | 2 | [`/receive`](https://pocket-drop.vercel.app/receive) → **Open the sample pool** | Take one slot of a team-hosted pool. Your browser creates a key and a Pocket, and the QOR lands in it. No wallet needed. |
 | 3 | The transaction link shown after the claim, which opens [`/check`](https://pocket-drop.vercel.app/check) | The claim on Diana, mined through the router. `/check` re-runs each ML-DSA-87 signature check in your browser, using the public keys the chain holds. |
 | 4 | [`/judges`](https://pocket-drop.vercel.app/judges) | Every track requirement, mapped to code, a live transaction and a test. |
+
+> [!NOTE]
+> Each number in this README carries a label. **LIVE** is read from the chain or the API when you open the link. **RECORDED** comes from a file in this repo, written by a named script on the date shown. **TEAM-RUN** means team test accounts did it; they are never counted as external users. **ILLUSTRATION** marks a picture that is not data.
 
 ## Screens
 
@@ -173,7 +173,7 @@ sequenceDiagram
 - **Relayer** (`backend/`, Vercel functions) pays gas and forwards intents as hybrid-signed `MsgCrossVMCall`s (secp256k1 + ML-DSA-87, both checked by the chain before the EVM runs). It cannot forge any intent. Its ML-DSA-87 half is signed by a separate deployment (`signer/`) that signs only policy-checked relays.
 - **Confirmed by default.** A new link is Confirmed (Someone I know): the sender compares 4 words of the recipient's key before any money moves. Open (first to open it) is for small gifts and works like cash; above 0.5 QOR the app asks for an explicit OK before it makes one.
 - **Relay it yourself.** `PocketRouter.relay` has no caller check, so the relayer is optional. When it is down or slow (or always, with the Advanced setting on `/pocket`), the user's own account opens a hybrid-signed EVM window scoped to the one router (about 9 minutes, 3 transactions) and submits the call it signed. Inside that window the classical key can only call the router, and the router only forwards calls whose authority is an ML-DSA-87 signature. The account pays its own fees (a link's drip covers it). The native window transaction goes through the app's key-less `/rpc` proxy because Diana's public REST and RPC send no CORS headers. Code: [`frontend/src/lib/selfRelay.ts`](frontend/src/lib/selfRelay.ts).
-- **Open in QoreX.** The claim and receive pages link to the same page in the QoreX app's dApp browser, using the `browse` link from the [QoreX dApp integration guide](https://docs.qorechain.io/qorex/dapp-integration). A claim link carries its link key in the `#` fragment, so it only gets the on-device `qorex://browse` form, never the `https://link.qore.network/browse` form, which would send the key to a web server. We have not tested this on a phone.
+- **Open in QoreX.** The claim and receive pages link to the same page in the QoreX app's dApp browser, using the `browse` link from the [QoreX dApp integration guide](https://docs.qorechain.io/qorex/dapp-integration). A claim link carries its link key in the `#` fragment, so it only gets the on-device `qorex://browse` form, never the `https://link.qore.network/browse` form, which would send the key to a web server. The QoreX hand-off has not yet been tried on a real phone.
 
 Every `pqcVerify` and `pqcKeyStatus` call site, what it protects and its tests: [docs/AUDIT.md, section 5](docs/AUDIT.md#5-post-quantum-design-every-pqcverify-and-pqckeystatus-call-site).
 
@@ -423,7 +423,7 @@ The full list is [`contracts-v4/KNOWN_ISSUES.md`](contracts-v4/KNOWN_ISSUES.md).
 - **Open-mode links are bearer links** until bound, and an interceptor of a Confirmed link keeps the drip.
 - **Browser keys live in the browser.** Clearing site data without a backup loses the key; guardians can recover the Pocket.
 - **No one-tap move** from v5 or v4 Pockets to v5.2 (see Contracts).
-- **Open in QoreX** has not been tested on a phone.
+- **Phones.** What is tested today: a full send and claim in Playwright on a 390×844 mobile viewport (RECORDED, TEAM-RUN, proof row 9), and the mobile clip in the demo film, recorded at the same 390×844 viewport. A claim on a real phone is pending; it will be added here as TEAM-RUN with its transactions once recorded. **Open in QoreX** has not yet been tried on a real phone.
 
 ## Repository map
 
